@@ -34,7 +34,11 @@ const extensionConfig = {
         exclude: /node_modules/,
         use: [
           {
-            loader: 'ts-loader'
+            loader: 'ts-loader',
+            options: {
+              // Keep package builds focused on extension entry dependencies.
+              onlyCompileBundledFiles: true
+            }
           }
         ]
       }
