@@ -1,8 +1,8 @@
 ## Nutzerstory
-> Als [Rolle] möchte ich [Ziel], damit [Nutzen].
+> Als (Rolle) möchte ich (Ziel), damit (Nutzen).
 
 ## Beschreibung
 [Bitte beschreibe das Problem, den Kontext und die gewünschte Lösung.]
 
 ## Akzeptanzkriterien
-- [ ] [Kriterium 1]
+- [ ] (Kriterium 1)
