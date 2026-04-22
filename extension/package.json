@@ -12,6 +12,27 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
+    "languages": [
+      {
+        "id": "5board",
+        "aliases": [
+          "5board"
+        ],
+        "extensions": [
+          ".5board"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "customEditors": [
+    {
+      "viewType": "5board-vsc.editor",
+      "displayName": "5Board Editor",
+      "selector": [
+        { "filenamePattern": "*.5board" }
+      ]
+    }
+    ],
     "commands": [
       {
         "command": "5board-vsc.helloWorld",
