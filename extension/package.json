@@ -25,13 +25,15 @@
       }
     ],
     "customEditors": [
-    {
-      "viewType": "5board-vsc.editor",
-      "displayName": "5Board Editor",
-      "selector": [
-        { "filenamePattern": "*.5board" }
-      ]
-    }
+      {
+        "viewType": "5board-vsc.editor",
+        "displayName": "5Board Editor",
+        "selector": [
+          {
+            "filenamePattern": "*.5board"
+          }
+        ]
+      }
     ],
     "commands": [
       {
@@ -49,6 +51,8 @@
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
     "lint": "eslint src",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "vscode-test"
   },
   "devDependencies": {
@@ -58,6 +62,7 @@
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
     "eslint": "^9.39.3",
+    "prettier": "^3.8.3",
     "ts-loader": "^9.5.4",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.1",
