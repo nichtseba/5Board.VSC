@@ -157,8 +157,9 @@ function updateStaticWebview(
 
   // Beispiel: ersetze src="/media/webview/..." o.ä., falls du so referenzierst
   // (anpassen je nach deinen Pfad-Konventionen)
-  html = html.replace(/src="\.\/(.*?)"/g, `src="${mediaRootWeb}/$1"`);
-  html = html.replace(/href="\.\/(.*?)"/g, `href="${mediaRootWeb}/$1"`);
+  html = html.replace(/(src|href)="([^"]+)"/g, `$1="${mediaRootWeb}/$2"`);
+
+  console.log(html);
 
   webview.html = html;
   console.log("Webview aktualisiert");

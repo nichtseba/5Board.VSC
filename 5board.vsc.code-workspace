@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"path": "extension"
+		},
+		{
+			"path": "webview"
+		}
+	],
+	"settings": {
+		"typescript.tsc.autoDetect": "off"
+	}
+}
