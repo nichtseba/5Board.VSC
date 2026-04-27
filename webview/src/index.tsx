@@ -1,6 +1,5 @@
 import { createRoot } from "react-dom/client";
 import Webview from "./Webview";
-import { doStuff, Test } from "5board.vsc-common";
 
 function start() {
   const root = createRoot(document.getElementById("root")!);
@@ -12,7 +11,3 @@ if (document.readyState === "loading") {
 } else {
   start();
 }
-
-const t: Test = {};
-
-console.log(doStuff("Hello from Webview!"));

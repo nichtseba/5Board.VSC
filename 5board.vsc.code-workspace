@@ -5,6 +5,9 @@
 		},
 		{
 			"path": "webview"
+		},
+		{
+			"path": "common"
 		}
 	],
 	"settings": {
