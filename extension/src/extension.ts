@@ -1,44 +1,69 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import * as vscode from 'vscode';
-import * as fs from 'fs';
+import * as vscode from "vscode";
+import * as fs from "fs";
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+  // Use the console to output diagnostic information (console.log) and errors (console.error)
+  // This line of code will only be executed once when your extension is activated
+  console.log('Congratulations, your extension "5board-vsc" is now active!');
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "5board-vsc" is now active!');
+  const disposable2 = vscode.commands.registerCommand(
+    "5board-vsc.showWebview",
+    () => {
+      const panel = vscode.window.createWebviewPanel(
+        "showWebview", // dein „Webseiten“-Typ
+        "5Board Webview", // Tab-Titel
+        vscode.ViewColumn.One,
+        {
+          enableScripts: true,
+          portMapping: [{ extensionHostPort: 8080, webviewPort: 8080 }],
+        },
+      );
+      panel.webview.html = `<!DOCTYPE html>
+      <html lang="de">
+        <meta http-equiv="refresh" content = "0;url=http://localhost:8080/">
+      </html>`;
+    },
+  );
+  context.subscriptions.push(disposable2);
 
-  const disposable = vscode.commands.registerCommand('5board-vsc.helloWorld', () => {
-    const panel = vscode.window.createWebviewPanel(
-      'fiveBoardCustomPage',          // dein „Webseiten“-Typ
-      '5Board – Custom Page',         // Tab-Titel
-      vscode.ViewColumn.One,
-      {
-        enableScripts: true,          // JS in deiner „Website“ erlaubt
-        localResourceRoots: [
-          vscode.Uri.joinPath(context.extensionUri, 'media')
-        ]
-      }
-    );
+  const disposable = vscode.commands.registerCommand(
+    "5board-vsc.helloWorld",
+    () => {
+      const panel = vscode.window.createWebviewPanel(
+        "fiveBoardCustomPage", // dein „Webseiten“-Typ
+        "5Board – Custom Page", // Tab-Titel
+        vscode.ViewColumn.One,
+        {
+          enableScripts: true, // JS in deiner „Website“ erlaubt
+          localResourceRoots: [
+            vscode.Uri.joinPath(context.extensionUri, "media"),
+          ],
+        },
+      );
 
-    // Startseite laden, z.B. "index.html"
-    updateStaticWebview(panel.webview, context, 'index.html');
+      // Startseite laden, z.B. "index.html"
+      updateStaticWebview(panel.webview, context, "index.html");
 
-    // Navigation aus der Webview entgegennehmen
-    panel.webview.onDidReceiveMessage(
-      message => {
-        if (message.command === 'navigate' && typeof message.page === 'string') {
-          // z.B. page = "seite2.html"
-          updateStaticWebview(panel.webview, context, message.page);
-        }
-      },
-      undefined,
-      context.subscriptions
-    );
-  });
+      // Navigation aus der Webview entgegennehmen
+      panel.webview.onDidReceiveMessage(
+        (message) => {
+          if (
+            message.command === "navigate" &&
+            typeof message.page === "string"
+          ) {
+            // z.B. page = "seite2.html"
+            updateStaticWebview(panel.webview, context, message.page);
+          }
+        },
+        undefined,
+        context.subscriptions,
+      );
+    },
+  );
 
   context.subscriptions.push(disposable);
 
@@ -49,26 +74,26 @@ export function activate(context: vscode.ExtensionContext) {
     async openCustomDocument(
       uri: vscode.Uri,
       _openContext: vscode.CustomDocumentOpenContext,
-      _token: vscode.CancellationToken
+      _token: vscode.CancellationToken,
     ): Promise<vscode.CustomDocument> {
       return {
         uri,
         dispose: () => {
           /* nothing */
-        }
+        },
       };
     },
 
     async resolveCustomEditor(
       document: vscode.CustomDocument,
       webviewPanel: vscode.WebviewPanel,
-      _token: vscode.CancellationToken
+      _token: vscode.CancellationToken,
     ): Promise<void> {
       webviewPanel.webview.options = {
-        enableScripts: true,          // JS in „Website“ erlaubt
+        enableScripts: true, // JS in „Website“ erlaubt
         localResourceRoots: [
-          vscode.Uri.joinPath(context.extensionUri, 'media')
-        ]
+          vscode.Uri.joinPath(context.extensionUri, "media"),
+        ],
       };
 
       webviewPanel.title = `5Board: ${vscode.workspace.asRelativePath(document.uri, false)}`;
@@ -76,25 +101,29 @@ export function activate(context: vscode.ExtensionContext) {
       // JSON‑Inhalt der .5board Datei einlesen
       let fileContent: string | undefined;
       try {
-        fileContent = fs.readFileSync(document.uri.fsPath, 'utf8');
+        fileContent = fs.readFileSync(document.uri.fsPath, "utf8");
       } catch {
         fileContent = undefined;
       }
 
-      webviewPanel.webview.html = getEditorWebviewHtml(webviewPanel.webview, context, fileContent);
-    }
+      webviewPanel.webview.html = getEditorWebviewHtml(
+        webviewPanel.webview,
+        context,
+        fileContent,
+      );
+    },
   };
 
   context.subscriptions.push(
     vscode.window.registerCustomEditorProvider(
-      '5board-vsc.editor', // muss zu viewType im package.json passen
+      "5board-vsc.editor", // muss zu viewType im package.json passen
       provider,
       {
         webviewOptions: {
-          retainContextWhenHidden: true
-        }
-      }
-    )
+          retainContextWhenHidden: true,
+        },
+      },
+    ),
   );
 }
 
@@ -104,17 +133,17 @@ export function activate(context: vscode.ExtensionContext) {
 function getEditorWebviewHtml(
   webview: vscode.Webview,
   context: vscode.ExtensionContext,
-  fileContent?: string
+  fileContent?: string,
 ): string {
   const escapedJson = fileContent
-    ? fileContent.replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    : 'Keine Daten geladen';
+    ? fileContent.replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    : "Keine Daten geladen";
 
   const scriptUri = webview.asWebviewUri(
-    vscode.Uri.joinPath(context.extensionUri, 'media', 'webview', 'main.js')
+    vscode.Uri.joinPath(context.extensionUri, "media", "webview", "main.js"),
   );
   const styleUri = webview.asWebviewUri(
-    vscode.Uri.joinPath(context.extensionUri, 'media', 'webview', 'styles.css')
+    vscode.Uri.joinPath(context.extensionUri, "media", "webview", "styles.css"),
   );
 
   console.log("Custom Editor wird geladen...");
@@ -142,17 +171,25 @@ function getEditorWebviewHtml(
 function updateStaticWebview(
   webview: vscode.Webview,
   context: vscode.ExtensionContext,
-  pageName: string
+  pageName: string,
 ) {
-  const pageOnDisk = vscode.Uri.joinPath(context.extensionUri, 'media', 'webview', pageName);
+  const pageOnDisk = vscode.Uri.joinPath(
+    context.extensionUri,
+    "media",
+    "webview",
+    pageName,
+  );
 
   let html: string;
 
-  html = fs.readFileSync(pageOnDisk.fsPath, 'utf8');
-
+  html = fs.readFileSync(pageOnDisk.fsPath, "utf8");
 
   // Ressourcenpfade (CSS/JS/Bilder) anpassen, wenn du welche nutzt
-  const mediaRoot = vscode.Uri.joinPath(context.extensionUri, 'media', 'webview');
+  const mediaRoot = vscode.Uri.joinPath(
+    context.extensionUri,
+    "media",
+    "webview",
+  );
   const mediaRootWeb = webview.asWebviewUri(mediaRoot).toString();
 
   // Beispiel: ersetze src="/media/webview/..." o.ä., falls du so referenzierst

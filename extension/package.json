@@ -39,6 +39,10 @@
       {
         "command": "5board-vsc.helloWorld",
         "title": "5Board Hello World Webview"
+      },
+      {
+        "command": "5board-vsc.showWebview",
+        "title": "5Board Show Webview"
       }
     ]
   },
