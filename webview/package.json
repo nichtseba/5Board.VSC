@@ -1,11 +1,12 @@
 {
-  "name": "webview",
+  "name": "5board.vsc-webview",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "private": true,
   "scripts": {
-    "build": "webpack --mode production",
-    "dev": "webpack serve"
+    "package": "webpack --mode production",
+    "watch": "webpack --watch --mode development"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +23,7 @@
     "webpack-cli": "^7.0.2"
   },
   "dependencies": {
+    "5board.vsc-common": "link:../common",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"
   }
