@@ -1,7 +1,5 @@
 {
-  "name": "5board.vsc-webview",
-  "version": "1.0.0",
-  "description": "",
+  "name": "5board-vsc-webview",
   "main": "index.js",
   "private": true,
   "scripts": {
@@ -9,8 +7,6 @@
     "watch": "webpack --watch --mode development",
     "clean": "rimraf dist"
   },
-  "keywords": [],
-  "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.6.2",
   "devDependencies": {

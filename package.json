@@ -2,5 +2,12 @@
   "name": "5board.vsc-workspace",
   "private": true,
   "license": "ISC",
-  "packageManager": "pnpm@10.6.2"
+  "packageManager": "pnpm@10.6.2",
+  "scripts": {
+    "package": "cd extension && pnpm run vsce",
+    "build": "pnpm run build:common && pnpm run build:webview && pnpm run build:extension",
+    "build:common": "pnpm --filter 5board-vsc-common run package",
+    "build:webview": "pnpm --filter 5board-vsc-webview run package",
+    "build:extension": "pnpm --filter 5board-vsc run package"
+  }
 }
