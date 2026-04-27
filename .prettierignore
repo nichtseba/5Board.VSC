@@ -1,0 +1,8 @@
+node_modules
+dist
+out
+coverage
+
+# optional
+*.md
+.vscode-test
