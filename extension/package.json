@@ -25,13 +25,15 @@
       }
     ],
     "customEditors": [
-    {
-      "viewType": "5board-vsc.editor",
-      "displayName": "5Board Editor",
-      "selector": [
-        { "filenamePattern": "*.5board" }
-      ]
-    }
+      {
+        "viewType": "5board-vsc.editor",
+        "displayName": "5Board Editor",
+        "selector": [
+          {
+            "filenamePattern": "*.5board"
+          }
+        ]
+      }
     ],
     "commands": [
       {
@@ -58,6 +60,7 @@
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
     "eslint": "^9.39.3",
+    "eslint-config-prettier": "^10.1.8",
     "ts-loader": "^9.5.4",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.1",
