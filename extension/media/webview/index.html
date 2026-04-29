@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <title>5Board Hello World</title>
+  </head>
+  <body>
+    <h1>Hello World aus dem 5Board Webview 🎉</h1>
+    <p>Dies ist eine Testseite um eine HTML-Seite in VSCode anzuzeigen ;)</p>
+    <nav>
+      <button onclick="navigate('seite2.html')">Test-Seite</button>
+    </nav>
+
+    <script>
+      const vscode = acquireVsCodeApi();
+
+      function navigate(page) {
+        vscode.postMessage({
+          command: 'navigate',
+          page,
+        });
+      }
+    </script>
+  </body>
+</html>

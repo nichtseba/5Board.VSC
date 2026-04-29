@@ -8,6 +8,17 @@
     "build": "pnpm run build:common && pnpm run build:webview && pnpm run build:extension",
     "build:common": "pnpm --filter 5board-vsc-common run package",
     "build:webview": "pnpm --filter 5board-vsc-webview run package",
-    "build:extension": "pnpm --filter 5board-vsc run package"
+    "build:extension": "pnpm --filter 5board-vsc run package",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.3"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,json,css}": "prettier --write"
   }
 }
