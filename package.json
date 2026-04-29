@@ -9,6 +9,10 @@
     "build:common": "pnpm --filter 5board-vsc-common run package",
     "build:webview": "pnpm --filter 5board-vsc-webview run package",
     "build:extension": "pnpm --filter 5board-vsc run package",
+    "watch": "pnpm run /^watch:.+$/",
+    "watch:common": "pnpm --filter 5board-vsc-common run watch",
+    "watch:webview": "pnpm --filter 5board-vsc-webview run watch",
+    "watch:extension": "pnpm --filter 5board-vsc run watch",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky"

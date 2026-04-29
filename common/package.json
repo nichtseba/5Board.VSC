@@ -11,7 +11,7 @@
   },
   "scripts": {
     "package": "tsc",
-    "watch": "tsc --watch",
+    "watch": "tsc --watch --preserveWatchOutput",
     "clean": "rimraf dist"
   }
 }
