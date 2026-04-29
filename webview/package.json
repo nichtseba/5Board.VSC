@@ -3,7 +3,7 @@
   "main": "index.js",
   "private": true,
   "scripts": {
-    "package": "webpack --mode production",
+    "build": "webpack --mode production",
     "watch": "webpack --watch --mode development",
     "clean": "rimraf dist"
   },
