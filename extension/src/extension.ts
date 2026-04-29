@@ -2,6 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as fs from 'fs';
+import { setWebviewHtml } from './webview';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -12,7 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   const disposable = vscode.commands.registerCommand('5board-vsc.helloWorld', () => {
     const panel = vscode.window.createWebviewPanel(
-      'fiveBoardCustomPage', // dein „Webseiten“-Typ
+      '5board.vsc-webview', // dein „Webseiten“-Typ
       '5Board – Custom Page', // Tab-Titel
       vscode.ViewColumn.One,
       {
@@ -20,21 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
         localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')],
       },
     );
-
-    // Startseite laden, z.B. "index.html"
-    updateStaticWebview(panel.webview, context, 'index.html');
-
-    // Navigation aus der Webview entgegennehmen
-    panel.webview.onDidReceiveMessage(
-      (message) => {
-        if (message.command === 'navigate' && typeof message.page === 'string') {
-          // z.B. page = "seite2.html"
-          updateStaticWebview(panel.webview, context, message.page);
-        }
-      },
-      undefined,
-      context.subscriptions,
-    );
+    setWebviewHtml(context, panel.webview);
   });
 
   context.subscriptions.push(disposable);
