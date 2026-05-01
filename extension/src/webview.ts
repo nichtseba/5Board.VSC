@@ -2,7 +2,7 @@ import vscode from 'vscode';
 import fs from 'fs';
 
 export function setWebviewHtml(context: vscode.ExtensionContext, webview: vscode.Webview): void {
-  const filePath = vscode.Uri.joinPath(context.extensionUri, 'media', 'webview', 'index.html');
+  const filePath = vscode.Uri.joinPath(context.extensionUri, 'media', 'webview', 'Editor.html');
 
   const filecontent = fs.readFileSync(filePath.fsPath, 'utf8');
 

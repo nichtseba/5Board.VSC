@@ -6,6 +6,7 @@ const path = require('path');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+// Multiple entry points for different webviews. Each entry point will generate a separate HTML file and JavaScript bundle.
 const VIEWS = ['Editor', 'OtherView'];
 
 //@ts-check

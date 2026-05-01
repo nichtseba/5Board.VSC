@@ -5,7 +5,8 @@
     "lib": ["ESNext", "DOM"],
     "module": "esnext",
     "moduleResolution": "bundler",
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "types": ["@types/vscode-webview"]
   },
   "extends": "../tsconfig.json",
   "include": ["src/**/*"]

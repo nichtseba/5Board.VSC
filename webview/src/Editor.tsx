@@ -1,7 +1,13 @@
+import EditorCanvas from './components/EditorCanvas';
+import EditorElement from './components/EditorElement';
 import { init } from './init';
 
-export default function Webview() {
-  return <h1>Hello World</h1>;
+export default function Editor() {
+  return (
+    <EditorCanvas>
+      <EditorElement />
+    </EditorCanvas>
+  );
 }
 
-init(Webview);
+init(Editor);
