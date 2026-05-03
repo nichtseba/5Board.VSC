@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
         localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')],
       },
     );
-    setWebviewHtml(context, panel.webview);
+    setWebviewHtml(context, panel.webview, 'Editor.html');
   });
 
   context.subscriptions.push(disposable);
@@ -93,7 +93,7 @@ export function activate(context: vscode.ExtensionContext) {
         localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')],
       };
 
-      webviewView.webview.html = getSidebarHtml();
+      setWebviewHtml(context, webviewView.webview, 'Sidebar.html');
     },
   };
 
@@ -145,19 +145,6 @@ function getEditorWebviewHtml(
     <script src="${scriptUri}"></script>
   </body>
 </html>`;
-}
-
-//
-// HTML for custom sidebar
-//
-function getSidebarHtml(): string {
-  console.log('Sidebar html loading...');
-  return `<!DOCTYPE html>
-  <html lang="de">
-    <body>
-      <h1>Sidebar läuft</h1>
-    </body>
-  </html>`;
 }
 
 //
