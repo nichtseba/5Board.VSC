@@ -78,6 +78,36 @@ export function activate(context: vscode.ExtensionContext) {
       },
     ),
   );
+
+  //
+  // Custom Sidebar Provider: only for *.5board
+  //
+  const sidebarProvider: vscode.WebviewViewProvider = {
+    resolveWebviewView(
+      webviewView: vscode.WebviewView,
+      _context: vscode.WebviewViewResolveContext,
+      _token: vscode.CancellationToken,
+    ) {
+      webviewView.webview.options = {
+        enableScripts: true,
+        localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')],
+      };
+
+      webviewView.webview.html = getSidebarHtml();
+    },
+  };
+
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      '5boardSidebarView', // same id as view in package.json
+      sidebarProvider,
+      {
+        webviewOptions: {
+          retainContextWhenHidden: true,
+        },
+      },
+    ),
+  );
 }
 
 //
@@ -115,6 +145,19 @@ function getEditorWebviewHtml(
     <script src="${scriptUri}"></script>
   </body>
 </html>`;
+}
+
+//
+// HTML for custom sidebar
+//
+function getSidebarHtml(): string {
+  console.log('Sidebar html loading...');
+  return `<!DOCTYPE html>
+  <html lang="de">
+    <body>
+      <h1>Sidebar läuft</h1>
+    </body>
+  </html>`;
 }
 
 //

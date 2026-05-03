@@ -35,6 +35,25 @@
         ]
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "5board-sidebar",
+          "title": "5Board",
+          "icon": "./media/sidebar-icon.png"
+        }
+      ]
+    },
+    "views": {
+      "5board-sidebar": [
+        {
+          "type": "webview",
+          "id": "5boardSidebarView",
+          "name": "Controls",
+          "when": "resourceExtname == .5board"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "5board-vsc.helloWorld",
