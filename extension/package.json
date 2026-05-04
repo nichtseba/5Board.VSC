@@ -58,8 +58,22 @@
       {
         "command": "5board-vsc.helloWorld",
         "title": "5Board Hello World Webview"
+      },
+      {
+        "command": "5board-vsc.incrementFromToolbar",
+        "title": "Increment Counter",
+        "icon": "$(add)"
       }
-    ]
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "5board-vsc.incrementFromToolbar",
+          "when": "resourceExtname == .5board",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
     "vsce": "vsce package",

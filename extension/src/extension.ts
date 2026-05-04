@@ -1,8 +1,7 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { setWebviewHtml } from './webview';
+import { MessageService } from './MessageService';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -10,6 +9,28 @@ export function activate(context: vscode.ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
   console.log('Congratulations, your extension "5board-vsc" is now active!');
+
+  const messages = new MessageService();
+
+  // Status Bar: shows live counter, click = increment
+  const statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
+  statusBar.command = '5board-vsc.incrementFromToolbar';
+  statusBar.tooltip = 'Click to increment counter';
+  statusBar.text = `$(symbol-numeric) Counter: 0`;
+  statusBar.show();
+
+  messages.setOnStateChange((state) => {
+    statusBar.text = `$(symbol-numeric) Counter: ${state.counter}`;
+  });
+
+  context.subscriptions.push(statusBar);
+
+  // Toolbar: increment counter from outside the webview
+  context.subscriptions.push(
+    vscode.commands.registerCommand('5board-vsc.incrementFromToolbar', () => {
+      messages.dispatch({ type: 'counterIncrement' });
+    }),
+  );
 
   const disposable = vscode.commands.registerCommand('5board-vsc.helloWorld', () => {
     const panel = vscode.window.createWebviewPanel(
@@ -62,20 +83,20 @@ export function activate(context: vscode.ExtensionContext) {
       } catch {
         fileContent = undefined;
       }
+
       setWebviewHtml(context, webviewPanel.webview, 'Editor.html');
+      messages.registerEditor(webviewPanel, {
+        content: fileContent ?? '',
+        fileName: vscode.workspace.asRelativePath(document.uri, false),
+      });
     },
   };
 
   context.subscriptions.push(
-    vscode.window.registerCustomEditorProvider(
-      '5board-vsc.editor', // muss zu viewType im package.json passen
-      provider,
-      {
-        webviewOptions: {
-          retainContextWhenHidden: true,
-        },
-      },
-    ),
+    vscode.window.registerCustomEditorProvider('5board-vsc.editor', provider, {
+      webviewOptions: { retainContextWhenHidden: true },
+      supportsMultipleEditorsPerDocument: true,
+    }),
   );
 
   //
@@ -93,49 +114,15 @@ export function activate(context: vscode.ExtensionContext) {
       };
 
       setWebviewHtml(context, webviewView.webview, 'Sidebar.html');
+      messages.register(webviewView);
     },
   };
 
   context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider(
-      '5boardSidebarView', // same id as view in package.json
-      sidebarProvider,
-      {
-        webviewOptions: {
-          retainContextWhenHidden: true,
-        },
-      },
-    ),
+    vscode.window.registerWebviewViewProvider('5boardSidebarView', sidebarProvider, {
+      webviewOptions: { retainContextWhenHidden: true },
+    }),
   );
-}
-
-//
-// HTML-Datei aus /media/webview laden und in die "alte" Webview setzen
-// pageName ist z.B. "index.html", "seite2.html" ...
-//
-function updateStaticWebview(
-  webview: vscode.Webview,
-  context: vscode.ExtensionContext,
-  pageName: string,
-) {
-  const pageOnDisk = vscode.Uri.joinPath(context.extensionUri, 'media', 'webview', pageName);
-
-  let html: string;
-
-  html = fs.readFileSync(pageOnDisk.fsPath, 'utf8');
-
-  // Ressourcenpfade (CSS/JS/Bilder) anpassen, wenn du welche nutzt
-  const mediaRoot = vscode.Uri.joinPath(context.extensionUri, 'media', 'webview');
-  const mediaRootWeb = webview.asWebviewUri(mediaRoot).toString();
-
-  // Beispiel: ersetze src="/media/webview/..." o.ä., falls du so referenzierst
-  // (anpassen je nach deinen Pfad-Konventionen)
-  // This is really bad
-  html = html.replace(/src="\.\/(.*?)"/g, `src="${mediaRootWeb}/$1"`);
-  html = html.replace(/href="\.\/(.*?)"/g, `href="${mediaRootWeb}/$1"`);
-
-  webview.html = html;
-  console.log('Webview aktualisiert');
 }
 
 export function deactivate() {}
