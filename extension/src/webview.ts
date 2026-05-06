@@ -30,7 +30,9 @@ export function setWebviewHtml(
   const mediaRoot = vscode.Uri.joinPath(context.extensionUri, 'media', 'webview');
   const mediaRootWeb = webview.asWebviewUri(mediaRoot).toString();
 
-  const html = filecontent.replace(/(src|href)="(.+?)"/g, `$1="${mediaRootWeb}/$2"`);
+  const html = filecontent
+    .replace(/(src|href)="(.+?)"/g, `$1="${mediaRootWeb}/$2"`)
+    .replace('__CSP_SOURCE__', webview.cspSource);
 
   webview.html = html;
 }
