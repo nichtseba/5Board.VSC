@@ -1,0 +1,36 @@
+.editor-canvas {
+  width: calc(var(--editor-spacing) * var(--editor-columns));
+  display: grid;
+  grid-template-columns: repeat(var(--editor-columns), var(--editor-spacing));
+  /* grid-template-rows: repeat(auto-fill, var(--editor-spacing)); */
+  grid-auto-rows: var(--editor-spacing);
+  background-size: var(--editor-spacing) var(--editor-spacing);
+  background-image:
+    linear-gradient(to right, var(--vscode-editorWidget-border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--vscode-editorWidget-border) 1px, transparent 1px);
+}
+
+.element {
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.element:hover,
+.element-selected {
+  outline: 1px solid var(--vscode-editorWidget-border);
+}
+
+.element-heading {
+  padding-left: var(--editor-spacing);
+  font-weight: bold;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 0;
+  margin-bottom: 0;
+}

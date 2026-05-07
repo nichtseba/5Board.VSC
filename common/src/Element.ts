@@ -7,6 +7,7 @@ export type EditorElement<T extends EditorElementType = EditorElementType> = {
   id: string;
   type: T;
   yPos: number;
+  height: number;
   data: EditorElementDataMap[T];
 };
 

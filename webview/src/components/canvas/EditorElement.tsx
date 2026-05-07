@@ -67,7 +67,12 @@ function HeadingElement({
     <div
       onClick={() => onSelect?.(element.id)}
       className={`element element-heading ${selected ? 'element-selected' : ''}`}
-      style={{ top: `calc(var(--editor-spacing) * ${element.yPos})` }}
+      style={{
+        gridRowStart: element.yPos + 1,
+        gridRowEnd: `span ${element.height}`,
+        gridColumnStart: 1,
+        gridColumnEnd: 'span var(--editor-columns)',
+      }}
     >
       <HeadingTag level={element.data.level}>{element.data.content}</HeadingTag>
     </div>

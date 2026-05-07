@@ -1,7 +1,7 @@
 import { Document } from '5board.vsc-common';
-import { ArrayOrValue, ensureArray } from '../util';
-import EditorElement from './EditorElement';
 import { useState } from 'react';
+import EditorElement from './EditorElement';
+import './EditorCanvas.css';
 
 export type EditorCanvasProps = {
   document: Document;
@@ -24,9 +24,6 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
             onSelect={setSelectedElementId}
           />
         ))}
-        <EditorStretcher
-          lowestYPos={Math.max(...document.content.elements.map((e) => e.yPos), 10)}
-        />
       </div>
     </>
   );
