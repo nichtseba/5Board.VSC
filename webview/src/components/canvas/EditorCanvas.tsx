@@ -28,15 +28,3 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
     </>
   );
 }
-
-/**
- * Does not render anything visible, but stretches the canvas to allow scrolling when elements are near the bottom edge.
- * Todo: Figure out how to get element height properly and replace the hardcoded "5" with it, so that the stretcher is only as big as needed, not a fixed size.
- */
-function EditorStretcher({ lowestYPos, lowestY }: { lowestYPos: number; lowestY?: number }) {
-  let height =
-    lowestY !== undefined
-      ? `round(up, ${lowestY}px, var(--editor-spacing))`
-      : `calc(var(--editor-spacing) * (${lowestYPos} + 5))`;
-  return <div className="editor-stretcher" style={{ height }} />;
-}
