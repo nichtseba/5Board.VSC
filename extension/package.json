@@ -51,6 +51,15 @@
           "id": "5boardSidebarView",
           "name": "Controls",
           "when": "resourceExtname == .5board"
+        },
+        {
+          "type": "webview",
+          "id": "5boardElementView",
+          "name": "Element Details"
+        },
+        {
+          "id": "5boardStructureView",
+          "name": "Structure"
         }
       ]
     },

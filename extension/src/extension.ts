@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { setWebviewHtml } from './webview';
 import { MessageService } from './MessageService';
+import { SidebarViewProvider } from './providers/SidebarViewProvider';
+import { StructureTreeProvider } from './providers/StructureTreeProvider';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -100,28 +102,31 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   //
-  // Custom Sidebar Provider: only for *.5board
+  // Custom Sidebar Providers
   //
-  const sidebarProvider: vscode.WebviewViewProvider = {
-    resolveWebviewView(
-      webviewView: vscode.WebviewView,
-      _context: vscode.WebviewViewResolveContext,
-      _token: vscode.CancellationToken,
-    ) {
-      webviewView.webview.options = {
-        enableScripts: true,
-        localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')],
-      };
-
-      setWebviewHtml(context, webviewView.webview, 'Sidebar.html');
-      messages.register(webviewView);
-    },
-  };
-
+  // Control - webview
   context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider('5boardSidebarView', sidebarProvider, {
-      webviewOptions: { retainContextWhenHidden: true },
-    }),
+    vscode.window.registerWebviewViewProvider(
+      '5boardSidebarView',
+      new SidebarViewProvider(context, messages, 'Sidebar.html'),
+      {
+        webviewOptions: { retainContextWhenHidden: true },
+      },
+    ),
+  );
+  // Element Details - webview
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      '5boardElementView',
+      new SidebarViewProvider(context, messages, 'OtherView.html'),
+      {
+        webviewOptions: { retainContextWhenHidden: true },
+      },
+    ),
+  );
+  // Structure - Treeview (not a webview)
+  context.subscriptions.push(
+    vscode.window.registerTreeDataProvider('5boardStructureView', new StructureTreeProvider()),
   );
 }
 
