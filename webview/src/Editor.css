@@ -3,12 +3,19 @@
 }
 
 .editor-canvas {
-  height: 100vh;
+  min-height: 100vh;
+  height: fit-content;
+  width: calc(var(--editor-spacing) * 40);
   position: relative;
   background-size: var(--editor-spacing) var(--editor-spacing);
   background-image:
     linear-gradient(to right, var(--vscode-editorWidget-border) 1px, transparent 1px),
     linear-gradient(to bottom, var(--vscode-editorWidget-border) 1px, transparent 1px);
+}
+
+.editor-stretcher {
+  width: 100%;
+  pointer-events: none;
 }
 
 .element {
@@ -22,6 +29,17 @@
 }
 
 .element-heading {
+  padding-left: var(--editor-spacing);
   font-weight: bold;
   width: 100%;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin-top: 0;
+  margin-bottom: 0;
 }
