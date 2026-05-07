@@ -30,3 +30,7 @@ Die React-basierte Benutzeroberfläche, die innerhalb des VS Code-Webviews läuf
 | `format`          | Formatiert alle Dateien mit Prettier                                |
 | `format:check`    | Prüft die Formatierung ohne Änderungen zu schreiben                 |
 | `prepare`         | Initialisiert Husky (Git Hooks)                                     |
+
+
+## Automatisches Formatieren
+Für das automatische Formatieren ist Prettier eingebunden. Im Pre-Commit Git hook wird das formatieren immer automatisch ausgeführt. Um automatisch zu formatieren beim Speichern einer Datei, reicht es die VS Code Extension `Prettier - Code formatter` zu installieren. Sicher gehen, dass in den Einstellungen 'Editor: Default Formatter' auf 'Prettier - Code formatter' steht und 'Editor: Format On Save' aktiviert ist.
