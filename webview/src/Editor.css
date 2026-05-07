@@ -1,0 +1,27 @@
+:root {
+  --editor-spacing: 1rem;
+}
+
+.editor-canvas {
+  height: 100vh;
+  position: relative;
+  background-size: var(--editor-spacing) var(--editor-spacing);
+  background-image:
+    linear-gradient(to right, var(--vscode-editorWidget-border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--vscode-editorWidget-border) 1px, transparent 1px);
+}
+
+.element {
+  position: absolute;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.element:hover {
+  outline: 1px solid var(--vscode-editorWidget-border);
+}
+
+.element-heading {
+  font-weight: bold;
+  width: 100%;
+}
