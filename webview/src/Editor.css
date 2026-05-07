@@ -19,12 +19,13 @@
 }
 
 .element {
-  position: absolute;
+  position: relative;
   cursor: pointer;
   box-sizing: border-box;
 }
 
-.element:hover {
+.element:hover,
+.element-selected {
   outline: 1px solid var(--vscode-editorWidget-border);
 }
 

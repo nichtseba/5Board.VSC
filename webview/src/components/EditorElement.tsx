@@ -66,7 +66,7 @@ function HeadingElement({
   return (
     <div
       onClick={() => onSelect?.(element.id)}
-      className={`element element-heading ${selected ? 'element-active' : ''}`}
+      className={`element element-heading ${selected ? 'element-selected' : ''}`}
       style={{ top: `calc(var(--editor-spacing) * ${element.yPos})` }}
     >
       <HeadingTag level={element.data.level}>{element.data.content}</HeadingTag>

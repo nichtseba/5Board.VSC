@@ -13,17 +13,22 @@ export type EditorCanvasProps = {
 export default function EditorCanvas({ document }: EditorCanvasProps) {
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   return (
-    <div className="editor-canvas">
-      {document.content.elements.map((element) => (
-        <EditorElement
-          key={element.id}
-          element={element}
-          selected={element.id === selectedElementId}
-          onSelect={setSelectedElementId}
+    <>
+      {`Selected element ID: ${selectedElementId}`}
+      <div className="editor-canvas">
+        {document.content.elements.map((element) => (
+          <EditorElement
+            key={element.id}
+            element={element}
+            selected={element.id === selectedElementId}
+            onSelect={setSelectedElementId}
+          />
+        ))}
+        <EditorStretcher
+          lowestYPos={Math.max(...document.content.elements.map((e) => e.yPos), 10)}
         />
-      ))}
-      <EditorStretcher lowestYPos={Math.max(...document.content.elements.map((e) => e.yPos), 10)} />
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -36,5 +41,5 @@ function EditorStretcher({ lowestYPos, lowestY }: { lowestYPos: number; lowestY?
     lowestY !== undefined
       ? `round(up, ${lowestY}px, var(--editor-spacing))`
       : `calc(var(--editor-spacing) * (${lowestYPos} + 5))`;
-  return <div inert className="editor-stretcher" style={{ height }} />;
+  return <div className="editor-stretcher" style={{ height }} />;
 }
