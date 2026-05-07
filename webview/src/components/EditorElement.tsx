@@ -6,6 +6,10 @@ export type EditorElementProps<T extends EditorElementType> = {
   selected?: boolean;
 };
 
+/**
+ * Renders an editor element based on its type. The actual rendering logic for each element type is delegated to specific components (e.g., HeadingElement for heading elements).
+ * Uses {@link ELEMENT_COMPONENTS} to determine which component to render for each element type.
+ */
 export default function EditorElement<ElementType extends EditorElementType>({
   element,
   onSelect,
@@ -17,17 +21,24 @@ export default function EditorElement<ElementType extends EditorElementType>({
   return <ElementComponent element={element} onSelect={onSelect} selected={selected} />;
 }
 
+/**
+ * Mapping of editor element types to their corresponding React components.
+ */
 const ELEMENT_COMPONENTS = {
   [EditorElementType.Heading]: HeadingElement,
 } as const satisfies {
   [ElementType in EditorElementType]: React.ComponentType<EditorElementProps<ElementType>>;
 };
 
+/**
+ * Renders a heading element. The heading level (h1, h2, etc.) is determined by the `level` property in the element's data.
+ */
 function HeadingElement({
   element,
   onSelect,
   selected,
 }: EditorElementProps<EditorElementType.Heading>) {
+  /** Utility component for rendering the appropriate heading tag based on the level */
   function HeadingTag({
     children,
     level,

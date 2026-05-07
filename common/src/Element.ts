@@ -1,3 +1,4 @@
+// Todo: Add additional element types
 export enum EditorElementType {
   Heading = 'heading',
 }
@@ -18,6 +19,7 @@ export type HeadingElementData = {
   content: string;
 };
 
+// Todo: Figure out proper document type
 export type Document = {
   content: {
     elements: EditorElement[];
