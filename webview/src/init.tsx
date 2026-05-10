@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { VsCodeContext } from './components/VsCode';
+import '@vscode/codicons/dist/codicon.css';
 
 export function init(RootComponent: React.ComponentType) {
   function start() {
