@@ -49,8 +49,17 @@
         {
           "type": "webview",
           "id": "5boardSidebarView",
-          "name": "Controls",
+          "name": "Common",
           "when": "resourceExtname == .5board"
+        },
+        {
+          "type": "webview",
+          "id": "5boardElementControlView",
+          "name": "Selected Element Controls"
+        },
+        {
+          "id": "5boardStructureView",
+          "name": "Structure"
         }
       ]
     },
