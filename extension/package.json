@@ -49,13 +49,12 @@
         {
           "type": "webview",
           "id": "5boardSidebarView",
-          "name": "Common",
-          "when": "resourceExtname == .5board"
+          "name": "Tools & Presets"
         },
         {
           "type": "webview",
           "id": "5boardElementControlView",
-          "name": "Selected Element Controls"
+          "name": "Selected Element"
         },
         {
           "id": "5boardStructureView",
