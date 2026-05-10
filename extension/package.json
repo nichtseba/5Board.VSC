@@ -67,8 +67,22 @@
       {
         "command": "5board-vsc.helloWorld",
         "title": "5Board Hello World Webview"
+      },
+      {
+        "command": "5board-vsc.startPresentation",
+        "title": "Start Presentation",
+        "icon": "$(play)"
       }
-    ]
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "5board-vsc.startPresentation",
+          "when": "view == 5boardSidebarView",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
     "vsce": "vsce package",
