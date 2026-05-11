@@ -1,1 +1,2 @@
-export * from './Element.js';
+export * from './Element';
+export * from './boardFormat';
