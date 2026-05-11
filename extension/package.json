@@ -63,6 +63,7 @@
   },
   "scripts": {
     "package": "vsce package --no-dependencies",
+    "vscode:prepublish": "pnpm run copy-webview",
     "compile": "webpack",
     "watch": "pnpm run /^watch:.+$/",
     "watch:webpack": "webpack --watch",
