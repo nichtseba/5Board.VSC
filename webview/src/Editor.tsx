@@ -1,8 +1,7 @@
-import { Button } from 'vscrui';
+import { Document, EditorElementType } from '5board.vsc-common';
 import EditorCanvas from './components/canvas/EditorCanvas';
-import { init } from './init';
-import { Document, EditorElement, EditorElementType } from '5board.vsc-common';
 import './Editor.css';
+import { init } from './init';
 
 export default function Editor() {
   const document: Document = {

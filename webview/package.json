@@ -5,7 +5,8 @@
   "scripts": {
     "build": "webpack --mode production",
     "watch": "webpack --watch --mode development",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "lint": "eslint src"
   },
   "license": "ISC",
   "packageManager": "pnpm@10.6.2",
