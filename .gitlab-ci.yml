@@ -36,5 +36,5 @@ package:
   dependencies:
     - build
   script:
-    - pnpm --filter 5board-vsc install
+    - pnpm install
     - pnpm run package
