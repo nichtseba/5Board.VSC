@@ -46,8 +46,6 @@ package:
     untracked: false
     when: on_success
     access: all
-    expire_in: 30 days
-    expose_as: 'vsix'
     paths:
       - 'extension/5board-vsc-*.vsix'
   # Cant Actually do that since our runner is out of date and doesn't support the release keyword:
