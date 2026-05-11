@@ -20,7 +20,7 @@ build:
   extends: .pnpm
   stage: build
   script:
-    - pnpm clean-install # install dependencies
+    - pnpm install # install dependencies
     - pnpm run build
   artifacts:
     untracked: false
