@@ -29,6 +29,7 @@ build:
     expire_in: 30 days
     paths:
       - 'extension/dist'
+      - 'webview/dist'
 
 package:
   extends: .pnpm
