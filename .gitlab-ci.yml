@@ -11,6 +11,7 @@ build:
     - pnpm config set store-dir .pnpm-store
   script:
     - pnpm install # install dependencies
+    - pnpm run build
   cache:
     key:
       files:
