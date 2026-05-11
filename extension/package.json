@@ -19,7 +19,8 @@
           "5board"
         ],
         "extensions": [
-          ".5board"
+          ".5board",
+          ".5boardz"
         ],
         "configuration": "./language-configuration.json"
       }
@@ -31,6 +32,9 @@
         "selector": [
           {
             "filenamePattern": "*.5board"
+          },
+          {
+            "filenamePattern": "*.5boardz"
           }
         ]
       }
@@ -58,8 +62,32 @@
       {
         "command": "5board-vsc.helloWorld",
         "title": "5Board Hello World Webview"
+      },
+      {
+        "command": "5board-vsc.openBoardFile",
+        "title": "5Board: Datei öffnen"
+      },
+      {
+        "command": "5board-vsc.newBoard",
+        "title": "5Board: Neue .5boardz Datei erstellen"
       }
-    ]
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "5board-vsc.openBoardFile",
+          "when": "resourceExtname == .5board || resourceExtname == .5boardz",
+          "group": "navigation"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "5board-vsc.openBoardFile",
+          "when": "resourceExtname == .5board || resourceExtname == .5boardz",
+          "group": "navigation"
+        }
+      ]
+    }
   },
   "scripts": {
     "vsce": "vsce package",
@@ -85,19 +113,20 @@
     "@types/vscode": "^1.107.0",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.9.1",
     "copy-folder-util": "^1.2.3",
     "eslint": "^9.39.3",
+    "eslint-config-prettier": "^10.1.8",
     "nodemon": "^3.1.14",
     "rimraf": "^6.1.3",
-    "eslint-config-prettier": "^10.1.8",
     "ts-loader": "^9.5.4",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.56.1",
     "webpack": "^5.105.3",
-    "webpack-cli": "^6.0.1",
-    "@vscode/vsce": "^3.9.1"
+    "webpack-cli": "^6.0.1"
   },
   "dependencies": {
-    "5board.vsc-common": "link:../common"
+    "5board.vsc-common": "link:../common",
+    "jszip": "^3.10.1"
   }
 }

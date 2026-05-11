@@ -1,7 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
-    "module": "Node16",
     "target": "ES2022",
     "lib": ["ES2022"],
     "types": ["vscode", "node", "mocha"],
