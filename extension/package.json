@@ -62,7 +62,7 @@
     ]
   },
   "scripts": {
-    "vsce": "vsce package",
+    "package": "vsce package",
     "compile": "webpack",
     "watch": "pnpm run /^watch:.+$/",
     "watch:webpack": "webpack --watch",

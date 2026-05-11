@@ -4,7 +4,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.6.2",
   "scripts": {
-    "package": "pnpm --filter 5board-vsc extension run vsce",
+    "package": "pnpm --filter 5board-vsc run package",
     "build": "pnpm run build:common && pnpm run build:webview && pnpm run build:extension",
     "build:common": "pnpm --filter 5board-vsc-common run build",
     "build:webview": "pnpm --filter 5board-vsc-webview run build",
