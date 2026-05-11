@@ -12,6 +12,13 @@ build:
   script:
     - pnpm install # install dependencies
     - pnpm run build
+  artifacts:
+    untracked: false
+    when: on_success
+    access: all
+    expire_in: 30 days
+    paths:
+      - "extension/dist"
   cache:
     key:
       files:
