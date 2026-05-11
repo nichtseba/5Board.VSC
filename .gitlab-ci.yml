@@ -47,7 +47,6 @@ package:
     when: on_success
     access: all
     expire_in: 30 days
-    expose_as: 'vsix'
     paths:
       - 'extension/5board-vsc-*.vsix'
 
