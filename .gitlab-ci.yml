@@ -28,7 +28,7 @@ build:
     access: all
     expire_in: 30 days
     paths:
-      - "extension/dist"
+      - 'extension/dist'
 
 package:
   extends: .pnpm
@@ -36,6 +36,5 @@ package:
   dependencies:
     - build
   script:
-    - pnpm clean-install
-    - pnpm run package
-    
+    - pnpm install
+    - ls -la extension/dist

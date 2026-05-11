@@ -63,12 +63,10 @@
   },
   "scripts": {
     "vsce": "vsce package",
-    "vscode:prepublish": "pnpm run package",
     "compile": "webpack",
     "watch": "pnpm run /^watch:.+$/",
     "watch:webpack": "webpack --watch",
     "watch:copy-webview": "nodemon --watch ../webview/dist -e css,css.map,html,js,js.map --exec \"pnpm run copy-webview\"",
-    "package": "cd .. && pnpm run build",
     "prebuild": "pnpm run copy-webview",
     "build": "webpack --mode production --devtool hidden-source-map",
     "compile-tests": "tsc -p . --outDir out",
