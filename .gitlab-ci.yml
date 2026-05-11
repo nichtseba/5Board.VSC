@@ -36,5 +36,5 @@ package:
   dependencies:
     - build
   script:
-    - pnpm install
-    - ls -la extension/dist
+    - pnpm --filter 5board-vsc install
+    - pnpm run package
