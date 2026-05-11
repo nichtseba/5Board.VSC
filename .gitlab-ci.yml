@@ -33,7 +33,8 @@ build:
 package:
   extends: .pnpm
   stage: package
-  script:
+  before_script:
     cd extension
+  script:
     pwd
     
