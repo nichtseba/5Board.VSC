@@ -56,12 +56,15 @@ export function activate(context: vscode.ExtensionContext) {
       webviewPanel.title = `5Board: ${vscode.workspace.asRelativePath(document.uri, false)}`;
 
       // Get JSON‑Content from .5board file
+      // This should stay here as an example it will be removed later
+      /* eslint-disable @typescript-eslint/no-unused-vars */
       let fileContent: string | undefined;
       try {
         fileContent = fs.readFileSync(document.uri.fsPath, 'utf8');
       } catch {
         fileContent = undefined;
       }
+      /* eslint-enable @typescript-eslint/no-unused-vars */
       setWebviewHtml(context, webviewPanel.webview, 'Editor.html');
     },
   };
@@ -113,6 +116,7 @@ export function activate(context: vscode.ExtensionContext) {
 // HTML-Datei aus /media/webview laden und in die "alte" Webview setzen
 // pageName ist z.B. "index.html", "seite2.html" ...
 //
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- wird später gebraucht
 function updateStaticWebview(
   webview: vscode.Webview,
   context: vscode.ExtensionContext,
