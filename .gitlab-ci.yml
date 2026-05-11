@@ -1,14 +1,24 @@
 stages:
   - build
+  - package
 
-build:
-  stage: build
+.pnpm:
   image: node:24.14.1
   before_script:
     - npm install --global corepack@latest
     - corepack enable
     - corepack prepare pnpm@latest-11 --activate
     - pnpm config set store-dir .pnpm-store
+  cache:
+    key:
+      files:
+        - pnpm-lock.yaml
+    paths:
+      - .pnpm-store
+
+build:
+  extends: .pnpm
+  stage: build
   script:
     - pnpm install # install dependencies
     - pnpm run build
@@ -19,9 +29,11 @@ build:
     expire_in: 30 days
     paths:
       - "extension/dist"
-  cache:
-    key:
-      files:
-        - pnpm-lock.yaml
-    paths:
-      - .pnpm-store
+
+package:
+  extends: .pnpm
+  stage: package
+  script:
+    cd extension
+    pwd
+    
