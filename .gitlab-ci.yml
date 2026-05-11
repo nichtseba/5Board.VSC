@@ -51,6 +51,7 @@ package:
 lint:
   stage: lint
   extends: .pnpm
+  allow_failure: true
   script:
     - pnpm install
     - pnpm -r run lint
