@@ -54,7 +54,7 @@
           "type": "webview",
           "id": "5boardSidebarView",
           "name": "Controls",
-          "when": "resourceExtname == .5board"
+          "when": "resourceExtname == .5board || resourceExtname == .5boardz"
         }
       ]
     },
