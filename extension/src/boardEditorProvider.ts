@@ -1,24 +1,14 @@
 import * as vscode from 'vscode';
-import { isJsonObject } from '5board.vsc-common';
 import { write5boardzPackage } from './boardPackage';
-import {
-  FIVEBOARD_EDITOR_VIEW_TYPE,
-  load5boardDocument,
-  reload5boardDocument,
-  save5boardDocument,
-  saveOld5boardAs5boardzPackage,
-} from './boardDocument';
+import { load5boardDocument, reload5boardDocument, save5boardDocument } from './boardDocument';
 import type { FiveBoardDocument } from './boardDocument';
-import {
-  get5boardzAssetCacheRoot,
-  render5boardzPackageHtml,
-  SAVE_OLD_5BOARD_AS_5BOARDZ_MESSAGE,
-} from './boardPackageWebview';
+import type { MessageService } from './MessageService';
+import { setWebviewHtml } from './webview';
 
 export function create5boardEditorProvider(
   context: vscode.ExtensionContext,
+  messages: MessageService,
 ): vscode.CustomEditorProvider<FiveBoardDocument> {
-  // This provider encapsulates the complete custom editor lifecycle for .5board/.5boardz
   const changeEmitter = new vscode.EventEmitter<
     vscode.CustomDocumentContentChangeEvent<FiveBoardDocument>
   >();
@@ -39,40 +29,21 @@ export function create5boardEditorProvider(
       webviewPanel: vscode.WebviewPanel,
       _token: vscode.CancellationToken,
     ): Promise<void> {
-      const assetCacheRoot = get5boardzAssetCacheRoot(context, document.uri);
-
       webviewPanel.webview.options = {
         enableScripts: true,
-        localResourceRoots: [
-          vscode.Uri.joinPath(context.extensionUri, 'media'),
-          context.globalStorageUri,
-          assetCacheRoot,
-        ],
+        localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')],
       };
 
       webviewPanel.title = `5Board: ${vscode.workspace.asRelativePath(document.uri, false)}`;
-      webviewPanel.webview.onDidReceiveMessage(async (message: unknown) => {
-        try {
-          if (isJsonObject(message) && message.type === SAVE_OLD_5BOARD_AS_5BOARDZ_MESSAGE) {
-            const targetUri = await saveOld5boardAs5boardzPackage(document);
-            await vscode.commands.executeCommand(
-              'vscode.openWith',
-              targetUri,
-              FIVEBOARD_EDITOR_VIEW_TYPE,
-            );
-          }
-        } catch (error) {
-          vscode.window.showErrorMessage(
-            `5boardz Datei konnte nicht gespeichert werden: ${errorMessage(error)}`,
-          );
-        }
+
+      // registerEditor sends 'fileLoaded' automatically when the webview posts 'ready',
+      // so the React editor receives the board content right after it boots.
+      messages.registerEditor(webviewPanel, {
+        content: JSON.stringify(document.fiveBoardz.content),
+        fileName: document.uri.fsPath,
       });
 
-      webviewPanel.webview.html = await render5boardzPackageHtml(
-        webviewPanel.webview,
-        document,
-        assetCacheRoot,
-      );
+      setWebviewHtml(context, webviewPanel.webview, 'Editor.html');
     },
 
     async saveCustomDocument(
@@ -112,8 +83,4 @@ export function create5boardEditorProvider(
       };
     },
   };
-}
-
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
 }

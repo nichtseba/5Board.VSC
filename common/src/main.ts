@@ -3,6 +3,7 @@ export * from './boardFormat';
 
 export type AppState = {
   counter: number;
+  selectedElementId: string | null;
 };
 
 // Messages FROM the extension TO webviews
@@ -18,4 +19,5 @@ export type WebviewToExtensionMessage =
   | { type: 'ready' }
   | { type: 'runCode'; code: string }
   | { type: 'counterIncrement' }
-  | { type: 'counterDecrement' };
+  | { type: 'counterDecrement' }
+  | { type: 'selectElement'; id: string | null };

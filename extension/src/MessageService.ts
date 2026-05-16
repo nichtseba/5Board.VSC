@@ -10,7 +10,7 @@ type EditorData = { content: string; fileName: string };
 export class MessageService {
   private webviews = new Set<vscode.Webview>();
   private editorData = new Map<vscode.Webview, EditorData>();
-  private state: AppState = { counter: 0 };
+  private state: AppState = { counter: 0, selectedElementId: null };
   private onStateChange?: (state: AppState) => void;
 
   setOnStateChange(cb: (state: AppState) => void): void {
@@ -65,6 +65,11 @@ export class MessageService {
         break;
       case 'counterDecrement':
         this.state = { ...this.state, counter: this.state.counter - 1 };
+        this.broadcast({ type: 'updateContent', state: this.state });
+        this.onStateChange?.(this.state);
+        break;
+      case 'selectElement':
+        this.state = { ...this.state, selectedElementId: msg.id };
         this.broadcast({ type: 'updateContent', state: this.state });
         this.onStateChange?.(this.state);
         break;

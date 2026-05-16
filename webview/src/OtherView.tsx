@@ -5,7 +5,7 @@ import { init } from './init';
 
 export default function OtherView() {
   const messages = useMessageService();
-  const [state, setState] = useState<AppState>({ counter: 0 });
+  const [state, setState] = useState<AppState>({ counter: 0, selectedElementId: null });
 
   useEffect(() => {
     messages.send({ type: 'ready' });

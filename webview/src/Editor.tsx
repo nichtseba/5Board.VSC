@@ -1,8 +1,8 @@
 import { Button } from 'vscrui';
 import { memo, useEffect, useState } from 'react';
-import type { AppState } from '5board.vsc-common';
+import { Document, EditorElementType, type AppState } from '5board.vsc-common';
 import { useMessageService, useOnMessage } from './services/MessageService';
-import EditorCanvas from './components/EditorCanvas';
+import EditorCanvas from './components/canvas/EditorCanvas';
 import EditorElement from './components/EditorElement';
 import './Editor.css';
 import { init } from './init';
@@ -43,9 +43,23 @@ const FileView = memo(function FileView({
 
 export default function Editor() {
   const messages = useMessageService();
-  const [state, setState] = useState<AppState>({ counter: 0 });
+  //const [state, setState] = useState<AppState>({ counter: 0 });
   const [fileName, setFileName] = useState('');
   const [fileContent, setFileContent] = useState('');
+  const document: Document = {
+    content: {
+      elements: [1, 2, 3, 4, 5, 6].map((i) => ({
+        id: `element-${i}`,
+        type: EditorElementType.Heading,
+        yPos: i * 10,
+        height: 2,
+        data: {
+          level: i as 1 | 2 | 3 | 4 | 5 | 6,
+          content: `Heading ${i}`,
+        },
+      })),
+    },
+  };
 
   useEffect(() => {
     messages.send({ type: 'ready' });
@@ -53,7 +67,7 @@ export default function Editor() {
 
   useOnMessage((msg) => {
     if (msg.type === 'init' || msg.type === 'updateContent') {
-      setState(msg.state);
+      //setState(msg.state);
     }
     if (msg.type === 'fileLoaded') {
       setFileName(msg.fileName);
@@ -61,14 +75,15 @@ export default function Editor() {
     }
   });
   return (
-    <EditorCanvas>
+    <>
       <div>
-        <h2>Counter: {state.counter}</h2>
+        {/*<h2>Counter: {state.counter}</h2>*/}
         <button onClick={() => messages.send({ type: 'counterIncrement' })}>+</button>
         <button onClick={() => messages.send({ type: 'counterDecrement' })}>−</button>
         <FileView fileName={fileName} fileContent={fileContent} />
       </div>
-    </EditorCanvas>
+      <EditorCanvas document={document} />
+    </>
   );
 }
 

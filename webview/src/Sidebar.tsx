@@ -5,7 +5,7 @@ import { init } from './init';
 
 export default function Sidebar() {
   const messages = useMessageService();
-  const [state, setState] = useState<AppState>({ counter: 0 });
+  const [state, setState] = useState<AppState>({ counter: 0, selectedElementId: null });
 
   useEffect(() => {
     messages.send({ type: 'ready' });
@@ -23,6 +23,7 @@ export default function Sidebar() {
       <h2>Counter: {state.counter}</h2>
       <button onClick={() => messages.send({ type: 'counterIncrement' })}>+</button>
       <button onClick={() => messages.send({ type: 'counterDecrement' })}>−</button>
+      <p>Ausgewähltes Element: {state.selectedElementId ?? '–'}</p>
     </div>
   );
 }

@@ -70,7 +70,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.window.registerCustomEditorProvider(
       FIVEBOARD_EDITOR_VIEW_TYPE,
-      create5boardEditorProvider(context),
+      create5boardEditorProvider(context, messages),
       {
         webviewOptions: {
           retainContextWhenHidden: true,
