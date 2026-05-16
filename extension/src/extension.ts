@@ -15,7 +15,7 @@ export function activate(context: vscode.ExtensionContext) {
   // This line of code will only be executed once when your extension is activated
   console.log('Congratulations, your extension "5board-vsc" is now active!');
 
-  const disposable = vscode.commands.registerCommand('5board-vsc.helloWorld', () => {
+  const disposable = vscode.commands.registerCommand('5board-vsc.openCustomEditor', () => {
     const panel = vscode.window.createWebviewPanel(
       '5board.vsc-webview', // dein „Webseiten“-Typ
       '5Board – Custom Page', // Tab-Titel
