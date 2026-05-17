@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import type {
   AppState,
+  EditorElement,
   ExtensionToWebviewMessage,
   WebviewToExtensionMessage,
 } from '5board.vsc-common';
@@ -47,35 +48,61 @@ export class MessageService {
   private handleMessage(msg: WebviewToExtensionMessage, sender?: vscode.Webview): void {
     switch (msg.type) {
       case 'ready':
-        sender?.postMessage({
-          type: 'init',
-          state: this.state,
-        } satisfies ExtensionToWebviewMessage);
-        if (sender) {
-          const data = this.editorData.get(sender);
-          if (data) {
-            sender.postMessage({ type: 'fileLoaded', ...data } satisfies ExtensionToWebviewMessage);
-          }
-        }
+        this.handleReady(sender);
         break;
       case 'counterIncrement':
-        this.state = { ...this.state, counter: this.state.counter + 1 };
-        this.broadcast({ type: 'updateContent', state: this.state });
-        this.onStateChange?.(this.state);
+        this.updateCounter(1);
         break;
       case 'counterDecrement':
-        this.state = { ...this.state, counter: this.state.counter - 1 };
-        this.broadcast({ type: 'updateContent', state: this.state });
-        this.onStateChange?.(this.state);
+        this.updateCounter(-1);
         break;
       case 'selectElement':
-        this.state = { ...this.state, selectedElementId: msg.id };
-        this.broadcast({ type: 'updateContent', state: this.state });
-        this.onStateChange?.(this.state);
+        this.handleSelectElement(msg);
         break;
       case 'runCode':
-        this.broadcast({ type: 'statusUpdate', status: `Running: ${msg.code}` });
+        this.handleRunCode(msg);
         break;
+      case 'loadFile':
+        this.handleLoadFile(msg);
+        break;
+      case 'saveFile':
+        this.handleSaveFile(msg);
+        break;
+      case 'updateFile':
+        this.handleUpdateFile(msg);
+        break;
+      case 'selectionChange':
+        this.handleSelectionChange(msg);
+        break;
+      case 'updateElement':
+        this.handleUpdateElement(msg);
+        break;
+      case 'changeElementContent':
+        this.handleChangeElementContent(msg);
+        break;
+      case 'changeElementType':
+        this.handleChangeElementType(msg);
+        break;
+      case 'moveElement':
+        this.handleMoveElement(msg);
+        break;
+      case 'deleteElement':
+        this.handleDeleteElement(msg);
+        break;
+      case 'toggleElementVisibility':
+        this.handleToggleElementVisibility(msg);
+        break;
+      case 'addElement':
+        this.handleAddElement(msg);
+        break;
+      case 'duplicateElement':
+        this.handleDuplicateElement(msg);
+        break;
+      case 'selectTool':
+        this.handleSelectTool(msg);
+        break;
+      default:
+        console.warn('Unhandled webview message', msg);
     }
   }
 
@@ -88,5 +115,125 @@ export class MessageService {
     for (const webview of this.webviews) {
       webview.postMessage(msg);
     }
+  }
+
+  //message handlers for messages from webviews to extension (called in handleMessage):
+
+  /**
+   * Handles the 'ready' message from a webview.
+   * @param sender The webview that sent the message.
+   */
+  private handleReady(sender?: vscode.Webview): void {
+    sender?.postMessage({
+      type: 'init',
+      state: this.state,
+    } satisfies ExtensionToWebviewMessage);
+    if (sender) {
+      const data = this.editorData.get(sender);
+      if (data) {
+        sender.postMessage({ type: 'fileLoaded', ...data } satisfies ExtensionToWebviewMessage);
+      }
+    }
+  }
+
+  /**
+   * Updates the counter value and broadcasts the change.
+   * @param increment
+   */
+  private updateCounter(increment: number): void {
+    this.state = { ...this.state, counter: this.state.counter + increment };
+    this.broadcast({ type: 'updateContent', state: this.state });
+    this.onStateChange?.(this.state);
+  }
+
+  /**
+   * Handles the 'selectElement' message, updating the selected element ID and broadcasting the change.
+   * @param msg The message containing the ID of the selected element.
+   */
+  private handleSelectElement(msg: { type: 'selectElement'; id: string | null }): void {
+    this.state = { ...this.state, selectedElementId: msg.id };
+    this.broadcast({ type: 'updateContent', state: this.state });
+    this.onStateChange?.(this.state);
+  }
+
+  /**
+   * Handles the 'runCode' message, broadcasting the status update.
+   * @param msg The message containing the code to run.
+   */
+  private handleRunCode(msg: { type: 'runCode'; code: string }): void {
+    this.broadcast({ type: 'statusUpdate', status: `Running: ${msg.code}` });
+  }
+
+  private handleLoadFile(msg: { type: 'loadFile'; fileName: string }): void {
+    //todo: implement file loading logic, e.g. read file content and send back to webview
+  }
+
+  private handleSaveFile(msg: { type: 'saveFile'; content: string; fileName: string }): void {
+    //todo: implement file saving logic, e.g. write content to file system
+  }
+
+  private handleUpdateFile(msg: { type: 'updateFile'; content: string; fileName: string }): void {
+    //todo: implement file updating logic, e.g. write updated content to file system
+  }
+
+  private handleSelectionChange(msg: { type: 'selectionChange'; selectedIds: string[] }): void {
+    //todo: implement selection change logic, e.g. update state with selected element IDs and broadcast changes
+  }
+
+  private handleUpdateElement(msg: {
+    type: 'updateElement';
+    id: string;
+    changes: Partial<EditorElement>;
+  }): void {
+    //todo: implement element update logic, e.g. find element by ID, apply changes, update state and broadcast changes
+  }
+
+  private handleChangeElementContent(msg: {
+    type: 'changeElementContent';
+    id: string;
+    content: string;
+  }): void {
+    //todo: implement element content change logic, e.g. find element by ID, update content, update state and broadcast changes
+  }
+
+  private handleChangeElementType(msg: {
+    type: 'changeElementType';
+    id: string;
+    newType: EditorElement['type'];
+  }): void {
+    //todo: implement element type change logic, e.g. find element by ID, update type, update state and broadcast changes
+  }
+
+  private handleMoveElement(msg: {
+    type: 'moveElement';
+    id: string;
+    xPos: number;
+    yPos: number;
+  }): void {
+    //todo: implement element move logic, e.g. find element by ID, update position, update state and broadcast changes
+  }
+
+  private handleDeleteElement(msg: { type: 'deleteElement'; id: string }): void {
+    //todo: implement element deletion logic, e.g. find element by ID, remove from state, update state and broadcast changes
+  }
+
+  private handleToggleElementVisibility(msg: {
+    type: 'toggleElementVisibility';
+    id: string;
+    visible: boolean;
+  }): void {
+    //todo: implement element visibility toggle logic, e.g. find element by ID, update visibility, update state and broadcast changes
+  }
+
+  private handleAddElement(msg: { type: 'addElement'; element: EditorElement }): void {
+    //todo: implement element addition logic, e.g. add element to state, update state and broadcast changes
+  }
+
+  private handleDuplicateElement(msg: { type: 'duplicateElement'; id: string }): void {
+    //todo: implement element duplication logic, e.g. find element by ID, create copy with new ID, add to state, update state and broadcast changes
+  }
+
+  private handleSelectTool(msg: { type: 'selectTool'; id: string }): void {
+    //todo: implement tool selection logic, e.g. update state with selected tool ID and broadcast changes
   }
 }
