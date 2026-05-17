@@ -8,6 +8,190 @@ export type JsonPrimitive = string | number | boolean | null;
 export type JsonValue = JsonPrimitive | JsonObject | JsonArray;
 export type JsonObject = { [key: string]: JsonValue };
 export type JsonArray = JsonValue[];
+export type FiveBoardzContentObject =
+  | FiveBoardzTextboxObject
+  | FiveBoardzSectionObject
+  | FiveBoardzCodeObject
+  | FiveBoardzImageObject
+  | FiveBoardzRectObject
+  | FiveBoardzPathObject
+  | FiveBoardzArrowObject
+  | FiveBoardzEllipseObject
+  | FiveBoardzPolylineObject
+  | FiveBoardzGroupObject;
+
+export interface FiveBoardzObjectBase {
+  type: string;
+  version?: string;
+  id?: string;
+
+  left?: number;
+  top?: number;
+  width?: number;
+  height?: number;
+
+  scaleX?: number;
+  scaleY?: number;
+  angle?: number;
+  opacity?: number;
+
+  visible?: boolean;
+  hidden?: boolean;
+
+  fill?: JsonValue;
+  fillRule?: string;
+  backgroundColor?: string;
+  stroke?: JsonValue;
+  strokeWidth?: number;
+  strokeDashArray?: JsonValue;
+  strokeDashOffset?: number;
+  strokeLineCap?: string;
+  strokeLineJoin?: string;
+  strokeMiterLimit?: number;
+  strokeUniform?: boolean;
+
+  shadow?: JsonValue;
+  clipTo?: JsonValue;
+  paintFirst?: string;
+  globalCompositeOperation?: string;
+  transformMatrix?: JsonValue;
+  skewX?: number;
+  skewY?: number;
+
+  originX?: string;
+  originY?: string;
+  flipX?: boolean;
+  flipY?: boolean;
+
+  selectable?: boolean;
+  canBeSelected?: boolean;
+  revealOrder?: number;
+  sectionId?: string;
+  snapAngle?: number;
+  objectCaching?: boolean;
+}
+
+export interface FiveBoardzTextObjectBase extends FiveBoardzObjectBase {
+  text?: string;
+
+  fontSize?: number;
+  fontWeight?: string | number;
+  fontFamily?: string;
+  fontStyle?: string;
+  lineHeight?: number;
+  textAlign?: string;
+  styles?: JsonValue;
+  fontDisplayName?: string;
+  charSpacing?: number;
+  minWidth?: number;
+  splitByGrapheme?: boolean;
+
+  textBackgroundColor?: string;
+  underline?: boolean;
+  overline?: boolean;
+  linethrough?: boolean;
+}
+
+export interface FiveBoardzTextboxObject extends FiveBoardzTextObjectBase {
+  type: 'textbox';
+
+  isSpeakerNote?: boolean;
+  displayName?: string;
+}
+
+export interface FiveBoardzSectionObject extends FiveBoardzTextObjectBase {
+  type: 'section';
+
+  sectionLevel?: string;
+  numbering?: string;
+}
+
+export interface FiveBoardzCodeObject extends FiveBoardzTextObjectBase {
+  type: 'code';
+
+  errors?: JsonArray | null;
+  codeClass?: string;
+  codeClassBlockId?: number;
+  codeIsCommentedOut?: boolean;
+  codeOrder?: number;
+  codeSourceOffset?: number;
+  isCode?: boolean;
+}
+
+export interface FiveBoardzImageObject extends FiveBoardzObjectBase {
+  type: 'image';
+
+  src?: string;
+  altText?: string;
+  crossOrigin?: string;
+  cropX?: number;
+  cropY?: number;
+  filters?: JsonArray;
+  hideInExport?: boolean;
+  isSpeakerNote?: boolean;
+  displayName?: string;
+}
+
+export interface FiveBoardzRectObject extends FiveBoardzObjectBase {
+  type: 'rect';
+
+  rx?: number;
+  ry?: number;
+  modifyFill?: boolean;
+  modifyRadius?: boolean;
+  displayName?: string;
+}
+
+export interface FiveBoardzPathObject extends FiveBoardzObjectBase {
+  type: 'path';
+
+  path?: JsonArray;
+  strokeDash?: string;
+  displayName?: string;
+  isSpeakerNote?: boolean;
+}
+
+export interface FiveBoardzArrowObject extends FiveBoardzObjectBase {
+  type: 'arrow';
+
+  x1?: number;
+  y1?: number;
+  x2?: number;
+  y2?: number;
+  arrowHead?: string;
+  strokeDash?: string;
+}
+
+export interface FiveBoardzEllipseObject extends FiveBoardzObjectBase {
+  type: 'ellipse';
+
+  rx?: number;
+  ry?: number;
+  modifyFill?: boolean;
+}
+
+export interface FiveBoardzPolylineObject extends FiveBoardzObjectBase {
+  type: 'polyline';
+
+  points?: JsonArray;
+  modifyFill?: boolean;
+}
+
+export interface FiveBoardzGroupObject extends FiveBoardzObjectBase {
+  type: 'group';
+
+  objects?: FiveBoardzContentObject[];
+  isSpeakerNote?: boolean;
+  displayName?: string;
+}
+
+export interface FiveBoardzContent {
+  version?: string;
+  objects: FiveBoardzContentObject[];
+  background?: string;
+  snapAngle?: number;
+  revealOrder?: number;
+}
 
 export interface FiveBoardzManifest {
   title: string;
@@ -34,7 +218,7 @@ export interface FiveBoardzAsset {
 
 export interface FiveBoardzDocument {
   manifest: FiveBoardzManifest;
-  content: JsonValue;
+  content: FiveBoardzContent;
   sources: FiveBoardzSourceFile[];
   assets: FiveBoardzAsset[];
 }
@@ -46,7 +230,7 @@ export interface Old5boardClass {
 }
 
 export interface Old5boardDocument {
-  content: JsonValue;
+  content: FiveBoardzContent;
   classes: Old5boardClass[];
 }
 
@@ -107,6 +291,16 @@ export function validateOld5boardDocument(value: unknown): Old5boardDocument {
     throw new Error('Alte .5board Dateien müssen einen content Abschnitt enthalten.');
   }
 
+  //Structure Check
+  const contentValue = value.content;
+  if (!isJsonObject(contentValue)) {
+    throw new Error('content section of old .5board files must be a JSON object');
+  }
+
+  if (!Array.isArray(contentValue.objects)) {
+    throw new Error('content section of old .5board files must contain an objects array');
+  }
+
   //Prüft ob ein classes Abschnitt existiert
   const classesValue = value.classes;
   if (!Array.isArray(classesValue)) {
@@ -132,7 +326,7 @@ export function validateOld5boardDocument(value: unknown): Old5boardDocument {
   });
 
   return {
-    content: value.content,
+    content: value.content as unknown as FiveBoardzContent,
     classes,
   };
 }

@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import {
   FIVEBOARDZ_MANIFEST_PATH,
   FiveBoardzAsset,
+  FiveBoardzContent,
   FiveBoardzDocument,
   FiveBoardzSourceFile,
   create5boardzManifest,
@@ -16,7 +17,7 @@ export async function read5boardzPackage(uri: vscode.Uri): Promise<FiveBoardzDoc
   const manifest = validate5boardzManifest(await readJsonFile(zip, FIVEBOARDZ_MANIFEST_PATH));
 
   // Content, source code, and assets are stored as separate files in the ZIP
-  const content = await readJsonFile(zip, manifest.contentPath);
+  const content = (await readJsonFile(zip, manifest.contentPath)) as unknown as FiveBoardzContent;
   const sources = await read5boardzSourceFiles(zip, manifest.sourceRoot);
   const assets = await read5boardzAssets(zip, manifest.assetRoot);
 

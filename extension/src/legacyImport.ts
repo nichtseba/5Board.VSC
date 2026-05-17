@@ -13,6 +13,7 @@ import {
   create5boardzManifest,
   isJsonObject,
   validateOld5boardDocument,
+  FiveBoardzContent,
 } from '5board.vsc-common';
 import { makePackagePath, sanitizeJavaFileName } from './boardPackage';
 
@@ -54,7 +55,10 @@ export function convertOld5boardTo5boardzDocument(
 
   return {
     manifest: create5boardzManifest(title),
-    content: externalizeDataUrls(legacy.content, assetState),
+    content: externalizeDataUrls(
+      legacy.content as unknown as JsonValue,
+      assetState,
+    ) as unknown as FiveBoardzContent,
     sources: convertClassesArrayToSourceFiles(legacy),
     assets: assetState.assets,
   };
