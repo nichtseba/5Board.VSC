@@ -3,9 +3,9 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { createEmpty5boardzPackage, write5boardzPackage } from './boardPackage';
-import { create5boardEditorProvider } from './boardEditorProvider';
-import { FIVEBOARD_EDITOR_VIEW_TYPE, is5boardzUri, isOld5boardUri } from './boardDocument';
+import { createEmpty5boardzPackage, write5boardzPackage } from './board/boardPackage';
+import { create5boardEditorProvider } from './board/boardEditorProvider';
+import { FIVEBOARD_EDITOR_VIEW_TYPE, is5boardzUri, isOld5boardUri } from './board/boardDocument';
 import { setWebviewHtml } from './webview';
 
 // This method is called when your extension is activated
@@ -44,7 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
   // Custom Editor Provider for *.5board and *.5boardz files
   context.subscriptions.push(
     vscode.window.registerCustomEditorProvider(
-      FIVEBOARD_EDITOR_VIEW_TYPE, // needs to match viewType from boardDocument.ts
+      FIVEBOARD_EDITOR_VIEW_TYPE, // needs to match viewType from board/boardDocument.ts
       create5boardEditorProvider(context),
       {
         webviewOptions: {
