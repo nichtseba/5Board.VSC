@@ -1,0 +1,32 @@
+.settings-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-panel-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  margin: 0;
+
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+
+  color: var(--vscode-descriptionForeground);
+}
+
+.settings-panel-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

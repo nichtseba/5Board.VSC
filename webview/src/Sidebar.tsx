@@ -1,13 +1,8 @@
 import { useState } from 'react';
 import { init } from './init';
 import { Button } from 'vscrui';
+import { ToolItem } from '5board.vsc-common';
 import './Sidebar.css';
-
-type ToolItem = {
-  id: string;
-  label: string;
-  icon: string;
-};
 
 const tools: ToolItem[] = [
   {

@@ -53,8 +53,8 @@
         },
         {
           "type": "webview",
-          "id": "5boardElementControlView",
-          "name": "Selected Element"
+          "id": "5boardElementSettingsView",
+          "name": "Element Settings"
         },
         {
           "id": "5boardStructureView",

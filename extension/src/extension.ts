@@ -102,8 +102,8 @@ export function activate(context: vscode.ExtensionContext) {
   // Element Details - webview
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
-      '5boardElementControlView',
-      new SidebarViewProvider(context, 'OtherView.html'),
+      '5boardElementSettingsView',
+      new SidebarViewProvider(context, 'ElementSettingsSidebar.html'),
       {
         webviewOptions: { retainContextWhenHidden: true },
       },
