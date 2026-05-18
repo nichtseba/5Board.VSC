@@ -3,3 +3,4 @@ out
 dist
 media/webview
 .vscode-test/
+*.vsix

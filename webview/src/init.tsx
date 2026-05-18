@@ -1,5 +1,4 @@
 import { createRoot } from 'react-dom/client';
-import { VsCodeContext } from './components/VsCode';
 
 export function init(RootComponent: React.ComponentType) {
   function start() {
