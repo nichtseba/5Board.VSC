@@ -1,18 +1,18 @@
 .settings-panel {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1rem;
 }
 
 .settings-panel-title {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 0.75rem;
 
   margin: 0;
 
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
 
@@ -22,11 +22,11 @@
 .settings-panel-content {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 1rem;
 }
 
 .settings-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 0.5rem;
 }
