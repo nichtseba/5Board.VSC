@@ -1,5 +1,3 @@
-//@ts-check
-
 'use strict';
 
 const path = require('path');
@@ -44,7 +42,18 @@ const extensionConfig = {
       },
       {
         test: /\.css$/i,
-        use: [MiniCssExtractPlugin.loader, 'css-loader'],
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          {
+            loader: 'postcss-loader',
+            options: {
+              postcssOptions: {
+                plugins: ['@tailwindcss/postcss'],
+              },
+            },
+          },
+        ],
       },
     ],
   },

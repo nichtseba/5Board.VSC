@@ -15,7 +15,7 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
   return (
     <>
       {`Selected element ID: ${selectedElementId}`}
-      <div className="editor-canvas">
+      <div className="editor-canvas bg-editor-background">
         {document.content.elements.map((element) => (
           <EditorElement
             key={element.id}

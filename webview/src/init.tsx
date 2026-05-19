@@ -1,4 +1,5 @@
 import { createRoot } from 'react-dom/client';
+import './global.css';
 
 export function init(RootComponent: React.ComponentType) {
   function start() {
