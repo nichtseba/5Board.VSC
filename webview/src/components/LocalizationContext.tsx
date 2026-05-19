@@ -3,6 +3,7 @@ import { createContext, useContext } from 'react';
 
 export const LocalizationContext = createContext<LocalizationContextType>({
   language: 'en',
+  t: (key: string) => key,
 });
 
 export function useLocalization() {

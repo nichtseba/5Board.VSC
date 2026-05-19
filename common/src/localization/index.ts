@@ -3,6 +3,7 @@ import de from './de.json';
 
 export type LocalizationContextType = {
   language: string;
+  t: (key: string) => string;
 };
 
 const translations = {

@@ -20,12 +20,10 @@ export default function Editor() {
       })),
     },
   };
-  const { language } = useLocalization();
+  const { t } = useLocalization();
   return (
     <>
-      <Button>
-        Localize {language}: {t(language, 'webview.customEditor.Test')}
-      </Button>
+      <Button>Localized: {t('webview.customEditor.Test')}</Button>
       <EditorCanvas document={document} />
     </>
   );
