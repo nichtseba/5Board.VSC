@@ -1,6 +1,6 @@
-import { Button } from 'vscrui';
+//import { Button } from 'vscrui';
 import { memo, useEffect, useState } from 'react';
-import { Document, EditorElementType, type AppState } from '5board.vsc-common';
+import { Document, EditorElementType } from '5board.vsc-common';
 import { useMessageService, useOnMessage } from './services/MessageService';
 import EditorCanvas from './components/canvas/EditorCanvas';
 import EditorElement from './components/EditorElement';
