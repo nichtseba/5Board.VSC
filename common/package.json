@@ -13,7 +13,8 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch --preserveWatchOutput",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "lint": "eslint src"
   },
   "dependencies": {}
 }

@@ -45,6 +45,7 @@ export class MessageService {
     }
   }
 
+  // Todo: ändern
   private handleMessage(msg: WebviewToExtensionMessage, sender?: vscode.Webview): void {
     switch (msg.type) {
       case 'ready':
@@ -164,23 +165,23 @@ export class MessageService {
     this.broadcast({ type: 'statusUpdate', status: `Running: ${msg.code}` });
   }
 
-  private handleLoadFile(msg: { type: 'loadFile'; fileName: string }): void {
+  private handleLoadFile(_msg: { type: 'loadFile'; fileName: string }): void {
     //todo: implement file loading logic, e.g. read file content and send back to webview
   }
 
-  private handleSaveFile(msg: { type: 'saveFile'; content: string; fileName: string }): void {
+  private handleSaveFile(_msg: { type: 'saveFile'; content: string; fileName: string }): void {
     //todo: implement file saving logic, e.g. write content to file system
   }
 
-  private handleUpdateFile(msg: { type: 'updateFile'; content: string; fileName: string }): void {
+  private handleUpdateFile(_msg: { type: 'updateFile'; content: string; fileName: string }): void {
     //todo: implement file updating logic, e.g. write updated content to file system
   }
 
-  private handleSelectionChange(msg: { type: 'selectionChange'; selectedIds: string[] }): void {
+  private handleSelectionChange(_msg: { type: 'selectionChange'; selectedIds: string[] }): void {
     //todo: implement selection change logic, e.g. update state with selected element IDs and broadcast changes
   }
 
-  private handleUpdateElement(msg: {
+  private handleUpdateElement(_msg: {
     type: 'updateElement';
     id: string;
     changes: Partial<EditorElement>;
@@ -188,7 +189,7 @@ export class MessageService {
     //todo: implement element update logic, e.g. find element by ID, apply changes, update state and broadcast changes
   }
 
-  private handleChangeElementContent(msg: {
+  private handleChangeElementContent(_msg: {
     type: 'changeElementContent';
     id: string;
     content: string;
@@ -196,7 +197,7 @@ export class MessageService {
     //todo: implement element content change logic, e.g. find element by ID, update content, update state and broadcast changes
   }
 
-  private handleChangeElementType(msg: {
+  private handleChangeElementType(_msg: {
     type: 'changeElementType';
     id: string;
     newType: EditorElement['type'];
@@ -204,7 +205,7 @@ export class MessageService {
     //todo: implement element type change logic, e.g. find element by ID, update type, update state and broadcast changes
   }
 
-  private handleMoveElement(msg: {
+  private handleMoveElement(_msg: {
     type: 'moveElement';
     id: string;
     xPos: number;
@@ -213,11 +214,11 @@ export class MessageService {
     //todo: implement element move logic, e.g. find element by ID, update position, update state and broadcast changes
   }
 
-  private handleDeleteElement(msg: { type: 'deleteElement'; id: string }): void {
+  private handleDeleteElement(_msg: { type: 'deleteElement'; id: string }): void {
     //todo: implement element deletion logic, e.g. find element by ID, remove from state, update state and broadcast changes
   }
 
-  private handleToggleElementVisibility(msg: {
+  private handleToggleElementVisibility(_msg: {
     type: 'toggleElementVisibility';
     id: string;
     visible: boolean;
@@ -225,15 +226,15 @@ export class MessageService {
     //todo: implement element visibility toggle logic, e.g. find element by ID, update visibility, update state and broadcast changes
   }
 
-  private handleAddElement(msg: { type: 'addElement'; element: EditorElement }): void {
+  private handleAddElement(_msg: { type: 'addElement'; element: EditorElement }): void {
     //todo: implement element addition logic, e.g. add element to state, update state and broadcast changes
   }
 
-  private handleDuplicateElement(msg: { type: 'duplicateElement'; id: string }): void {
+  private handleDuplicateElement(_msg: { type: 'duplicateElement'; id: string }): void {
     //todo: implement element duplication logic, e.g. find element by ID, create copy with new ID, add to state, update state and broadcast changes
   }
 
-  private handleSelectTool(msg: { type: 'selectTool'; id: string }): void {
+  private handleSelectTool(_msg: { type: 'selectTool'; id: string }): void {
     //todo: implement tool selection logic, e.g. update state with selected tool ID and broadcast changes
   }
 }

@@ -18,6 +18,7 @@ export class MessageService {
     this.vscode.postMessage(msg);
   }
 
+  // Todo: Split in different messages - on extension too
   /** Register a handler for messages from the extension. Returns an unsubscribe fn. */
   on(handler: Handler): () => void {
     this.handlers.add(handler);

@@ -4,7 +4,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.6.2",
   "scripts": {
-    "package": "pnpm run -r clean && cd extension && pnpm run vsce",
+    "package": "pnpm --filter 5board-vsc run package",
     "build": "pnpm run build:common && pnpm run build:webview && pnpm run build:extension",
     "build:common": "pnpm --filter 5board-vsc-common run build",
     "build:webview": "pnpm --filter 5board-vsc-webview run build",
@@ -18,11 +18,15 @@
     "prepare": "husky"
   },
   "devDependencies": {
+    "eslint": "^9.39.3",
+    "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
-    "prettier": "^3.8.3"
+    "prettier": "^3.8.3",
+    "typescript-eslint": "^8.56.1"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,json,css}": "prettier --write"
+    "*.{js,jsx,ts,tsx,json,css}": "prettier --write",
+    "*.{js,jsx,ts,tsx}": "eslint"
   }
 }
