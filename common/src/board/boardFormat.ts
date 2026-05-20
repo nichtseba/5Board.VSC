@@ -230,7 +230,7 @@ export interface Old5boardClass {
 }
 
 export interface Old5boardDocument {
-  content: FiveBoardzContent;
+  content: JsonObject;
   classes: Old5boardClass[];
 }
 
@@ -280,15 +280,90 @@ export function validate5boardzManifest(value: unknown): FiveBoardzManifest {
   };
 }
 
-//Prüft ob die .5board Datei eine JSON Datei ist
-export function validateOld5boardDocument(value: unknown): Old5boardDocument {
+//validates the content.json of a .5boardz file and checks if it has the expected structure and fields, returns the parsed content as a FiveBoardzContent object if valid
+export function validateFiveBoardzContent(value: unknown): FiveBoardzContent {
   if (!isJsonObject(value)) {
-    throw new Error('.5board Dateien müssen ein JSON Objekt sein');
+    throw new Error('content.json has to be a JSON object.');
   }
 
-  //Prüft ob ein content Abschnitt existiert
+  if (!Array.isArray(value.objects)) {
+    throw new Error('content.json must contain an objects array.');
+  }
+
+  return {
+    ...value,
+    objects: value.objects.map((entry, index) =>
+      validateFiveBoardzContentObject(entry, `objects[${index}]`),
+    ),
+  } as FiveBoardzContent;
+}
+
+export function validateFiveBoardzContentObject(
+  value: unknown,
+  path = 'object',
+): FiveBoardzContentObject {
+  if (!isJsonObject(value)) {
+    throw new Error(`${path} has to be a JSON object.`);
+  }
+
+  if (typeof value.type !== 'string') {
+    throw new Error(`${path}.type has to be a string.`);
+  }
+
+  //switch case for every currently supported object type
+  switch (value.type) {
+    case 'textbox':
+      return value as unknown as FiveBoardzTextboxObject;
+    case 'section':
+      return value as unknown as FiveBoardzSectionObject;
+    case 'code':
+      return value as unknown as FiveBoardzCodeObject;
+    case 'image':
+      return value as unknown as FiveBoardzImageObject;
+    case 'rect':
+      return value as unknown as FiveBoardzRectObject;
+    case 'path':
+      return value as unknown as FiveBoardzPathObject;
+    case 'arrow':
+      return value as unknown as FiveBoardzArrowObject;
+    case 'ellipse':
+      return value as unknown as FiveBoardzEllipseObject;
+    case 'polyline':
+      return value as unknown as FiveBoardzPolylineObject;
+    case 'group':
+      return validateFiveBoardzGroupObject(value, path);
+    default:
+      throw new Error(`${path}.type "${value.type}" is not supported.`);
+  }
+}
+
+//validates groups objects and its nested objects recursively
+function validateFiveBoardzGroupObject(value: JsonObject, path: string): FiveBoardzGroupObject {
+  if (value.objects === undefined) {
+    return value as unknown as FiveBoardzGroupObject;
+  }
+
+  if (!Array.isArray(value.objects)) {
+    throw new Error(`${path}.objects has to be an array.`);
+  }
+
+  return {
+    ...value,
+    objects: value.objects.map((entry, index) =>
+      validateFiveBoardzContentObject(entry, `${path}.objects[${index}]`),
+    ),
+  } as FiveBoardzGroupObject;
+}
+
+//checks if the .5board file is a valid JSON file
+export function validateOld5boardDocument(value: unknown): Old5boardDocument {
+  if (!isJsonObject(value)) {
+    throw new Error('.5board files have to be a JSON object');
+  }
+
+  //checks if a content section exists
   if (!('content' in value)) {
-    throw new Error('Alte .5board Dateien müssen einen content Abschnitt enthalten.');
+    throw new Error('Old .5board files must contain a content section.');
   }
 
   //Structure Check
@@ -301,18 +376,18 @@ export function validateOld5boardDocument(value: unknown): Old5boardDocument {
     throw new Error('content section of old .5board files must contain an objects array');
   }
 
-  //Prüft ob ein classes Abschnitt existiert
+  //checks if a classes section exists
   const classesValue = value.classes;
   if (!Array.isArray(classesValue)) {
-    throw new Error('Alte .5board Dateien müssen ein classes Array enthalten.');
+    throw new Error('Old .5board files must contain a classes array.');
   }
 
   const classes = classesValue.map((entry, index) => {
     if (!isJsonObject(entry)) {
-      throw new Error(`Alte Klasse an Index ${index} muss ein Objekt sein.`);
+      throw new Error(`Old class at index ${index} must be an object.`);
     }
 
-    //Prüft auf die erforderlichen Felder für eine Klasse
+    //checks for the required fields for a class
     const name = readRequiredString(entry, 'name');
     const code = readRequiredString(entry, 'code');
     const currentBlockId =
@@ -326,7 +401,7 @@ export function validateOld5boardDocument(value: unknown): Old5boardDocument {
   });
 
   return {
-    content: value.content as unknown as FiveBoardzContent,
+    content: contentValue,
     classes,
   };
 }
