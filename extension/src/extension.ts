@@ -7,6 +7,8 @@ import { createEmpty5boardzPackage, write5boardzPackage } from './boardPackage';
 import { create5boardEditorProvider } from './boardEditorProvider';
 import { FIVEBOARD_EDITOR_VIEW_TYPE, is5boardzUri, isOld5boardUri } from './boardDocument';
 import { setWebviewHtml } from './webview';
+import { setLanguage, t } from './localization';
+import { normalizeLanguage } from '5board.vsc-common/dist/localization';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -14,11 +16,12 @@ export function activate(context: vscode.ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
   console.log('Congratulations, your extension "5board-vsc" is now active!');
+  setLanguage(normalizeLanguage(vscode.env.language));
 
-  const disposable = vscode.commands.registerCommand('5board-vsc.helloWorld', () => {
+  const disposable = vscode.commands.registerCommand('5board-vsc.openCustomEditor', () => {
     const panel = vscode.window.createWebviewPanel(
       '5board.vsc-webview', // dein „Webseiten“-Typ
-      '5Board – Custom Page', // Tab-Titel
+      t('extension.openCustomEditor.title'), // Tab-Titel
       vscode.ViewColumn.One,
       {
         enableScripts: true, // JS in deiner „Website“ erlaubt
@@ -132,87 +135,6 @@ async function resolve5boardFileUri(uri?: vscode.Uri): Promise<vscode.Uri | unde
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
-}
-
-function createLegacyReadonlyEditorProvider(
-  context: vscode.ExtensionContext,
-): vscode.CustomReadonlyEditorProvider {
-  return {
-    async openCustomDocument(
-      uri: vscode.Uri,
-      _openContext: vscode.CustomDocumentOpenContext,
-      _token: vscode.CancellationToken,
-    ): Promise<vscode.CustomDocument> {
-      return {
-        uri,
-        dispose: () => {
-          /* nothing */
-        },
-      };
-    },
-
-    async resolveCustomEditor(
-      document: vscode.CustomDocument,
-      webviewPanel: vscode.WebviewPanel,
-      _token: vscode.CancellationToken,
-    ): Promise<void> {
-      webviewPanel.webview.options = {
-        enableScripts: true, // JS allowed
-        localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')],
-      };
-
-      webviewPanel.title = `5Board: ${vscode.workspace.asRelativePath(document.uri, false)}`;
-
-      // Get JSON‑Content from .5board file
-      // This should stay here as an example it will be removed later
-      /* eslint-disable @typescript-eslint/no-unused-vars */
-      let fileContent: string | undefined;
-      try {
-        fileContent = fs.readFileSync(document.uri.fsPath, 'utf8');
-      } catch {
-        fileContent = undefined;
-      }
-      /* eslint-enable @typescript-eslint/no-unused-vars */
-      setWebviewHtml(context, webviewPanel.webview, 'Editor.html');
-    },
-  };
-}
-
-//
-// HTML für den Custom Editor (zeigt .5board-Inhalt als JSON-Text an)
-//
-function getEditorWebviewHtml(
-  webview: vscode.Webview,
-  context: vscode.ExtensionContext,
-  fileContent?: string,
-): string {
-  const escapedJson = fileContent
-    ? fileContent.replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    : 'Keine Daten geladen';
-
-  const scriptUri = webview.asWebviewUri(
-    vscode.Uri.joinPath(context.extensionUri, 'media', 'webview', 'main.js'),
-  );
-  const styleUri = webview.asWebviewUri(
-    vscode.Uri.joinPath(context.extensionUri, 'media', 'webview', 'styles.css'),
-  );
-
-  console.log('Custom Editor wird geladen...');
-  return `<!DOCTYPE html>
-<html lang="de">
-  <head>
-    <meta charset="UTF-8" />
-    <title>5Board Test Editor</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="${styleUri}">
-  </head>
-  <body>
-    <h1>5Board Webview Test Editor</h1>
-    <p>Dies ist ein Testeditor, der den Inhalt der Datei anzeigt. Erkennt die 5Board Datei als JSON.</p>
-    <pre id="content">${escapedJson}</pre>
-    <script src="${scriptUri}"></script>
-  </body>
-</html>`;
 }
 
 //

@@ -54,14 +54,14 @@
           "type": "webview",
           "id": "5boardSidebarView",
           "name": "Controls",
-          "when": "resourceExtname == .5board"
+          "when": "resourceExtname == .5board || resourceExtname == .5boardz"
         }
       ]
     },
     "commands": [
       {
-        "command": "5board-vsc.helloWorld",
-        "title": "5Board Hello World Webview"
+        "command": "5board-vsc.openCustomEditor",
+        "title": "%command.5board-vsc.openCustomEditor%"
       },
       {
         "command": "5board-vsc.openBoardFile",

@@ -1,7 +1,9 @@
-import { Document, EditorElementType } from '5board.vsc-common';
 import EditorCanvas from './components/canvas/EditorCanvas';
-import './Editor.css';
 import { init } from './init';
+import { Document, EditorElementType } from '5board.vsc-common';
+import './Editor.css';
+import { useLocalization } from './components/LocalizationContext';
+import { Button } from 'vscrui';
 
 export default function Editor() {
   const document: Document = {
@@ -18,8 +20,10 @@ export default function Editor() {
       })),
     },
   };
+  const { t } = useLocalization();
   return (
     <>
+      <Button>Localized: {t('webview.customEditor.Test')}</Button>
       <EditorCanvas document={document} />
     </>
   );
