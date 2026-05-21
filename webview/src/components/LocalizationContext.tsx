@@ -8,6 +8,11 @@ export type LocalizationContextType = {
   t: LocalizationFunction;
 };
 
+export const LocalizationContext = createContext<LocalizationContextType>({
+  language: null,
+  t: defaultLocalizationFunction,
+});
+
 function defaultLocalizationFunction(key: string): string {
   return key;
 }
@@ -18,11 +23,6 @@ export function createLocalizationContext(language: Language): LocalizationConte
     t: (key: TranslationKey) => translate(language, key),
   };
 }
-
-export const LocalizationContext = createContext<LocalizationContextType>({
-  language: null,
-  t: defaultLocalizationFunction,
-});
 
 export function useLocalization() {
   return useContext(LocalizationContext);

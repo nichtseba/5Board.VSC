@@ -1,6 +1,7 @@
 import en from './en.json';
 import de from './de.json';
 
+// Garantees that all translations have the same keys, otherwise TypeScript will throw an error
 type Translations = Readonly<typeof en>;
 
 const EN_TRANSLATIONS: Translations = en;
@@ -22,24 +23,29 @@ type ExtractTranslationKeys<T, Prefix extends string = ''> =
 export type TranslationKey = ExtractTranslationKeys<Translations>;
 
 const TRANSLATIONS = {
-  en,
-  de,
+  en: EN_TRANSLATIONS,
+  de: DE_TRANSLATIONS,
 } as const;
 
 export type Language = keyof typeof TRANSLATIONS;
+
+type TranslationNode = {
+  [key: string]: string | TranslationNode;
+};
 
 export function normalizeLanguage(language: string): Language {
   return language.startsWith('de') ? 'de' : 'en';
 }
 
-function getNestedValue(obj: Record<string, any>, path: string): unknown {
-  return path.split('.').reduce((acc, part) => {
+function getNestedValue(obj: TranslationNode, path: string): string | undefined {
+  const result = path.split('.').reduce<string | TranslationNode | undefined>((acc, part) => {
     if (acc && typeof acc === 'object') {
       return acc[part];
     }
 
     return undefined;
   }, obj);
+  return typeof result === 'string' ? result : undefined;
 }
 
 export function t(language: Language, key: TranslationKey): string {
