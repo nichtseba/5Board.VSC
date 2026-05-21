@@ -8,6 +8,7 @@ import { create5boardEditorProvider } from './boardEditorProvider';
 import { FIVEBOARD_EDITOR_VIEW_TYPE, is5boardzUri, isOld5boardUri } from './boardDocument';
 import { setWebviewHtml } from './webview';
 import { setLanguage, t } from './localization';
+import { normalizeLanguage } from '5board.vsc-common/dist/localization';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
@@ -15,7 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
   console.log('Congratulations, your extension "5board-vsc" is now active!');
-  setLanguage(vscode.env.language);
+  setLanguage(normalizeLanguage(vscode.env.language));
 
   const disposable = vscode.commands.registerCommand('5board-vsc.openCustomEditor', () => {
     const panel = vscode.window.createWebviewPanel(
