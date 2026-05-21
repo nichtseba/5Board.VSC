@@ -84,6 +84,7 @@ function render5boardzSummary(
     <meta http-equiv="Content-Security-Policy" content="${csp}" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>${escapeHtml(fiveBoardz.manifest.title)}</title>
+    <script nonce="${nonce}">window.vscode = acquireVsCodeApi();</script>
     <style>
       body { font-family: var(--vscode-font-family); padding: 24px; color: var(--vscode-foreground); }
       h1 { margin: 0 0 16px; font-size: 24px; }
@@ -94,6 +95,9 @@ function render5boardzSummary(
       .tile strong { display: block; font-size: 20px; margin-bottom: 4px; }
       ul { padding-left: 20px; }
       button { background: var(--vscode-button-background); color: var(--vscode-button-foreground); border: 0; border-radius: 4px; padding: 8px 12px; cursor: pointer; }
+      .codeblock-tester { max-width: 900px; margin-bottom: 24px; }
+      .codeblock-tester textarea { width: 100%; min-height: 160px; font-family: var(--vscode-editor-font-family); margin: 12px 0; padding: 10px; border: 1px solid var(--vscode-panel-border); border-radius: 4px; background: var(--vscode-input-background); color: var(--vscode-input-foreground); }
+      pre { white-space: pre-wrap; background: var(--vscode-editor-background); padding: 12px; border: 1px solid var(--vscode-panel-border); border-radius: 4px; }
       .legacy { border: 1px solid var(--vscode-panel-border); border-left: 4px solid var(--vscode-button-background); padding: 12px; margin: 0 0 20px; max-width: 900px; }
       .legacy p { margin: 0 0 12px; }
       img { max-width: 180px; max-height: 120px; object-fit: contain; border: 1px solid var(--vscode-panel-border); background: var(--vscode-editor-background); }
@@ -112,11 +116,86 @@ function render5boardzSummary(
     </section>
     <h2>Quellcode</h2>
     ${renderSourceFiles(fiveBoardz.sources)}
+    <h2>Codeblock Runner</h2>
+    ${renderCodeblockTester(nonce)}
     <h2>Assets</h2>
     ${renderAssets(assets)}
     ${renderOld5boardScript(document, nonce)}
   </body>
 </html>`;
+}
+
+function renderCodeblockTester(nonce: string): string {
+  return `<section class="codeblock-tester">
+      <p>Java-Code ausführen</p>
+      <textarea id="codeblock-code">System.out.println("Hello from 5board");</textarea>
+      <div>
+        <button id="codeblock-run">Ausführen</button>
+      </div>
+      <div>
+        <p id="codeblock-tool-status">Prüfe Java-Tools...</p>
+        <h3>Ausgabe</h3>
+        <pre id="codeblock-output"></pre>
+        <h3>Fehler</h3>
+        <pre id="codeblock-error"></pre>
+      </div>
+    </section>
+    <script nonce="${nonce}">
+      const codeInput = document.getElementById('codeblock-code');
+      const runButton = document.getElementById('codeblock-run');
+      const statusText = document.getElementById('codeblock-tool-status');
+      const outputText = document.getElementById('codeblock-output');
+      const errorText = document.getElementById('codeblock-error');
+
+      function renderToolStatus(result) {
+        if (result.available) {
+          statusText.textContent = 'Java runtime und Compiler sind verfügbar.';
+          return;
+        }
+        const missing = (result.missingTools && result.missingTools.join(', ')) || 'Java-Tools';
+        statusText.textContent = 'Fehlende Tools: ' + missing + '.';
+      }
+
+      function renderResult(result) {
+        outputText.textContent = result.stdout || '';
+        errorText.textContent = result.stderr || result.error || '';
+      }
+
+      window.addEventListener('message', (event) => {
+        const message = event.data;
+        if (!message || typeof message.type !== 'string') {
+          return;
+        }
+
+        if (message.type === 'codeblockToolCheckResult') {
+          renderToolStatus(message.payload);
+        }
+
+        if (message.type === 'codeblockResult') {
+          renderResult(message.payload);
+        }
+      });
+
+      function postToolCheck() {
+        vscode.postMessage({
+          type: 'checkCodeblockTools',
+          payload: { language: 'java' },
+        });
+      }
+
+      runButton.addEventListener('click', () => {
+        vscode.postMessage({
+          type: 'runCodeblock',
+          payload: {
+            id: 'codeblock-test',
+            language: 'java',
+            code: codeInput.value,
+          },
+        });
+      });
+
+      postToolCheck();
+    </script>`;
 }
 
 function renderOld5boardNotice(document: FiveBoardDocument): string {
@@ -137,7 +216,6 @@ function renderOld5boardScript(document: FiveBoardDocument, nonce: string): stri
   }
 
   return `<script nonce="${nonce}">
-      const vscode = acquireVsCodeApi();
       document.getElementById('save-legacy-as-package').addEventListener('click', () => {
         vscode.postMessage({ type: '${SAVE_OLD_5BOARD_AS_5BOARDZ_MESSAGE}' });
       });

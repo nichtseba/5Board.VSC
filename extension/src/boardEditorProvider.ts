@@ -1,5 +1,9 @@
 import * as vscode from 'vscode';
-import { isJsonObject } from '5board.vsc-common';
+import {
+  ExtensionToWebviewMessage,
+  WebviewToExtensionMessage,
+  isJsonObject,
+} from '5board.vsc-common';
 import { write5boardzPackage } from './boardPackage';
 import {
   FIVEBOARD_EDITOR_VIEW_TYPE,
@@ -14,6 +18,7 @@ import {
   render5boardzPackageHtml,
   SAVE_OLD_5BOARD_AS_5BOARDZ_MESSAGE,
 } from './boardPackageWebview';
+import { checkCodeblockTools, runCodeblock } from './runner';
 
 export function create5boardEditorProvider(
   context: vscode.ExtensionContext,
@@ -53,13 +58,36 @@ export function create5boardEditorProvider(
       webviewPanel.title = `5Board: ${vscode.workspace.asRelativePath(document.uri, false)}`;
       webviewPanel.webview.onDidReceiveMessage(async (message: unknown) => {
         try {
-          if (isJsonObject(message) && message.type === SAVE_OLD_5BOARD_AS_5BOARDZ_MESSAGE) {
+          if (!isJsonObject(message)) return;
+
+          if (message.type === SAVE_OLD_5BOARD_AS_5BOARDZ_MESSAGE) {
             const targetUri = await saveOld5boardAs5boardzPackage(document);
             await vscode.commands.executeCommand(
               'vscode.openWith',
               targetUri,
               FIVEBOARD_EDITOR_VIEW_TYPE,
             );
+            return;
+          }
+
+          const msg = message as unknown as WebviewToExtensionMessage;
+
+          if (msg.type === 'runCodeblock') {
+            const result = await runCodeblock(msg.payload);
+            webviewPanel.webview.postMessage({
+              type: 'codeblockResult',
+              payload: result,
+            } as ExtensionToWebviewMessage);
+            return;
+          }
+
+          if (msg.type === 'checkCodeblockTools') {
+            const result = await checkCodeblockTools(msg.payload.language);
+            webviewPanel.webview.postMessage({
+              type: 'codeblockToolCheckResult',
+              payload: result,
+            } as ExtensionToWebviewMessage);
+            return;
           }
         } catch (error) {
           vscode.window.showErrorMessage(
