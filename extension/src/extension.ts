@@ -137,88 +137,11 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-function createLegacyReadonlyEditorProvider(
-  context: vscode.ExtensionContext,
-): vscode.CustomReadonlyEditorProvider {
-  return {
-    async openCustomDocument(
-      uri: vscode.Uri,
-      _openContext: vscode.CustomDocumentOpenContext,
-      _token: vscode.CancellationToken,
-    ): Promise<vscode.CustomDocument> {
-      return {
-        uri,
-        dispose: () => {
-          /* nothing */
-        },
-      };
-    },
-
-    async resolveCustomEditor(
-      document: vscode.CustomDocument,
-      webviewPanel: vscode.WebviewPanel,
-      _token: vscode.CancellationToken,
-    ): Promise<void> {
-      webviewPanel.webview.options = {
-        enableScripts: true, // JS allowed
-        localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'media')],
-      };
-
-      webviewPanel.title = `5Board: ${vscode.workspace.asRelativePath(document.uri, false)}`;
-
-      // Get JSON‑Content from .5board file
-      let fileContent: string | undefined;
-      try {
-        fileContent = fs.readFileSync(document.uri.fsPath, 'utf8');
-      } catch {
-        fileContent = undefined;
-      }
-      setWebviewHtml(context, webviewPanel.webview, 'Editor.html');
-    },
-  };
-}
-
-//
-// HTML für den Custom Editor (zeigt .5board-Inhalt als JSON-Text an)
-//
-function getEditorWebviewHtml(
-  webview: vscode.Webview,
-  context: vscode.ExtensionContext,
-  fileContent?: string,
-): string {
-  const escapedJson = fileContent
-    ? fileContent.replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    : 'Keine Daten geladen';
-
-  const scriptUri = webview.asWebviewUri(
-    vscode.Uri.joinPath(context.extensionUri, 'media', 'webview', 'main.js'),
-  );
-  const styleUri = webview.asWebviewUri(
-    vscode.Uri.joinPath(context.extensionUri, 'media', 'webview', 'styles.css'),
-  );
-
-  console.log('Custom Editor wird geladen...');
-  return `<!DOCTYPE html>
-<html lang="de">
-  <head>
-    <meta charset="UTF-8" />
-    <title>5Board Test Editor</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="${styleUri}">
-  </head>
-  <body>
-    <h1>5Board Webview Test Editor</h1>
-    <p>Dies ist ein Testeditor, der den Inhalt der Datei anzeigt. Erkennt die 5Board Datei als JSON.</p>
-    <pre id="content">${escapedJson}</pre>
-    <script src="${scriptUri}"></script>
-  </body>
-</html>`;
-}
-
 //
 // HTML-Datei aus /media/webview laden und in die "alte" Webview setzen
 // pageName ist z.B. "index.html", "seite2.html" ...
 //
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- wird später gebraucht
 function updateStaticWebview(
   webview: vscode.Webview,
   context: vscode.ExtensionContext,

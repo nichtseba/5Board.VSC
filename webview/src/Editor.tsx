@@ -1,9 +1,9 @@
-import { Button } from 'vscrui';
 import EditorCanvas from './components/canvas/EditorCanvas';
 import { init } from './init';
-import { Document, EditorElement, EditorElementType, t } from '5board.vsc-common';
+import { Document, EditorElementType } from '5board.vsc-common';
 import './Editor.css';
 import { useLocalization } from './components/LocalizationContext';
+import { Button } from 'vscrui';
 
 export default function Editor() {
   const document: Document = {

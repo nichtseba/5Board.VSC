@@ -1,7 +1,5 @@
 import { createRoot } from 'react-dom/client';
 import { createLocalizationContext, LocalizationContext } from './components/LocalizationContext';
-import { VsCodeContext } from './components/VsCode';
-import { t as translate } from '5board.vsc-common';
 
 export function init(RootComponent: React.ComponentType) {
   function start() {
