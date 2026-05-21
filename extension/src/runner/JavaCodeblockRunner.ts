@@ -11,6 +11,12 @@ import type {
 } from '5board.vsc-common';
 import { indent, runCommand } from './runnerUtils';
 
+/**
+ * Builds the Java source code for a given code snippet and class name.
+ * @param code The Java code to include in the source.
+ * @param className The name of the Java class.
+ * @returns The complete Java source code.
+ */
 function buildJavaSource(code: string, className: string): string {
   return `public class ${className} {
     public static void main(String[] args) throws Exception {
