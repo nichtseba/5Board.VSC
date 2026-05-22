@@ -5,7 +5,7 @@ import { init } from './init';
 
 export default function Sidebar() {
   const messages = useMessageService();
-  const [state, setState] = useState<AppState>({ counter: 0, selectedElementId: null });
+  const [state, setState] = useState<AppState>({ selectedElementId: null });
 
   useEffect(() => {
     messages.send({ type: 'ready' });

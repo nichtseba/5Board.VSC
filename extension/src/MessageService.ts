@@ -11,7 +11,7 @@ type EditorData = { content: string; fileName: string };
 export class MessageService {
   private webviews = new Set<vscode.Webview>();
   private editorData = new Map<vscode.Webview, EditorData>();
-  private state: AppState = { counter: 0, selectedElementId: null };
+  private state: AppState = { selectedElementId: null };
   private onStateChange?: (state: AppState) => void;
 
   setOnStateChange(cb: (state: AppState) => void): void {

@@ -1,7 +1,6 @@
 import { EditorElement } from './Element';
 
 export type AppState = {
-  counter: number;
   selectedElementId: string | null;
 };
 

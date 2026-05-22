@@ -5,7 +5,7 @@ import { init } from './init';
 
 export default function OtherView() {
   const messages = useMessageService();
-  const [state, setState] = useState<AppState>({ counter: 0, selectedElementId: null });
+  const [, setState] = useState<AppState>({ selectedElementId: null });
 
   useEffect(() => {
     messages.send({ type: 'ready' });
@@ -20,7 +20,6 @@ export default function OtherView() {
   return (
     <div>
       <h1>5Board Sidebar Treeview</h1>
-      <h2>Counter: {state.counter}</h2>
     </div>
   );
 }
