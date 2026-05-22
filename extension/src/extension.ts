@@ -21,26 +21,6 @@ export function activate(context: vscode.ExtensionContext) {
 
   const messages = new MessageService();
 
-  // Status Bar: shows live counter, click = increment
-  const statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-  statusBar.command = '5board-vsc.incrementFromToolbar';
-  statusBar.tooltip = 'Click to increment counter';
-  statusBar.text = `$(symbol-numeric) Counter: 0`;
-  statusBar.show();
-
-  messages.setOnStateChange((state) => {
-    statusBar.text = `$(symbol-numeric) Counter: ${state.counter}`;
-  });
-
-  context.subscriptions.push(statusBar);
-
-  // Toolbar: increment counter from outside the webview
-  context.subscriptions.push(
-    vscode.commands.registerCommand('5board-vsc.incrementFromToolbar', () => {
-      messages.dispatch({ type: 'counterIncrement' });
-    }),
-  );
-
   const disposable = vscode.commands.registerCommand('5board-vsc.helloWorld', () => {
     const panel = vscode.window.createWebviewPanel(
       '5board.vsc-webview', // dein „Webseiten“-Typ

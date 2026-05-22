@@ -21,8 +21,6 @@ export default function OtherView() {
     <div>
       <h1>5Board Sidebar Treeview</h1>
       <h2>Counter: {state.counter}</h2>
-      <button onClick={() => messages.send({ type: 'counterIncrement' })}>+</button>
-      <button onClick={() => messages.send({ type: 'counterDecrement' })}>−</button>
     </div>
   );
 }

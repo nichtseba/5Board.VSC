@@ -20,9 +20,6 @@ export default function Sidebar() {
   return (
     <div>
       <h1>5Board Sidebar</h1>
-      <h2>Counter: {state.counter}</h2>
-      <button onClick={() => messages.send({ type: 'counterIncrement' })}>+</button>
-      <button onClick={() => messages.send({ type: 'counterDecrement' })}>−</button>
       <p>Ausgewähltes Element: {state.selectedElementId ?? '–'}</p>
     </div>
   );

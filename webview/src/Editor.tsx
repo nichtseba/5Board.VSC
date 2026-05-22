@@ -1,4 +1,3 @@
-//import { Button } from 'vscrui';
 import { memo, useEffect, useState } from 'react';
 import { Document, EditorElementType } from '5board.vsc-common';
 import { useMessageService, useOnMessage } from './services/MessageService';
@@ -77,9 +76,6 @@ export default function Editor() {
   return (
     <>
       <div>
-        {/*<h2>Counter: {state.counter}</h2>*/}
-        <button onClick={() => messages.send({ type: 'counterIncrement' })}>+</button>
-        <button onClick={() => messages.send({ type: 'counterDecrement' })}>−</button>
         <FileView fileName={fileName} fileContent={fileContent} />
       </div>
       <EditorCanvas document={document} />

@@ -51,12 +51,6 @@ export class MessageService {
       case 'ready':
         this.handleReady(sender);
         break;
-      case 'counterIncrement':
-        this.updateCounter(1);
-        break;
-      case 'counterDecrement':
-        this.updateCounter(-1);
-        break;
       case 'selectElement':
         this.handleSelectElement(msg);
         break;
@@ -135,16 +129,6 @@ export class MessageService {
         sender.postMessage({ type: 'fileLoaded', ...data } satisfies ExtensionToWebviewMessage);
       }
     }
-  }
-
-  /**
-   * Updates the counter value and broadcasts the change.
-   * @param increment
-   */
-  private updateCounter(increment: number): void {
-    this.state = { ...this.state, counter: this.state.counter + increment };
-    this.broadcast({ type: 'updateContent', state: this.state });
-    this.onStateChange?.(this.state);
   }
 
   /**
