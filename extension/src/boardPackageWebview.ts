@@ -108,13 +108,20 @@ function render5boardzSummary(
       <div class="tile"><strong>${contentObjectCount}</strong>Canvas-Objekte</div>
       <div class="tile"><strong>${fiveBoardz.sources.length}</strong>Quelldateien</div>
       <div class="tile"><strong>${assets.length}</strong>Assets</div>
-      
+      <div class="tile">
+        <strong id="counter-value">–</strong>Counter
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button id="counter-dec">−</button>
+          <button id="counter-inc">+</button>
+        </div>
+      </div>
     </section>
+    <p>Ausgewähltes Element: <span id="selected-element">–</span></p> // Move to Sidebar
     <h2>Quellcode</h2>
     ${renderSourceFiles(fiveBoardz.sources)}
     <h2>Assets</h2>
     ${renderAssets(assets)}
-    ${renderOld5boardScript(document, nonce)}
+    ${renderScript(document, nonce)}
   </body>
 </html>`;
 }
@@ -131,17 +138,39 @@ function renderOld5boardNotice(document: FiveBoardDocument): string {
     </section>`;
 }
 
-function renderOld5boardScript(document: FiveBoardDocument, nonce: string): string {
-  if (document.source !== 'legacy') {
-    return '';
-  }
+function renderScript(document: FiveBoardDocument, nonce: string): string {
+  const legacySaveHandler =
+    document.source === 'legacy'
+      ? `document.getElementById('save-legacy-as-package').addEventListener('click', () => {
+        vscode.postMessage({ type: '${SAVE_OLD_5BOARD_AS_5BOARDZ_MESSAGE}' });
+      });`
+      : '';
 
   return `<script nonce="${nonce}">
+    (function () {
       const vscode = acquireVsCodeApi();
-      document.getElementById('save-legacy-as-package').addEventListener('click', () => {
-        vscode.postMessage({ type: '${SAVE_OLD_5BOARD_AS_5BOARDZ_MESSAGE}' });
+
+      window.addEventListener('message', (e) => {
+        const msg = e.data;
+        if (msg.type === 'init' || msg.type === 'updateContent') {
+          document.getElementById('counter-value').textContent = String(msg.state.counter);
+          document.getElementById('selected-element').textContent =
+            msg.state.selectedElementId ?? '–';
+        }
       });
-    </script>`;
+
+      document.getElementById('counter-inc').addEventListener('click', () => {
+        vscode.postMessage({ type: 'counterIncrement' });
+      });
+      document.getElementById('counter-dec').addEventListener('click', () => {
+        vscode.postMessage({ type: 'counterDecrement' });
+      });
+
+      ${legacySaveHandler}
+
+      vscode.postMessage({ type: 'ready' });
+    }());
+  </script>`;
 }
 
 function renderSourceFiles(sources: FiveBoardzDocument['sources']): string {

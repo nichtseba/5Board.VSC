@@ -3,6 +3,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { MessageService } from './MessageService';
+import { SidebarViewProvider } from './providers/SidebarViewProvider';
 import { createEmpty5boardzPackage, write5boardzPackage } from './boardPackage';
 import { create5boardEditorProvider } from './boardEditorProvider';
 import { FIVEBOARD_EDITOR_VIEW_TYPE, is5boardzUri, isOld5boardUri } from './boardDocument';
@@ -17,6 +19,10 @@ export function activate(context: vscode.ExtensionContext) {
   // This line of code will only be executed once when your extension is activated
   console.log('Congratulations, your extension "5board-vsc" is now active!');
   setLanguage(normalizeLanguage(vscode.env.language));
+
+  // Todo: nicht hier sondern vor activate()
+  // Todo: sidebar drinlassen aber toolbar weg (selected-element)
+  const messages = new MessageService();
 
   const disposable = vscode.commands.registerCommand('5board-vsc.openCustomEditor', () => {
     const panel = vscode.window.createWebviewPanel(
@@ -47,12 +53,23 @@ export function activate(context: vscode.ExtensionContext) {
   // Custom Editor Provider for *.5board and *.5boardz files
   context.subscriptions.push(
     vscode.window.registerCustomEditorProvider(
-      FIVEBOARD_EDITOR_VIEW_TYPE, // needs to match viewType from boardDocument.ts
-      create5boardEditorProvider(context),
+      FIVEBOARD_EDITOR_VIEW_TYPE,
+      create5boardEditorProvider(context, messages),
       {
         webviewOptions: {
           retainContextWhenHidden: true,
         },
+      },
+    ),
+  );
+
+  // Sidebar: Control-Webview
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      '5boardSidebarView',
+      new SidebarViewProvider(context, messages, 'Sidebar.html'),
+      {
+        webviewOptions: { retainContextWhenHidden: true },
       },
     ),
   );

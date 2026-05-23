@@ -64,16 +64,21 @@ export async function write5boardzPackage(
   await vscode.workspace.fs.writeFile(uri, bytes);
 }
 
-// Creates a new .5boardz package
+// Creates a new .5boardz package using the new Document format ({ elements: [] }).
+// Old .5boardz files still use the legacy format ({ objects: [] }) and won't render in the editor.
 export function createEmpty5boardzPackage(title: string): FiveBoardzDocument {
   return {
     manifest: create5boardzManifest(title),
     content: {
-      version: '3.6.6',
-      objects: [],
-      background: '',
-      snapAngle: 0,
-      revealOrder: -1,
+      elements: [
+        {
+          id: 'heading-test-1',
+          type: 'heading',
+          yPos: 0,
+          height: 2,
+          data: { level: 1, content: title },
+        },
+      ],
     },
     sources: [],
     assets: [],
