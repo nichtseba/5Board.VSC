@@ -60,8 +60,8 @@
     },
     "commands": [
       {
-        "command": "5board-vsc.helloWorld",
-        "title": "5Board Hello World Webview"
+        "command": "5board-vsc.openCustomEditor",
+        "title": "%command.5board-vsc.openCustomEditor%"
       },
       {
         "command": "5board-vsc.openBoardFile",

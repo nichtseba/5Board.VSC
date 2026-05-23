@@ -1,10 +1,12 @@
 import { memo, useEffect, useState } from 'react';
-import { Document, EditorElementType } from '5board.vsc-common';
 import { useMessageService, useOnMessage } from './services/MessageService';
 import EditorCanvas from './components/canvas/EditorCanvas';
 import EditorElement from './components/EditorElement';
-import './Editor.css';
 import { init } from './init';
+import { Document, EditorElementType } from '5board.vsc-common';
+import './Editor.css';
+import { useLocalization } from './components/LocalizationContext';
+import { Button } from 'vscrui';
 
 // Wrapped in memo: only re-renders when fileName or fileContent actually change,
 // NOT on every counter update.
@@ -59,6 +61,7 @@ export default function Editor() {
       })),
     },
   };
+  const { t } = useLocalization();
 
   useEffect(() => {
     messages.send({ type: 'ready' });
@@ -75,6 +78,7 @@ export default function Editor() {
   });
   return (
     <>
+      <Button>Localized: {t('webview.customEditor.Test')}</Button>
       <div>
         <FileView fileName={fileName} fileContent={fileContent} />
       </div>
