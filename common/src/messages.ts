@@ -1,4 +1,5 @@
 import { EditorElement } from './Element';
+import { Language } from './localization';
 
 export type AppState = {
   selectedElementId: string | null;
@@ -6,7 +7,7 @@ export type AppState = {
 
 // Messages FROM the extension TO webviews
 export type ExtensionToWebviewMessage =
-  | { type: 'init'; state: AppState }
+  | { type: 'init'; state: AppState; language: Language }
   | { type: 'updateContent'; state: AppState }
   | { type: 'fileLoaded'; content: string; fileName: string }
   | { type: 'statusUpdate'; status: string }

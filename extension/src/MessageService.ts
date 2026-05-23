@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
-import type {
-  AppState,
-  EditorElement,
-  ExtensionToWebviewMessage,
-  WebviewToExtensionMessage,
+import {
+  normalizeLanguage,
+  type AppState,
+  type EditorElement,
+  type ExtensionToWebviewMessage,
+  type WebviewToExtensionMessage,
 } from '5board.vsc-common';
 
 type EditorData = { content: string; fileName: string };
@@ -11,7 +12,9 @@ type EditorData = { content: string; fileName: string };
 export class MessageService {
   private webviews = new Set<vscode.Webview>();
   private editorData = new Map<vscode.Webview, EditorData>();
-  private state: AppState = { selectedElementId: null };
+  private state: AppState = {
+    selectedElementId: null,
+  };
   private onStateChange?: (state: AppState) => void;
 
   setOnStateChange(cb: (state: AppState) => void): void {
@@ -121,6 +124,7 @@ export class MessageService {
     sender?.postMessage({
       type: 'init',
       state: this.state,
+      language: normalizeLanguage(vscode.env.language),
     } satisfies ExtensionToWebviewMessage);
     if (sender) {
       const data = this.editorData.get(sender);

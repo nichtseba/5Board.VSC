@@ -1,18 +1,32 @@
 import { createRoot } from 'react-dom/client';
 import { createLocalizationContext, LocalizationContext } from './components/LocalizationContext';
+import { useOnMessage } from './services/MessageService';
+import { Language } from '5board.vsc-common';
+import { useMemo, useState } from 'react';
+
+function App({ RootComponent }: { RootComponent: React.ComponentType }) {
+  const [language, setLanguage] = useState<Language>('en');
+
+  useOnMessage((msg) => {
+    if (msg.type === 'init') {
+      setLanguage(msg.language);
+    }
+  });
+
+  const localizationContext = useMemo(() => createLocalizationContext(language), [language]);
+
+  return (
+    <LocalizationContext.Provider value={localizationContext}>
+      <RootComponent />
+    </LocalizationContext.Provider>
+  );
+}
 
 export function init(RootComponent: React.ComponentType) {
   function start() {
     const root = createRoot(document.getElementById('root')!);
 
-    const language = 'de'; // TODO: Get this from the extension with MessageService
-    const localizationContext = createLocalizationContext(language);
-
-    root.render(
-      <LocalizationContext.Provider value={localizationContext}>
-        <RootComponent />
-      </LocalizationContext.Provider>,
-    );
+    root.render(<App RootComponent={RootComponent} />);
   }
 
   if (document.readyState === 'loading') {
