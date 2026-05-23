@@ -45,7 +45,6 @@ export class MessageService {
     }
   }
 
-  // Todo: ändern maybe kein Switch-case
   private handleMessage(msg: WebviewToExtensionMessage, sender?: vscode.Webview): void {
     switch (msg.type) {
       case 'ready':

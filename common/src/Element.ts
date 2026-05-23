@@ -2,8 +2,8 @@
 export enum EditorElementType {
   Heading = 'heading',
 }
-// Todo: Message Beispiel zb -> hier nicht neue Dateien ^^
-// common nur generelle
+
+// Only types used by extension and webview
 export type EditorElement<T extends EditorElementType = EditorElementType> = {
   id: string;
   type: T;

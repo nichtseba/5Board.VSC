@@ -1,6 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-// import * as fs from 'fs';
+import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import { MessageService } from './MessageService';
@@ -11,7 +11,6 @@ import { FIVEBOARD_EDITOR_VIEW_TYPE, is5boardzUri, isOld5boardUri } from './boar
 import { setWebviewHtml } from './webview';
 import { setLanguage, t } from './localization';
 import { normalizeLanguage } from '5board.vsc-common/dist/localization';
-import fs from 'fs';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
