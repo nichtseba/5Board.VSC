@@ -5,7 +5,6 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { MessageService } from './MessageService';
 import { SidebarViewProvider } from './providers/SidebarViewProvider';
-import { StructureTreeProvider } from './providers/StructureTreeProvider';
 import { createEmpty5boardzPackage, write5boardzPackage } from './boardPackage';
 import { create5boardEditorProvider } from './boardEditorProvider';
 import { FIVEBOARD_EDITOR_VIEW_TYPE, is5boardzUri, isOld5boardUri } from './boardDocument';
@@ -22,6 +21,8 @@ export function activate(context: vscode.ExtensionContext) {
   console.log('Congratulations, your extension "5board-vsc" is now active!');
   setLanguage(normalizeLanguage(vscode.env.language));
 
+  // Todo: nicht hier sondern vor activate()
+  // Todo: sidebar drinlassen aber toolbar weg (selected-element)
   const messages = new MessageService();
 
   const disposable = vscode.commands.registerCommand('5board-vsc.openCustomEditor', () => {
@@ -72,22 +73,6 @@ export function activate(context: vscode.ExtensionContext) {
         webviewOptions: { retainContextWhenHidden: true },
       },
     ),
-  );
-
-  // Sidebar: Element Details-Webview
-  context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider(
-      '5boardElementView',
-      new SidebarViewProvider(context, messages, 'OtherView.html'),
-      {
-        webviewOptions: { retainContextWhenHidden: true },
-      },
-    ),
-  );
-
-  // Structure Treeview (kein Webview)
-  context.subscriptions.push(
-    vscode.window.registerTreeDataProvider('5boardStructureView', new StructureTreeProvider()),
   );
 }
 

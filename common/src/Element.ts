@@ -2,7 +2,8 @@
 export enum EditorElementType {
   Heading = 'heading',
 }
-
+// Todo: Message Beispiel zb -> hier nicht neue Dateien ^^
+// common nur generelle
 export type EditorElement<T extends EditorElementType = EditorElementType> = {
   id: string;
   type: T;
