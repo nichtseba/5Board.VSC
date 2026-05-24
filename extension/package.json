@@ -75,7 +75,8 @@
       },
       {
         "command": "5board-vsc.newBoard",
-        "title": "%commands.newBoardFile%"
+        "title": "%commands.newBoardFile%",
+        "icon": "$(plus)"
       }
     ],
     "menus": {
@@ -86,10 +87,10 @@
           "group": "navigation"
         }
       ],
-      "editor/title": [
+      "view/title": [
         {
-          "command": "5board-vsc.openBoardFile",
-          "when": "resourceExtname == .5board || resourceExtname == .5boardz",
+          "command": "5board-vsc.newBoard",
+          "when": "view == 5boardSidebarView",
           "group": "navigation"
         }
       ]
