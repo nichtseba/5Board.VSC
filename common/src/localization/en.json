@@ -9,6 +9,10 @@
     }
   },
   "webview": {
-    "customEditor": { "Test": "Test the translation." }
+    "customEditor": { "Test": "Test the translation." },
+    "sidebar": {
+      "title": "5Board Sidebar",
+      "selectedElement": "Selected Element"
+    }
   }
 }
