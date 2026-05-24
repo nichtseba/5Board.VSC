@@ -1,6 +1,6 @@
 import { memo, useEffect, useState } from 'react';
 import { useMessageService, useOnMessage } from './services/MessageService';
-import { BoardDocument } from '5board.vsc-common';
+import { BoardDocument, EditorElementType } from '5board.vsc-common';
 import { init } from './app/init';
 import './Editor.css';
 import { useLocalization } from './providers/LocalizationProvider';
@@ -55,7 +55,16 @@ export default function Editor() {
       version: '',
     },
     content: {
-      elements: [],
+      elements: [1, 2, 3, 4, 5, 6].map((i) => ({
+        id: `element-${i}`,
+        type: EditorElementType.Heading,
+        yPos: i * 10,
+        height: 2,
+        data: {
+          level: i as 1 | 2 | 3 | 4 | 5 | 6,
+          content: `Heading ${i}`,
+        },
+      })),
     },
     sources: [],
     assets: [],
