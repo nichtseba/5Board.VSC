@@ -1,2 +1,1 @@
-export * from './Element';
-export * from './board/boardFormat';
+export * from './board/board';

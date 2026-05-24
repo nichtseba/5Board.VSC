@@ -1,27 +1,24 @@
-export const FIVEBOARDZ_MANIFEST_PATH = 'manifest.json';
-export const DEFAULT_CONTENT_PATH = 'content.json';
-export const DEFAULT_SOURCE_ROOT = 'src/java';
-export const DEFAULT_ASSET_ROOT = 'assets';
-export const DEFAULT_EXPORTS_ROOT = 'exports';
+import { BoardManifest } from './document';
 
-export type JsonPrimitive = string | number | boolean | null;
-export type JsonValue = JsonPrimitive | JsonObject | JsonArray;
-export type JsonObject = { [key: string]: JsonValue };
-export type JsonArray = JsonValue[];
-export type FiveBoardzContentObject =
-  | FiveBoardzTextboxObject
-  | FiveBoardzSectionObject
-  | FiveBoardzCodeObject
-  | FiveBoardzImageObject
-  | FiveBoardzRectObject
-  | FiveBoardzPathObject
-  | FiveBoardzArrowObject
-  | FiveBoardzEllipseObject
-  | FiveBoardzPolylineObject
-  | FiveBoardzGroupObject;
+export const MANIFEST_PATH = 'manifest.json';
+export const CONTENT_PATH = 'content.json';
+export const SRC_ROOT = 'src';
+export const ASSET_ROOT = 'assets';
+export const EXPORTS_ROOT = 'exports';
 
-export interface FiveBoardzObjectBase {
-  type: string;
+export type LegacyObject =
+  | LegacyTextboxObject
+  | LegacySectionObject
+  | LegacyCodeObject
+  | LegacyImageObject
+  | LegacyRectObject
+  | LegacyPathObject
+  | LegacyArrowObject
+  | LegacyEllipseObject
+  | LegacyPolylineObject
+  | LegacyGroupObject;
+
+export interface LegacyObjectBase {
   version?: string;
   id?: string;
 
@@ -38,23 +35,23 @@ export interface FiveBoardzObjectBase {
   visible?: boolean;
   hidden?: boolean;
 
-  fill?: JsonValue;
+  fill?: unknown;
   fillRule?: string;
   backgroundColor?: string;
-  stroke?: JsonValue;
+  stroke?: unknown;
   strokeWidth?: number;
-  strokeDashArray?: JsonValue;
+  strokeDashArray?: unknown;
   strokeDashOffset?: number;
   strokeLineCap?: string;
   strokeLineJoin?: string;
   strokeMiterLimit?: number;
   strokeUniform?: boolean;
 
-  shadow?: JsonValue;
-  clipTo?: JsonValue;
+  shadow?: unknown;
+  clipTo?: unknown;
   paintFirst?: string;
   globalCompositeOperation?: string;
-  transformMatrix?: JsonValue;
+  transformMatrix?: unknown;
   skewX?: number;
   skewY?: number;
 
@@ -71,7 +68,7 @@ export interface FiveBoardzObjectBase {
   objectCaching?: boolean;
 }
 
-export interface FiveBoardzTextObjectBase extends FiveBoardzObjectBase {
+export interface LegacyTextObjectBase extends LegacyObjectBase {
   text?: string;
 
   fontSize?: number;
@@ -80,7 +77,7 @@ export interface FiveBoardzTextObjectBase extends FiveBoardzObjectBase {
   fontStyle?: string;
   lineHeight?: number;
   textAlign?: string;
-  styles?: JsonValue;
+  styles?: unknown;
   fontDisplayName?: string;
   charSpacing?: number;
   minWidth?: number;
@@ -92,24 +89,24 @@ export interface FiveBoardzTextObjectBase extends FiveBoardzObjectBase {
   linethrough?: boolean;
 }
 
-export interface FiveBoardzTextboxObject extends FiveBoardzTextObjectBase {
+export interface LegacyTextboxObject extends LegacyTextObjectBase {
   type: 'textbox';
 
   isSpeakerNote?: boolean;
   displayName?: string;
 }
 
-export interface FiveBoardzSectionObject extends FiveBoardzTextObjectBase {
+export interface LegacySectionObject extends LegacyTextObjectBase {
   type: 'section';
 
   sectionLevel?: string;
   numbering?: string;
 }
 
-export interface FiveBoardzCodeObject extends FiveBoardzTextObjectBase {
+export interface LegacyCodeObject extends LegacyTextObjectBase {
   type: 'code';
 
-  errors?: JsonArray | null;
+  errors?: unknown;
   codeClass?: string;
   codeClassBlockId?: number;
   codeIsCommentedOut?: boolean;
@@ -118,7 +115,7 @@ export interface FiveBoardzCodeObject extends FiveBoardzTextObjectBase {
   isCode?: boolean;
 }
 
-export interface FiveBoardzImageObject extends FiveBoardzObjectBase {
+export interface LegacyImageObject extends LegacyObjectBase {
   type: 'image';
 
   src?: string;
@@ -126,13 +123,13 @@ export interface FiveBoardzImageObject extends FiveBoardzObjectBase {
   crossOrigin?: string;
   cropX?: number;
   cropY?: number;
-  filters?: JsonArray;
+  filters?: Array<unknown>;
   hideInExport?: boolean;
   isSpeakerNote?: boolean;
   displayName?: string;
 }
 
-export interface FiveBoardzRectObject extends FiveBoardzObjectBase {
+export interface LegacyRectObject extends LegacyObjectBase {
   type: 'rect';
 
   rx?: number;
@@ -142,16 +139,16 @@ export interface FiveBoardzRectObject extends FiveBoardzObjectBase {
   displayName?: string;
 }
 
-export interface FiveBoardzPathObject extends FiveBoardzObjectBase {
+export interface LegacyPathObject extends LegacyObjectBase {
   type: 'path';
 
-  path?: JsonArray;
+  path?: Array<unknown>;
   strokeDash?: string;
   displayName?: string;
   isSpeakerNote?: boolean;
 }
 
-export interface FiveBoardzArrowObject extends FiveBoardzObjectBase {
+export interface LegacyArrowObject extends LegacyObjectBase {
   type: 'arrow';
 
   x1?: number;
@@ -162,7 +159,7 @@ export interface FiveBoardzArrowObject extends FiveBoardzObjectBase {
   strokeDash?: string;
 }
 
-export interface FiveBoardzEllipseObject extends FiveBoardzObjectBase {
+export interface LegacyEllipseObject extends LegacyObjectBase {
   type: 'ellipse';
 
   rx?: number;
@@ -170,92 +167,59 @@ export interface FiveBoardzEllipseObject extends FiveBoardzObjectBase {
   modifyFill?: boolean;
 }
 
-export interface FiveBoardzPolylineObject extends FiveBoardzObjectBase {
+export interface LegacyPolylineObject extends LegacyObjectBase {
   type: 'polyline';
 
-  points?: JsonArray;
+  points?: Array<unknown>;
   modifyFill?: boolean;
 }
 
-export interface FiveBoardzGroupObject extends FiveBoardzObjectBase {
+export interface LegacyGroupObject extends LegacyObjectBase {
   type: 'group';
 
-  objects?: FiveBoardzContentObject[];
+  objects?: LegacyObject[];
   isSpeakerNote?: boolean;
   displayName?: string;
 }
 
-export interface FiveBoardzContent {
-  version?: string;
-  objects: FiveBoardzContentObject[];
-  background?: string;
-  snapAngle?: number;
-  revealOrder?: number;
-}
-
-export interface FiveBoardzManifest {
-  title: string;
-  createdAt: string;
-  modifiedAt: string;
-  contentPath: string;
-  sourceRoot: string;
-  assetRoot: string;
-  exportsRoot?: string;
-}
-
-export interface FiveBoardzSourceFile {
-  name: string;
-  path: string;
-  language: string;
-  code: string;
-}
-
-export interface FiveBoardzAsset {
-  path: string;
-  mime: string;
-  bytes: Uint8Array;
-}
-
-export interface FiveBoardzDocument {
-  manifest: FiveBoardzManifest;
-  content: FiveBoardzContent;
-  sources: FiveBoardzSourceFile[];
-  assets: FiveBoardzAsset[];
-}
-
-export interface Old5boardClass {
+export interface LegacyClass {
   name: string;
   code: string;
   currentBlockId?: number;
 }
 
-export interface Old5boardDocument {
-  content: FiveBoardzContent;
-  classes: Old5boardClass[];
+export interface LegacyContent {
+  version?: string;
+  objects: LegacyObject[];
+  background?: string;
+  snapAngle?: number;
+  revealOrder?: number;
+}
+
+export interface LegacyDocument {
+  content: LegacyContent;
+  classes: LegacyClass[];
 }
 
 // erstellt Manifest für ein neues .5boardz Dokument
-export function create5boardzManifest(title: string, now = new Date()): FiveBoardzManifest {
+export function create5boardzManifest(title: string, now = new Date()): BoardManifest {
   const timestamp = now.toISOString();
 
   return {
     title,
     createdAt: timestamp,
     modifiedAt: timestamp,
-    contentPath: DEFAULT_CONTENT_PATH,
-    sourceRoot: DEFAULT_SOURCE_ROOT,
-    assetRoot: DEFAULT_ASSET_ROOT,
-    exportsRoot: DEFAULT_EXPORTS_ROOT,
+    version: '4.0.0',
   };
 }
 
 //Funktion die prüft ob der Übergebene Wert ein JSON Objekt ist
-export function isJsonObject(value: unknown): value is JsonObject {
+export function isJsonObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 //Validiert ob die manifest.json erwarete und richtige Felder hat
-export function validate5boardzManifest(value: unknown): FiveBoardzManifest {
+export function validateManifest(value: unknown): BoardManifest {
   if (!isJsonObject(value)) {
     throw new Error('manifest.json muss ein JSON Objekt sein.');
   }
@@ -264,24 +228,18 @@ export function validate5boardzManifest(value: unknown): FiveBoardzManifest {
   const title = readRequiredString(value, 'title');
   const createdAt = readRequiredString(value, 'createdAt');
   const modifiedAt = readRequiredString(value, 'modifiedAt');
-  const contentPath = readRequiredString(value, 'contentPath');
-  const sourceRoot = readRequiredString(value, 'sourceRoot');
-  const assetRoot = readRequiredString(value, 'assetRoot');
-  const exportsRoot = readOptionalString(value, 'exportsRoot');
+  const version = readRequiredString(value, 'version');
 
   return {
     title,
     createdAt,
     modifiedAt,
-    contentPath,
-    sourceRoot,
-    assetRoot,
-    ...(exportsRoot ? { exportsRoot } : {}),
+    version,
   };
 }
 
 //Prüft ob die .5board Datei eine JSON Datei ist
-export function validateOld5boardDocument(value: unknown): Old5boardDocument {
+export function validateOld5boardDocument(value: unknown): LegacyDocument {
   if (!isJsonObject(value)) {
     throw new Error('.5board Dateien müssen ein JSON Objekt sein');
   }
@@ -326,28 +284,14 @@ export function validateOld5boardDocument(value: unknown): Old5boardDocument {
   });
 
   return {
-    content: value.content as unknown as FiveBoardzContent,
+    content: value.content as unknown as LegacyContent,
     classes,
   };
 }
 
 //Prüft ob Werte vorhanden sind und Strings sind
-function readRequiredString(value: JsonObject, key: string): string {
+function readRequiredString(value: Record<string, unknown>, key: string): string {
   const field = value[key];
-  if (typeof field !== 'string' || field.length === 0) {
-    throw new Error(`Expected manifest field "${key}" to be a non-empty string.`);
-  }
-
-  return field;
-}
-
-//Prüft ob optionale Werte ein String ist
-function readOptionalString(value: JsonObject, key: string): string | undefined {
-  const field = value[key];
-  if (field === undefined) {
-    return undefined;
-  }
-
   if (typeof field !== 'string' || field.length === 0) {
     throw new Error(`Expected manifest field "${key}" to be a non-empty string.`);
   }

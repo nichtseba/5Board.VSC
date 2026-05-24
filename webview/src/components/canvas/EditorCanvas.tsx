@@ -1,10 +1,10 @@
-import { Document } from '5board.vsc-common';
+import { BoardDocument } from '5board.vsc-common';
 import { useState } from 'react';
 import EditorElement from './EditorElement';
 import './EditorCanvas.css';
 
 export type EditorCanvasProps = {
-  document: Document;
+  document: BoardDocument;
 };
 
 /**
