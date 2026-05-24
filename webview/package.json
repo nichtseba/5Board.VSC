@@ -5,7 +5,8 @@
   "scripts": {
     "build": "webpack --mode production",
     "watch": "webpack --watch --mode development",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "lint": "eslint src"
   },
   "license": "ISC",
   "packageManager": "pnpm@10.6.2",
@@ -15,6 +16,7 @@
     "@types/react-dom": "^18.3.1",
     "@types/vscode-webview": "^1.57.5",
     "css-loader": "^7.1.4",
+    "eslint-plugin-react": "^7.37.5",
     "html-webpack-plugin": "^5.6.7",
     "mini-css-extract-plugin": "^2.10.2",
     "rimraf": "^6.1.3",

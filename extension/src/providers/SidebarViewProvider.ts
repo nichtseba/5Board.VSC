@@ -1,10 +1,11 @@
 import * as vscode from 'vscode';
 import { setWebviewHtml } from '../webview';
+import { MessageService } from '../MessageService';
 
 export class SidebarViewProvider implements vscode.WebviewViewProvider {
   constructor(
     private readonly context: vscode.ExtensionContext,
-    //private readonly messages: MessageService, // Todo: Add when passing messages to the webview
+    private readonly messages: MessageService,
     private readonly htmlFile: string,
   ) {}
 
@@ -20,6 +21,6 @@ export class SidebarViewProvider implements vscode.WebviewViewProvider {
 
     setWebviewHtml(this.context, webviewView.webview, this.htmlFile);
 
-    // this.messages.register(webviewView); // Todo: Add when passing messages to the webview
+    this.messages.register(webviewView);
   }
 }

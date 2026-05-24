@@ -2,6 +2,7 @@ node_modules
 dist
 out
 coverage
+extension/media/webview
 
 # optional
 *.md

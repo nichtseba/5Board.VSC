@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
-export class StructureTreeProvider implements vscode.TreeDataProvider<any> {
-  getTreeItem(element: any): vscode.TreeItem {
+export class StructureTreeProvider implements vscode.TreeDataProvider<StructureNode> {
+  getTreeItem(element: StructureNode): vscode.TreeItem {
     return element;
   }
 
@@ -15,10 +15,6 @@ export class StructureTreeProvider implements vscode.TreeDataProvider<any> {
     }
 
     return Promise.resolve([new StructureNode('Child A'), new StructureNode('Child B')]);
-  }
-
-  private getActiveDocument(): vscode.TextDocument | undefined {
-    return vscode.window.activeTextEditor?.document;
   }
 }
 

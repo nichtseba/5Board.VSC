@@ -2,8 +2,8 @@
   "name": "5board-vsc-common",
   "license": "ISC",
   "packageManager": "pnpm@10.6.2",
-  "type": "module",
   "main": "dist/main.js",
+  "types": "dist/main.d.ts",
   "private": true,
   "devDependencies": {
     "rimraf": "^6.1.3",
@@ -13,7 +13,8 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch --preserveWatchOutput",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "lint": "eslint src"
   },
   "dependencies": {}
 }

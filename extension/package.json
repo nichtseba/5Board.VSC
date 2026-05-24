@@ -19,7 +19,8 @@
           "5board"
         ],
         "extensions": [
-          ".5board"
+          ".5board",
+          ".5boardz"
         ],
         "configuration": "./language-configuration.json"
       }
@@ -27,7 +28,16 @@
     "customEditors": [
       {
         "viewType": "5board-vsc.editor",
-        "displayName": "5Board Editor",
+        "displayName": "%customEditors.editor%",
+        "selector": [
+          {
+            "filenamePattern": "*.5boardz"
+          }
+        ]
+      },
+      {
+        "viewType": "5board-vsc.legacy-converter",
+        "displayName": "%customEditors.legacy-converter%",
         "selector": [
           {
             "filenamePattern": "*.5board"
@@ -64,8 +74,17 @@
     },
     "commands": [
       {
-        "command": "5board-vsc.helloWorld",
-        "title": "5Board Hello World Webview"
+        "command": "5board-vsc.openCustomEditor",
+        "title": "%commands.openCustomEditor%"
+      },
+      {
+        "command": "5board-vsc.openBoardFile",
+        "title": "%commands.openBoardFile%"
+      },
+      {
+        "command": "5board-vsc.newBoard",
+        "title": "%commands.newBoardFile%",
+        "icon": "$(plus)"
       },
       {
         "command": "5board-vsc.startPresentation",
@@ -74,7 +93,19 @@
       }
     ],
     "menus": {
+      "explorer/context": [
+        {
+          "command": "5board-vsc.openBoardFile",
+          "when": "resourceExtname == .5board || resourceExtname == .5boardz",
+          "group": "navigation"
+        }
+      ],
       "view/title": [
+        {
+          "command": "5board-vsc.newBoard",
+          "when": "view == 5boardSidebarView",
+          "group": "navigation"
+        },
         {
           "command": "5board-vsc.startPresentation",
           "when": "view == 5boardSidebarView",
@@ -84,13 +115,12 @@
     }
   },
   "scripts": {
-    "vsce": "vsce package",
-    "vscode:prepublish": "pnpm run package",
+    "package": "vsce package --no-dependencies",
+    "vscode:prepublish": "pnpm run copy-webview",
     "compile": "webpack",
     "watch": "pnpm run /^watch:.+$/",
     "watch:webpack": "webpack --watch",
-    "watch:copy-webview": "nodemon --watch ../webview/dist -e css,css.map,html,js,js.map --exec \"pnpm run copy-webview\"",
-    "package": "cd .. && pnpm run build",
+    "watch:copy-webview": "nodemon --watch ../webview/dist -e css,css.map,html,js,js.map --delay 1000ms --exec \"pnpm run copy-webview\"",
     "prebuild": "pnpm run copy-webview",
     "build": "webpack --mode production --devtool hidden-source-map",
     "compile-tests": "tsc -p . --outDir out",
@@ -107,19 +137,17 @@
     "@types/vscode": "^1.107.0",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.9.1",
     "copy-folder-util": "^1.2.3",
-    "eslint": "^9.39.3",
     "nodemon": "^3.1.14",
     "rimraf": "^6.1.3",
-    "eslint-config-prettier": "^10.1.8",
     "ts-loader": "^9.5.4",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.56.1",
     "webpack": "^5.105.3",
-    "webpack-cli": "^6.0.1",
-    "@vscode/vsce": "^3.9.1"
+    "webpack-cli": "^6.0.1"
   },
   "dependencies": {
-    "5board.vsc-common": "link:../common"
+    "5board.vsc-common": "link:../common",
+    "jszip": "^3.10.1"
   }
 }
