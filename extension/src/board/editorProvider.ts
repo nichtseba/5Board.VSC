@@ -2,12 +2,16 @@ import * as vscode from 'vscode';
 
 import { FiveBoardDocument } from './document';
 import { get5boardzAssetCacheRoot, setEditorWebviewHtml } from './webview';
+import { MessageService } from '../MessageService';
 
 export class FiveBoardEditorProvider implements vscode.CustomEditorProvider<FiveBoardDocument> {
   // Todo: Actually fire this event whenever the document changes, so the editor knows to update
   onDidChangeCustomDocument;
 
-  constructor(private context: vscode.ExtensionContext) {
+  constructor(
+    private context: vscode.ExtensionContext,
+    private messages: MessageService,
+  ) {
     this.onDidChangeCustomDocument = new vscode.EventEmitter<
       vscode.CustomDocumentContentChangeEvent<FiveBoardDocument>
     >().event;
@@ -36,7 +40,10 @@ export class FiveBoardEditorProvider implements vscode.CustomEditorProvider<Five
     _token: vscode.CancellationToken,
   ): Promise<void> {
     const assetCacheRoot = get5boardzAssetCacheRoot(this.context, document.uri);
-
+    this.messages.registerEditor(webviewPanel, {
+      content: JSON.stringify(document.boardPackage.document.content), // Todo: this is terrible
+      fileName: document.uri.fsPath,
+    });
     webviewPanel.webview.options = {
       enableScripts: true,
       localResourceRoots: [

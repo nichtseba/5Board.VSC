@@ -47,7 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.window.registerCustomEditorProvider(
       EDITOR_VIEW_TYPE,
-      new FiveBoardEditorProvider(context),
+      new FiveBoardEditorProvider(context, messages),
       {
         webviewOptions: {
           retainContextWhenHidden: true, // Todo: store context
