@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { AppState } from '5board.vsc-common';
 import { useMessageService, useOnMessage } from './services/MessageService';
-import { init } from './init';
+import { init } from './app/init';
 
 export default function Sidebar() {
   const messages = useMessageService();
