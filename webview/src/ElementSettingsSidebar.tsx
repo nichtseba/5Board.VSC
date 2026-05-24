@@ -1,4 +1,4 @@
-import { init } from './init';
+import { init } from './app/init';
 import { EditorElement, EditorElementType } from '5board.vsc-common/dist/Element';
 import HeadingSettings from './components/sidebar/HeadingSettings';
 import './components/sidebar/layout/sidebar.css';

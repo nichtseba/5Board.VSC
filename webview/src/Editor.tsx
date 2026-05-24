@@ -3,8 +3,6 @@ import { useMessageService, useOnMessage } from './services/MessageService';
 import { BoardDocument, EditorElementType } from '5board.vsc-common';
 import { init } from './app/init';
 import './Editor.css';
-import { useLocalization } from './providers/LocalizationProvider';
-import { Button } from 'vscrui';
 import EditorCanvas from './components/canvas/EditorCanvas';
 import EditorElement from './components/EditorElement';
 
@@ -69,7 +67,6 @@ export default function Editor() {
     sources: [],
     assets: [],
   };
-  const { t } = useLocalization();
 
   useEffect(() => {
     messages.send({ type: 'ready' });
@@ -86,7 +83,6 @@ export default function Editor() {
   });
   return (
     <>
-      <Button>Localized: {t('webview.customEditor.Test')}</Button>
       <div>
         <FileView fileName={fileName} fileContent={fileContent} />
       </div>
