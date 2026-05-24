@@ -1,0 +1,8 @@
+{
+  "extension": {
+    "openCustomEditor": { "title": "5Board – Custom Page" }
+  },
+  "webview": {
+    "customEditor": { "Test": "Test the translation." }
+  }
+}

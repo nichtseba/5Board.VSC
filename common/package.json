@@ -3,6 +3,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.6.2",
   "main": "dist/main.js",
+  "types": "dist/main.d.ts",
   "private": true,
   "devDependencies": {
     "rimraf": "^6.1.3",

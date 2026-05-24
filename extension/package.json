@@ -66,6 +66,14 @@
     },
     "commands": [
       {
+        "command": "5board-vsc.openCustomEditor",
+        "title": "%command.5board-vsc.openCustomEditor%"
+      },
+      {
+        "command": "5board-vsc.openBoardFile",
+        "title": "5Board: Datei öffnen"
+      },
+      {
         "command": "5board-vsc.newBoard",
         "title": "5Board: Neue .5boardz Datei erstellen"
       }
