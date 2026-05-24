@@ -31,10 +31,16 @@
         "displayName": "5Board Editor",
         "selector": [
           {
-            "filenamePattern": "*.5board"
-          },
-          {
             "filenamePattern": "*.5boardz"
+          }
+        ]
+      },
+      {
+        "viewType": "5board-vsc.legacy-converter",
+        "displayName": "5Board Legacy Converter",
+        "selector": [
+          {
+            "filenamePattern": "*.5board"
           }
         ]
       }

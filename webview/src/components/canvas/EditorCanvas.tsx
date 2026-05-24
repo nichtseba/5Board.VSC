@@ -1,11 +1,11 @@
-import { Document } from '5board.vsc-common';
+import { BoardDocument } from '5board.vsc-common';
 import { useEffect, useState } from 'react';
 import EditorElement from './EditorElement';
 import { useMessageService } from '../../services/MessageService';
 import './EditorCanvas.css';
 
 export type EditorCanvasProps = {
-  document: Document;
+  document: BoardDocument;
 };
 
 /**

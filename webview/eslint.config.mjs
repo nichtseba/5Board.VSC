@@ -8,7 +8,7 @@ export default defineConfig(
   {
     settings: {
       react: {
-        version: 'detect',
+        version: '18',
       },
     },
   },
