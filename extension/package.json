@@ -28,7 +28,7 @@
     "customEditors": [
       {
         "viewType": "5board-vsc.editor",
-        "displayName": "5Board Editor",
+        "displayName": "%customEditors.editor%",
         "selector": [
           {
             "filenamePattern": "*.5boardz"
@@ -37,7 +37,7 @@
       },
       {
         "viewType": "5board-vsc.legacy-converter",
-        "displayName": "5Board Legacy Converter",
+        "displayName": "%customEditors.legacy-converter%",
         "selector": [
           {
             "filenamePattern": "*.5board"
@@ -59,7 +59,7 @@
         {
           "type": "webview",
           "id": "5boardSidebarView",
-          "name": "Controls",
+          "name": "%views.sidebar.sidebar-title%",
           "when": "resourceExtname == .5boardz"
         }
       ]
@@ -67,15 +67,15 @@
     "commands": [
       {
         "command": "5board-vsc.openCustomEditor",
-        "title": "%command.5board-vsc.openCustomEditor%"
+        "title": "%commands.openCustomEditor%"
       },
       {
         "command": "5board-vsc.openBoardFile",
-        "title": "5Board: Datei öffnen"
+        "title": "%commands.openBoardFile%"
       },
       {
         "command": "5board-vsc.newBoard",
-        "title": "5Board: Neue .5boardz Datei erstellen"
+        "title": "%commands.newBoardFile%"
       }
     ],
     "menus": {
