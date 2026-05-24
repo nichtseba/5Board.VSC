@@ -1,12 +1,12 @@
 import { memo, useEffect, useState } from 'react';
 import { useMessageService, useOnMessage } from './services/MessageService';
-import { BoardDocument } from '5board.vsc-common';
-import EditorElement from './components/EditorElement';
-import { init } from './init';
+import { BoardDocument, EditorElementType } from '5board.vsc-common';
+import { init } from './app/init';
 import './Editor.css';
-import { useLocalization } from './components/LocalizationContext';
+import { useLocalization } from './providers/LocalizationProvider';
 import { Button } from 'vscrui';
 import EditorCanvas from './components/canvas/EditorCanvas';
+import EditorElement from './components/EditorElement';
 
 // Wrapped in memo: only re-renders when fileName or fileContent actually change,
 // NOT on every counter update.
@@ -55,7 +55,16 @@ export default function Editor() {
       version: '',
     },
     content: {
-      elements: [],
+      elements: [1, 2, 3, 4, 5, 6].map((i) => ({
+        id: `element-${i}`,
+        type: EditorElementType.Heading,
+        yPos: i * 10,
+        height: 2,
+        data: {
+          level: i as 1 | 2 | 3 | 4 | 5 | 6,
+          content: `Heading ${i}`,
+        },
+      })),
     },
     sources: [],
     assets: [],
