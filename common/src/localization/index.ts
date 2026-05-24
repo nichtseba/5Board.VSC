@@ -4,9 +4,6 @@ import de from './de.json';
 // Garantees that all translations have the same keys, otherwise TypeScript will throw an error
 type Translations = Readonly<typeof en>;
 
-const EN_TRANSLATIONS: Translations = en;
-const DE_TRANSLATIONS: Translations = de;
-
 // Type system black magic to extract all possible translation keys as string literals
 type JoinPath<Prefix extends string, Key extends string> = Prefix extends ''
   ? Key
@@ -23,8 +20,8 @@ type ExtractTranslationKeys<T, Prefix extends string = ''> =
 export type TranslationKey = ExtractTranslationKeys<Translations>;
 
 const TRANSLATIONS = {
-  en: EN_TRANSLATIONS,
-  de: DE_TRANSLATIONS,
+  en,
+  de,
 } as const;
 
 export type Language = keyof typeof TRANSLATIONS;

@@ -5,8 +5,7 @@ import vscode from 'vscode';
 import { FiveBoardEditorProvider } from './board/editorProvider';
 import { EDITOR_VIEW_TYPE } from './board/webview';
 import { BoardPackage } from './board/package';
-import { setLanguage, t } from './localization';
-import { normalizeLanguage } from '5board.vsc-common';
+import { t } from './localization';
 import { MessageService } from './MessageService';
 import { setWebviewHtml } from './webview';
 import { SidebarViewProvider } from './providers/SidebarViewProvider';
@@ -15,7 +14,6 @@ export function activate(context: vscode.ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
   // This line of code will only be executed once when your extension is activated
   console.log('Congratulations, your extension "5board-vsc" is now active!');
-  setLanguage(normalizeLanguage(vscode.env.language));
 
   // Todo: nicht hier sondern vor activate()
   // Todo: sidebar drinlassen aber toolbar weg (selected-element)
@@ -24,7 +22,7 @@ export function activate(context: vscode.ExtensionContext) {
   const disposable = vscode.commands.registerCommand('5board-vsc.openCustomEditor', () => {
     const panel = vscode.window.createWebviewPanel(
       '5board.vsc-webview', // dein „Webseiten“-Typ
-      t('extension.openCustomEditor.title'), // Tab-Titel
+      t('extension.openCustomEditorCommand.title'), // Tab-Titel
       vscode.ViewColumn.One,
       {
         enableScripts: true, // JS in deiner „Website“ erlaubt
@@ -71,14 +69,17 @@ export function activate(context: vscode.ExtensionContext) {
 async function new5boardCommand(): Promise<void> {
   try {
     const defaultUri = vscode.workspace.workspaceFolders?.[0]
-      ? vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, 'Vorlesung.5boardz')
+      ? vscode.Uri.joinPath(
+          vscode.workspace.workspaceFolders[0].uri,
+          `${t('extension.new5boardCommand.defaultFileName')}.5boardz`,
+        )
       : undefined;
     const targetUri = await vscode.window.showSaveDialog({
       defaultUri,
       filters: {
-        '5Boardz package': ['5boardz'],
+        [t('extension.new5boardCommand.packageFilter')]: ['5boardz'],
       },
-      saveLabel: '5boardz Datei erstellen',
+      saveLabel: t('extension.new5boardCommand.createFile'),
     });
 
     if (!targetUri) {
@@ -90,7 +91,7 @@ async function new5boardCommand(): Promise<void> {
     await vscode.commands.executeCommand('vscode.openWith', targetUri, EDITOR_VIEW_TYPE);
   } catch (error) {
     vscode.window.showErrorMessage(
-      `5boardz Datei konnte nicht erstellt werden: ${error instanceof Error ? error.message : String(error)}`,
+      `${t('extension.new5boardCommand.createFileFailed')} ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 }

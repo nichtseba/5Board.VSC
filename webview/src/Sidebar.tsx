@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
+import { init } from './app/init';
 import type { AppState } from '5board.vsc-common';
 import { useMessageService, useOnMessage } from './services/MessageService';
-import { init } from './app/init';
+import { useLocalization } from './providers/LocalizationProvider';
 
 export default function Sidebar() {
   const messages = useMessageService();
   const [state, setState] = useState<AppState>({ selectedElementId: null });
+  const { t } = useLocalization();
 
   useEffect(() => {
     messages.send({ type: 'ready' });
@@ -19,8 +21,10 @@ export default function Sidebar() {
 
   return (
     <div>
-      <h1>5Board Sidebar</h1>
-      <p>Ausgewähltes Element: {state.selectedElementId ?? '–'}</p>
+      <h1>{t('webview.sidebar.title')}</h1>
+      <p>
+        {t('webview.sidebar.selectedElement')}: {state.selectedElementId ?? '–'}
+      </p>
     </div>
   );
 }

@@ -1,8 +1,18 @@
 {
   "extension": {
-    "openCustomEditor": { "title": "5Board – Custom Page" }
+    "openCustomEditorCommand": { "title": "5Boardz – Custom Page" },
+    "new5boardCommand": {
+      "defaultFileName": "Lecture",
+      "packageFilter": "5Boardz Package",
+      "createFile": "Create 5Board file",
+      "createFileFailed": "Failed to create 5Board file:"
+    }
   },
   "webview": {
-    "customEditor": { "Test": "Test the translation." }
+    "customEditor": { "Test": "Test the translation." },
+    "sidebar": {
+      "title": "5Board Sidebar",
+      "selectedElement": "Selected Element"
+    }
   }
 }
