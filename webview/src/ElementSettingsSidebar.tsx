@@ -1,7 +1,10 @@
 import { init } from './app/init';
-import { EditorElement, EditorElementType } from '5board.vsc-common/dist/Element';
+import { useEffect, useState } from 'react';
+import { EditorElement, EditorElementType, AppState } from '5board.vsc-common';
 import HeadingSettings from './components/sidebar/HeadingSettings';
 import './components/sidebar/layout/sidebar.css';
+import { useMessageService, useOnMessage } from './services/MessageService';
+import { useLocalization } from './providers/LocalizationProvider';
 
 type SettingsProps<T extends EditorElementType> = {
   element: EditorElement<T>;
@@ -17,6 +20,9 @@ const SETTINGS_COMPONENTS = {
 };
 
 export default function ElementSettingsSidebar() {
+  const messages = useMessageService();
+  const [state, setState] = useState<AppState>({ selectedElementId: null });
+  const { t } = useLocalization();
   const selectedElement: EditorElement = {
     id: '123',
     type: EditorElementType.Heading,
@@ -28,25 +34,41 @@ export default function ElementSettingsSidebar() {
     height: 0,
   }; // Todo: replace with real data from extension
 
+  useEffect(() => {
+    messages.send({ type: 'ready' });
+  }, []);
+
+  useOnMessage((msg) => {
+    if (msg.type === 'init' || msg.type === 'updateContent') {
+      setState(msg.state);
+    }
+  });
+
   if (!selectedElement) {
     return (
       <div className="element-controls-tab">
-        <p>No element selected</p>
+        <p>{t('webview.sidebar-element-settings.noElementSelected')}</p>
       </div>
     );
   }
 
   const SettingsComponent = SETTINGS_COMPONENTS[selectedElement.type];
-
   if (!SettingsComponent) {
     return (
-      <div className="element-controls-tab">
-        <p>Unsupported element type: {selectedElement.type}</p>
-      </div>
+      <>
+        <div className="element-controls-tab">
+          <p>{t('webview.sidebar-element-settings.unsupportedElement')}</p>
+        </div>
+      </>
     );
   }
 
-  return <SettingsComponent element={selectedElement} />;
+  return (
+    <>
+      <SettingsComponent element={selectedElement} />
+      {t('webview.sidebar-element-settings.selectedElement')}: {state.selectedElementId ?? '–'}
+    </>
+  );
 }
 
 init(ElementSettingsSidebar);

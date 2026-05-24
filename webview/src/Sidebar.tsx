@@ -1,82 +1,66 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { init } from './app/init';
-import { AppState } from '5board.vsc-common';
+import { ToolItem } from '5board.vsc-common';
 import './Sidebar.css';
-import { useMessageService, useOnMessage } from './services/MessageService';
 import { useLocalization } from './providers/LocalizationProvider';
-
-/*const tools: ToolItem[] = [
-  {
-    id: 'pointer',
-    label: 'Pointer',
-    icon: 'cursor',
-  },
-  {
-    id: 'text',
-    label: 'Text',
-    icon: 'symbol-string',
-  },
-  {
-    id: 'heading',
-    label: 'Heading',
-    icon: 'text-size',
-  },
-  {
-    id: 'link',
-    label: 'Link',
-    icon: 'link',
-  },
-  {
-    id: 'code',
-    label: 'Code',
-    icon: 'code',
-  },
-  {
-    id: 'image',
-    label: 'Image',
-    icon: 'file-media',
-  },
-];*/
+import { Button } from 'vscrui';
 
 export default function Sidebar() {
-  const messages = useMessageService();
-  const [state, setState] = useState<AppState>({ selectedElementId: null });
   const { t } = useLocalization();
+  const [selectedTool, setSelectedTool] = useState<string | null>(null);
 
-  useEffect(() => {
-    messages.send({ type: 'ready' });
-  }, []);
-
-  useOnMessage((msg) => {
-    if (msg.type === 'init' || msg.type === 'updateContent') {
-      setState(msg.state);
-    }
-  });
+  const handleToolClick = (tool: ToolItem) => {
+    setSelectedTool((prev) => (prev === tool.id ? null : tool.id));
+  };
+  const tools: ToolItem[] = [
+    {
+      id: 'pointer',
+      label: t('webview.sidebar.tools.pointer'),
+      icon: 'cursor',
+    },
+    {
+      id: 'text',
+      label: t('webview.sidebar.tools.text'),
+      icon: 'symbol-string',
+    },
+    {
+      id: 'heading',
+      label: t('webview.sidebar.tools.heading'),
+      icon: 'text-size',
+    },
+    {
+      id: 'link',
+      label: t('webview.sidebar.tools.link'),
+      icon: 'link',
+    },
+    {
+      id: 'code',
+      label: t('webview.sidebar.tools.code'),
+      icon: 'code',
+    },
+    {
+      id: 'image',
+      label: t('webview.sidebar.tools.image'),
+      icon: 'file-media',
+    },
+  ];
 
   return (
     <>
       <div className="sidebar">
         <div className="tool-grid">
-          {/*tools.map((tool) => (
+          {tools.map((tool) => (
             <Button
               key={tool.id}
               title={tool.label}
-              appearance={selected === tool.id ? 'primary' : 'secondary'}
+              appearance={selectedTool === tool.id ? 'primary' : 'secondary'}
               className="tool-button"
               onClick={() => handleToolClick(tool)}
             >
               <span className={`codicon codicon-${tool.icon}`} />
-
-              {/* <span className="tool-label">{tool.label}</span> /}
             </Button>
-          ))*/}
+          ))}
         </div>
-      </div>
-      <div>
-        <h1>{t('webview.sidebar.title')}</h1>
-        <p>
-          {t('webview.sidebar.selectedElement')}: {state.selectedElementId ?? '–'}
-        </p>
       </div>
     </>
   );

@@ -59,16 +59,16 @@
         {
           "type": "webview",
           "id": "5boardSidebarView",
-          "name": "Tools & Presets"
+          "name": "%views.sidebar.sidebar-title%"
         },
         {
           "type": "webview",
           "id": "5boardElementSettingsView",
-          "name": "Element Settings"
+          "name": "%views.sidebar.element-settings-title%"
         },
         {
           "id": "5boardStructureView",
-          "name": "Structure"
+          "name": "%views.sidebar.structure-title%"
         }
       ]
     },
@@ -88,7 +88,7 @@
       },
       {
         "command": "5board-vsc.startPresentation",
-        "title": "Start Presentation",
+        "title": "%commands.startPresentation%",
         "icon": "$(play)"
       }
     ],

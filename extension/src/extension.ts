@@ -61,7 +61,7 @@ export function activate(context: vscode.ExtensionContext) {
     ),
   );
 
-  // Sidebar: Control-Webview
+  // Sidebar Editor Controls
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       '5boardSidebarView',
@@ -71,7 +71,7 @@ export function activate(context: vscode.ExtensionContext) {
       },
     ),
   );
-  // Element Details - webview
+  // Sidebar Element Settings
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
       '5boardElementSettingsView',
@@ -81,7 +81,7 @@ export function activate(context: vscode.ExtensionContext) {
       },
     ),
   );
-  // Structure - Treeview (not a webview)
+  // Sidebar Treeview (not a webview)
   context.subscriptions.push(
     vscode.window.registerTreeDataProvider('5boardStructureView', new StructureTreeProvider()),
   );

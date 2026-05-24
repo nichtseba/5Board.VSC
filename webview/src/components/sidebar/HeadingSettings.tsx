@@ -2,15 +2,20 @@ import { EditorElement, EditorElementType } from '5board.vsc-common';
 import { Dropdown } from 'vscrui';
 import SettingsField from './layout/SettingsField';
 import SettingsPanel from './layout/SettingsPanel';
+import { useLocalization } from '../../providers/LocalizationProvider';
 
 type Props = {
   element: EditorElement<EditorElementType.Heading>;
 };
 function HeadingSettings({ element }: Props) {
+  const { t } = useLocalization();
   return (
     <>
-      <SettingsPanel type={element.type} icon="text-size">
-        <SettingsField label="Level">
+      <SettingsPanel
+        title={t('webview.sidebar-element-settings.headingSettings.title')}
+        icon="text-size"
+      >
+        <SettingsField label={t('webview.sidebar-element-settings.headingSettings.levelLabel')}>
           <Dropdown
             options={[
               { value: '1', label: 'H1' },

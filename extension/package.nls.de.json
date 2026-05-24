@@ -1,8 +1,11 @@
 {
   "customEditors.editor": "5Board Editor",
   "customEditors.legacy-converter": "5Board Legacy Konverter",
-  "views.sidebar.sidebar-title": "Editor Steuerungen",
+  "views.sidebar.sidebar-title": "Werkzeuge & Presets",
+  "views.sidebar.element-settings-title": "Element Einstellungen",
+  "views.sidebar.structure-title": "Struktur",
   "commands.openCustomEditor": "5Board Editor öffnen",
   "commands.openBoardFile": "5Board Datei öffnen",
-  "commands.newBoardFile": "Neue 5Board Datei"
+  "commands.newBoardFile": "Neue 5Board Datei",
+  "commands.startPresentation": "Präsentation starten"
 }

@@ -12,7 +12,23 @@
     "customEditor": { "Test": "Testen der Übersetzung" },
     "sidebar": {
       "title": "5Board Seitenleiste",
-      "selectedElement": "Ausgewähltes Element"
+      "tools": {
+        "pointer": "Zeiger",
+        "text": "Text",
+        "heading": "Überschrift",
+        "link": "Link",
+        "code": "Code",
+        "image": "Bild"
+      }
+    },
+    "sidebar-element-settings": {
+      "noElementSelected": "Kein Element ausgewählt",
+      "unsupportedElement": "Elementtyp wird nicht unterstützt",
+      "selectedElement": "Ausgewähltes Element",
+      "headingSettings": {
+        "title": "Überschrift",
+        "levelLabel": "Hierarchiestufe"
+      }
     }
   }
 }
