@@ -2,7 +2,7 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig(
-  globalIgnores(['**/webpack.config.js', '**/dist', '**/media/webview']),
+  globalIgnores(['**/webpack.config.js', '**/dist', '**/media/webview', 'scripts/**']),
   tseslint.configs.strict,
   tseslint.configs.recommended,
   {
