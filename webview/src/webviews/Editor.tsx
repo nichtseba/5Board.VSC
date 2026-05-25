@@ -1,9 +1,8 @@
 import { memo, useEffect, useState } from 'react';
-import { useMessageService, useOnMessage } from './services/MessageService';
+import { useMessageService, useOnMessage } from '../services/MessageService';
 import { BoardDocument, EditorElementType } from '5board.vsc-common';
-import { init } from './app/init';
-import './Editor.css';
-import EditorCanvas from './components/canvas/EditorCanvas';
+import { init } from '../app/init';
+import EditorCanvas from '../components/canvas/EditorCanvas';
 
 // Wrapped in memo: only re-renders when fileName or fileContent actually change,
 // NOT on every counter update.

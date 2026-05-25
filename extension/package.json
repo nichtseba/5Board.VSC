@@ -48,26 +48,26 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "5board-sidebar",
+          "id": "5board-vsc-activitybar",
           "title": "5Board",
           "icon": "./media/sidebar-icon.png"
         }
       ]
     },
     "views": {
-      "5board-sidebar": [
+      "5board-vsc-activitybar": [
         {
           "type": "webview",
-          "id": "5boardSidebarView",
+          "id": "5board-vsc.sidebar-view",
           "name": "%views.sidebar.sidebar-title%"
         },
         {
           "type": "webview",
-          "id": "5boardElementSettingsView",
+          "id": "5board-vsc.sidebar-element-settings-view",
           "name": "%views.sidebar.element-settings-title%"
         },
         {
-          "id": "5boardStructureView",
+          "id": "5board-vsc.sidebar-structure-view",
           "name": "%views.sidebar.structure-title%"
         }
       ]

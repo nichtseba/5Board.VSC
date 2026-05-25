@@ -64,7 +64,7 @@ export function activate(context: vscode.ExtensionContext) {
   // Sidebar Editor Controls
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
-      '5boardSidebarView',
+      '5board-vsc.sidebar-view',
       new SidebarViewProvider(context, messages, 'Sidebar.html'),
       {
         webviewOptions: { retainContextWhenHidden: true },
@@ -74,7 +74,7 @@ export function activate(context: vscode.ExtensionContext) {
   // Sidebar Element Settings
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
-      '5boardElementSettingsView',
+      '5board-vsc.sidebar-element-settings-view',
       new SidebarViewProvider(context, messages, 'ElementSettingsSidebar.html'),
       {
         webviewOptions: { retainContextWhenHidden: true },
@@ -83,7 +83,10 @@ export function activate(context: vscode.ExtensionContext) {
   );
   // Sidebar Treeview (not a webview)
   context.subscriptions.push(
-    vscode.window.registerTreeDataProvider('5boardStructureView', new StructureTreeProvider()),
+    vscode.window.registerTreeDataProvider(
+      '5board-vsc.sidebar-structure-view',
+      new StructureTreeProvider(),
+    ),
   );
 }
 

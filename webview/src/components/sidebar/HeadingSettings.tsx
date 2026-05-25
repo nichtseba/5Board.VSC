@@ -7,7 +7,7 @@ import { useLocalization } from '../../providers/LocalizationProvider';
 type Props = {
   element: EditorElement<EditorElementType.Heading>;
 };
-function HeadingSettings({ element }: Props) {
+export function HeadingSettings({ element }: Props) {
   const { t } = useLocalization();
   return (
     <>
@@ -32,5 +32,3 @@ function HeadingSettings({ element }: Props) {
     </>
   );
 }
-
-export default HeadingSettings;

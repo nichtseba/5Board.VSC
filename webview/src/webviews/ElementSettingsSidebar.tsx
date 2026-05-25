@@ -1,10 +1,10 @@
-import { init } from './app/init';
+import { init } from '../app/init';
 import { useEffect, useState } from 'react';
 import { EditorElement, EditorElementType, AppState } from '5board.vsc-common';
-import HeadingSettings from './components/sidebar/HeadingSettings';
-import './components/sidebar/layout/sidebar.css';
-import { useMessageService, useOnMessage } from './services/MessageService';
-import { useLocalization } from './providers/LocalizationProvider';
+import { HeadingSettings } from '../components/sidebar/HeadingSettings';
+import { useMessageService, useOnMessage } from '../services/MessageService';
+import { useLocalization } from '../providers/LocalizationProvider';
+import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
 
 type SettingsProps<T extends EditorElementType> = {
   element: EditorElement<T>;
@@ -44,30 +44,35 @@ export default function ElementSettingsSidebar() {
     }
   });
 
+  let content: React.ReactNode;
+
   if (!selectedElement) {
-    return (
+    content = (
       <div className="element-controls-tab">
         <p>{t('webview.sidebar-element-settings.noElementSelected')}</p>
       </div>
     );
-  }
+  } else {
+    const SettingsComponent = SETTINGS_COMPONENTS[selectedElement.type];
 
-  const SettingsComponent = SETTINGS_COMPONENTS[selectedElement.type];
-  if (!SettingsComponent) {
-    return (
-      <>
-        <div className="element-controls-tab">
-          <p>{t('webview.sidebar-element-settings.unsupportedElement')}</p>
-        </div>
-      </>
-    );
+    if (!SettingsComponent) {
+      content = (
+        <>
+          <div className="element-controls-tab">
+            <p>{t('webview.sidebar-element-settings.unsupportedElement')}</p>
+          </div>
+        </>
+      );
+    } else {
+      content = <SettingsComponent element={selectedElement} />;
+    }
   }
 
   return (
-    <>
-      <SettingsComponent element={selectedElement} />
+    <SidebarShell>
+      {content}
       {t('webview.sidebar-element-settings.selectedElement')}: {state.selectedElementId ?? '–'}
-    </>
+    </SidebarShell>
   );
 }
 
