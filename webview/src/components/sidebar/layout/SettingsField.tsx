@@ -7,7 +7,7 @@ type Props = {
 
 export default function SettingsField({ label, children }: Props) {
   return (
-    <div className="settings-field">
+    <div className="flex flex-col gap-2 mb-4">
       <Label>{label}</Label>
 
       {children}

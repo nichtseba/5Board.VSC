@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { init } from './app/init';
+import { init } from '../app/init';
 import { ToolItem } from '5board.vsc-common';
-import './Sidebar.css';
-import { useLocalization } from './providers/LocalizationProvider';
+import { useLocalization } from '../providers/LocalizationProvider';
 import { Button } from 'vscrui';
+import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
 
 export default function Sidebar() {
   const { t } = useLocalization();
@@ -47,21 +47,21 @@ export default function Sidebar() {
 
   return (
     <>
-      <div className="sidebar">
-        <div className="tool-grid">
+      <SidebarShell>
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3">
           {tools.map((tool) => (
             <Button
               key={tool.id}
               title={tool.label}
               appearance={selectedTool === tool.id ? 'primary' : 'secondary'}
-              className="tool-button"
+              className="h-8 flex flex-col items-center justify-center gap-2"
               onClick={() => handleToolClick(tool)}
             >
               <span className={`codicon codicon-${tool.icon}`} />
             </Button>
           ))}
         </div>
-      </div>
+      </SidebarShell>
     </>
   );
 }
