@@ -4,7 +4,6 @@ import { BoardDocument, EditorElementType } from '5board.vsc-common';
 import { init } from './app/init';
 import './Editor.css';
 import EditorCanvas from './components/canvas/EditorCanvas';
-import EditorElement from './components/EditorElement';
 
 // Wrapped in memo: only re-renders when fileName or fileContent actually change,
 // NOT on every counter update.
@@ -35,7 +34,6 @@ const FileView = memo(function FileView({
       ) : (
         <pre>{fileContent || 'Datei ist leer.'}</pre>
       )}
-      <EditorElement />
     </div>
   );
 });
