@@ -15,7 +15,8 @@
     "watch:extension": "pnpm --filter 5board-vsc run watch",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "devDependencies": {
     "eslint": "^9.39.3",
