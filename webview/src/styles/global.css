@@ -3,15 +3,13 @@
 @import './utilities/sidebar.css';
 
 @theme {
-  /* --*: initial;  Disable default theme */
+  --color-*: initial; /* Disable default theme for colors */
+  --radius-*: initial; /* Disable default theme for border radius */
 
   /* Fonts */
   --font-sans: var(--vscode-font-family);
   --font-mono: var(--vscode-editor-font-family);
-  --font-weight-normal: var(--vscode-font-weight);
-  --font-weight-editor: var(--vscode-editor-font-weight);
-  --text-xs: var(--vscode-bodyFontSize-xSmall);
-  --text-sm: var(--vscode-bodyFontSize-small);
+  --font-serif: initial;
   --text-base: var(--vscode-font-size);
   --text-editor: var(--vscode-editor-font-size);
 
@@ -21,6 +19,7 @@
   --radius-md: var(--vscode-cornerRadius-medium);
   --radius-lg: var(--vscode-cornerRadius-large);
   --radius-xl: var(--vscode-cornerRadius-xLarge);
+  --radius-circle: var(--vscode-cornerRadius-circle);
 
   /* Colors */
   --color-foreground: var(--vscode-foreground);
