@@ -1,27 +1,26 @@
 @import 'tailwindcss';
+@import './utilities/editor.css';
+@import './utilities/sidebar.css';
 
 @theme {
-  --*: initial; /* Disable default theme */
+  /* --*: initial;  Disable default theme */
 
   /* Fonts */
-  --font-vs-code: var(--vscode-font-family);
-  --font-weight-vs-code: var(--vscode-font-weight);
-  --text-vs-code: var(--vscode-font-size);
-  --font-editor: var(--vscode-editor-font-family);
+  --font-sans: var(--vscode-font-family);
+  --font-mono: var(--vscode-editor-font-family);
+  --font-weight-normal: var(--vscode-font-weight);
   --font-weight-editor: var(--vscode-editor-font-weight);
+  --text-xs: var(--vscode-bodyFontSize-xSmall);
+  --text-sm: var(--vscode-bodyFontSize-small);
+  --text-base: var(--vscode-font-size);
   --text-editor: var(--vscode-editor-font-size);
-  --text-body: var(--vscode-bodyFontSize);
-  --text-body-small: var(--vscode-bodyFontSize-small);
-  --text-body-xSmall: var(--vscode-bodyFontSize-xSmall);
-  --text-codicon: var(--vscode-codiconFontSize);
 
   /* Border Radius */
-  --radius-medium: var(--vscode-cornerRadius-medium);
-  --radius-xSmall: var(--vscode-cornerRadius-xSmall);
-  --radius-small: var(--vscode-cornerRadius-small);
-  --radius-large: var(--vscode-cornerRadius-large);
-  --radius-xLarge: var(--vscode-cornerRadius-xLarge);
-  --radius-circle: var(--vscode-cornerRadius-circle);
+  --radius-xs: var(--vscode-cornerRadius-xSmall);
+  --radius-sm: var(--vscode-cornerRadius-small);
+  --radius-md: var(--vscode-cornerRadius-medium);
+  --radius-lg: var(--vscode-cornerRadius-large);
+  --radius-xl: var(--vscode-cornerRadius-xLarge);
 
   /* Colors */
   --color-foreground: var(--vscode-foreground);

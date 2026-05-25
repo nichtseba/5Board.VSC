@@ -9,18 +9,3 @@
     linear-gradient(to right, var(--vscode-editorWidget-border) 1px, transparent 1px),
     linear-gradient(to bottom, var(--vscode-editorWidget-border) 1px, transparent 1px);
 }
-
-.element {
-  cursor: pointer;
-  box-sizing: border-box;
-}
-
-.element:hover,
-.element-selected {
-  outline: 1px solid var(--vscode-editorWidget-border);
-}
-
-.element-heading {
-  padding-left: var(--editor-spacing);
-  font-weight: bold;
-}
