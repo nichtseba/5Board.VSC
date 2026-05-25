@@ -48,19 +48,27 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "5board-sidebar",
+          "id": "5board-vsc-activitybar",
           "title": "5Board",
           "icon": "./media/sidebar-icon.png"
         }
       ]
     },
     "views": {
-      "5board-sidebar": [
+      "5board-vsc-activitybar": [
         {
           "type": "webview",
-          "id": "5boardSidebarView",
-          "name": "%views.sidebar.sidebar-title%",
-          "when": "resourceExtname == .5boardz"
+          "id": "5board-vsc.sidebar-view",
+          "name": "%views.sidebar.sidebar-title%"
+        },
+        {
+          "type": "webview",
+          "id": "5board-vsc.sidebar-element-settings-view",
+          "name": "%views.sidebar.element-settings-title%"
+        },
+        {
+          "id": "5board-vsc.sidebar-structure-view",
+          "name": "%views.sidebar.structure-title%"
         }
       ]
     },
@@ -77,6 +85,11 @@
         "command": "5board-vsc.newBoard",
         "title": "%commands.newBoardFile%",
         "icon": "$(plus)"
+      },
+      {
+        "command": "5board-vsc.startPresentation",
+        "title": "%commands.startPresentation%",
+        "icon": "$(play)"
       }
     ],
     "menus": {
@@ -90,6 +103,11 @@
       "view/title": [
         {
           "command": "5board-vsc.newBoard",
+          "when": "view == 5boardSidebarView",
+          "group": "navigation"
+        },
+        {
+          "command": "5board-vsc.startPresentation",
           "when": "view == 5boardSidebarView",
           "group": "navigation"
         }

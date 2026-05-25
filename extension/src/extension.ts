@@ -9,6 +9,7 @@ import { t } from './localization';
 import { MessageService } from './MessageService';
 import { setWebviewHtml } from './webview';
 import { SidebarViewProvider } from './providers/SidebarViewProvider';
+import { StructureTreeProvider } from './providers/StructureTreeProvider';
 
 export function activate(context: vscode.ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
@@ -35,7 +36,13 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(disposable);
 
   context.subscriptions.push(
-    // >5Board: Neue .5boardz Datei erstellen
+    vscode.commands.registerCommand('5board-vsc.startPresentation', () => {
+      vscode.window.showInformationMessage('Presentation started');
+    }),
+  );
+
+  // >5Board: Neue .5boardz Datei erstellen
+  context.subscriptions.push(
     vscode.commands.registerCommand('5board-vsc.newBoard', async () => {
       await new5boardCommand();
     }),
@@ -54,14 +61,31 @@ export function activate(context: vscode.ExtensionContext) {
     ),
   );
 
-  // Sidebar: Control-Webview
+  // Sidebar Editor Controls
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
-      '5boardSidebarView',
+      '5board-vsc.sidebar-view',
       new SidebarViewProvider(context, messages, 'Sidebar.html'),
       {
         webviewOptions: { retainContextWhenHidden: true },
       },
+    ),
+  );
+  // Sidebar Element Settings
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      '5board-vsc.sidebar-element-settings-view',
+      new SidebarViewProvider(context, messages, 'ElementSettingsSidebar.html'),
+      {
+        webviewOptions: { retainContextWhenHidden: true },
+      },
+    ),
+  );
+  // Sidebar Treeview (not a webview)
+  context.subscriptions.push(
+    vscode.window.registerTreeDataProvider(
+      '5board-vsc.sidebar-structure-view',
+      new StructureTreeProvider(),
     ),
   );
 }

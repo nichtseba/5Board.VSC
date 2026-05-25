@@ -1,4 +1,4 @@
-import { EditorElement } from './Element';
+import { EditorElement } from './board/element';
 import { Language } from './localization';
 
 export type AppState = {

@@ -21,6 +21,11 @@
   --radius-xl: var(--vscode-cornerRadius-xLarge);
   --radius-circle: var(--vscode-cornerRadius-circle);
 
+  /* Editor System */
+  --editor-spacing: 1rem;
+  --editor-grid-size: 1rem;
+  --editor-columns: 40;
+
   /* Colors */
   --color-foreground: var(--vscode-foreground);
   --color-foreground-strong: var(--vscode-strongForeground);

@@ -1,4 +1,5 @@
 import { createRoot } from 'react-dom/client';
+import '@vscode/codicons/dist/codicon.css';
 import '../styles/global.css';
 import { App } from './App';
 

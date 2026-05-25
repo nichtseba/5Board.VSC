@@ -6,7 +6,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 // Multiple entry points for different webviews. Each entry point will generate a separate HTML file and JavaScript bundle.
-const VIEWS = ['Editor', 'Sidebar'];
+const VIEWS = ['Editor', 'Sidebar', 'ElementSettingsSidebar'];
 
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
@@ -15,7 +15,7 @@ const VIEWS = ['Editor', 'Sidebar'];
 const extensionConfig = {
   target: 'web',
   mode: 'none', // this leaves the source code as close as possible to the original (when packaging we set this to 'production')
-  entry: Object.fromEntries(VIEWS.map((view) => [view, `./src/${view}.tsx`])),
+  entry: Object.fromEntries(VIEWS.map((view) => [view, `./src/webviews/${view}.tsx`])),
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js',

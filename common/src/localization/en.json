@@ -12,7 +12,23 @@
     "customEditor": { "Test": "Test the translation." },
     "sidebar": {
       "title": "5Board Sidebar",
-      "selectedElement": "Selected Element"
+      "tools": {
+        "pointer": "Pointer",
+        "text": "Text",
+        "heading": "Heading",
+        "link": "Link",
+        "code": "Code",
+        "image": "Image"
+      }
+    },
+    "sidebar-element-settings": {
+      "noElementSelected": "No element selected",
+      "unsupportedElement": "Unsupported element type",
+      "selectedElement": "Selected Element",
+      "headingSettings": {
+        "title": "Heading",
+        "levelLabel": "Hierarchy level"
+      }
     }
   }
 }
