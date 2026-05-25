@@ -1,0 +1,8 @@
+{
+  "customEditors.editor": "5Board Editor",
+  "customEditors.legacy-converter": "5Board Legacy Converter",
+  "views.sidebar.sidebar-title": "Editor Controls",
+  "commands.openCustomEditor": "Open 5Board Editor",
+  "commands.openBoardFile": "Open 5Board File",
+  "commands.newBoardFile": "New 5Board File"
+}

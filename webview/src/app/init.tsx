@@ -1,10 +1,12 @@
 import { createRoot } from 'react-dom/client';
-import './styles/global.css';
+import '../styles/global.css';
+import { App } from './App';
 
 export function init(RootComponent: React.ComponentType) {
   function start() {
     const root = createRoot(document.getElementById('root')!);
-    root.render(<RootComponent></RootComponent>);
+
+    root.render(<App RootComponent={RootComponent} />);
   }
 
   if (document.readyState === 'loading') {

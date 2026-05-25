@@ -1,4 +1,4 @@
-import { EditorElement, EditorElementType } from '5board.vsc-common/dist/Element';
+import { EditorElement, EditorElementType } from '5board.vsc-common';
 
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;

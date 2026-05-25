@@ -3,6 +3,7 @@ export enum EditorElementType {
   Heading = 'heading',
 }
 
+// Only types used by extension and webview
 export type EditorElement<T extends EditorElementType = EditorElementType> = {
   id: string;
   type: T;
