@@ -10,6 +10,8 @@ import { MessageService } from './MessageService';
 import { setWebviewHtml } from './webview';
 import { SidebarViewProvider } from './providers/SidebarViewProvider';
 import { StructureTreeProvider } from './providers/StructureTreeProvider';
+import { ProjectorEditorProvider } from './projector/editorProvider';
+import { PROJECTOR_VIEW_TYPE } from './projector/webview';
 
 export function activate(context: vscode.ExtensionContext) {
   // Use the console to output diagnostic information (console.log) and errors (console.error)
@@ -35,9 +37,32 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(disposable);
 
+  // Opens the currently active .5boardz file in the projector (beamer) view.
+  // The projector view is a separate tab with the same content as the editor.
   context.subscriptions.push(
-    vscode.commands.registerCommand('5board-vsc.startPresentation', () => {
-      vscode.window.showInformationMessage('Presentation started');
+    vscode.commands.registerCommand('5board-vsc.startPresentation', async () => {
+      // Find the URI of the active custom editor (the open .5boardz file)
+      const activeTab = vscode.window.tabGroups.activeTabGroup.activeTab;
+      const tabInput = activeTab?.input;
+
+      // CustomEditorInput has a uri and viewType property
+      if (tabInput instanceof vscode.TabInputCustom && tabInput.viewType === EDITOR_VIEW_TYPE) {
+        // Open the projector beside the editor.
+        // preserveFocus keeps the focus on the editor so the projector tab
+        // opens quietly in the background — less visual flicker for the user.
+        // Note: VS Code has no public API to open a custom editor directly
+        // in a new window, so we always go through "open tab → move to window".
+        await vscode.commands.executeCommand('vscode.openWith', tabInput.uri, PROJECTOR_VIEW_TYPE, {
+          viewColumn: vscode.ViewColumn.Beside,
+          preserveFocus: true,
+        });
+        // Focus the projector's column (always the last/rightmost group after openWith).
+        await vscode.commands.executeCommand('workbench.action.focusLastEditorGroup');
+        // Move the projector's entire column into its own VS Code window.
+        await vscode.commands.executeCommand('workbench.action.moveEditorGroupToNewWindow');
+      } else {
+        vscode.window.showWarningMessage(t('extension.projector.noFileOpen'));
+      }
     }),
   );
 
@@ -56,6 +81,21 @@ export function activate(context: vscode.ExtensionContext) {
       {
         webviewOptions: {
           retainContextWhenHidden: true, // Todo: store context
+        },
+      },
+    ),
+  );
+
+  // Read-only projector (beamer) view for *.5boardz files.
+  // Priority "option" means it won't open by default — only via the play button
+  // or "Open With" in the context menu.
+  context.subscriptions.push(
+    vscode.window.registerCustomEditorProvider(
+      PROJECTOR_VIEW_TYPE,
+      new ProjectorEditorProvider(context, messages),
+      {
+        webviewOptions: {
+          retainContextWhenHidden: true,
         },
       },
     ),

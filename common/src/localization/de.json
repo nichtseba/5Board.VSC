@@ -6,6 +6,10 @@
       "packageFilter": "5Boardz Paket",
       "createFile": "Erstelle 5Board Datei",
       "createFileFailed": "Fehler beim Erstellen der 5Board Datei:"
+    },
+    "projector": {
+      "title": "Beameransicht",
+      "noFileOpen": "Bitte öffne zuerst eine .5boardz Datei im Editor, bevor du die Beameransicht startest."
     }
   },
   "webview": {

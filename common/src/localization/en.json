@@ -6,6 +6,10 @@
       "packageFilter": "5Boardz Package",
       "createFile": "Create 5Board file",
       "createFileFailed": "Failed to create 5Board file:"
+    },
+    "projector": {
+      "title": "Projector",
+      "noFileOpen": "Please open a .5boardz file in the editor before starting the projector view."
     }
   },
   "webview": {
