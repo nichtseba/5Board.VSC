@@ -11,6 +11,7 @@ export default function Projector() {
   const messages = useMessageService();
   const { t } = useLocalization();
   const [fileName, setFileName] = useState('');
+  const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
 
   // Todo: replace with real document data once the editor loads from file.
   // For now this mirrors the same dummy document that Editor.tsx uses,
@@ -43,6 +44,9 @@ export default function Projector() {
     if (msg.type === 'fileLoaded') {
       setFileName(msg.fileName);
     }
+    if (msg.type === 'cursorUpdate') {
+      setCursor({ x: msg.x, y: msg.y });
+    }
   });
 
   return (
@@ -61,13 +65,34 @@ export default function Projector() {
       >
         📽 {t('extension.projector.title')} — {fileName}
       </div>
-
       {/* Same canvas as the editor.
           The canvas manages its own selection state — clicking an element here
           also broadcasts selectElement to the extension, which updates all webviews.
           Syncing the editor's selection INTO the projector would require
-          modifying EditorCanvas, which is out of scope for this task. */}
-      <EditorCanvas document={document} />
+          modifying EditorCanvas, which is out of scope for this task. 
+          New: Cursor overlay: mirrors the editor's mouse position in real time 
+          EditorCanvas is wrapped in a div with position: relative. */}
+      <div style={{ position: 'relative' }}>
+        <EditorCanvas document={document} />
+        {cursor && (
+          <div
+            style={{
+              // Todo: make cursor overlay correctly display when both windows have different sizes
+              position: 'absolute',
+              left: `${cursor.x * 100}%`,
+              top: `${cursor.y * 100}%`,
+              width: 20,
+              height: 20,
+              borderRadius: '50%',
+              background: 'rgba(220, 38, 38, 0.75)',
+              border: '2px solid #dc2626',
+              transform: 'translate(-50%, -50%)',
+              pointerEvents: 'none',
+              zIndex: 1000,
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }

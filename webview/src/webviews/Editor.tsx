@@ -1,4 +1,4 @@
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { useMessageService, useOnMessage } from '../services/MessageService';
 import { BoardDocument, EditorElementType } from '5board.vsc-common';
 import { init } from '../app/init';
@@ -42,6 +42,19 @@ export default function Editor() {
   //const [state, setState] = useState<AppState>({ counter: 0 });
   const [fileName, setFileName] = useState('');
   const [fileContent, setFileContent] = useState('');
+  const rafRef = useRef<number | null>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (rafRef.current !== null) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = null;
+      messages.send({ type: 'cursorMove', x, y });
+    });
+    console.log(`Mouse Position: (${x}, ${y})`); // dev tools
+  };
   const document: BoardDocument = {
     manifest: {
       title: '',
@@ -83,7 +96,9 @@ export default function Editor() {
       <div>
         <FileView fileName={fileName} fileContent={fileContent} />
       </div>
-      <EditorCanvas document={document} />
+      <div onMouseMove={handleMouseMove}>
+        <EditorCanvas document={document} />
+      </div>
     </>
   );
 }

@@ -98,6 +98,9 @@ export class MessageService {
       case 'selectTool':
         this.handleSelectTool(msg);
         break;
+      case 'cursorMove':
+        this.broadcast({ type: 'cursorUpdate', x: msg.x, y: msg.y });
+        break;
       default:
         console.warn('Unhandled webview message', msg);
     }
