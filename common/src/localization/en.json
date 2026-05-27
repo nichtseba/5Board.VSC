@@ -1,0 +1,34 @@
+{
+  "extension": {
+    "openCustomEditorCommand": { "title": "5Boardz – Custom Page" },
+    "new5boardCommand": {
+      "defaultFileName": "Lecture",
+      "packageFilter": "5Boardz Package",
+      "createFile": "Create 5Board file",
+      "createFileFailed": "Failed to create 5Board file:"
+    }
+  },
+  "webview": {
+    "customEditor": { "Test": "Test the translation." },
+    "sidebar": {
+      "title": "5Board Sidebar",
+      "tools": {
+        "pointer": "Pointer",
+        "text": "Text",
+        "heading": "Heading",
+        "link": "Link",
+        "code": "Code",
+        "image": "Image"
+      }
+    },
+    "sidebar-element-settings": {
+      "noElementSelected": "No element selected",
+      "unsupportedElement": "Unsupported element type",
+      "selectedElement": "Selected Element",
+      "headingSettings": {
+        "title": "Heading",
+        "levelLabel": "Hierarchy level"
+      }
+    }
+  }
+}

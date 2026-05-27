@@ -33,11 +33,3 @@ export interface CodeblockRunner {
   checkTools(): Promise<ToolCheckResult>;
   execute(request: CodeblockExecutionRequest): Promise<CodeblockExecutionResult>;
 }
-
-export type WebviewToExtensionMessage =
-  | { type: 'runCodeblock'; payload: CodeblockExecutionRequest }
-  | { type: 'checkCodeblockTools'; payload: { language: CodeblockLanguage } };
-
-export type ExtensionToWebviewMessage =
-  | { type: 'codeblockResult'; payload: CodeblockExecutionResult }
-  | { type: 'codeblockToolCheckResult'; payload: ToolCheckResult };

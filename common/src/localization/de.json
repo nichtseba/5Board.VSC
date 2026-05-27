@@ -1,0 +1,34 @@
+{
+  "extension": {
+    "openCustomEditorCommand": { "title": "5Boardz – Custom Seite" },
+    "new5boardCommand": {
+      "defaultFileName": "Vorlesung",
+      "packageFilter": "5Boardz Paket",
+      "createFile": "Erstelle 5Board Datei",
+      "createFileFailed": "Fehler beim Erstellen der 5Board Datei:"
+    }
+  },
+  "webview": {
+    "customEditor": { "Test": "Testen der Übersetzung" },
+    "sidebar": {
+      "title": "5Board Seitenleiste",
+      "tools": {
+        "pointer": "Zeiger",
+        "text": "Text",
+        "heading": "Überschrift",
+        "link": "Link",
+        "code": "Code",
+        "image": "Bild"
+      }
+    },
+    "sidebar-element-settings": {
+      "noElementSelected": "Kein Element ausgewählt",
+      "unsupportedElement": "Elementtyp wird nicht unterstützt",
+      "selectedElement": "Ausgewähltes Element",
+      "headingSettings": {
+        "title": "Überschrift",
+        "levelLabel": "Hierarchiestufe"
+      }
+    }
+  }
+}
