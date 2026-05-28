@@ -1,5 +1,5 @@
 import { join } from 'path';
-import { mkdtempSync, rmSync, writeFileSync } from 'fs';
+import { mkdtemp, rm, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import type {
   CodeblockExecutionRequest,
@@ -49,13 +49,12 @@ export class JavaCodeblockRunner implements CodeblockRunner {
 
   async execute(request: CodeblockExecutionRequest): Promise<CodeblockExecutionResult> {
     const className = request.className ?? 'CodeBlockRunner';
-    const tempDir = mkdtempSync(join(tmpdir(), '5board-'));
-    const content = buildJavaSource(request.code, className);
-    const sourceFile = join(tempDir, `${className}.java`);
-    writeFileSync(sourceFile, content, 'utf8');
-    const generatedFiles: GeneratedSourceFile[] = [{ path: `${className}.java`, content }];
-
+    const tempDir = await mkdtemp(join(tmpdir(), '5board-'));
     try {
+      const content = buildJavaSource(request.code, className);
+      const sourceFile = join(tempDir, `${className}.java`);
+      await writeFile(sourceFile, content, 'utf8');
+      const generatedFiles: GeneratedSourceFile[] = [{ path: `${className}.java`, content }];
       const compile = await runCommand('javac', [`${className}.java`], tempDir, 30_000);
       if (compile.status !== 0) {
         return {
@@ -78,7 +77,7 @@ export class JavaCodeblockRunner implements CodeblockRunner {
         error: run.error,
       };
     } finally {
-      rmSync(tempDir, { recursive: true, force: true });
+      await rm(tempDir, { recursive: true, force: true });
     }
   }
 }
