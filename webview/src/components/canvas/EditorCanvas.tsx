@@ -13,22 +13,51 @@ export type EditorCanvasProps = {
  */
 export default function EditorCanvas({ document }: EditorCanvasProps) {
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+  const [currentDocument, setCurrentDocument] = useState(document);
   const messages = useMessageService();
+
+  useEffect(() => {
+    setCurrentDocument(document);
+  }, [document]);
 
   useEffect(() => {
     messages.send({ type: 'selectElement', id: selectedElementId });
   }, [selectedElementId, messages]);
 
+  const handleUpdateLayout = (
+    id: string,
+    changes: Partial<(typeof currentDocument.content.elements)[number]['layout']>,
+  ) => {
+    setCurrentDocument((prev) => ({
+      ...prev,
+      content: {
+        ...prev.content,
+        elements: prev.content.elements.map((element) =>
+          element.id === id
+            ? {
+                ...element,
+                layout: {
+                  ...element.layout,
+                  ...changes,
+                },
+              }
+            : element,
+        ),
+      },
+    }));
+  };
+
   return (
     <>
       {`Selected element ID: ${selectedElementId}`}
       <div className="editor-canvas bg-editor-background">
-        {document.content.elements.map((element) => (
+        {currentDocument.content.elements.map((element) => (
           <EditorElement
             key={element.id}
             element={element}
             selected={element.id === selectedElementId}
             onSelect={setSelectedElementId}
+            onUpdateLayout={handleUpdateLayout}
           />
         ))}
       </div>
