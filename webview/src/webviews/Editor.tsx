@@ -52,16 +52,25 @@ export default function Editor() {
       version: '',
     },
     content: {
-      elements: [1, 2, 3, 4, 5, 6].map((i) => ({
-        id: `element-${i}`,
-        type: EditorElementType.Heading,
-        yPos: i * 10,
-        height: 2,
-        data: {
-          level: i as 1 | 2 | 3 | 4 | 5 | 6,
-          content: `Heading ${i}`,
-        },
-      })),
+      elements: [
+        ...[1, 2, 3, 4, 5, 6].map((i) => ({
+          id: `heading-${i}`,
+          type: EditorElementType.Heading,
+          layout: {
+            xPos: 0,
+            yPos: i * 4,
+            width: 12,
+            height: 2,
+          },
+          style: {
+            visible: true,
+          },
+          data: {
+            level: i as 1 | 2 | 3 | 4 | 5 | 6,
+            content: `Heading ${i}`,
+          },
+        })),
+      ],
     },
     sources: [],
     assets: [],

@@ -30,8 +30,15 @@ export default function ElementSettingsSidebar() {
       level: 1,
       content: '',
     },
-    yPos: 0,
-    height: 0,
+    layout: {
+      xPos: 0,
+      yPos: 0,
+      width: 0,
+      height: 0,
+    },
+    style: {
+      visible: true,
+    },
   }; // Todo: replace with real data from extension
 
   useEffect(() => {
