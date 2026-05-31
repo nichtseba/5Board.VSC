@@ -5,7 +5,6 @@ import { get5boardzAssetCacheRoot } from '../board/webview';
 import { MessageService } from '../MessageService';
 import { t } from '../localization';
 import { setProjectorWebviewHtml } from './webview';
-import path from 'path';
 
 /**
  * Read-only editor provider for the projector/beamer view.
@@ -56,7 +55,7 @@ export class ProjectorEditorProvider implements vscode.CustomReadonlyEditorProvi
     };
 
     // Set the tab title so the user can tell it apart from the normal editor
-    webviewPanel.title = `${t('extension.projector.title')}: ${path.basename(document.uri.fsPath)}`;
+    webviewPanel.title = `${t('extension.projector.title')}: ${document.boardPackage.document.manifest.title}`;
 
     // Register the webview with the MessageService so it receives the file content
     // when it sends the 'ready' message
