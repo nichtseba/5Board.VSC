@@ -88,6 +88,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
           snappable={true}
           snapGridWidth={cellSize.width}
           snapGridHeight={cellSize.height}
+          snapThreshold={cellSize.width / 2}
           onDrag={({ target, transform }) => {
             target.style.transform = transform;
           }}
@@ -117,6 +118,31 @@ export default function EditorElement<ElementType extends EditorElementType>({
           onResize={({ target, width, height }) => {
             target.style.width = `${width}px`;
             target.style.height = `${height}px`;
+          }}
+          onResizeEnd={({ target, lastEvent }) => {
+            if (!lastEvent || !target) return;
+            const gridSize = getGridCellSize();
+            const width = lastEvent.width;
+            const height = lastEvent.height;
+            const newWidth = Math.max(1, Math.round(width / gridSize.width));
+            const newHeight = Math.max(1, Math.round(height / gridSize.height));
+
+            if (newWidth !== element.layout.width || newHeight !== element.layout.height) {
+              onUpdateLayout?.(element.id, {
+                width: newWidth,
+                height: newHeight,
+              });
+              console.log('persisted resize on resize end', element.id, {
+                width: newWidth,
+                height: newHeight,
+              });
+            }
+
+            if (target instanceof HTMLElement) {
+              target.style.width = '';
+              target.style.height = '';
+            }
+            moveableRef.current?.updateRect();
           }}
         />
       )}
