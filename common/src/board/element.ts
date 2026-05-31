@@ -2,6 +2,7 @@ export type BoardElement = EditorElement; // Todo: Replace with new Element type
 // Todo: Add additional element types
 export enum EditorElementType {
   Heading = 'heading',
+  Text = 'text',
 }
 
 /**
@@ -49,6 +50,7 @@ export type ElementStyle = {
 
 type EditorElementDataMap = {
   [EditorElementType.Heading]: HeadingElementData;
+  [EditorElementType.Text]: TextElementData;
 };
 
 export type HeadingElementData = {
@@ -67,7 +69,12 @@ export type TextStyle = {
   fontSize?: number;
   fontWeight?: 'normal' | 'bold' | 'bolder' | 'lighter' | number;
   fontStyle?: 'normal' | 'italic' | 'oblique';
-  textDecoration?: 'none' | 'underline' | 'overline' | 'line-through';
+  textDecoration?: TextDecorationStyle;
   textAlign?: 'left' | 'center' | 'right' | 'justify';
   lineHeight?: number;
+};
+export type TextDecorationStyle = {
+  underline?: boolean;
+  overline?: boolean;
+  lineThrough?: boolean;
 };

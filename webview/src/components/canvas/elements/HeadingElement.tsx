@@ -4,12 +4,7 @@ import { EditorElementProps } from '../EditorElement';
 /**
  * Renders a heading element. The heading level (h1, h2, etc.) is determined by the `level` property in the element's data.
  */
-export function HeadingElement({
-  element,
-  onSelect,
-  selected,
-  targetRef,
-}: EditorElementProps<EditorElementType.Heading>) {
+export function HeadingElement({ element }: EditorElementProps<EditorElementType.Heading>) {
   /** Utility component for rendering the appropriate heading tag based on the level */
   function HeadingTag({
     children,
@@ -36,19 +31,5 @@ export function HeadingElement({
     }
   }
 
-  return (
-    <div
-      onClick={() => onSelect?.(element.id)}
-      ref={targetRef}
-      className={`editor-element editor-element-hover ${selected ? 'editor-element-selected' : ''} pl-[var(--editor-spacing)] font-bold`}
-      style={{
-        gridRowStart: element.layout.yPos + 1,
-        gridRowEnd: `span ${element.layout.height}`,
-        gridColumnStart: element.layout.xPos + 1,
-        gridColumnEnd: `span ${element.layout.width}`,
-      }}
-    >
-      <HeadingTag level={element.data.level}>{element.data.content}</HeadingTag>
-    </div>
-  );
+  return <HeadingTag level={element.data.level}>{element.data.content}</HeadingTag>;
 }

@@ -1,6 +1,8 @@
 import { useLayoutEffect, useRef } from 'react';
 import { EditorElement, EditorElementType } from '5board.vsc-common';
 import Moveable from 'react-moveable';
+import type React from 'react';
+import { TextElement } from './elements/TextElement';
 import { HeadingElement } from './elements/HeadingElement';
 
 export type EditorElementProps<T extends EditorElementType> = {
@@ -59,13 +61,24 @@ export default function EditorElement<ElementType extends EditorElementType>({
 
   return (
     <>
-      <ElementComponent
-        element={element}
-        onSelect={onSelect}
-        selected={selected}
-        targetRef={targetRef}
-        onUpdateLayout={onUpdateLayout}
-      />
+      <div
+        onClick={() => onSelect?.(element.id)}
+        className={`editor-element editor-element-hover ${selected ? 'editor-element-selected' : ''} pl-[var(--editor-spacing)] font-bold`}
+        ref={targetRef}
+        style={{
+          gridRowStart: element.layout.yPos + 1,
+          gridRowEnd: `span ${element.layout.height}`,
+          gridColumnStart: element.layout.xPos + 1,
+          gridColumnEnd: `span ${element.layout.width}`,
+        }}
+      >
+        <ElementComponent
+          element={element}
+          targetRef={targetRef}
+          selected={selected}
+          onSelect={onSelect}
+        />
+      </div>
       {selected && (
         <Moveable
           ref={moveableRef}
@@ -116,6 +129,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
  */
 const ELEMENT_COMPONENTS = {
   [EditorElementType.Heading]: HeadingElement,
+  [EditorElementType.Text]: TextElement,
 } as const satisfies {
   [ElementType in EditorElementType]: React.ComponentType<EditorElementProps<ElementType>>;
 };
