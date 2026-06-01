@@ -31,6 +31,7 @@ export function activate(context: vscode.ExtensionContext) {
       },
     );
     setWebviewHtml(context, panel.webview, 'Editor.html');
+    messages.register(panel);
   });
 
   context.subscriptions.push(disposable);
@@ -45,6 +46,13 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand('5board-vsc.newBoard', async () => {
       await new5boardCommand();
+    }),
+  );
+
+  // >HTML Test Export-Command
+  context.subscriptions.push(
+    vscode.commands.registerCommand('5board-vsc.exportHtmlTest', () => {
+      messages.requestHtmlExport();
     }),
   );
 

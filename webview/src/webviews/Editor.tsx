@@ -79,6 +79,16 @@ export default function Editor() {
       setFileName(msg.fileName);
       setFileContent(msg.content);
     }
+    if (msg.type === 'requestHtmlExport') {
+      const body = window.document.querySelector('#root')?.innerHTML ?? '';
+      const css = collectCss();
+
+      messages.send({
+        type: 'exportHtml',
+        html: createHtmlExport(body, css),
+        fileName,
+      });
+    }
   });
   return (
     <>
@@ -88,6 +98,34 @@ export default function Editor() {
       <EditorCanvas document={document} />
     </>
   );
+}
+
+function createHtmlExport(body: string, css: string): string {
+  return `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>5Board Export</title>
+  <style>
+${css}
+  </style>
+</head>
+<body>
+${body}
+</body>
+</html>`;
+}
+
+function collectCss(): string {
+  return [...document.styleSheets]
+    .map((sheet) => {
+      try {
+        return [...sheet.cssRules].map((rule) => rule.cssText).join('\n');
+      } catch {
+        return '';
+      }
+    })
+    .join('\n');
 }
 
 init(Editor);

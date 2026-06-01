@@ -98,6 +98,9 @@ export class MessageService {
       case 'selectTool':
         this.handleSelectTool(msg);
         break;
+      case 'exportHtml':
+        this.handleExportHtml(msg);
+        break;
       default:
         console.warn('Unhandled webview message', msg);
     }
@@ -223,5 +226,29 @@ export class MessageService {
 
   private handleSelectTool(_msg: { type: 'selectTool'; id: string }): void {
     //todo: implement tool selection logic, e.g. update state with selected tool ID and broadcast changes
+  }
+
+  requestHtmlExport(): void {
+    this.broadcast({ type: 'requestHtmlExport' });
+  }
+
+  private async handleExportHtml(msg: {
+    type: 'exportHtml';
+    html: string;
+    fileName?: string;
+  }): Promise<void> {
+    const targetUri = await vscode.window.showSaveDialog({
+      filters: {
+        HTML: ['html', 'htm'],
+      },
+      saveLabel: 'Export HTML',
+    });
+
+    if (!targetUri) {
+      return;
+    }
+
+    await vscode.workspace.fs.writeFile(targetUri, new TextEncoder().encode(msg.html));
+    vscode.window.showInformationMessage(`HTML export saved: ${targetUri.fsPath}`);
   }
 }
