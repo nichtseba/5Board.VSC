@@ -1,8 +1,8 @@
 import { EditorElement, EditorElementType } from '5board.vsc-common';
 import { Dropdown } from 'vscrui';
-import SettingsField from './layout/SettingsField';
-import SettingsPanel from './layout/SettingsPanel';
-import { useLocalization } from '../../providers/LocalizationProvider';
+import SettingsField from '../layout/SettingsField';
+import SettingsPanel from '../layout/SettingsPanel';
+import { useLocalization } from '../../../providers/LocalizationProvider';
 
 type Props = {
   element: EditorElement<EditorElementType.Heading>;

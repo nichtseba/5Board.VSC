@@ -64,8 +64,8 @@ export function activate(context: vscode.ExtensionContext) {
   // Sidebar Editor Controls
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(
-      '5board-vsc.sidebar-view',
-      new SidebarViewProvider(context, messages, 'Sidebar.html'),
+      '5board-vsc.sidebar-tool-view',
+      new SidebarViewProvider(context, messages, 'ToolSidebar.html'),
       {
         webviewOptions: { retainContextWhenHidden: true },
       },
