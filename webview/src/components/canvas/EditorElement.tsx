@@ -2,6 +2,10 @@ import type React from 'react';
 import { EditorElement, EditorElementType } from '5board.vsc-common';
 import { TextElement } from './elements/TextElement';
 import { HeadingElement } from './elements/HeadingElement';
+import { CodeElement } from './elements/CodeElement';
+import { ImageElement } from './elements/ImageElement';
+import { ShapeElement } from './elements/ShapeElement';
+import { ArrowElement } from './elements/ArrowElement';
 
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
@@ -44,6 +48,10 @@ export default function EditorElement<ElementType extends EditorElementType>({
 const ELEMENT_COMPONENTS = {
   [EditorElementType.Heading]: HeadingElement,
   [EditorElementType.Text]: TextElement,
+  [EditorElementType.Code]: CodeElement,
+  [EditorElementType.Image]: ImageElement,
+  [EditorElementType.Shape]: ShapeElement,
+  [EditorElementType.Arrow]: ArrowElement,
 } as const satisfies {
   [ElementType in EditorElementType]: React.ComponentType<EditorElementProps<ElementType>>;
 };
