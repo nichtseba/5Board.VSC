@@ -5,5 +5,5 @@ import { EditorElementProps } from '../EditorElement';
  * Renders a text element.
  */
 export function TextElement({ element }: EditorElementProps<EditorElementType.Text>) {
-  return <p>{element.data.content}</p>;
+  return <div>Add canvas element for {element.id}</div>;
 }
