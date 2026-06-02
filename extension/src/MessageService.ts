@@ -59,6 +59,9 @@ export class MessageService {
       case 'runCode':
         this.handleRunCode(msg);
         break;
+      case 'scroll':
+        this.handleScroll(msg);
+        break;
       case 'loadFile':
         this.handleLoadFile(msg);
         break;
@@ -153,6 +156,14 @@ export class MessageService {
    */
   private handleRunCode(msg: { type: 'runCode'; code: string }): void {
     this.broadcast({ type: 'statusUpdate', status: `Running: ${msg.code}` });
+  }
+
+  /**
+   * Handles the 'scroll' message, broadcasting the vertical and horizontal scroll position.
+   * @param msg The message containing the scroll position.
+   */
+  private handleScroll(msg: { type: 'scroll'; top: number; left: number }): void {
+    this.broadcast({ type: 'scrollUpdate', top: msg.top, left: msg.left });
   }
 
   private handleLoadFile(_msg: { type: 'loadFile'; fileName: string }): void {

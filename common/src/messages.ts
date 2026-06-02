@@ -12,14 +12,15 @@ export type ExtensionToWebviewMessage =
   | { type: 'fileLoaded'; content: string; fileName: string }
   | { type: 'statusUpdate'; status: string }
   | { type: 'error'; message: string }
-  | { type: 'scrollToElementPreview'; id: string } //or position:number?
-  | { type: 'visibleRangePreview'; startY: number; endY: number }
+  | { type: 'scrollUpdate'; top: number; left: number }
+  | { type: 'visibleRange'; startY: number; endY: number }
   | { type: 'cursorUpdate'; x: number; y: number };
 
 // Messages FROM webviews TO the extension
 export type WebviewToExtensionMessage =
   | { type: 'ready' }
   | { type: 'cursorMove'; x: number; y: number }
+  | { type: 'scroll'; top: number; left: number }
   | { type: 'runCode'; code: string }
   | { type: 'loadFile'; fileName: string }
   | { type: 'saveFile'; content: string; fileName: string }

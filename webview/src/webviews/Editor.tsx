@@ -55,6 +55,7 @@ export default function Editor() {
     });
     console.log(`Mouse Position: (${x}, ${y})`); // dev tools
   };
+
   const document: BoardDocument = {
     manifest: {
       title: '',
@@ -66,7 +67,7 @@ export default function Editor() {
       elements: [1, 2, 3, 4, 5, 6].map((i) => ({
         id: `element-${i}`,
         type: EditorElementType.Heading,
-        yPos: i * 10,
+        yPos: i * 20,
         height: 2,
         data: {
           level: i as 1 | 2 | 3 | 4 | 5 | 6,
@@ -80,6 +81,23 @@ export default function Editor() {
 
   useEffect(() => {
     messages.send({ type: 'ready' });
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const top = window.document.documentElement.scrollTop;
+      const left = window.document.documentElement.scrollLeft;
+
+      messages.send({
+        type: 'scroll',
+        top,
+        left,
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useOnMessage((msg) => {

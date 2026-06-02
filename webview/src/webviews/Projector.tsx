@@ -22,7 +22,7 @@ export default function Projector() {
       elements: [1, 2, 3, 4, 5, 6].map((i) => ({
         id: `element-${i}`,
         type: EditorElementType.Heading,
-        yPos: i * 10,
+        yPos: i * 20,
         height: 2,
         data: {
           level: i as 1 | 2 | 3 | 4 | 5 | 6,
@@ -46,6 +46,12 @@ export default function Projector() {
     }
     if (msg.type === 'cursorUpdate') {
       setCursor({ x: msg.x, y: msg.y });
+    }
+    if (msg.type === 'scrollUpdate') {
+      window.scrollTo({
+        top: msg.top,
+        left: msg.left,
+      });
     }
   });
 
