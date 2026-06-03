@@ -22,9 +22,9 @@ export default function EditorElement<ElementType extends EditorElementType>({
   onSelect,
   selected,
 }: EditorElementProps<ElementType>) {
-  const ElementComponent = ELEMENT_COMPONENTS[element.type] as React.ComponentType<
-    EditorElementProps<ElementType>
-  >;
+  const ElementComponent =
+    (ELEMENT_COMPONENTS[element.type] as React.ComponentType<EditorElementProps<ElementType>>) ??
+    UnknownElement;
 
   return (
     <div
@@ -55,3 +55,12 @@ const ELEMENT_COMPONENTS = {
 } as const satisfies {
   [ElementType in EditorElementType]: React.ComponentType<EditorElementProps<ElementType>>;
 };
+
+function UnknownElement({ element }: { element: unknown }) {
+  return (
+    <div>
+      Unknown Element Type:
+      <code>{JSON.stringify(element)}</code>
+    </div>
+  );
+}

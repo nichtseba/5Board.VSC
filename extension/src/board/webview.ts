@@ -2,8 +2,6 @@ import crypto from 'crypto';
 import vscode from 'vscode';
 import { setWebviewHtml } from '../webview';
 
-export const EDITOR_VIEW_TYPE = '5board-vsc.editor';
-
 export function get5boardzAssetCacheRoot(
   context: vscode.ExtensionContext,
   packageUri: vscode.Uri,
