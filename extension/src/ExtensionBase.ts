@@ -33,12 +33,18 @@ export type CommandConfig = {
   callback: CommandCallback;
 };
 
-export type CommandCallback = (this: ExtensionBase, ...args: unknown[]) => void;
+export type CommandCallback<Args extends unknown[] = unknown[]> = (
+  this: ExtensionBase,
+  ...args: Args
+) => void;
 
-export function Command(id: string) {
-  return function (target: CommandCallback, context: ClassMethodDecoratorContext<ExtensionBase>) {
+export function Command<Args extends unknown[] = unknown[]>(id: string) {
+  return function (
+    target: CommandCallback<Args>,
+    context: ClassMethodDecoratorContext<ExtensionBase>,
+  ) {
     context.addInitializer(function (this: ExtensionBase) {
-      this.registerCommand(id, target);
+      this.registerCommand(id, target as CommandCallback);
     });
   };
 }

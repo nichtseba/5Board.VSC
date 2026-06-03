@@ -27,4 +27,4 @@ export type WebviewToExtensionMessage<
 export type WebviewToExtensionMessageType = AllWebviewToExtensionMessage['type'];
 
 // All Messages from webviews to the extension
-type AllWebviewToExtensionMessage = { type: 'ready' };
+type AllWebviewToExtensionMessage = { type: 'ready' } | { type: 'focus' };
