@@ -1,5 +1,6 @@
 import { EditorElement } from './board/element';
 import { Language } from './localization';
+import { BoardDocument } from './board/document';
 
 export type AppState = {
   selectedElementId: string | null;
@@ -13,10 +14,16 @@ export type ExtensionToWebviewMessage =
   | { type: 'statusUpdate'; status: string }
   | { type: 'error'; message: string }
   | { type: 'scrollToElementPreview'; id: string } //or position:number?
-  | { type: 'visibleRangePreview'; startY: number; endY: number };
+  | { type: 'visibleRangePreview'; startY: number; endY: number }
+  | { type: 'updateDocument'; content: BoardDocument }; //todo: define type of document content
+
+export type WebviewToExtensionMessageType = AllWebviewToExtensionMessage['type'];
+export type WebviewToExtensionMessage<
+  MessageType extends WebviewToExtensionMessageType = WebviewToExtensionMessageType,
+> = Extract<AllWebviewToExtensionMessage, { type: MessageType }>;
 
 // Messages FROM webviews TO the extension
-export type WebviewToExtensionMessage =
+type AllWebviewToExtensionMessage =
   | { type: 'ready' }
   | { type: 'runCode'; code: string }
   | { type: 'loadFile'; fileName: string }

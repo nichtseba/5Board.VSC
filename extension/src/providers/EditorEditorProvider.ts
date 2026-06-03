@@ -1,24 +1,26 @@
 import * as vscode from 'vscode';
 
-import { FiveBoardDocument } from './document';
-import { get5boardzAssetCacheRoot, setEditorWebviewHtml } from './webview';
-import { MessageService } from '../MessageService';
+import { setEditorWebviewHtml } from '../board/webview';
+import { BoardCustomDocument } from '../board/BoardCustomDocument';
+import { PackageManager } from '../PackageManager.class';
 
-export class FiveBoardEditorProvider implements vscode.CustomEditorProvider<FiveBoardDocument> {
+export class EditorEditorProvider implements vscode.CustomEditorProvider<BoardCustomDocument> {
+  public static readonly VIEW_TYPE = '5board-vsc.editor';
+
   // Todo: Actually fire this event whenever the document changes, so the editor knows to update
-  onDidChangeCustomDocument;
+
+  private didChangeCustomDocument = new vscode.EventEmitter<
+    vscode.CustomDocumentContentChangeEvent<BoardCustomDocument>
+  >();
+  onDidChangeCustomDocument = this.didChangeCustomDocument.event;
 
   constructor(
     private context: vscode.ExtensionContext,
-    private messages: MessageService,
-  ) {
-    this.onDidChangeCustomDocument = new vscode.EventEmitter<
-      vscode.CustomDocumentContentChangeEvent<FiveBoardDocument>
-    >().event;
-  }
+    private packageManager: PackageManager,
+  ) {}
 
   saveCustomDocumentAs(
-    document: FiveBoardDocument,
+    document: BoardCustomDocument,
     destination: vscode.Uri,
     _cancellation: vscode.CancellationToken,
   ): Thenable<void> {
@@ -27,32 +29,24 @@ export class FiveBoardEditorProvider implements vscode.CustomEditorProvider<Five
 
   async openCustomDocument(
     uri: vscode.Uri,
-    _openContext: vscode.CustomDocumentOpenContext,
+    openContext: vscode.CustomDocumentOpenContext,
     _token: vscode.CancellationToken,
-  ): Promise<FiveBoardDocument> {
-    // Todo: Implement openContext data
-    return FiveBoardDocument.load(uri);
+  ): Promise<BoardCustomDocument> {
+    const pkg = await this.packageManager.getOrLoadPackage(uri, openContext);
+    return new BoardCustomDocument(pkg, uri);
   }
 
   async resolveCustomEditor(
-    document: FiveBoardDocument,
+    document: BoardCustomDocument,
     webviewPanel: vscode.WebviewPanel,
     _token: vscode.CancellationToken,
   ): Promise<void> {
-    const assetCacheRoot = get5boardzAssetCacheRoot(this.context, document.uri);
-    this.messages.registerEditor(webviewPanel, {
-      content: JSON.stringify(document.boardPackage.document.content), // Todo: this is terrible
-      fileName: document.uri.fsPath,
-    });
     webviewPanel.webview.options = {
       enableScripts: true,
-      localResourceRoots: [
-        vscode.Uri.joinPath(this.context.extensionUri, 'media'),
-        this.context.globalStorageUri,
-        assetCacheRoot,
-      ],
+      localResourceRoots: [vscode.Uri.joinPath(this.context.extensionUri, 'media')],
     };
 
+    document.messageService.registerPanel(webviewPanel);
     // Todo: Replace with actual document title
     webviewPanel.title = `5Board: ${vscode.workspace.asRelativePath(document.uri, false)}`;
 
@@ -60,20 +54,21 @@ export class FiveBoardEditorProvider implements vscode.CustomEditorProvider<Five
   }
 
   async saveCustomDocument(
-    document: FiveBoardDocument,
+    document: BoardCustomDocument,
     _cancellation: vscode.CancellationToken,
   ): Promise<void> {
     await document.saveDocument();
   }
+
   async revertCustomDocument(
-    document: FiveBoardDocument,
+    document: BoardCustomDocument,
     _cancellation: vscode.CancellationToken,
   ): Promise<void> {
     await document.reloadDocument();
   }
 
   async backupCustomDocument(
-    document: FiveBoardDocument,
+    document: BoardCustomDocument,
     backupContext: vscode.CustomDocumentBackupContext,
     _cancellation: vscode.CancellationToken,
   ): Promise<vscode.CustomDocumentBackup> {
@@ -85,5 +80,15 @@ export class FiveBoardEditorProvider implements vscode.CustomEditorProvider<Five
         await vscode.workspace.fs.delete(backupContext.destination, { recursive: false });
       },
     };
+  }
+
+  public register(): void {
+    this.context.subscriptions.push(
+      vscode.window.registerCustomEditorProvider(EditorEditorProvider.VIEW_TYPE, this, {
+        webviewOptions: {
+          retainContextWhenHidden: true, // Todo: store context
+        },
+      }),
+    );
   }
 }
