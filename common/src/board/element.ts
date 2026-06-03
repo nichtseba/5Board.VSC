@@ -91,9 +91,11 @@ export type CodeElementData = {
   codeBlockId: string;
   fileName?: string;
   language?: string;
+  className?: string;
 
   content: string;
   output?: string;
+  errorOutput?: string;
 };
 
 export type ImageElementData = {

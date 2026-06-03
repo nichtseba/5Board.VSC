@@ -70,6 +70,34 @@ export default function Editor() {
             content: `Heading ${i}`,
           },
         })),
+        {
+          id: 'code-test-1',
+          type: EditorElementType.Code,
+          layout: { xPos: 0, yPos: 28, width: 36, height: 10 },
+          style: { visible: true },
+          data: {
+            codeBlockId: 'test-block-1',
+            language: 'java',
+            className: 'Student',
+            content:
+              'public String greet(String name) {\n    return "Hallo, " + name + "!";\n}\nSystem.out.println(greet("Tom"));',
+            output: 'Hallo, Tom!',
+          },
+        },
+        {
+          id: 'code-test-2',
+          type: EditorElementType.Code,
+          layout: { xPos: 0, yPos: 50, width: 36, height: 10 },
+          style: { visible: true },
+          data: {
+            codeBlockId: 'test-block-1',
+            language: 'java',
+            className: 'Student',
+            content:
+              'public String greet(String name) {\n    return "Hallo, " + name + "!";\n}\nSystem.out.println(greet("Tom"));',
+            errorOutput: 'SyntaxError: Unexpected token "return"',
+          },
+        },
       ],
     },
     sources: [],
