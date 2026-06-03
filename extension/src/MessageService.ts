@@ -27,7 +27,6 @@ export class MessageService {
     msg: WebviewToExtensionMessage<MessageType>,
     sender: vscode.Webview,
   ): void {
-    console.log('Handling message in MessageService:', msg);
     const handlers: Set<Handler<MessageType>> | undefined = this.handlers[msg.type];
     if (handlers) {
       for (const handler of handlers) {

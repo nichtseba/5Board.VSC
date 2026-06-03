@@ -19,7 +19,9 @@ export class BoardCustomDocument implements vscode.CustomDocument {
         sender,
       );
     });
-
+    this.messageService.on('focus', () => {
+      EXTENSION.setActiveEditorDocument(this);
+    });
     this.onDocumentChange((document) => {
       this.messageService.send({ type: 'updateDocument', document });
     });

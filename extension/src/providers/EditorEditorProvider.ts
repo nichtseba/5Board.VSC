@@ -85,9 +85,7 @@ export class EditorEditorProvider implements vscode.CustomEditorProvider<BoardCu
   public register(): void {
     this.context.subscriptions.push(
       vscode.window.registerCustomEditorProvider(EditorEditorProvider.VIEW_TYPE, this, {
-        webviewOptions: {
-          retainContextWhenHidden: true, // Todo: store context
-        },
+        supportsMultipleEditorsPerDocument: true,
       }),
     );
   }

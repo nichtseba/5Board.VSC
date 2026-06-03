@@ -18,7 +18,24 @@ export default function Editor() {
       setDocument(msg.document);
     }
   });
-  return <>{document && <EditorCanvas document={document} />}</>;
+
+  useEffect(() => {
+    const setFocus = () => {
+      messages.send({ type: 'focus' });
+    };
+    window.addEventListener('focus', setFocus);
+    return () => {
+      window.removeEventListener('focus', setFocus);
+    };
+  }, []);
+  return (
+    <>
+      <p>
+        Document: <code>{JSON.stringify(document, null, 2)}</code>
+      </p>
+      {document && <EditorCanvas document={document} />}
+    </>
+  );
 }
 
 init(Editor);
