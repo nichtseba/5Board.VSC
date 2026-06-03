@@ -5,7 +5,7 @@ import * as vscode from 'vscode';
  * No 5Board-specific logic should be implemented here.
  * Implement 5Board-specific logic in {@link FiveBoardExtension}.
  */
-export abstract class Extension {
+export abstract class ExtensionBase {
   private commands: CommandConfig[] = [];
 
   public registerCommand(id: string, callback: CommandCallback): void {
@@ -33,4 +33,12 @@ export type CommandConfig = {
   callback: CommandCallback;
 };
 
-export type CommandCallback = (this: Extension, ...args: unknown[]) => void;
+export type CommandCallback = (this: ExtensionBase, ...args: unknown[]) => void;
+
+export function Command(id: string) {
+  return function (target: CommandCallback, context: ClassMethodDecoratorContext<ExtensionBase>) {
+    context.addInitializer(function (this: ExtensionBase) {
+      this.registerCommand(id, target);
+    });
+  };
+}

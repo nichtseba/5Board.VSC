@@ -1,5 +1,5 @@
 import vscode from 'vscode';
-import { FiveBoardExtension } from './FiveBoardExtension.class';
+import { FiveBoardExtension } from './FiveBoardExtension';
 
 export const EXTENSION = new FiveBoardExtension();
 

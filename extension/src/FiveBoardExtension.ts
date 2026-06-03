@@ -1,8 +1,6 @@
-import { Command } from './decorators/Command.decorator';
-import { Extension } from './Extension.class';
 import * as vscode from 'vscode';
 import { MessageService } from './MessageService';
-import { PackageManager } from './PackageManager.class';
+import { PackageManager } from './PackageManager';
 import { EditorEditorProvider } from './providers/EditorEditorProvider';
 import { t } from './localization';
 import path from 'path';
@@ -14,8 +12,9 @@ import {
 import { StructureTreeProvider } from './providers/StructureTreeProvider';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
 import { BoardDocument } from '5board.vsc-common';
+import { Command, ExtensionBase } from './ExtensionBase';
 
-export class FiveBoardExtension extends Extension {
+export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
   public readonly packageManager = new PackageManager();
   public activeEditorDocument: BoardCustomDocument | null = null;

@@ -3,6 +3,7 @@
 'use strict';
 
 const path = require('path');
+const { sourceMapsEnabled } = require('process');
 
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
@@ -35,16 +36,12 @@ const extensionConfig = {
         use: [
           {
             loader: 'ts-loader',
-            options: {
-              // Keep package builds focused on extension entry dependencies.
-              onlyCompileBundledFiles: true,
-            },
           },
         ],
       },
     ],
   },
-  devtool: 'nosources-source-map',
+  devtool: 'source-map',
   infrastructureLogging: {
     level: 'log', // enables logging required for problem matchers
   },

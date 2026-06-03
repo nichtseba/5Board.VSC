@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import {
   WebviewToExtensionMessageType,
-  type ExtensionToWebviewMessage,
   type WebviewToExtensionMessage,
+  type ExtensionToWebviewMessage,
 } from '5board.vsc-common';
 
 export class MessageService {
@@ -14,11 +14,7 @@ export class MessageService {
 
   /**
    * Registers a webview panel or view.
-   * - Wires up onDidReceiveMessage
-   * - Cleans up when the panel/view is disposed (via onDidDispose)
-   * Does NOT return a Disposable — cleanup is handled internally.
    */
-  /** Use for editor panels — stores file data sent to that panel on 'ready'. */
   registerPanel(panel: vscode.WebviewPanel): void {
     this.webviews.add(panel.webview);
     panel.webview.onDidReceiveMessage((msg) => this.handleMessage(msg, panel.webview));
@@ -31,6 +27,7 @@ export class MessageService {
     msg: WebviewToExtensionMessage<MessageType>,
     sender: vscode.Webview,
   ): void {
+    console.log('Handling message in MessageService:', msg);
     const handlers: Set<Handler<MessageType>> | undefined = this.handlers[msg.type];
     if (handlers) {
       for (const handler of handlers) {
@@ -46,6 +43,10 @@ export class MessageService {
     }
   }
 
+  /**
+   * Registers a handler for a specific message type.
+   * Returns an unsubscribe function to remove the handler.
+   */
   public on<MessageType extends WebviewToExtensionMessageType>(
     type: MessageType,
     handler: Handler<MessageType>,

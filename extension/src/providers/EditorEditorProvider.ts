@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 
 import { setEditorWebviewHtml } from '../board/webview';
 import { BoardCustomDocument } from '../board/BoardCustomDocument';
-import { PackageManager } from '../PackageManager.class';
+import { PackageManager } from '../PackageManager';
 
 export class EditorEditorProvider implements vscode.CustomEditorProvider<BoardCustomDocument> {
   public static readonly VIEW_TYPE = '5board-vsc.editor';

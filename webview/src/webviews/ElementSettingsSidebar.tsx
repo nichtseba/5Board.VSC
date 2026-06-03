@@ -1,8 +1,8 @@
 import { init } from '../app/init';
-import { useEffect, useState } from 'react';
-import { EditorElement, EditorElementType, AppState } from '5board.vsc-common';
+import { useEffect } from 'react';
+import { EditorElement, EditorElementType } from '5board.vsc-common';
 import { HeadingSettings } from '../components/sidebar/HeadingSettings';
-import { useMessageService, useOnMessage } from '../services/MessageService';
+import { useMessageService } from '../services/MessageService';
 import { useLocalization } from '../providers/LocalizationProvider';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
 
@@ -21,7 +21,6 @@ const SETTINGS_COMPONENTS = {
 
 export default function ElementSettingsSidebar() {
   const messages = useMessageService();
-  const [state, setState] = useState<AppState>({ selectedElementId: null });
   const { t } = useLocalization();
   const selectedElement: EditorElement = {
     id: '123',
@@ -37,12 +36,6 @@ export default function ElementSettingsSidebar() {
   useEffect(() => {
     messages.send({ type: 'ready' });
   }, []);
-
-  useOnMessage((msg) => {
-    if (msg.type === 'init' || msg.type === 'updateContent') {
-      setState(msg.state);
-    }
-  });
 
   let content: React.ReactNode;
 
@@ -68,12 +61,7 @@ export default function ElementSettingsSidebar() {
     }
   }
 
-  return (
-    <SidebarShell>
-      {content}
-      {t('webview.sidebar-element-settings.selectedElement')}: {state.selectedElementId ?? '–'}
-    </SidebarShell>
-  );
+  return <SidebarShell>{content}</SidebarShell>;
 }
 
 init(ElementSettingsSidebar);

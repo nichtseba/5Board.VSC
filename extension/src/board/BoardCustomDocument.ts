@@ -15,13 +15,13 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   ) {
     this.messageService.on('ready', (_msg, sender) => {
       this.messageService.send(
-        { type: 'updateDocument', content: this.boardPackage.document },
+        { type: 'init', document: this.boardPackage.document, language: 'en' },
         sender,
       );
     });
 
     this.onDocumentChange((document) => {
-      this.messageService.send({ type: 'updateDocument', content: document });
+      this.messageService.send({ type: 'updateDocument', document });
     });
   }
 

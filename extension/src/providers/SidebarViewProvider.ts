@@ -21,8 +21,6 @@ export abstract class WebviewProvider implements vscode.WebviewViewProvider {
     };
 
     setWebviewHtml(this.context, webviewView.webview, this.htmlFileName);
-
-    this.messages.register(webviewView);
   }
 
   public register(): void {
