@@ -58,7 +58,7 @@
       "5board-vsc-activitybar": [
         {
           "type": "webview",
-          "id": "5board-vsc.sidebar-view",
+          "id": "5board-vsc.sidebar-tool-view",
           "name": "%views.sidebar.sidebar-title%"
         },
         {
