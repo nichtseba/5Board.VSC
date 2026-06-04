@@ -3,6 +3,7 @@ import { Language } from './localization';
 
 export type AppState = {
   selectedElementId: string | null;
+  selectedToolId: string | null;
 };
 
 // Messages FROM the extension TO webviews
@@ -32,4 +33,4 @@ export type WebviewToExtensionMessage =
   | { type: 'toggleElementVisibility'; id: string; visible: boolean } //todo: add field visible in definition of EditorElement
   | { type: 'addElement'; element: EditorElement }
   | { type: 'duplicateElement'; id: string }
-  | { type: 'selectTool'; id: string }; //different handling of tools vs editorElements?
+  | { type: 'selectTool'; id: string | null };

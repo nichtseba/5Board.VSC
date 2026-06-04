@@ -3,7 +3,6 @@ import { useMessageService, useOnMessage } from '../services/MessageService';
 import { BoardDocument, EditorElementType } from '5board.vsc-common';
 import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
-import EditorElement from '../components/EditorElement';
 
 // Wrapped in memo: only re-renders when fileName or fileContent actually change,
 // NOT on every counter update.
@@ -34,15 +33,14 @@ const FileView = memo(function FileView({
       ) : (
         <pre>{fileContent || 'Datei ist leer.'}</pre>
       )}
-      <EditorElement />
     </div>
   );
 });
 
 export default function Editor() {
   const messages = useMessageService();
-  //const [state, setState] = useState<AppState>({ counter: 0 });
   const [fileName, setFileName] = useState('');
+  const [activeToolId, setActiveToolId] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState('');
   const document: BoardDocument = {
     manifest: {
@@ -82,7 +80,7 @@ export default function Editor() {
 
   useOnMessage((msg) => {
     if (msg.type === 'init' || msg.type === 'updateContent') {
-      //setState(msg.state);
+      setActiveToolId(msg.state.selectedToolId ?? null);
     }
     if (msg.type === 'fileLoaded') {
       setFileName(msg.fileName);
@@ -94,7 +92,7 @@ export default function Editor() {
       <div>
         <FileView fileName={fileName} fileContent={fileContent} />
       </div>
-      <EditorCanvas document={document} />
+      <EditorCanvas document={document} spacerMode={activeToolId === 'spacer'} />
     </>
   );
 }

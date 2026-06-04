@@ -1,9 +1,10 @@
-import { useLayoutEffect, useRef } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { EditorElement, EditorElementType } from '5board.vsc-common';
 import Moveable from 'react-moveable';
 import type React from 'react';
 import { TextElement } from './elements/TextElement';
 import { HeadingElement } from './elements/HeadingElement';
+import { getGridCellSize } from '../../util';
 
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
@@ -27,25 +28,16 @@ export default function EditorElement<ElementType extends EditorElementType>({
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
   const moveableRef = useRef<Moveable | null>(null);
+  const [canvasElement, setCanvasElement] = useState<HTMLElement | null>(null);
   const ElementComponent = ELEMENT_COMPONENTS[element.type] as React.ComponentType<
     EditorElementProps<ElementType>
   >;
 
-  const getGridCellSize = () => {
-    const canvas = targetRef.current?.closest('.editor-canvas') as HTMLElement | null;
-    if (!canvas) return { width: 1, height: 1 };
+  const cellSize = useMemo(() => getGridCellSize(canvasElement), [canvasElement]);
 
-    const style = getComputedStyle(canvas);
-    const parsePx = (value: string) => Number(value.replace('px', '').trim()) || 0;
-
-    const columns = parseInt(style.getPropertyValue('--editor-columns')) || 1;
-    const templateColumns = style.getPropertyValue('grid-template-columns');
-    const columnWidth = parsePx(templateColumns.split(' ')[0]) || canvas.clientWidth / columns || 1;
-    const rowHeight = parsePx(style.getPropertyValue('grid-auto-rows')) || columnWidth;
-
-    return { width: columnWidth, height: rowHeight };
-  };
-  const cellSize = getGridCellSize();
+  useLayoutEffect(() => {
+    setCanvasElement(targetRef.current?.closest('.editor-canvas') as HTMLElement | null);
+  }, [element.id]);
 
   useLayoutEffect(() => {
     if (selected) {
@@ -63,7 +55,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
     <>
       <div
         onClick={() => onSelect?.(element.id)}
-        className={`editor-element editor-element-hover ${selected ? 'editor-element-selected' : ''} pl-[var(--editor-spacing)] font-bold`}
+        className={`editor-element editor-element-hover ${selected ? 'editor-element-selected' : ''} pl-editor font-bold`}
         ref={targetRef}
         style={{
           gridRowStart: element.layout.yPos + 1,
@@ -95,9 +87,8 @@ export default function EditorElement<ElementType extends EditorElementType>({
           onDragEnd={({ target, lastEvent }) => {
             if (!lastEvent || !target) return;
             const [dx, dy] = lastEvent.beforeTranslate;
-            const gridSize = getGridCellSize();
-            const xDelta = Math.round(dx / gridSize.width);
-            const yDelta = Math.round(dy / gridSize.height);
+            const xDelta = Math.round(dx / cellSize.width);
+            const yDelta = Math.round(dy / cellSize.height);
 
             if (xDelta !== 0 || yDelta !== 0) {
               onUpdateLayout?.(element.id, {
@@ -121,11 +112,10 @@ export default function EditorElement<ElementType extends EditorElementType>({
           }}
           onResizeEnd={({ target, lastEvent }) => {
             if (!lastEvent || !target) return;
-            const gridSize = getGridCellSize();
             const width = lastEvent.width;
             const height = lastEvent.height;
-            const newWidth = Math.max(1, Math.round(width / gridSize.width));
-            const newHeight = Math.max(1, Math.round(height / gridSize.height));
+            const newWidth = Math.max(1, Math.round(width / cellSize.width));
+            const newHeight = Math.max(1, Math.round(height / cellSize.height));
 
             if (newWidth !== element.layout.width || newHeight !== element.layout.height) {
               onUpdateLayout?.(element.id, {

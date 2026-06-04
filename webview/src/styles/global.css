@@ -22,7 +22,7 @@
   --radius-circle: var(--vscode-cornerRadius-circle);
 
   /* Editor System */
-  --editor-spacing: 1rem;
+  --spacing-editor: 1rem;
   --editor-grid-size: 1rem;
   --editor-columns: 40;
 

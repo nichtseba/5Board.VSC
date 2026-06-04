@@ -4,13 +4,19 @@ import { ToolItem } from '5board.vsc-common';
 import { useLocalization } from '../providers/LocalizationProvider';
 import { Button } from 'vscrui';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
+import { useMessageService } from '../services/MessageService';
 
 export default function ToolSidebar() {
   const { t } = useLocalization();
+  const messages = useMessageService();
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
 
   const handleToolClick = (tool: ToolItem) => {
-    setSelectedTool((prev) => (prev === tool.id ? null : tool.id));
+    setSelectedTool((prev) => {
+      const next = prev === tool.id ? null : tool.id;
+      messages.send({ type: 'selectTool', id: next });
+      return next;
+    });
   };
   const tools: ToolItem[] = [
     {
@@ -42,6 +48,11 @@ export default function ToolSidebar() {
       id: 'image',
       label: t('webview.sidebar.tools.image'),
       icon: 'file-media',
+    },
+    {
+      id: 'spacer',
+      label: t('webview.sidebar.tools.spacer'),
+      icon: 'move',
     },
   ];
 

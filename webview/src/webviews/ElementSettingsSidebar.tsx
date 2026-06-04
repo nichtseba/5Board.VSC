@@ -9,7 +9,7 @@ import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
 
 export default function ElementSettingsSidebar() {
   const messages = useMessageService();
-  const [state, setState] = useState<AppState>({ selectedElementId: null });
+  const [state, setState] = useState<AppState>({ selectedElementId: null, selectedToolId: null });
   const { t } = useLocalization();
   const selectedElement: EditorElement = {
     id: '123',

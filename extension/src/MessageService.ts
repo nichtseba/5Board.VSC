@@ -14,6 +14,7 @@ export class MessageService {
   private editorData = new Map<vscode.Webview, EditorData>();
   private state: AppState = {
     selectedElementId: null,
+    selectedToolId: null,
   };
   private onStateChange?: (state: AppState) => void;
 
@@ -221,7 +222,12 @@ export class MessageService {
     //todo: implement element duplication logic, e.g. find element by ID, create copy with new ID, add to state, update state and broadcast changes
   }
 
-  private handleSelectTool(_msg: { type: 'selectTool'; id: string }): void {
-    //todo: implement tool selection logic, e.g. update state with selected tool ID and broadcast changes
+  private handleSelectTool(msg: { type: 'selectTool'; id: string | null }): void {
+    this.state = {
+      ...this.state,
+      selectedToolId: this.state.selectedToolId === msg.id ? null : msg.id,
+    };
+    this.broadcast({ type: 'updateContent', state: this.state });
+    this.onStateChange?.(this.state);
   }
 }
