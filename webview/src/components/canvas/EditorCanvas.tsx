@@ -1,32 +1,42 @@
-import { BoardDocument } from '5board.vsc-common';
+import { BoardDocument, EditorToolId } from '5board.vsc-common';
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type React from 'react';
 import EditorElement from './EditorElement';
 import SpacerOverlay from './SpacerOverlay';
-import { useMessageService } from '../../services/MessageService';
+import { useMessageService, useOnMessage } from '../../services/MessageService';
 import { getGridCellSize } from '../../util';
 import './EditorCanvas.css';
 
 export type EditorCanvasProps = {
   document: BoardDocument;
-  spacerMode?: boolean;
 };
 
 /**
  * Renders the editor canvas, which displays all editor elements based on their yPos.
  */
-export default function EditorCanvas({ document, spacerMode = false }: EditorCanvasProps) {
+export default function EditorCanvas({ document }: EditorCanvasProps) {
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
   const [currentDocument, setCurrentDocument] = useState(document);
+  const [activeToolId, setActiveToolId] = useState<string | null>(null);
+
   const [canvasGridSize, setCanvasGridSize] = useState(() => getGridCellSize(null));
+  const rowHeight = useMemo(() => canvasGridSize.height, [canvasGridSize.height]);
+
   const [dragState, setDragState] = useState<{
     startY: number;
     currentY: number;
     startRow: number;
     draggedRows: number;
   } | null>(null);
+
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const messages = useMessageService();
+
+  useOnMessage((msg) => {
+    if (msg.type === 'init' || msg.type === 'updateContent') {
+      setActiveToolId(msg.state.selectedToolId ?? null);
+    }
+  });
 
   useEffect(() => {
     setCurrentDocument(document);
@@ -34,14 +44,14 @@ export default function EditorCanvas({ document, spacerMode = false }: EditorCan
 
   useLayoutEffect(() => {
     setCanvasGridSize(getGridCellSize(canvasRef.current));
-  }, [spacerMode, currentDocument.content.elements.length]);
+  }, [activeToolId, currentDocument.content.elements.length]);
 
   useEffect(() => {
     messages.send({ type: 'selectElement', id: selectedElementId });
   }, [selectedElementId, messages]);
 
   useEffect(() => {
-    if (!spacerMode) {
+    if (!(activeToolId === EditorToolId.SPACER)) {
       setDragState(null);
       return;
     }
@@ -81,9 +91,7 @@ export default function EditorCanvas({ document, spacerMode = false }: EditorCan
       window.removeEventListener('pointerup', handlePointerRelease);
       window.removeEventListener('pointercancel', handlePointerRelease);
     };
-  }, [spacerMode]);
-
-  const rowHeight = useMemo(() => canvasGridSize.height, [canvasGridSize.height]);
+  }, [activeToolId]);
 
   const getRowFromClientY = (clientY: number) => {
     const canvas = canvasRef.current;
@@ -95,7 +103,7 @@ export default function EditorCanvas({ document, spacerMode = false }: EditorCan
   };
 
   const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!spacerMode || event.button !== 0) return;
+    if (!(activeToolId === EditorToolId.SPACER) || event.button !== 0) return;
 
     event.preventDefault();
     setDragState({
@@ -107,7 +115,7 @@ export default function EditorCanvas({ document, spacerMode = false }: EditorCan
   };
 
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!spacerMode || !dragState) return;
+    if (!(activeToolId === EditorToolId.SPACER) || !dragState) return;
 
     const draggedRows = Math.round((event.clientY - dragState.startY) / rowHeight);
 
@@ -150,11 +158,13 @@ export default function EditorCanvas({ document, spacerMode = false }: EditorCan
       {`Selected element ID: ${selectedElementId}`}
       <div
         ref={canvasRef}
-        className={`editor-canvas bg-editor-background ${spacerMode ? 'cursor-row-resize' : ''}`}
+        className={`editor-canvas bg-editor-background ${activeToolId === EditorToolId.SPACER ? 'cursor-row-resize' : ''}`}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
       >
-        {spacerMode ? <SpacerOverlay dragState={dragState} canvasRef={canvasRef} /> : null}
+        {activeToolId === EditorToolId.SPACER ? (
+          <SpacerOverlay dragState={dragState} canvasRef={canvasRef} />
+        ) : null}
         {currentDocument.content.elements.map((element) => (
           <EditorElement
             key={element.id}
@@ -162,6 +172,7 @@ export default function EditorCanvas({ document, spacerMode = false }: EditorCan
             selected={element.id === selectedElementId}
             onSelect={setSelectedElementId}
             onUpdateLayout={handleUpdateLayout}
+            moveEnabled={activeToolId === EditorToolId.POINTER}
           />
         ))}
       </div>

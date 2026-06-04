@@ -40,7 +40,6 @@ const FileView = memo(function FileView({
 export default function Editor() {
   const messages = useMessageService();
   const [fileName, setFileName] = useState('');
-  const [activeToolId, setActiveToolId] = useState<string | null>(null);
   const [fileContent, setFileContent] = useState('');
   const document: BoardDocument = {
     manifest: {
@@ -79,9 +78,6 @@ export default function Editor() {
   }, []);
 
   useOnMessage((msg) => {
-    if (msg.type === 'init' || msg.type === 'updateContent') {
-      setActiveToolId(msg.state.selectedToolId ?? null);
-    }
     if (msg.type === 'fileLoaded') {
       setFileName(msg.fileName);
       setFileContent(msg.content);
@@ -92,7 +88,7 @@ export default function Editor() {
       <div>
         <FileView fileName={fileName} fileContent={fileContent} />
       </div>
-      <EditorCanvas document={document} spacerMode={activeToolId === 'spacer'} />
+      <EditorCanvas document={document} />
     </>
   );
 }

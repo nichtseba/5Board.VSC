@@ -12,6 +12,7 @@ export type EditorElementProps<T extends EditorElementType> = {
   selected?: boolean;
   targetRef?: React.RefObject<HTMLDivElement>;
   onUpdateLayout?: (id: string, changes: Partial<EditorElement<T>['layout']>) => void;
+  moveEnabled?: boolean;
 };
 
 /**
@@ -25,6 +26,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
   onSelect,
   selected,
   onUpdateLayout,
+  moveEnabled,
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
   const moveableRef = useRef<Moveable | null>(null);
@@ -71,7 +73,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
           onSelect={onSelect}
         />
       </div>
-      {selected && (
+      {selected && moveEnabled && (
         <Moveable
           ref={moveableRef}
           target={targetRef}
