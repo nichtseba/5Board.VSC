@@ -42,6 +42,16 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
   });
 
   useEffect(() => {
+    if (activeToolId !== EditorToolId.POINTER) {
+      setSelectedElementId(null);
+    }
+  }, [activeToolId]);
+  const handleSelectElement: (id: string) => void = (id) => {
+    if (activeToolId !== EditorToolId.POINTER) return;
+    setSelectedElementId(id);
+  };
+
+  useEffect(() => {
     setCurrentDocument(document);
   }, [document]);
 
@@ -173,7 +183,7 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
             key={element.id}
             element={element}
             selected={element.id === selectedElementId}
-            onSelect={setSelectedElementId}
+            onSelect={handleSelectElement}
             onUpdateLayout={handleUpdateLayout}
             activeToolId={activeToolId}
           />

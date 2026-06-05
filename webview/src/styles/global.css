@@ -1,6 +1,4 @@
 @import 'tailwindcss';
-@import './utilities/editor.css';
-@import './utilities/sidebar.css';
 
 @theme {
   --color-*: initial; /* Disable default theme for colors */

@@ -36,7 +36,16 @@ export default function EditorElement<ElementType extends EditorElementType>({
     <>
       <div
         onClick={() => onSelect?.(element.id)}
-        className={`editor-element editor-element-hover ${selected ? 'editor-element-selected' : ''} pl-editor font-bold`}
+        className={`
+          box-border font-bold
+          ${activeToolId === EditorToolId.POINTER ? 'cursor-pointer' : ''}
+          ${
+            activeToolId === EditorToolId.POINTER && !selected
+              ? 'hover:outline hover:outline-1 hover:outline-focus-border'
+              : ''
+          }
+          ${selected ? 'outline outline-2 outline-focus-border bg-focus-border/12' : ''}
+        `}
         ref={targetRef}
         style={{
           gridRowStart: element.layout.yPos + 1,
