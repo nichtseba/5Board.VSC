@@ -175,7 +175,7 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
             selected={element.id === selectedElementId}
             onSelect={setSelectedElementId}
             onUpdateLayout={handleUpdateLayout}
-            moveEnabled={activeToolId === EditorToolId.POINTER}
+            activeToolId={activeToolId}
           />
         ))}
       </div>

@@ -1,10 +1,9 @@
-import { useLayoutEffect, useRef } from 'react';
-import { EditorElement, EditorElementType } from '5board.vsc-common';
-import Moveable from 'react-moveable';
+import { useRef } from 'react';
+import { EditorElement, EditorElementType, EditorToolId } from '5board.vsc-common';
 import type React from 'react';
 import { TextElement } from './elements/TextElement';
 import { HeadingElement } from './elements/HeadingElement';
-import { useGrid } from '../../providers/GridProvider';
+import ElementInteractionController from './elementInteraction/ElementInteractionController';
 
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
@@ -12,7 +11,7 @@ export type EditorElementProps<T extends EditorElementType> = {
   selected?: boolean;
   targetRef?: React.RefObject<HTMLDivElement>;
   onUpdateLayout?: (id: string, changes: Partial<EditorElement<T>['layout']>) => void;
-  moveEnabled?: boolean;
+  activeToolId?: string | null;
 };
 
 /**
@@ -26,27 +25,12 @@ export default function EditorElement<ElementType extends EditorElementType>({
   onSelect,
   selected,
   onUpdateLayout,
-  moveEnabled,
+  activeToolId,
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
-  const moveableRef = useRef<Moveable | null>(null);
   const ElementComponent = ELEMENT_COMPONENTS[element.type] as React.ComponentType<
     EditorElementProps<ElementType>
   >;
-
-  const { cellSize } = useGrid();
-
-  useLayoutEffect(() => {
-    if (selected) {
-      moveableRef.current?.updateRect();
-    }
-  }, [
-    selected,
-    element.layout.xPos,
-    element.layout.yPos,
-    element.layout.width,
-    element.layout.height,
-  ]);
 
   return (
     <>
@@ -68,69 +52,12 @@ export default function EditorElement<ElementType extends EditorElementType>({
           onSelect={onSelect}
         />
       </div>
-      {selected && moveEnabled && (
-        <Moveable
-          ref={moveableRef}
-          target={targetRef}
-          draggable={true}
-          resizable={true}
-          snappable={true}
-          snapGridWidth={cellSize.width}
-          snapGridHeight={cellSize.height}
-          snapThreshold={cellSize.width / 2}
-          onDrag={({ target, transform }) => {
-            target.style.transform = transform;
-          }}
-          onDragEnd={({ target, lastEvent }) => {
-            if (!lastEvent || !target) return;
-            const [dx, dy] = lastEvent.beforeTranslate;
-            const xDelta = Math.round(dx / cellSize.width);
-            const yDelta = Math.round(dy / cellSize.height);
-
-            if (xDelta !== 0 || yDelta !== 0) {
-              onUpdateLayout?.(element.id, {
-                xPos: element.layout.xPos + xDelta,
-                yPos: element.layout.yPos + yDelta,
-              });
-              console.log('persisted position on drag end', element.id, {
-                xPos: element.layout.xPos + xDelta,
-                yPos: element.layout.yPos + yDelta,
-              });
-            }
-
-            if (target instanceof HTMLElement) {
-              target.style.transform = '';
-            }
-            moveableRef.current?.updateRect();
-          }}
-          onResize={({ target, width, height }) => {
-            target.style.width = `${width}px`;
-            target.style.height = `${height}px`;
-          }}
-          onResizeEnd={({ target, lastEvent }) => {
-            if (!lastEvent || !target) return;
-            const width = lastEvent.width;
-            const height = lastEvent.height;
-            const newWidth = Math.max(1, Math.round(width / cellSize.width));
-            const newHeight = Math.max(1, Math.round(height / cellSize.height));
-
-            if (newWidth !== element.layout.width || newHeight !== element.layout.height) {
-              onUpdateLayout?.(element.id, {
-                width: newWidth,
-                height: newHeight,
-              });
-              console.log('persisted resize on resize end', element.id, {
-                width: newWidth,
-                height: newHeight,
-              });
-            }
-
-            if (target instanceof HTMLElement) {
-              target.style.width = '';
-              target.style.height = '';
-            }
-            moveableRef.current?.updateRect();
-          }}
+      {activeToolId === EditorToolId.POINTER && (
+        <ElementInteractionController
+          element={element}
+          selected={selected}
+          targetRef={targetRef}
+          onUpdateLayout={onUpdateLayout}
         />
       )}
     </>

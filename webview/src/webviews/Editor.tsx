@@ -56,7 +56,7 @@ export default function Editor() {
           layout: {
             xPos: 0,
             yPos: i * 4,
-            width: 12,
+            width: 40,
             height: 2,
           },
           style: {
@@ -67,6 +67,23 @@ export default function Editor() {
             content: `Heading ${i}`,
           },
         })),
+        {
+          id: 'text-1',
+          type: EditorElementType.Text,
+          layout: {
+            xPos: 10,
+            yPos: 10,
+            width: 20,
+            height: 5,
+          },
+          style: {
+            visible: true,
+          },
+          data: {
+            content:
+              "Test Text Element, with some content here please. Let's see how it looks like in the editor.",
+          },
+        },
       ],
     },
     sources: [],
