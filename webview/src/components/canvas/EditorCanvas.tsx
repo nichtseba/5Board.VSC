@@ -1,11 +1,11 @@
 import { BoardDocument, EditorToolId } from '5board.vsc-common';
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type React from 'react';
 import EditorElement from './EditorElement';
 import SpacerOverlay from './SpacerOverlay';
 import { useMessageService, useOnMessage } from '../../services/MessageService';
-import { getGridCellSize } from '../../util';
 import './EditorCanvas.css';
+import { useGrid } from '../../providers/GridProvider';
 
 export type EditorCanvasProps = {
   document: BoardDocument;
@@ -19,8 +19,14 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
   const [currentDocument, setCurrentDocument] = useState(document);
   const [activeToolId, setActiveToolId] = useState<string | null>(null);
 
-  const [canvasGridSize, setCanvasGridSize] = useState(() => getGridCellSize(null));
-  const rowHeight = useMemo(() => canvasGridSize.height, [canvasGridSize.height]);
+  const messages = useMessageService();
+  const canvasRef = useRef<HTMLDivElement | null>(null);
+
+  const { cellSize, setGridElement } = useGrid();
+  useEffect(() => {
+    setGridElement(canvasRef.current);
+  }, [setGridElement]);
+  const rowHeight = cellSize.height;
 
   const [dragState, setDragState] = useState<{
     startY: number;
@@ -28,9 +34,6 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
     startRow: number;
     draggedRows: number;
   } | null>(null);
-
-  const canvasRef = useRef<HTMLDivElement | null>(null);
-  const messages = useMessageService();
 
   useOnMessage((msg) => {
     if (msg.type === 'init' || msg.type === 'updateContent') {
@@ -41,10 +44,6 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
   useEffect(() => {
     setCurrentDocument(document);
   }, [document]);
-
-  useLayoutEffect(() => {
-    setCanvasGridSize(getGridCellSize(canvasRef.current));
-  }, [activeToolId, currentDocument.content.elements.length]);
 
   useEffect(() => {
     messages.send({ type: 'selectElement', id: selectedElementId });
@@ -130,6 +129,10 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
     );
   };
 
+  /*
+   * Handler to update the layout of an element (position and size) based on its ID.
+   * Used when the element is moved or resized.
+   */
   const handleUpdateLayout = (
     id: string,
     changes: Partial<(typeof currentDocument.content.elements)[number]['layout']>,

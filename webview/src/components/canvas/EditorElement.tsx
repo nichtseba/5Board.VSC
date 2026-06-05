@@ -1,10 +1,10 @@
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { EditorElement, EditorElementType } from '5board.vsc-common';
 import Moveable from 'react-moveable';
 import type React from 'react';
 import { TextElement } from './elements/TextElement';
 import { HeadingElement } from './elements/HeadingElement';
-import { getGridCellSize } from '../../util';
+import { useGrid } from '../../providers/GridProvider';
 
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
@@ -30,16 +30,11 @@ export default function EditorElement<ElementType extends EditorElementType>({
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
   const moveableRef = useRef<Moveable | null>(null);
-  const [canvasElement, setCanvasElement] = useState<HTMLElement | null>(null);
   const ElementComponent = ELEMENT_COMPONENTS[element.type] as React.ComponentType<
     EditorElementProps<ElementType>
   >;
 
-  const cellSize = useMemo(() => getGridCellSize(canvasElement), [canvasElement]);
-
-  useLayoutEffect(() => {
-    setCanvasElement(targetRef.current?.closest('.editor-canvas') as HTMLElement | null);
-  }, [element.id]);
+  const { cellSize } = useGrid();
 
   useLayoutEffect(() => {
     if (selected) {
