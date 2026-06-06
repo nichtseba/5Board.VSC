@@ -2,7 +2,7 @@
   "customEditors.editor": "5Board Editor",
   "customEditors.legacy-converter": "5Board Legacy Converter",
   "customEditors.projector": "5Board Projector View",
-  "views.sidebar.sidebar-title": "Tools & Presets",
+  "views.sidebar.tool-title": "Tools & Presets",
   "views.sidebar.element-settings-title": "Element Settings",
   "views.sidebar.structure-title": "Structure",
   "commands.openCustomEditor": "Open 5Board Editor",

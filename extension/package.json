@@ -69,7 +69,7 @@
         {
           "type": "webview",
           "id": "5board-vsc.sidebar-tool-view",
-          "name": "%views.sidebar.sidebar-title%"
+          "name": "%views.sidebar.tool-title%"
         },
         {
           "type": "webview",
@@ -113,12 +113,12 @@
       "view/title": [
         {
           "command": "5board-vsc.newBoard",
-          "when": "view == 5board-vsc.sidebar-view",
+          "when": "view == 5board-vsc.sidebar-tool-view",
           "group": "navigation"
         },
         {
           "command": "5board-vsc.startPresentation",
-          "when": "view == 5board-vsc.sidebar-view",
+          "when": "view == 5board-vsc.sidebar-tool-view",
           "group": "navigation"
         }
       ]
