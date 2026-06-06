@@ -14,6 +14,10 @@
   },
   "webview": {
     "customEditor": { "Test": "Test the translation." },
+    "canvas": {
+      "spacerLabel": "Spacer",
+      "rows": "rows"
+    },
     "sidebar": {
       "title": "5Board Sidebar",
       "tools": {
@@ -22,7 +26,9 @@
         "heading": "Heading",
         "link": "Link",
         "code": "Code",
-        "image": "Image"
+        "image": "Image",
+        "spacer": "Spacer Tool",
+        "freehand": "Freehand Tool"
       }
     },
     "sidebar-element-settings": {

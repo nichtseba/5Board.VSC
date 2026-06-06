@@ -20,7 +20,7 @@ export class BoardCustomDocument implements vscode.CustomDocument {
       );
     });
     this.messageService.on('focus', () => {
-      EXTENSION.setActiveEditorDocument(this);
+      EXTENSION.activeEditorDocument = this;
     });
     this.onDocumentChange((document) => {
       this.messageService.send({ type: 'updateDocument', document });
@@ -28,7 +28,7 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   }
 
   dispose(): void {
-    EXTENSION.clearActiveEditorDocument(this);
+    EXTENSION.activeEditorDocument = null;
   }
 
   public async reloadDocument(): Promise<void> {
