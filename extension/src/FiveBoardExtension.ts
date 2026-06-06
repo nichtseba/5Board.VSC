@@ -11,13 +11,34 @@ import {
 } from './providers/SidebarViewProvider';
 import { StructureTreeProvider } from './providers/StructureTreeProvider';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
-import { BoardDocument } from '5board.vsc-common';
+import { BoardDocument, DEFAULT_TOOL_ID, EditorState } from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
   public readonly packageManager = new PackageManager();
-  public activeEditorDocument: BoardCustomDocument | null = null;
+
+  private activeEditorDocument_: BoardCustomDocument | null = null;
+  public get activeEditorDocument(): BoardCustomDocument | null {
+    return this.activeEditorDocument_;
+  }
+  public set activeEditorDocument(document: BoardCustomDocument | null) {
+    this.activeEditorDocument_ = document;
+    this.activeDocumentChange.fire(document);
+  }
+  private activeDocumentChange = new vscode.EventEmitter<BoardCustomDocument | null>();
+  public onActiveDocumentChange = this.activeDocumentChange.event;
+
+  private editorState_: EditorState = { tool: { type: DEFAULT_TOOL_ID, parameters: undefined } };
+  public get editorState(): EditorState {
+    return this.editorState_;
+  }
+  public set editorState(state: Partial<EditorState>) {
+    this.editorState_ = { ...this.editorState_, ...state };
+    this.editorStateChange.fire(this.editorState_);
+  }
+  private editorStateChange = new vscode.EventEmitter<EditorState>();
+  public onEditorStateChange = this.editorStateChange.event;
 
   public constructor() {
     super();
@@ -70,15 +91,6 @@ export class FiveBoardExtension extends ExtensionBase {
       return;
     }
     this.activeEditorDocument.applyEdit(edit);
-  }
-
-  public setActiveEditorDocument(document: BoardCustomDocument): void {
-    this.activeEditorDocument = document;
-  }
-
-  public clearActiveEditorDocument(document: BoardCustomDocument): void {
-    if (this.activeEditorDocument === document) {
-      this.activeEditorDocument = null;
-    }
+    this.activeDocumentChange.fire(this.activeEditorDocument);
   }
 }

@@ -10,15 +10,16 @@
   },
   "webview": {
     "customEditor": { "Test": "Testen der Übersetzung" },
+    "canvas": {
+      "spacerLabel": "Abstand",
+      "rows": "Zeilen"
+    },
     "sidebar": {
       "title": "5Board Seitenleiste",
       "tools": {
         "pointer": "Zeiger",
-        "text": "Text",
-        "heading": "Überschrift",
-        "link": "Link",
-        "code": "Code",
-        "image": "Bild"
+        "spacer": "Abstand-Tool",
+        "freehand": "Freihand-Tool"
       }
     },
     "sidebar-element-settings": {
