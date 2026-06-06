@@ -1,5 +1,6 @@
 {
   "customEditors.editor": "5Board Editor",
+  "customEditors.export-preview": "5Board HTML Export Vorschau",
   "customEditors.legacy-converter": "5Board Legacy Konverter",
   "views.sidebar.sidebar-title": "Werkzeuge & Presets",
   "views.sidebar.element-settings-title": "Element Einstellungen",
@@ -7,5 +8,6 @@
   "commands.openCustomEditor": "5Board Editor öffnen",
   "commands.openBoardFile": "5Board Datei öffnen",
   "commands.newBoardFile": "Neue 5Board Datei",
-  "commands.startPresentation": "Präsentation starten"
+  "commands.startPresentation": "Präsentation starten",
+  "commands.previewHtmlExport": "HTML Export Vorschau"
 }

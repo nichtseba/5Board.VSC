@@ -14,7 +14,8 @@ export type ExtensionToWebviewMessage =
   | { type: 'error'; message: string }
   | { type: 'scrollToElementPreview'; id: string } //or position:number?
   | { type: 'visibleRangePreview'; startY: number; endY: number }
-  | { type: 'requestHtmlExport' };
+  | { type: 'requestHtmlExport' }
+  | { type: 'htmlExportPreviewLoaded'; html: string; fileName: string; warnings: string[] };
 
 // Messages FROM webviews TO the extension
 export type WebviewToExtensionMessage =
@@ -34,4 +35,6 @@ export type WebviewToExtensionMessage =
   | { type: 'addElement'; element: EditorElement }
   | { type: 'duplicateElement'; id: string }
   | { type: 'selectTool'; id: string } //different handling of tools vs editorElements?
-  | { type: 'exportHtml'; html: string; fileName?: string };
+  | { type: 'exportHtml'; html: string; fileName?: string }
+  | { type: 'refreshHtmlExportPreview' }
+  | { type: 'saveHtmlExport' };

@@ -3,7 +3,8 @@
 import path from 'path';
 import vscode from 'vscode';
 import { FiveBoardEditorProvider } from './board/editorProvider';
-import { EDITOR_VIEW_TYPE } from './board/webview';
+import { FiveBoardExportPreviewProvider } from './board/exportPreviewProvider';
+import { EDITOR_VIEW_TYPE, EXPORT_PREVIEW_VIEW_TYPE } from './board/webview';
 import { BoardPackage } from './board/package';
 import { t } from './localization';
 import { MessageService } from './MessageService';
@@ -56,6 +57,16 @@ export function activate(context: vscode.ExtensionContext) {
     }),
   );
 
+  // >HTML Export Preview
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      '5board-vsc.previewHtmlExport',
+      async (resource?: vscode.Uri) => {
+        await previewHtmlExportCommand(resource);
+      },
+    ),
+  );
+
   // Custom Editor Provider for *.5boardz files
   context.subscriptions.push(
     vscode.window.registerCustomEditorProvider(
@@ -64,6 +75,18 @@ export function activate(context: vscode.ExtensionContext) {
       {
         webviewOptions: {
           retainContextWhenHidden: true, // Todo: store context
+        },
+      },
+    ),
+  );
+
+  context.subscriptions.push(
+    vscode.window.registerCustomEditorProvider(
+      EXPORT_PREVIEW_VIEW_TYPE,
+      new FiveBoardExportPreviewProvider(context),
+      {
+        webviewOptions: {
+          retainContextWhenHidden: true,
         },
       },
     ),
@@ -96,6 +119,62 @@ export function activate(context: vscode.ExtensionContext) {
       new StructureTreeProvider(),
     ),
   );
+}
+
+// Opens the export preview beside the current .5boardz editor.
+async function previewHtmlExportCommand(resource?: vscode.Uri): Promise<void> {
+  const uri = getActiveBoardPackageUri(resource);
+
+  if (!uri) {
+    vscode.window.showErrorMessage('Open a .5boardz file before starting the HTML export preview.');
+    return;
+  }
+
+  await vscode.commands.executeCommand(
+    'vscode.openWith',
+    uri,
+    EXPORT_PREVIEW_VIEW_TYPE,
+    vscode.ViewColumn.Beside,
+  );
+}
+
+// Finds a .5boardz URI from the command resource or active editor.
+function getActiveBoardPackageUri(resource?: vscode.Uri): vscode.Uri | undefined {
+  if (isBoardPackageUri(resource)) {
+    return resource;
+  }
+
+  const activeTabUri = getUriFromTabInput(vscode.window.tabGroups.activeTabGroup.activeTab?.input);
+  if (isBoardPackageUri(activeTabUri)) {
+    return activeTabUri;
+  }
+
+  const activeTextEditorUri = vscode.window.activeTextEditor?.document.uri;
+  if (isBoardPackageUri(activeTextEditorUri)) {
+    return activeTextEditorUri;
+  }
+
+  return undefined;
+}
+
+// Extracts a URI from VS Code tab input objects.
+function getUriFromTabInput(input: unknown): vscode.Uri | undefined {
+  if (!isRecord(input)) {
+    return undefined;
+  }
+
+  const uri = input.uri;
+  return uri instanceof vscode.Uri ? uri : undefined;
+}
+
+// Checks whether a URI points to a .5boardz package.
+function isBoardPackageUri(uri: vscode.Uri | undefined): uri is vscode.Uri {
+  return uri?.fsPath.toLowerCase().endsWith('.5boardz') === true;
+}
+
+// Checks whether an unknown value can be inspected like an object.
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
 }
 
 async function new5boardCommand(): Promise<void> {

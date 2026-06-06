@@ -3,6 +3,7 @@ import vscode from 'vscode';
 import { setWebviewHtml } from '../webview';
 
 export const EDITOR_VIEW_TYPE = '5board-vsc.editor';
+export const EXPORT_PREVIEW_VIEW_TYPE = '5board-vsc.exportPreview';
 
 export function get5boardzAssetCacheRoot(
   context: vscode.ExtensionContext,
@@ -18,4 +19,12 @@ export function setEditorWebviewHtml(
   webview: vscode.Webview,
 ): void {
   setWebviewHtml(context, webview, 'Editor.html');
+}
+
+// Loads the bundled export preview page into a VS Code webview.
+export function setExportPreviewWebviewHtml(
+  context: vscode.ExtensionContext,
+  webview: vscode.Webview,
+): void {
+  setWebviewHtml(context, webview, 'ExportPreview.html');
 }

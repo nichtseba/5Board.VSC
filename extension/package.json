@@ -36,6 +36,15 @@
         ]
       },
       {
+        "viewType": "5board-vsc.exportPreview",
+        "displayName": "%customEditors.export-preview%",
+        "selector": [
+          {
+            "filenamePattern": "*.5boardz"
+          }
+        ]
+      },
+      {
         "viewType": "5board-vsc.legacy-converter",
         "displayName": "%customEditors.legacy-converter%",
         "selector": [
@@ -94,6 +103,11 @@
       {
         "command": "5board-vsc.exportHtmlTest",
         "title": "Export HTML Test"
+      },
+      {
+        "command": "5board-vsc.previewHtmlExport",
+        "title": "%commands.previewHtmlExport%",
+        "icon": "$(preview)"
       }
     ],
     "menus": {
