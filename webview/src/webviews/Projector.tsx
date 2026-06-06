@@ -22,8 +22,15 @@ export default function Projector() {
       elements: [1, 2, 3, 4, 5, 6].map((i) => ({
         id: `element-${i}`,
         type: EditorElementType.Heading,
-        yPos: i * 20,
-        height: 2,
+        layout: {
+          yPos: i * 20,
+          xPos: 0,
+          height: 2,
+          width: 100,
+        },
+        style: {
+          visible: true,
+        },
         data: {
           level: i as 1 | 2 | 3 | 4 | 5 | 6,
           content: `Heading ${i}`,
@@ -41,13 +48,13 @@ export default function Projector() {
 
   // Listen for messages from the extension
   useOnMessage((msg) => {
-    if (msg.type === 'fileLoaded') {
-      setFileName(msg.fileName);
+    if (msg.type === 'init') {
+      setFileName(msg.document.manifest.title);
     }
-    if (msg.type === 'cursorUpdate') {
+    if (msg.type === 'cursorMove') {
       setCursor({ x: msg.x, y: msg.y });
     }
-    if (msg.type === 'scrollUpdate') {
+    if (msg.type === 'scroll') {
       window.scrollTo({
         top: msg.top,
         left: msg.left,

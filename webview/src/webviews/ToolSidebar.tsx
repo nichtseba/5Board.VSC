@@ -5,7 +5,7 @@ import { useLocalization } from '../providers/LocalizationProvider';
 import { Button } from 'vscrui';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
 
-export default function Sidebar() {
+export default function ToolSidebar() {
   const { t } = useLocalization();
   const [selectedTool, setSelectedTool] = useState<string | null>(null);
 
@@ -66,4 +66,4 @@ export default function Sidebar() {
   );
 }
 
-init(Sidebar);
+init(ToolSidebar);

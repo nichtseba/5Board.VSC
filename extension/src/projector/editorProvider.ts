@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 
-import { FiveBoardDocument } from '../board/document';
+import { BoardCustomDocument } from '../board/BoardCustomDocument';
+import { BoardPackage } from '../board/package';
 import { get5boardzAssetCacheRoot } from '../board/webview';
-import { MessageService } from '../MessageService';
 import { t } from '../localization';
 import { setProjectorWebviewHtml } from './webview';
 
@@ -12,38 +12,34 @@ import { setProjectorWebviewHtml } from './webview';
  * Uses CustomReadonlyEditorProvider instead of CustomEditorProvider because
  * the projector never modifies the document — it only displays it.
  *
- * VS Code will reuse the same FiveBoardDocument instance that the normal editor
+ * VS Code will reuse the same BoardCustomDocument instance that the normal editor
  * already opened, so the file is only read once.
  */
-export class ProjectorEditorProvider implements vscode.CustomReadonlyEditorProvider<FiveBoardDocument> {
-  constructor(
-    private readonly context: vscode.ExtensionContext,
-    private readonly messages: MessageService,
-  ) {}
+export class ProjectorEditorProvider implements vscode.CustomReadonlyEditorProvider<BoardCustomDocument> {
+  constructor(private readonly context: vscode.ExtensionContext) {}
 
   /**
    * Called by VS Code when the file needs to be loaded into memory.
-   * We simply delegate to FiveBoardDocument.load — same as the normal editor.
    */
   async openCustomDocument(
     uri: vscode.Uri,
     _openContext: vscode.CustomDocumentOpenContext,
     _token: vscode.CancellationToken,
-  ): Promise<FiveBoardDocument> {
-    return FiveBoardDocument.load(uri);
+  ): Promise<BoardCustomDocument> {
+    const boardPackage = await BoardPackage.read(uri);
+    return new BoardCustomDocument(boardPackage, uri);
   }
 
   /**
    * Called by VS Code when a new webview panel is created for this document.
-   * Sets up the webview options, registers it with the MessageService and
+   * Sets up the webview options, registers it with the document's MessageService and
    * loads the Projector HTML.
    */
   async resolveCustomEditor(
-    document: FiveBoardDocument,
+    document: BoardCustomDocument,
     webviewPanel: vscode.WebviewPanel,
     _token: vscode.CancellationToken,
   ): Promise<void> {
-    // Allow the webview to load scripts and local resources (same as the editor)
     const assetCacheRoot = get5boardzAssetCacheRoot(this.context, document.uri);
     webviewPanel.webview.options = {
       enableScripts: true,
@@ -54,17 +50,12 @@ export class ProjectorEditorProvider implements vscode.CustomReadonlyEditorProvi
       ],
     };
 
-    // Set the tab title so the user can tell it apart from the normal editor
     webviewPanel.title = `${t('extension.projector.title')}: ${document.boardPackage.document.manifest.title}`;
 
-    // Register the webview with the MessageService so it receives the file content
-    // when it sends the 'ready' message
-    this.messages.registerEditor(webviewPanel, {
-      content: JSON.stringify(document.boardPackage.document.content),
-      fileName: document.uri.fsPath,
-    });
+    // Use the document's own MessageService so the projector receives
+    // the same init/updateDocument messages as the editor webviews.
+    document.messageService.registerPanel(webviewPanel);
 
-    // Load the Projector HTML into the webview
     setProjectorWebviewHtml(this.context, webviewPanel.webview);
   }
 }

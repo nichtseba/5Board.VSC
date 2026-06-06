@@ -1,7 +1,6 @@
 import { BoardDocument } from '5board.vsc-common';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import EditorElement from './EditorElement';
-import { useMessageService } from '../../services/MessageService';
 import './EditorCanvas.css';
 
 export type EditorCanvasProps = {
@@ -13,11 +12,6 @@ export type EditorCanvasProps = {
  */
 export default function EditorCanvas({ document }: EditorCanvasProps) {
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
-  const messages = useMessageService();
-
-  useEffect(() => {
-    messages.send({ type: 'selectElement', id: selectedElementId });
-  }, [selectedElementId, messages]);
 
   return (
     <>

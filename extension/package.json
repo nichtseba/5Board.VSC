@@ -68,7 +68,7 @@
       "5board-vsc-activitybar": [
         {
           "type": "webview",
-          "id": "5board-vsc.sidebar-view",
+          "id": "5board-vsc.sidebar-tool-view",
           "name": "%views.sidebar.sidebar-title%"
         },
         {
@@ -132,7 +132,7 @@
     "watch:webpack": "webpack --watch",
     "watch:copy-webview": "nodemon --watch ../webview/dist -e css,css.map,html,js,js.map --delay 1000ms --exec \"pnpm run copy-webview\"",
     "prebuild": "pnpm run copy-webview",
-    "build": "webpack --mode production --devtool hidden-source-map",
+    "build": "webpack",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
