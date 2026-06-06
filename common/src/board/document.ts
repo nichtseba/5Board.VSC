@@ -17,6 +17,8 @@ export interface Source {
   name: string;
   language: string;
   code: string;
+  createdAt: number;
+  modifiedAt: number;
 }
 
 /**
@@ -25,8 +27,8 @@ export interface Source {
  */
 export interface BoardManifest {
   title: string;
-  createdAt: string;
-  modifiedAt: string;
+  createdAt: number;
+  modifiedAt: number;
   version: string;
 }
 
@@ -49,4 +51,8 @@ export interface Asset {
   name: string;
   mime: string;
   bytes: Uint8Array;
+  // timestamp of creation, should be set when the asset is first created and never modified afterwards
+  createdAt: number;
+  // timestamp of last modification, should be updated whenever the asset is modified
+  modifiedAt: number;
 }

@@ -1,11 +1,5 @@
 import { BoardManifest } from './document';
 
-export const MANIFEST_PATH = 'manifest.json';
-export const CONTENT_PATH = 'content.json';
-export const SRC_ROOT = 'src';
-export const ASSET_ROOT = 'assets';
-export const EXPORTS_ROOT = 'exports';
-
 export type LegacyObject =
   | LegacyTextboxObject
   | LegacySectionObject

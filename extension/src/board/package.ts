@@ -1,17 +1,23 @@
 import JSZip from 'jszip';
 import * as vscode from 'vscode';
 import {
-  ASSET_ROOT,
   Asset,
   BoardContent,
   BoardDocument,
   BoardManifest,
-  CONTENT_PATH,
-  MANIFEST_PATH,
-  SRC_ROOT,
   Source,
   create5boardzManifest,
 } from '5board.vsc-common';
+
+export const MANIFEST_PATH = 'manifest.json';
+export const CONTENT_PATH = 'content.json';
+export const PACKAGE_FILES = [MANIFEST_PATH, CONTENT_PATH] as const;
+export const SRC_ROOT = 'src';
+export const ASSET_ROOT = 'assets';
+export const EXPORTS_ROOT = 'exports';
+export const PACKAGE_DIRS = [SRC_ROOT, ASSET_ROOT, EXPORTS_ROOT] as const;
+
+export const READONLY_PATHS = [MANIFEST_PATH, CONTENT_PATH, EXPORTS_ROOT] as const;
 
 export class BoardPackage {
   public static async read(uri: vscode.Uri): Promise<BoardPackage> {
