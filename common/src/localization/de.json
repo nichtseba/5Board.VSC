@@ -8,8 +8,11 @@
       "createFileFailed": "Fehler beim Erstellen der 5Board Datei:"
     },
     "projector": {
+      "startPresentation": "Beameransicht starten",
       "title": "Beameransicht",
-      "noFileOpen": "Bitte öffne zuerst eine .5boardz Datei im Editor, bevor du die Beameransicht startest."
+      "noFileOpen": "Bitte öffne zuerst eine .5boardz Datei im Editor, bevor du die Beameransicht startest.",
+      "cursorTrackingOn": "Mauszeiger-Tracking: AN",
+      "cursorTrackingOff": "Mauszeiger-Tracking: AUS"
     }
   },
   "webview": {

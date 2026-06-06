@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import { setEditorWebviewHtml } from '../board/webview';
 import { BoardCustomDocument } from '../board/BoardCustomDocument';
 import { PackageManager } from '../PackageManager';
+import { DUMMY_BOARD_DOCUMENT } from '../board/dummyDocument';
 
 export class EditorEditorProvider implements vscode.CustomEditorProvider<BoardCustomDocument> {
   public static readonly VIEW_TYPE = '5board-vsc.editor';
@@ -33,6 +34,13 @@ export class EditorEditorProvider implements vscode.CustomEditorProvider<BoardCu
     _token: vscode.CancellationToken,
   ): Promise<BoardCustomDocument> {
     const pkg = await this.packageManager.getOrLoadPackage(uri, openContext);
+
+    // TODO: Remove once the file format is fully implemented.
+    // Show dummy slides so the editor is not blank during development.
+    if (pkg.document.content.elements.length === 0) {
+      pkg.document.content = { ...DUMMY_BOARD_DOCUMENT.content };
+    }
+
     return new BoardCustomDocument(pkg, uri);
   }
 

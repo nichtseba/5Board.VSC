@@ -5,21 +5,44 @@ import { BoardPackage } from '../board/package';
 import { get5boardzAssetCacheRoot } from '../board/webview';
 import { t } from '../localization';
 import { setProjectorWebviewHtml } from './webview';
+import { DUMMY_BOARD_DOCUMENT } from '../board/dummyDocument';
+import { EXTENSION } from '../extension';
 
 /**
  * Read-only editor provider for the projector/beamer view.
  *
- * Uses CustomReadonlyEditorProvider instead of CustomEditorProvider because
+ * Uses CustomReadonlyEditorProvider (via registerCustomEditorProvider) because
  * the projector never modifies the document — it only displays it.
  *
- * VS Code will reuse the same BoardCustomDocument instance that the normal editor
- * already opened, so the file is only read once.
+ * retainContextWhenHidden keeps the webview alive when the tab loses focus so the
+ * projector does not reload every time the teacher switches back to the editor.
  */
-export class ProjectorEditorProvider implements vscode.CustomReadonlyEditorProvider<BoardCustomDocument> {
+export class ProjectorEditorProvider
+  implements vscode.CustomReadonlyEditorProvider<BoardCustomDocument>
+{
+  /** Must match the viewType declared in package.json under "customEditors". */
+  public static readonly VIEW_TYPE = '5board-vsc.projector';
+
   constructor(private readonly context: vscode.ExtensionContext) {}
+
+  /** Register this provider with VS Code so it can be activated. */
+  public register(): void {
+    // registerCustomEditorProvider accepts CustomReadonlyEditorProvider — no separate function exists.
+    this.context.subscriptions.push(
+      vscode.window.registerCustomEditorProvider(
+        ProjectorEditorProvider.VIEW_TYPE,
+        this,
+        { webviewOptions: { retainContextWhenHidden: true } },
+      ),
+    );
+  }
 
   /**
    * Called by VS Code when the file needs to be loaded into memory.
+   *
+   * Falls back to DUMMY_BOARD_DOCUMENT when the .5boardz file has no elements yet,
+   * so the projector shows something useful during development.
+   * Remove the fallback block once the editor can write real content.
    */
   async openCustomDocument(
     uri: vscode.Uri,
@@ -27,13 +50,21 @@ export class ProjectorEditorProvider implements vscode.CustomReadonlyEditorProvi
     _token: vscode.CancellationToken,
   ): Promise<BoardCustomDocument> {
     const boardPackage = await BoardPackage.read(uri);
+
+    // TODO: Remove this block once the file format is fully implemented.
+    // Inject dummy slides so the projector is not blank during development.
+    if (boardPackage.document.content.elements.length === 0) {
+      boardPackage.document.content = DUMMY_BOARD_DOCUMENT.content;
+    }
+
     return new BoardCustomDocument(boardPackage, uri);
   }
 
   /**
    * Called by VS Code when a new webview panel is created for this document.
-   * Sets up the webview options, registers it with the document's MessageService and
-   * loads the Projector HTML.
+   * Sets up the webview options, registers the panel with the document's
+   * MessageService (so it receives init/updateDocument messages), and loads
+   * the Projector HTML.
    */
   async resolveCustomEditor(
     document: BoardCustomDocument,
@@ -50,11 +81,20 @@ export class ProjectorEditorProvider implements vscode.CustomReadonlyEditorProvi
       ],
     };
 
-    webviewPanel.title = `${t('extension.projector.title')}: ${document.boardPackage.document.manifest.title}`;
+    const updateTitle = () => {
+      webviewPanel.title = `${t('extension.projector.title')}: ${document.boardPackage.document.manifest.title}`;
+    };
 
-    // Use the document's own MessageService so the projector receives
-    // the same init/updateDocument messages as the editor webviews.
-    document.messageService.registerPanel(webviewPanel);
+    updateTitle();
+    document.onDocumentChange(() => updateTitle());
+
+    // If the file is already open in an editor, register the projector panel in
+    // that document's MessageService. This ensures cursorMove and scroll events
+    // forwarded by the editor are also received by the projector.
+    // Fall back to the projector's own service when no editor is open (standalone use).
+    const editorDocument = EXTENSION.getDocumentForUri(document.uri);
+    const targetService = editorDocument?.messageService ?? document.messageService;
+    targetService.registerPanel(webviewPanel);
 
     setProjectorWebviewHtml(this.context, webviewPanel.webview);
   }

@@ -9,9 +9,9 @@ type JoinPath<Prefix extends string, Key extends string> = Prefix extends ''
   ? Key
   : `${Prefix}.${Key}`;
 type ExtractTranslationKeys<T, Prefix extends string = ''> =
-  T extends Record<string, unknown>
+  T extends object
     ? {
-        [K in keyof T & string]: T[K] extends Record<string, unknown>
+        [K in keyof T & string]: T[K] extends object
           ? ExtractTranslationKeys<T[K], JoinPath<Prefix, K>>
           : JoinPath<Prefix, K>;
       }[keyof T & string]

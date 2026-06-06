@@ -1,58 +1,48 @@
 import { useEffect, useState } from 'react';
 import { useMessageService, useOnMessage } from '../services/MessageService';
 import { useLocalization } from '../providers/LocalizationProvider';
-import { BoardDocument, EditorElementType } from '5board.vsc-common';
+import { BoardDocument } from '5board.vsc-common';
 import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
 
 // The projector view shows the same canvas as the editor,
-// but is read-only and displays a "Projector" badge.
+// but is read-only and display-only — no interactive controls.
 export default function Projector() {
   const messages = useMessageService();
   const { t } = useLocalization();
-  const [fileName, setFileName] = useState('');
+  // boardDocument is null until the extension sends the initial 'init' message.
+  const [boardDocument, setBoardDocument] = useState<BoardDocument | null>(null);
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
+  // Mirrors the editor's selected element so the projector highlights the same one.
+  const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
 
-  // Todo: replace with real document data once the editor loads from file.
-  // For now this mirrors the same dummy document that Editor.tsx uses,
-  // so editor and projector look identical.
-  const document: BoardDocument = {
-    manifest: { title: '', createdAt: '', modifiedAt: '', version: '' },
-    content: {
-      elements: [1, 2, 3, 4, 5, 6].map((i) => ({
-        id: `element-${i}`,
-        type: EditorElementType.Heading,
-        layout: {
-          yPos: i * 20,
-          xPos: 0,
-          height: 2,
-          width: 100,
-        },
-        style: {
-          visible: true,
-        },
-        data: {
-          level: i as 1 | 2 | 3 | 4 | 5 | 6,
-          content: `Heading ${i}`,
-        },
-      })),
-    },
-    sources: [],
-    assets: [],
-  };
-
-  // Tell the extension that this webview is ready to receive messages
+  // Tell the extension that this webview is ready to receive messages.
+  // The extension will respond with 'init' and 'cursorTrackingChanged'.
   useEffect(() => {
     messages.send({ type: 'ready' });
   }, []);
 
-  // Listen for messages from the extension
+  // Listen for messages from the extension host.
   useOnMessage((msg) => {
-    if (msg.type === 'init') {
-      setFileName(msg.document.manifest.title);
+    if (msg.type === 'init' || msg.type === 'updateDocument') {
+      // Replace the displayed document whenever the extension sends fresh data.
+      setBoardDocument(msg.document);
     }
     if (msg.type === 'cursorMove') {
       setCursor({ x: msg.x, y: msg.y });
+    }
+    if (msg.type === 'cursorHide') {
+      // Mouse left the editor canvas — remove the dot.
+      setCursor(null);
+    }
+    if (msg.type === 'cursorTrackingChanged') {
+      // If tracking was just disabled, clear any lingering cursor dot.
+      if (!msg.enabled) {
+        setCursor(null);
+      }
+    }
+    if (msg.type === 'selectElement') {
+      setSelectedElementId(msg.elementId);
     }
     if (msg.type === 'scroll') {
       window.scrollTo({
@@ -64,7 +54,7 @@ export default function Projector() {
 
   return (
     <div>
-      {/* Projector badge */}
+      {/* Projector badge — display only, no interactive elements */}
       <div
         style={{
           background: 'var(--vscode-badge-background)',
@@ -76,34 +66,28 @@ export default function Projector() {
           textTransform: 'uppercase',
         }}
       >
-        📽 {t('extension.projector.title')} — {fileName}
+        📽 {t('extension.projector.title')} — {boardDocument?.manifest.title ?? ''}
       </div>
-      {/* Same canvas as the editor.
-          The canvas manages its own selection state — clicking an element here
-          also broadcasts selectElement to the extension, which updates all webviews.
-          Syncing the editor's selection INTO the projector would require
-          modifying EditorCanvas, which is out of scope for this task. 
-          New: Cursor overlay: mirrors the editor's mouse position in real time 
-          EditorCanvas is wrapped in a div with position: relative. */}
-      <div style={{ position: 'relative' }}>
-        <EditorCanvas document={document} />
-        {cursor && (
-          <div
-            style={{
-              // Todo: make cursor overlay correctly display when both windows have different sizes
-              position: 'absolute',
-              left: `${cursor.x * 100}%`,
-              top: `${cursor.y * 100}%`,
-              width: 20,
-              height: 20,
-              borderRadius: '50%',
-              background: 'rgba(220, 38, 38, 0.75)',
-              border: '2px solid #dc2626',
-              transform: 'translate(-50%, -50%)',
-              pointerEvents: 'none',
-              zIndex: 1000,
-            }}
+      {/*
+        Pass the live cursor position directly into EditorCanvas so the overlay
+        is rendered inside the canvas div and positioned against the same grid
+        that the editor uses to calculate coordinates. This guarantees the dot
+        lands on the same element regardless of window size differences.
+
+        selectedElementId from extension messages is passed as an external override
+        so the projector always mirrors the editor's selection (not the projector
+        user's own clicks).
+      */}
+      <div>
+        {boardDocument ? (
+          <EditorCanvas
+            document={boardDocument}
+            cursor={cursor}
+            selectedElementId={selectedElementId}
           />
+        ) : (
+          // Shown while waiting for the first 'init' message from the extension.
+          <div style={{ padding: '1rem', opacity: 0.5 }}>Loading…</div>
         )}
       </div>
     </div>

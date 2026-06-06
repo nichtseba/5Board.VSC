@@ -16,7 +16,10 @@ type AllExtensionToWebviewMessage =
   | { type: 'updateDocument'; document: BoardDocument }
   | { type: 'init'; document: BoardDocument; language: Language }
   | { type: 'cursorMove'; x: number; y: number }
-  | { type: 'scroll'; top: number; left: number };
+  | { type: 'cursorHide' }
+  | { type: 'cursorTrackingChanged'; enabled: boolean }
+  | { type: 'scroll'; top: number; left: number }
+  | { type: 'selectElement'; elementId: string | null };
 
 /**
  * Messages from the webviews to the extension
@@ -33,4 +36,7 @@ type AllWebviewToExtensionMessage =
   | { type: 'ready' }
   | { type: 'focus' }
   | { type: 'cursorMove'; x: number; y: number }
-  | { type: 'scroll'; top: number; left: number };
+  | { type: 'cursorLeave' }
+  | { type: 'scroll'; top: number; left: number }
+  | { type: 'selectElement'; elementId: string | null }
+  | { type: 'toggleCursorTracking' };

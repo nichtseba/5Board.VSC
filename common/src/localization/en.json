@@ -8,8 +8,11 @@
       "createFileFailed": "Failed to create 5Board file:"
     },
     "projector": {
+      "startPresentation": "Start Presentation",
       "title": "Projector",
-      "noFileOpen": "Please open a .5boardz file in the editor before starting the projector view."
+      "noFileOpen": "Please open a .5boardz file in the editor before starting the projector view.",
+      "cursorTrackingOn": "Cursor Tracking: ON",
+      "cursorTrackingOff": "Cursor Tracking: OFF"
     }
   },
   "webview": {
