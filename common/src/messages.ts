@@ -1,36 +1,34 @@
-import { EditorElement } from './board/element';
+import { BoardDocument } from './board/document';
 import { Language } from './localization';
 
-export type AppState = {
-  selectedElementId: string | null;
-  selectedToolId: string | null;
-};
+/**
+ * Messages from the extension to webviews
+ * This is a utility type that allows specifing the type of the message and getting the corresponding content type
+ * Add message types to {@link AllExtensionToWebviewMessage}
+ */
+export type ExtensionToWebviewMessage<
+  MessageType extends ExtensionToWebviewMessageType = ExtensionToWebviewMessageType,
+> = Extract<AllExtensionToWebviewMessage, { type: MessageType }>;
+export type ExtensionToWebviewMessageType = AllExtensionToWebviewMessage['type'];
 
-// Messages FROM the extension TO webviews
-export type ExtensionToWebviewMessage =
-  | { type: 'init'; state: AppState; language: Language }
-  | { type: 'updateContent'; state: AppState }
-  | { type: 'fileLoaded'; content: string; fileName: string }
-  | { type: 'statusUpdate'; status: string }
-  | { type: 'error'; message: string }
-  | { type: 'scrollToElementPreview'; id: string } //or position:number?
-  | { type: 'visibleRangePreview'; startY: number; endY: number };
+// All Messages from the extension to webviews
+type AllExtensionToWebviewMessage =
+  | { type: 'updateDocument'; document: BoardDocument }
+  | { type: 'init'; document: BoardDocument; language: Language };
 
-// Messages FROM webviews TO the extension
-export type WebviewToExtensionMessage =
+/**
+ * Messages from the webviews to the extension
+ * This is a utility type that allows specifing the type of the message and getting the corresponding content type
+ * Add message types to {@link AllWebviewToExtensionMessage}
+ */
+export type WebviewToExtensionMessage<
+  MessageType extends WebviewToExtensionMessageType = WebviewToExtensionMessageType,
+> = Extract<AllWebviewToExtensionMessage, { type: MessageType }>;
+export type WebviewToExtensionMessageType = AllWebviewToExtensionMessage['type'];
+
+// All Messages from webviews to the extension
+type AllWebviewToExtensionMessage =
   | { type: 'ready' }
-  | { type: 'runCode'; code: string }
-  | { type: 'loadFile'; fileName: string }
-  | { type: 'saveFile'; content: string; fileName: string }
-  | { type: 'updateFile'; content: string; fileName: string }
+  | { type: 'focus' }
   | { type: 'selectElement'; id: string | null }
-  | { type: 'selectionChange'; selectedIds: string[] }
-  | { type: 'updateElement'; id: string; changes: Partial<EditorElement> }
-  | { type: 'changeElementContent'; id: string; content: string }
-  | { type: 'changeElementType'; id: string; newType: EditorElement['type'] }
-  | { type: 'moveElement'; id: string; xPos: number; yPos: number }
-  | { type: 'deleteElement'; id: string }
-  | { type: 'toggleElementVisibility'; id: string; visible: boolean } //todo: add field visible in definition of EditorElement
-  | { type: 'addElement'; element: EditorElement }
-  | { type: 'duplicateElement'; id: string }
-  | { type: 'selectTool'; id: string | null };
+  | { type: 'selectTool'; id: string };

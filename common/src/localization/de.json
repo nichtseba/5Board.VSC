@@ -19,7 +19,12 @@
       "tools": {
         "pointer": "Zeiger",
         "spacer": "Abstand-Tool",
-        "freehand": "Freihand-Tool"
+        "freehand": "Freihand-Tool",
+        "text": "Text",
+        "heading": "Überschrift",
+        "link": "Link",
+        "code": "Code",
+        "image": "Bild"
       }
     },
     "sidebar-element-settings": {

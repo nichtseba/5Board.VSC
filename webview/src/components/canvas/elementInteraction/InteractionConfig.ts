@@ -22,4 +22,30 @@ export const ELEMENT_INTERACTION_CONFIG = {
     resizable: true,
     rotatable: false,
   },
+  [EditorElementType.Code]: {
+    draggable: true,
+    dragDirection: 'vertical',
+    resizable: false,
+    rotatable: false,
+  },
+  [EditorElementType.Image]: {
+    draggable: true,
+    dragDirection: 'free',
+    resizable: true,
+    rotatable: true,
+    scalable: true,
+    clipable: true,
+  },
+  [EditorElementType.Shape]: {
+    draggable: true,
+    dragDirection: 'free',
+    resizable: true,
+    rotatable: true,
+  },
+  [EditorElementType.Arrow]: {
+    draggable: true,
+    dragDirection: 'free',
+    resizable: true,
+    rotatable: true,
+  },
 } satisfies Record<EditorElementType, ElementInteractionProfile>;

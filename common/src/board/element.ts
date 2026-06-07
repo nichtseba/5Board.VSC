@@ -3,6 +3,10 @@ export type BoardElement = EditorElement; // Todo: Replace with new Element type
 export enum EditorElementType {
   Heading = 'heading',
   Text = 'text',
+  Code = 'code',
+  Image = 'image',
+  Shape = 'shape',
+  Arrow = 'arrow',
 }
 
 /**
@@ -13,7 +17,7 @@ export type EditorElement<T extends EditorElementType = EditorElementType> = {
   type: T;
 
   layout: ElementLayout;
-  style?: ElementStyle;
+  style: ElementStyle;
 
   data: EditorElementDataMap[T];
 };
@@ -51,6 +55,10 @@ export type ElementStyle = {
 type EditorElementDataMap = {
   [EditorElementType.Heading]: HeadingElementData;
   [EditorElementType.Text]: TextElementData;
+  [EditorElementType.Code]: CodeElementData;
+  [EditorElementType.Image]: ImageElementData;
+  [EditorElementType.Shape]: ShapeElementData;
+  [EditorElementType.Arrow]: ArrowElementData;
 };
 
 export type HeadingElementData = {
@@ -77,4 +85,75 @@ export type TextDecorationStyle = {
   underline?: boolean;
   overline?: boolean;
   lineThrough?: boolean;
+};
+
+export type CodeElementData = {
+  codeBlockId: string;
+  fileName?: string;
+  language?: string;
+
+  content: string;
+  output?: string;
+};
+
+export type ImageElementData = {
+  src: string;
+  content: string;
+
+  title?: string;
+  altText?: string;
+
+  hideInExport?: boolean;
+
+  cropData?: CropData;
+};
+export type CropData = {
+  cropX: number;
+  cropY: number;
+  cropWidth: number;
+  cropHeight: number;
+};
+
+export type ArrowElementData = {
+  headTypeStart?: 'none' | 'arrow' | 'circle' | 'square';
+  headTypeEnd?: 'none' | 'arrow' | 'circle' | 'square';
+  headSize?: number;
+  headFill?: boolean;
+  points: { x: number; y: number }[]; // Start and end points for the arrow
+};
+
+export type ShapeElementData =
+  | RectangleShapeData
+  | EllipseShapeData
+  | LineShapeData
+  | PolygonShapeData;
+
+type Point = { x: number; y: number };
+
+type BaseShapeData = {
+  fillColor?: string;
+  strokeColor?: string;
+  strokeWidth?: number;
+  shapeType: 'rectangle' | 'ellipse' | 'line' | 'polygon';
+};
+
+type RectangleShapeData = BaseShapeData & {
+  shapeType: 'rectangle';
+  radius?: number;
+};
+
+type EllipseShapeData = BaseShapeData & {
+  shapeType: 'ellipse';
+  rx: number;
+  ry: number;
+};
+
+type LineShapeData = BaseShapeData & {
+  shapeType: 'line';
+  points: [Point, Point];
+};
+
+type PolygonShapeData = BaseShapeData & {
+  shapeType: 'polygon';
+  points: Point[];
 };

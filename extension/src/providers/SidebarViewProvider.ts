@@ -2,11 +2,12 @@ import * as vscode from 'vscode';
 import { setWebviewHtml } from '../webview';
 import { MessageService } from '../MessageService';
 
-export class SidebarViewProvider implements vscode.WebviewViewProvider {
-  constructor(
+export abstract class WebviewProvider implements vscode.WebviewViewProvider {
+  protected constructor(
     private readonly context: vscode.ExtensionContext,
     private readonly messages: MessageService,
-    private readonly htmlFile: string,
+    private readonly htmlFileName: string,
+    private readonly viewId: string,
   ) {}
 
   resolveWebviewView(
@@ -19,8 +20,31 @@ export class SidebarViewProvider implements vscode.WebviewViewProvider {
       localResourceRoots: [vscode.Uri.joinPath(this.context.extensionUri, 'media')],
     };
 
-    setWebviewHtml(this.context, webviewView.webview, this.htmlFile);
+    setWebviewHtml(this.context, webviewView.webview, this.htmlFileName);
+  }
 
-    this.messages.register(webviewView);
+  public register(): void {
+    this.context.subscriptions.push(
+      vscode.window.registerWebviewViewProvider(this.viewId, this, {
+        webviewOptions: { retainContextWhenHidden: true },
+      }),
+    );
+  }
+}
+export class SidebarViewProvider extends WebviewProvider {
+  public static readonly VIEW_ID = '5board-vsc.sidebar-view';
+  constructor(context: vscode.ExtensionContext, messages: MessageService) {
+    super(context, messages, 'Sidebar.html', SidebarViewProvider.VIEW_ID);
+  }
+}
+export class ElementSettingsSidebarViewProvider extends WebviewProvider {
+  public static readonly VIEW_ID = '5board-vsc.sidebar-element-settings-view';
+  constructor(context: vscode.ExtensionContext, messages: MessageService) {
+    super(
+      context,
+      messages,
+      'ElementSettingsSidebar.html',
+      ElementSettingsSidebarViewProvider.VIEW_ID,
+    );
   }
 }

@@ -1,4 +1,4 @@
-import { TranslationKey } from './main';
+import { EditorElement, TranslationKey } from './main';
 
 export enum EditorToolId {
   POINTER = 'pointer',
@@ -27,3 +27,25 @@ export const TOOL_DEFINITIONS = {
     icon: 'pencil',
   },
 } satisfies Record<EditorToolId, EditorToolDefinition>;
+
+type TYPE_TOOL_PARAMETERS = {
+  [EditorToolId.POINTER]: undefined;
+  [EditorToolId.SPACER]: undefined;
+  [EditorToolId.FREEHAND]: FreehandToolParameters;
+};
+
+type FreehandToolParameters = unknown;
+
+export type EditorTool<EditorToolType extends EditorToolId = EditorToolId> = {
+  type: EditorToolType;
+  parameters: TYPE_TOOL_PARAMETERS[EditorToolType];
+};
+
+export type AddData = {
+  type: EditorElement['type'];
+  layout: Omit<EditorElement['layout'], 'xPos' | 'yPos'>;
+  style: EditorElement['style'];
+  data: EditorElement['data'];
+};
+
+export type EditorState = { tool: EditorTool };

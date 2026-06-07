@@ -36,8 +36,8 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
   } | null>(null);
 
   useOnMessage((msg) => {
-    if (msg.type === 'init' || msg.type === 'updateContent') {
-      setActiveToolId(msg.state.selectedToolId ?? null);
+    if (msg.type === 'init' || msg.type === 'updateDocument') {
+      setActiveToolId(msg.document.content.selectedToolId ?? null);
     }
   });
 
