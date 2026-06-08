@@ -19,7 +19,11 @@ type AllExtensionToWebviewMessage =
   | { type: 'cursorHide' }
   | { type: 'cursorTrackingChanged'; enabled: boolean }
   | { type: 'scroll'; top: number; left: number }
-  | { type: 'selectElement'; elementId: string | null };
+  | { type: 'selectElement'; elementId: string | null }
+  | {
+      type: 'viewportUpdate';
+      viewport: { top: number; left: number; height: number; width: number };
+    };
 
 /**
  * Messages from the webviews to the extension
@@ -39,4 +43,8 @@ type AllWebviewToExtensionMessage =
   | { type: 'cursorLeave' }
   | { type: 'scroll'; top: number; left: number }
   | { type: 'selectElement'; elementId: string | null }
-  | { type: 'toggleCursorTracking' };
+  | { type: 'toggleCursorTracking' }
+  | {
+      type: 'updateViewport';
+      viewport: { top: number; left: number; height: number; width: number };
+    };

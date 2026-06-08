@@ -23,6 +23,41 @@ export default function Projector() {
   }, []);
 
   useEffect(() => {
+    const sendViewport = () => {
+      const canvas = document.querySelector('.editor-canvas') as HTMLElement | null;
+
+      if (!canvas) {
+        return;
+      }
+
+      const canvasRect = canvas.getBoundingClientRect();
+
+      messages.send({
+        type: 'updateViewport',
+        viewport: {
+          // Sichtbarer Bereich innerhalb des Canvas
+          top: Math.max(0, -canvasRect.top),
+          left: Math.max(0, -canvasRect.left),
+
+          // Größe des sichtbaren Fensters
+          width: window.innerWidth,
+          height: window.innerHeight,
+        },
+      });
+    };
+
+    window.addEventListener('scroll', sendViewport, { passive: true });
+    window.addEventListener('resize', sendViewport);
+
+    sendViewport();
+
+    return () => {
+      window.removeEventListener('scroll', sendViewport);
+      window.removeEventListener('resize', sendViewport);
+    };
+  }, [messages]);
+
+  useEffect(() => {
     document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
 

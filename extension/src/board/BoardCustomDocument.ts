@@ -54,7 +54,10 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     // Toggle cursor tracking state and notify all panels so they can update their UI.
     this.messageService.on('toggleCursorTracking', () => {
       this.cursorTrackingEnabled = !this.cursorTrackingEnabled;
-      this.messageService.send({ type: 'cursorTrackingChanged', enabled: this.cursorTrackingEnabled });
+      this.messageService.send({
+        type: 'cursorTrackingChanged',
+        enabled: this.cursorTrackingEnabled,
+      });
     });
 
     // Forward the selected element so the projector highlights the same element.
@@ -66,6 +69,10 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     // This keeps the projector's scroll position in sync with the editor.
     this.messageService.on('scroll', (msg) => {
       this.messageService.send({ type: 'scroll', top: msg.top, left: msg.left });
+    });
+
+    this.messageService.on('updateViewport', (msg) => {
+      this.messageService.send({ type: 'viewportUpdate', viewport: msg.viewport });
     });
 
     this.onDocumentChange((document) => {

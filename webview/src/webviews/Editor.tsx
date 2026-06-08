@@ -12,6 +12,12 @@ export default function Editor() {
   // Cursor tracking starts OFF (matches the extension's default) for performance.
   // The extension confirms the actual state via 'cursorTrackingChanged' on ready.
   const [cursorTrackingEnabled, setCursorTrackingEnabled] = useState(false);
+  const [projectorViewport, setProjectorViewport] = useState<null | {
+    top: number;
+    left: number;
+    width: number;
+    height: number;
+  }>(null);
 
   // Called by EditorCanvas with canvas-relative (0–1) coordinates.
   // Only fires when tracking is enabled (onCursorMove is only passed when enabled).
@@ -68,6 +74,9 @@ export default function Editor() {
     if (msg.type === 'cursorTrackingChanged') {
       setCursorTrackingEnabled(msg.enabled);
     }
+    if (msg.type === 'viewportUpdate') {
+      setProjectorViewport(msg.viewport);
+    }
   });
 
   useEffect(() => {
@@ -122,6 +131,21 @@ export default function Editor() {
             onCursorMove={cursorTrackingEnabled ? handleCursorMove : undefined}
             onCursorLeave={handleCursorLeave}
             onElementSelect={handleElementSelect}
+          />
+        )}
+        {projectorViewport && (
+          <div
+            style={{
+              position: 'absolute',
+              left: projectorViewport.left,
+              top: projectorViewport.top,
+              width: projectorViewport.width,
+              height: projectorViewport.height,
+              border: '2px solid #3b82f6',
+              background: 'rgba(59, 130, 246, 0.08)',
+              pointerEvents: 'none',
+              zIndex: 9999,
+            }}
           />
         )}
       </div>
