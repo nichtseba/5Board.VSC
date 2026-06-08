@@ -63,7 +63,6 @@ export default function EditorCanvas({
 
   return (
     <>
-      {`Selected element ID: ${effectiveSelectedId}`}
       {/*
         position: relative is required so the absolute cursor overlay stays
         clipped inside the canvas boundaries and does not bleed outside.
