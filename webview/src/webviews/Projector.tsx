@@ -22,6 +22,15 @@ export default function Projector() {
     messages.send({ type: 'ready' });
   }, []);
 
+  useEffect(() => {
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+    };
+  }, []);
   // Listen for messages from the extension host.
   useOnMessage((msg) => {
     if (msg.type === 'init' || msg.type === 'updateDocument') {
