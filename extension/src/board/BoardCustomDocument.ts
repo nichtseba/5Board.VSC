@@ -29,7 +29,7 @@ export class BoardCustomDocument implements vscode.CustomDocument {
       // Sync current tracking state so the new panel starts in the correct state.
       this.messageService.send(
         { type: 'cursorTrackingChanged', enabled: this.cursorTrackingEnabled },
-        sender,
+        sender
       );
     });
 
