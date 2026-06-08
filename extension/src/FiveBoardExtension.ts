@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { MessageService } from './MessageService';
-import { PackageManager } from './PackageManager';
 import { EditorEditorProvider } from './providers/EditorEditorProvider';
 import { t } from './localization';
 import path from 'path';
@@ -13,6 +12,8 @@ import { StructureTreeProvider } from './providers/StructureTreeProvider';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
 import { BoardDocument } from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
+import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
+import { PackageManager } from './PackageManager';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
@@ -29,6 +30,7 @@ export class FiveBoardExtension extends ExtensionBase {
     new SidebarViewProvider(context, this.messages).register();
     new ElementSettingsSidebarViewProvider(context, this.messages).register();
     new StructureTreeProvider(context).register();
+    new FiveBoardFileSystemProvider(this.packageManager).register(context);
   }
 
   @Command('5board-vsc.newBoard')

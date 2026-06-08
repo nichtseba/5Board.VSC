@@ -11,13 +11,9 @@ import {
 
 export const MANIFEST_PATH = 'manifest.json';
 export const CONTENT_PATH = 'content.json';
-export const PACKAGE_FILES = [MANIFEST_PATH, CONTENT_PATH] as const;
 export const SRC_ROOT = 'src';
 export const ASSET_ROOT = 'assets';
 export const EXPORTS_ROOT = 'exports';
-export const PACKAGE_DIRS = [SRC_ROOT, ASSET_ROOT, EXPORTS_ROOT] as const;
-
-export const READONLY_PATHS = [MANIFEST_PATH, CONTENT_PATH, EXPORTS_ROOT] as const;
 
 export class BoardPackage {
   public static async read(uri: vscode.Uri): Promise<BoardPackage> {
@@ -123,6 +119,8 @@ async function readSources(zip: JSZip): Promise<Source[]> {
             language,
             name: relativePath,
             code,
+            createdAt: 0, // Todo: Store and read actual timestamps for sources
+            modifiedAt: 0, // Todo: Store and read actual timestamps for sources
           };
           resolve(source);
         } catch (error) {
@@ -151,6 +149,8 @@ async function readAssets(zip: JSZip): Promise<Asset[]> {
         const asset: Asset = {
           name: relativePath,
           mime: mimeFromFileName(relativePath),
+          createdAt: 0, // Todo: Store and read actual timestamps for assets
+          modifiedAt: 0,
           bytes,
         };
         resolve(asset);

@@ -33,6 +33,10 @@ export class EditorEditorProvider implements vscode.CustomEditorProvider<BoardCu
     _token: vscode.CancellationToken,
   ): Promise<BoardCustomDocument> {
     const pkg = await this.packageManager.getOrLoadPackage(uri, openContext);
+    const testUri = uri.with({ scheme: '5board', path: uri.path + '/src/java/test.java' });
+    vscode.commands.executeCommand('vscode.open', testUri, {
+      preview: true,
+    } satisfies vscode.TextDocumentShowOptions);
     return new BoardCustomDocument(pkg, uri);
   }
 
@@ -86,6 +90,7 @@ export class EditorEditorProvider implements vscode.CustomEditorProvider<BoardCu
     this.context.subscriptions.push(
       vscode.window.registerCustomEditorProvider(EditorEditorProvider.VIEW_TYPE, this, {
         supportsMultipleEditorsPerDocument: true,
+        webviewOptions: {},
       }),
     );
   }

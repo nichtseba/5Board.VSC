@@ -197,7 +197,7 @@ export interface LegacyDocument {
 
 // erstellt Manifest für ein neues .5boardz Dokument
 export function create5boardzManifest(title: string, now = new Date()): BoardManifest {
-  const timestamp = now.toISOString();
+  const timestamp = now.getTime();
 
   return {
     title,
@@ -220,8 +220,8 @@ export function validateManifest(value: unknown): BoardManifest {
 
   //manifest.json Felder prüfen und in speichern
   const title = readRequiredString(value, 'title');
-  const createdAt = readRequiredString(value, 'createdAt');
-  const modifiedAt = readRequiredString(value, 'modifiedAt');
+  const createdAt = Number(readRequiredString(value, 'createdAt'));
+  const modifiedAt = Number(readRequiredString(value, 'modifiedAt'));
   const version = readRequiredString(value, 'version');
 
   return {
