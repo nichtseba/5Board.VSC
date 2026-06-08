@@ -8,7 +8,7 @@ import EditorCanvas from '../components/canvas/EditorCanvas';
 export default function Editor() {
   const messages = useMessageService();
   const { t } = useLocalization();
-  const [document, setDocument] = useState<BoardDocument | null>(null);
+  const [boardDocument, setBoardDocument] = useState<BoardDocument | null>(null);
   // Cursor tracking starts OFF (matches the extension's default) for performance.
   // The extension confirms the actual state via 'cursorTrackingChanged' on ready.
   const [cursorTrackingEnabled, setCursorTrackingEnabled] = useState(false);
@@ -43,13 +43,15 @@ export default function Editor() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const top = window.document.documentElement.scrollTop;
-      const left = window.document.documentElement.scrollLeft;
+      const canvas = document.querySelector('.editor-canvas') as HTMLElement | null;
+      const canvasRect = canvas?.getBoundingClientRect();
+      const canvasTopOnPage = (canvasRect?.top ?? 0) + window.scrollY;
+      const canvasLeftOnPage = (canvasRect?.left ?? 0) + window.scrollX;
 
       messages.send({
         type: 'scroll',
-        top,
-        left,
+        top: Math.max(0, window.scrollY - canvasTopOnPage),
+        left: Math.max(0, window.scrollX - canvasLeftOnPage),
       });
     };
 
@@ -61,7 +63,7 @@ export default function Editor() {
   useOnMessage((msg) => {
     console.log('Received message in Editor:', msg.type);
     if (msg.type === 'updateDocument' || msg.type === 'init') {
-      setDocument(msg.document);
+      setBoardDocument(msg.document);
     }
     if (msg.type === 'cursorTrackingChanged') {
       setCursorTrackingEnabled(msg.enabled);
@@ -81,7 +83,7 @@ export default function Editor() {
   return (
     <>
       <p>
-        Document: <code>{JSON.stringify(document, null, 2)}</code>
+        Document: <code>{JSON.stringify(boardDocument, null, 2)}</code>
       </p>
 
       {/* Cursor tracking toggle — shown in the editor toolbar area */}
@@ -111,10 +113,10 @@ export default function Editor() {
         </button>
       </div>
 
-      <div>
-        {document && (
+      <div style={{ position: 'relative' }}>
+        {boardDocument && (
           <EditorCanvas
-            document={document}
+            document={boardDocument}
             // Pass onCursorMove only when tracking is enabled.
             // When undefined, EditorCanvas skips rAF entirely — no CPU cost.
             onCursorMove={cursorTrackingEnabled ? handleCursorMove : undefined}

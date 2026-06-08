@@ -54,9 +54,12 @@ export default function Projector() {
       setSelectedElementId(msg.elementId);
     }
     if (msg.type === 'scroll') {
+      const canvas = document.querySelector('.editor-canvas') as HTMLElement | null;
+      const canvasRect = canvas?.getBoundingClientRect();
+
       window.scrollTo({
-        top: msg.top,
-        left: msg.left,
+        top: Math.max(0, (canvasRect?.top ?? 0) + window.scrollY + msg.top),
+        left: Math.max(0, (canvasRect?.left ?? 0) + window.scrollX + msg.left),
       });
     }
   });
