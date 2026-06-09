@@ -14,7 +14,9 @@ export type ExtensionToWebviewMessageType = AllExtensionToWebviewMessage['type']
 // All Messages from the extension to webviews
 type AllExtensionToWebviewMessage =
   | { type: 'updateDocument'; document: BoardDocument }
-  | { type: 'init'; document: BoardDocument; language: Language };
+  | { type: 'init'; document: BoardDocument; language: Language }
+  | { type: 'htmlExportPreviewLoaded'; html: string; fileName: string }
+  | { type: 'initExportPreview'; document: BoardDocument };
 
 /**
  * Messages from the webviews to the extension
@@ -27,4 +29,8 @@ export type WebviewToExtensionMessage<
 export type WebviewToExtensionMessageType = AllWebviewToExtensionMessage['type'];
 
 // All Messages from webviews to the extension
-type AllWebviewToExtensionMessage = { type: 'ready' } | { type: 'focus' };
+type AllWebviewToExtensionMessage =
+  | { type: 'ready' }
+  | { type: 'focus' }
+  | { type: 'htmlExportPreviewGenerated'; html: string; fileName?: string }
+  | { type: 'saveHtmlExport' };

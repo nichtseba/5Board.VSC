@@ -43,6 +43,15 @@
             "filenamePattern": "*.5board"
           }
         ]
+      },
+      {
+        "viewType": "5board-vsc.exportPreview",
+        "displayName": "HTML Export Preview",
+        "selector": [
+          {
+            "filenamePattern": "*.5boardz"
+          }
+        ]
       }
     ],
     "viewsContainers": {
@@ -90,6 +99,11 @@
         "command": "5board-vsc.startPresentation",
         "title": "%commands.startPresentation%",
         "icon": "$(play)"
+      },
+      {
+        "command": "5board-vsc.previewHtmlExport",
+        "title": "Preview HTML Export",
+        "icon": "$(preview)"
       }
     ],
     "menus": {
