@@ -16,6 +16,9 @@ export const ASSET_ROOT = 'assets';
 export const EXPORTS_ROOT = 'exports';
 
 export class BoardPackage {
+  public readonly documentChange = new vscode.EventEmitter<void>();
+  public readonly onDocumentChange = this.documentChange.event;
+
   public static async read(uri: vscode.Uri): Promise<BoardPackage> {
     const packageBytes = await vscode.workspace.fs.readFile(uri);
     const zip = await JSZip.loadAsync(packageBytes);

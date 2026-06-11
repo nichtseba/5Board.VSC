@@ -51,6 +51,7 @@ export class FiveBoardFileSystemProvider implements vscode.FileSystemProvider {
     }
     const { packageUri } = split;
     await pkg.write(packageUri);
+    pkg.documentChange.fire();
   }
 
   async stat(uri: vscode.Uri): Promise<vscode.FileStat> {
@@ -276,8 +277,8 @@ export class FiveBoardFileSystemProvider implements vscode.FileSystemProvider {
     }
   }
 
-  createDirectory(_uri: vscode.Uri): void {
-    throw FileSystemError.NoPermissions(_uri);
+  createDirectory(uri: vscode.Uri): void {
+    throw FileSystemError.NoPermissions(uri);
   }
 
   delete(uri: vscode.Uri, _options: { recursive: boolean }): void {

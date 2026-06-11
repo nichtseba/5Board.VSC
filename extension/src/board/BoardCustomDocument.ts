@@ -9,6 +9,8 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   public readonly onDocumentChange = this.documentChange.event;
   public readonly messageService = new MessageService();
 
+  private disposables: vscode.Disposable[] = [];
+
   constructor(
     public boardPackage: BoardPackage,
     public uri: vscode.Uri,
@@ -25,10 +27,16 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     this.onDocumentChange((document) => {
       this.messageService.send({ type: 'updateDocument', document });
     });
+    this.disposables.push(
+      this.boardPackage.onDocumentChange(() => {
+        this.documentChange.fire(this.boardPackage.document);
+      }),
+    );
   }
 
   dispose(): void {
     EXTENSION.clearActiveEditorDocument(this);
+    this.disposables.forEach((d) => d.dispose());
   }
 
   public async reloadDocument(): Promise<void> {
