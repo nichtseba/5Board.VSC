@@ -6,6 +6,11 @@
       "packageFilter": "5Boardz Paket",
       "createFile": "Erstelle 5Board Datei",
       "createFileFailed": "Fehler beim Erstellen der 5Board Datei:"
+    },
+    "htmlExport": {
+      "noActiveBoard": "Öffne eine .5boardz-Datei oder speichere die aktuelle Datei.",
+      "saveLabel": "HTML-Export speichern",
+      "saved": "HTML-Export gespeichert:"
     }
   },
   "webview": {
@@ -13,6 +18,10 @@
     "canvas": {
       "spacerLabel": "Abstand",
       "rows": "Zeilen"
+    },
+    "exportPreview": {
+      "saveHtml": "HTML speichern",
+      "loading": "Vorschau wird geladen..."
     },
     "sidebar": {
       "title": "5Board Seitenleiste",

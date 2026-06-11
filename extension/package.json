@@ -46,7 +46,7 @@
       },
       {
         "viewType": "5board-vsc.exportPreview",
-        "displayName": "HTML Export Preview",
+        "displayName": "%customEditors.exportPreview%",
         "selector": [
           {
             "filenamePattern": "*.5boardz"
@@ -102,7 +102,7 @@
       },
       {
         "command": "5board-vsc.previewHtmlExport",
-        "title": "Preview HTML Export",
+        "title": "%commands.previewHtmlExport%",
         "icon": "$(preview)"
       }
     ],

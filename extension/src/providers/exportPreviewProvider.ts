@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import type { WebviewToExtensionMessage } from '5board.vsc-common';
 import { PackageManager } from '../PackageManager';
 import { BoardCustomDocument } from '../board/BoardCustomDocument';
 import { setExportPreviewWebviewHtml } from '../board/webview';
@@ -10,7 +9,6 @@ export class ExportPreviewProvider implements vscode.CustomReadonlyEditorProvide
   constructor(
     private context: vscode.ExtensionContext,
     private packageManager: PackageManager,
-    private getActiveEditorDocument: () => BoardCustomDocument | null,
   ) {}
 
   /*
@@ -30,35 +28,48 @@ export class ExportPreviewProvider implements vscode.CustomReadonlyEditorProvide
   async resolveCustomEditor(
     document: BoardCustomDocument,
     panel: vscode.WebviewPanel,
+    _token: vscode.CancellationToken,
   ): Promise<void> {
-    const editorDocument = this.getActiveEditorDocument() ?? document;
+    const editorDocument = document;
     const messages = editorDocument.messageService;
 
     messages.registerPanel(panel);
 
-    panel.webview.onDidReceiveMessage(async (msg: WebviewToExtensionMessage) => {
-      if (msg.type === 'ready') {
-        panel.webview.postMessage({
-          type: 'initExportPreview',
-          document: editorDocument.boardPackage.document,
-        });
+    const disposeReady = messages.on('ready', (_msg, sender) => {
+      if (sender !== panel.webview) {
+        return;
       }
 
-      if (msg.type === 'saveHtmlExport') {
-        await messages.saveLatestHtmlExport();
-      }
+      messages.send(
+        {
+          type: 'init',
+          document: editorDocument.boardPackage.document,
+          language: 'en', // Todo -> Sprache nicht hart codieren?
+        },
+        sender,
+      );
     });
+
+    const disposeSaveHtmlExport = messages.on('saveHtmlExport', async (msg, sender) => {
+      if (sender !== panel.webview) {
+        return;
+      }
+
+      await editorDocument.saveHtmlExport(msg.html, msg.backgroundColor);
+    });
+
+    panel.onDidDispose(() => {
+      disposeReady();
+      disposeSaveHtmlExport();
+    });
+
     panel.webview.options = { enableScripts: true };
     setExportPreviewWebviewHtml(this.context, panel.webview);
   }
 
   public register(): void {
     this.context.subscriptions.push(
-      vscode.window.registerCustomEditorProvider(ExportPreviewProvider.VIEW_TYPE, this, {
-        webviewOptions: {
-          retainContextWhenHidden: true,
-        },
-      }),
+      vscode.window.registerCustomEditorProvider(ExportPreviewProvider.VIEW_TYPE, this, {}),
     );
   }
 }

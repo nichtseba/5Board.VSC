@@ -3,6 +3,7 @@ import { BoardPackage } from './package';
 import { BoardDocument } from '5board.vsc-common';
 import { MessageService } from '../MessageService';
 import { EXTENSION } from '../extension';
+import { t } from '../localization';
 
 export class BoardCustomDocument implements vscode.CustomDocument {
   public readonly documentChange = new vscode.EventEmitter<BoardDocument>();
@@ -42,8 +43,51 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     await this.boardPackage.write(targetUri ?? this.uri);
   }
 
+  public async saveHtmlExport(html: string, backgroundColor: string): Promise<void> {
+    const exportHtml = createHtmlExport(html, backgroundColor);
+
+    const defaultUri = this.uri.with({
+      path: this.uri.path.replace(/\.[^/.]+$/, '.html'),
+    });
+
+    const targetUri = await vscode.window.showSaveDialog({
+      defaultUri,
+      filters: {
+        HTML: ['html', 'htm'],
+      },
+      saveLabel: t('extension.htmlExport.saveLabel'),
+    });
+
+    if (!targetUri) {
+      return;
+    }
+
+    await vscode.workspace.fs.writeFile(targetUri, new TextEncoder().encode(exportHtml));
+
+    vscode.window.showInformationMessage(`${t('extension.htmlExport.saved')} ${targetUri.fsPath}`);
+  }
+
   public applyEdit(edit: (document: BoardDocument) => void): void {
     edit(this.boardPackage.document);
     this.documentChange.fire(this.boardPackage.document);
   }
+}
+
+function createHtmlExport(html: string, backgroundColor: string): string {
+  return `<!doctype html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>5Board Export</title>
+      <style>
+        html, 
+        body {
+          background: ${backgroundColor};
+        }
+      </style>
+    </head>
+    <body>
+    ${html}
+    </body>
+    </html>`;
 }

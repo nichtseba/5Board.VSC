@@ -13,7 +13,7 @@ import { StructureTreeProvider } from './providers/StructureTreeProvider';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
 import { BoardDocument, DEFAULT_TOOL_ID, EditorState } from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
-import { ExportPreviewProvider } from './providers/exportPreviewProvider';
+import { ExportPreviewProvider } from './providers/ExportPreviewProvider';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
@@ -51,11 +51,7 @@ export class FiveBoardExtension extends ExtensionBase {
     new SidebarViewProvider(context, this.messages).register();
     new ElementSettingsSidebarViewProvider(context, this.messages).register();
     new StructureTreeProvider(context).register();
-    new ExportPreviewProvider(
-      context,
-      this.packageManager,
-      () => this.activeEditorDocument,
-    ).register();
+    new ExportPreviewProvider(context, this.packageManager).register();
   }
 
   @Command('5board-vsc.newBoard')
@@ -97,7 +93,7 @@ export class FiveBoardExtension extends ExtensionBase {
     const uri = this.activeEditorDocument?.uri;
 
     if (!uri) {
-      vscode.window.showErrorMessage('Open a .5boardz file first or save current file.');
+      vscode.window.showErrorMessage(t('extension.htmlExport.noActiveBoard'));
       return;
     }
 

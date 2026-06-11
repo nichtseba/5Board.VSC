@@ -16,18 +16,17 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
   return (
     <>
       {`Selected element ID: ${selectedElementId}`}
-      <div className="editor-canvas bg-editor-background" data-html-export-canvas>
+      <div className="editor-canvas bg-editor-background" id="html-export-canvas">
         {/* zu Testzwecken vvv */}
         <div
           style={{
-            gridColumn: '2 / span 12',
+            gridColumn: '2 / -1',
             gridRow: '2 / span 3',
             fontSize: 32,
             fontWeight: 700,
           }}
         >
-          HTML Export Test
-          <h1>test</h1>
+          HTML Export Test-Anzeige
         </div>
         {/* zu Testzwecken ^^^ */}
         {document.content.elements.map((element) => (
