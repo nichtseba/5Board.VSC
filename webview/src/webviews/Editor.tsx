@@ -141,8 +141,7 @@ export default function Editor() {
               top: projectorViewport.top,
               width: projectorViewport.width,
               height: projectorViewport.height,
-              border: '2px solid #3b82f6',
-              background: 'rgba(59, 130, 246, 0.08)',
+              border: '2px solid var(--vscode-activityErrorBadge-background)',
               pointerEvents: 'none',
               zIndex: 9999,
             }}
