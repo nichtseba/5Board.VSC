@@ -17,18 +17,6 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
     <>
       {`Selected element ID: ${selectedElementId}`}
       <div className="editor-canvas bg-editor-background" id="html-export-canvas">
-        {/* zu Testzwecken vvv */}
-        <div
-          style={{
-            gridColumn: '2 / -1',
-            gridRow: '2 / span 3',
-            fontSize: 32,
-            fontWeight: 700,
-          }}
-        >
-          HTML Export Test-Anzeige
-        </div>
-        {/* zu Testzwecken ^^^ */}
         {document.content.elements.map((element) => (
           <EditorElement
             key={element.id}

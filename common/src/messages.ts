@@ -30,4 +30,4 @@ export type WebviewToExtensionMessageType = AllWebviewToExtensionMessage['type']
 type AllWebviewToExtensionMessage =
   | { type: 'ready' }
   | { type: 'focus' }
-  | { type: 'saveHtmlExport'; html: string; backgroundColor: string; fileName?: string };
+  | { type: 'saveHtmlExport'; html: string; backgroundColor: string };

@@ -30,38 +30,9 @@ export class ExportPreviewProvider implements vscode.CustomReadonlyEditorProvide
     panel: vscode.WebviewPanel,
     _token: vscode.CancellationToken,
   ): Promise<void> {
-    const editorDocument = document;
-    const messages = editorDocument.messageService;
+    const messages = document.messageService;
 
     messages.registerPanel(panel);
-
-    const disposeReady = messages.on('ready', (_msg, sender) => {
-      if (sender !== panel.webview) {
-        return;
-      }
-
-      messages.send(
-        {
-          type: 'init',
-          document: editorDocument.boardPackage.document,
-          language: 'en', // Todo -> Sprache nicht hart codieren?
-        },
-        sender,
-      );
-    });
-
-    const disposeSaveHtmlExport = messages.on('saveHtmlExport', async (msg, sender) => {
-      if (sender !== panel.webview) {
-        return;
-      }
-
-      await editorDocument.saveHtmlExport(msg.html, msg.backgroundColor);
-    });
-
-    panel.onDidDispose(() => {
-      disposeReady();
-      disposeSaveHtmlExport();
-    });
 
     panel.webview.options = { enableScripts: true };
     setExportPreviewWebviewHtml(this.context, panel.webview);

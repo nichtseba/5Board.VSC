@@ -6,6 +6,7 @@ import EditorCanvas from '../components/canvas/EditorCanvas';
 import { useLocalization } from '../providers/LocalizationProvider';
 import type { MessageService } from '../services/MessageService';
 import { createExportCanvasHtml } from '../exportUtils';
+import { Button } from 'vscrui';
 
 export default function ExportPreview() {
   const messages = useMessageService();
@@ -24,9 +25,9 @@ export default function ExportPreview() {
 
   return (
     <div style={{ display: 'flex', height: '100vh', flexDirection: 'column', gap: 8, padding: 8 }}>
-      <button type="button" onClick={() => void exportDocument(messages)}>
+      <Button appearance="primary" onClick={() => void exportDocument(messages)}>
         {t('webview.exportPreview.saveHtml')}
-      </button>
+      </Button>
 
       {document ? (
         <div>
@@ -51,7 +52,6 @@ async function exportDocument(messages: MessageService): Promise<void> {
     type: 'saveHtmlExport',
     html: exportCanvasHtml.html,
     backgroundColor: exportCanvasHtml.backgroundColor,
-    fileName: '5board-export',
   });
 }
 
