@@ -122,7 +122,7 @@ export default function Editor() {
         </button>
       </div>
 
-      <div style={{ position: 'relative' }}>
+      <div className="relative">
         {boardDocument && (
           <EditorCanvas
             document={boardDocument}
@@ -135,15 +135,12 @@ export default function Editor() {
         )}
         {projectorViewport && (
           <div
+            className="absolute border-2 pointer-events-none z-9999 border-activity-error-badge-background"
             style={{
-              position: 'absolute',
               left: projectorViewport.left,
               top: projectorViewport.top,
               width: projectorViewport.width,
               height: projectorViewport.height,
-              border: '2px solid var(--vscode-activityErrorBadge-background)',
-              pointerEvents: 'none',
-              zIndex: 9999,
             }}
           />
         )}
