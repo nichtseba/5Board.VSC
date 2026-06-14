@@ -140,7 +140,7 @@ export default function Editor() {
               left: projectorViewport.left,
               top: projectorViewport.top,
               width: projectorViewport.width,
-              height: projectorViewport.height,
+              height: projectorViewport.height
             }}
           />
         )}
