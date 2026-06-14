@@ -15,15 +15,60 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   ) {
     this.messageService.on('ready', (_msg, sender) => {
       this.messageService.send(
-        { type: 'init', document: this.boardPackage.document, language: 'en' },
+        {
+          type: 'init',
+          document: this.boardPackage.document,
+          editorState: EXTENSION.editorState,
+          language: 'en',
+        },
         sender,
       );
     });
     this.messageService.on('focus', () => {
       EXTENSION.activeEditorDocument = this;
     });
+
+    this.messageService.on('selectElement', (msg) => {
+      console.log('selectElement: ', msg.id);
+      this.applyEdit((document) => {
+        document.content.selectedElementId = msg.id;
+      });
+    });
+
+    this.messageService.on('updateElementLayout', (msg) => {
+      this.applyEdit((document) => {
+        const element = document.content.elements.find((e) => e.id === msg.id);
+
+        if (!element) {
+          return;
+        }
+
+        element.layout = {
+          ...element.layout,
+          ...msg.changes,
+        };
+      });
+    });
+    this.messageService.on('insertSpacerRows', (msg) => {
+      this.applyEdit((document) => {
+        for (const element of document.content.elements) {
+          if (element.layout.yPos >= msg.startRow) {
+            element.layout = {
+              ...element.layout,
+              yPos: element.layout.yPos + msg.rowCount,
+            };
+          }
+        }
+      });
+    });
     this.onDocumentChange((document) => {
       this.messageService.send({ type: 'updateDocument', document });
+    });
+    EXTENSION.onEditorStateChange((state) => {
+      this.messageService.send({
+        type: 'updateEditorState',
+        editorState: state,
+      });
     });
   }
 

@@ -13,6 +13,7 @@ import { StructureTreeProvider } from './providers/StructureTreeProvider';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
 import { BoardDocument, DEFAULT_TOOL_ID, EditorState } from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
+import { SidebarDocumentSync } from './SidebarDocumentSync';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
@@ -47,9 +48,31 @@ export class FiveBoardExtension extends ExtensionBase {
   public activate(context: vscode.ExtensionContext): void {
     super.activate(context);
     new EditorEditorProvider(context, this.packageManager).register();
+    new SidebarDocumentSync(this.messages);
     new SidebarViewProvider(context, this.messages).register();
     new ElementSettingsSidebarViewProvider(context, this.messages).register();
     new StructureTreeProvider(context).register();
+
+    this.messages.on('selectTool', (msg) => {
+      this.editorState = {
+        tool: msg.tool,
+      };
+    });
+    this.messages.on('updateElement', (msg) => {
+      if (!this.activeEditorDocument) {
+        return;
+      }
+      this.activeEditorDocument.applyEdit((document) => {
+        const index = document.content.elements.findIndex((e) => e.id === msg.id);
+
+        if (index !== -1) {
+          document.content.elements[index] = {
+            ...document.content.elements[index],
+            ...msg.changes,
+          };
+        }
+      });
+    });
   }
 
   @Command('5board-vsc.newBoard')

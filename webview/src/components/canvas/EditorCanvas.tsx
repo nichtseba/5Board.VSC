@@ -1,4 +1,4 @@
-import { BoardDocument, EditorToolId } from '5board.vsc-common';
+import { BoardDocument, EditorState, EditorToolId } from '5board.vsc-common';
 import { useEffect, useRef, useState } from 'react';
 import type React from 'react';
 import EditorElement from './EditorElement';
@@ -15,9 +15,14 @@ export type EditorCanvasProps = {
  * Renders the editor canvas, which displays all editor elements based on their yPos.
  */
 export default function EditorCanvas({ document }: EditorCanvasProps) {
-  const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
-  const [currentDocument, setCurrentDocument] = useState(document);
-  const [activeToolId, setActiveToolId] = useState<string | null>(null);
+  const [editorState, setEditorState] = useState<EditorState>({
+    tool: {
+      type: EditorToolId.POINTER,
+      parameters: undefined,
+    },
+  });
+  const selectedElementId = document.content.selectedElementId ?? null;
+  const activeToolId = editorState.tool.type;
 
   const messages = useMessageService();
   const canvasRef = useRef<HTMLDivElement | null>(null);
@@ -35,29 +40,33 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
     draggedRows: number;
   } | null>(null);
 
+  useEffect(() => {
+    messages.send({ type: 'ready' });
+  }, []);
+
   useOnMessage((msg) => {
-    if (msg.type === 'init' || msg.type === 'updateDocument') {
-      setActiveToolId(msg.document.content.selectedToolId ?? null);
+    if (msg.type === 'updateEditorState' || msg.type === 'init') {
+      setEditorState(msg.editorState);
     }
   });
 
   useEffect(() => {
-    if (activeToolId !== EditorToolId.POINTER) {
-      setSelectedElementId(null);
+    if (activeToolId !== EditorToolId.POINTER && document.content.selectedElementId) {
+      messages.send({
+        type: 'selectElement',
+        id: null,
+      });
     }
-  }, [activeToolId]);
-  const handleSelectElement: (id: string) => void = (id) => {
+  }, [activeToolId, document.content.selectedElementId, messages]);
+
+  const handleSelectElement = (id: string) => {
     if (activeToolId !== EditorToolId.POINTER) return;
-    setSelectedElementId(id);
+
+    messages.send({
+      type: 'selectElement',
+      id,
+    });
   };
-
-  useEffect(() => {
-    setCurrentDocument(document);
-  }, [document]);
-
-  useEffect(() => {
-    messages.send({ type: 'selectElement', id: selectedElementId });
-  }, [selectedElementId, messages]);
 
   useEffect(() => {
     if (!(activeToolId === EditorToolId.SPACER)) {
@@ -71,23 +80,11 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
           return null;
         }
 
-        setCurrentDocument((current) => ({
-          ...current,
-          content: {
-            ...current.content,
-            elements: current.content.elements.map((element) =>
-              element.layout.yPos >= prev.startRow
-                ? {
-                    ...element,
-                    layout: {
-                      ...element.layout,
-                      yPos: element.layout.yPos + prev.draggedRows,
-                    },
-                  }
-                : element,
-            ),
-          },
-        }));
+        messages.send({
+          type: 'insertSpacerRows',
+          startRow: prev.startRow,
+          rowCount: prev.draggedRows,
+        });
 
         return null;
       });
@@ -139,33 +136,6 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
     );
   };
 
-  /*
-   * Handler to update the layout of an element (position and size) based on its ID.
-   * Used when the element is moved or resized.
-   */
-  const handleUpdateLayout = (
-    id: string,
-    changes: Partial<(typeof currentDocument.content.elements)[number]['layout']>,
-  ) => {
-    setCurrentDocument((prev) => ({
-      ...prev,
-      content: {
-        ...prev.content,
-        elements: prev.content.elements.map((element) =>
-          element.id === id
-            ? {
-                ...element,
-                layout: {
-                  ...element.layout,
-                  ...changes,
-                },
-              }
-            : element,
-        ),
-      },
-    }));
-  };
-
   return (
     <>
       {`Selected element ID: ${selectedElementId}`}
@@ -178,13 +148,12 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
         {activeToolId === EditorToolId.SPACER ? (
           <SpacerOverlay dragState={dragState} canvasRef={canvasRef} />
         ) : null}
-        {currentDocument.content.elements.map((element) => (
+        {document.content.elements.map((element) => (
           <EditorElement
             key={element.id}
             element={element}
             selected={element.id === selectedElementId}
             onSelect={handleSelectElement}
-            onUpdateLayout={handleUpdateLayout}
             activeToolId={activeToolId}
           />
         ))}

@@ -3,24 +3,24 @@ import { useLayoutEffect, useRef } from 'react';
 import { useGrid } from '../../../providers/GridProvider';
 import { ELEMENT_INTERACTION_CONFIG, ElementInteractionProfile } from './InteractionConfig';
 import Moveable, { OnDragEnd, OnResizeEnd } from 'react-moveable';
+import { useMessageService } from '../../../services/MessageService';
 
 type Props<T extends EditorElementType> = {
   element: EditorElement<T>;
   selected: boolean | undefined;
   targetRef: React.RefObject<HTMLDivElement>;
-  onUpdateLayout?: (id: string, changes: Partial<EditorElement<T>['layout']>) => void;
 };
 
 export default function ElementInteractionController<ElementType extends EditorElementType>({
   element,
   selected,
   targetRef,
-  onUpdateLayout,
 }: Props<ElementType>) {
   const moveableRef = useRef<Moveable | null>(null);
   const { cellSize } = useGrid();
 
   const profile: ElementInteractionProfile = ELEMENT_INTERACTION_CONFIG[element.type];
+  const messages = useMessageService();
 
   useLayoutEffect(() => {
     if (selected) {
@@ -49,9 +49,13 @@ export default function ElementInteractionController<ElementType extends EditorE
           yDelta = 0;
           break;
       }
-      onUpdateLayout?.(element.id, {
-        xPos: element.layout.xPos + xDelta,
-        yPos: element.layout.yPos + yDelta,
+      messages.send({
+        type: 'updateElementLayout',
+        id: element.id,
+        changes: {
+          xPos: element.layout.xPos + xDelta,
+          yPos: element.layout.yPos + yDelta,
+        },
       });
       console.log('persisted position on drag end', element.id, {
         xPos: element.layout.xPos + xDelta,
@@ -73,9 +77,13 @@ export default function ElementInteractionController<ElementType extends EditorE
     const newHeight = Math.max(1, Math.round(height / cellSize.height));
 
     if (newWidth !== element.layout.width || newHeight !== element.layout.height) {
-      onUpdateLayout?.(element.id, {
-        width: newWidth,
-        height: newHeight,
+      messages.send({
+        type: 'updateElementLayout',
+        id: element.id,
+        changes: {
+          width: newWidth,
+          height: newHeight,
+        },
       });
       console.log('persisted resize on resize end', element.id, {
         width: newWidth,

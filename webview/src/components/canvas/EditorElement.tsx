@@ -14,7 +14,6 @@ export type EditorElementProps<T extends EditorElementType> = {
   onSelect?: (id: string) => void;
   selected?: boolean;
   targetRef?: React.RefObject<HTMLDivElement>;
-  onUpdateLayout?: (id: string, changes: Partial<EditorElement<T>['layout']>) => void;
   activeToolId?: string | null;
 };
 
@@ -28,7 +27,6 @@ export default function EditorElement<ElementType extends EditorElementType>({
   element,
   onSelect,
   selected,
-  onUpdateLayout,
   activeToolId,
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
@@ -66,12 +64,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
         />
       </div>
       {activeToolId === EditorToolId.POINTER && (
-        <ElementInteractionController
-          element={element}
-          selected={selected}
-          targetRef={targetRef}
-          onUpdateLayout={onUpdateLayout}
-        />
+        <ElementInteractionController element={element} selected={selected} targetRef={targetRef} />
       )}
     </>
   );

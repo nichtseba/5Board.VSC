@@ -22,6 +22,15 @@ export class MessageService {
       this.webviews.delete(panel.webview);
     });
   }
+  registerView(view: vscode.WebviewView): void {
+    this.webviews.add(view.webview);
+
+    view.webview.onDidReceiveMessage((msg) => this.handleMessage(msg, view.webview));
+
+    view.onDidDispose?.(() => {
+      this.webviews.delete(view.webview);
+    });
+  }
 
   private handleMessage<MessageType extends WebviewToExtensionMessageType>(
     msg: WebviewToExtensionMessage<MessageType>,
