@@ -8,11 +8,30 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   public readonly documentChange = new vscode.EventEmitter<BoardDocument>();
   public readonly onDocumentChange = this.documentChange.event;
   public readonly messageService = new MessageService();
+  private readonly disposables: vscode.Disposable[] = []; // Todo dispose of them
 
   constructor(
     public boardPackage: BoardPackage,
     public uri: vscode.Uri,
   ) {
+    this.disposables.push(
+      this.onDocumentChange((document) => {
+        this.messageService.send({ type: 'updateDocument', document });
+      }),
+    );
+    this.disposables.push(
+      EXTENSION.onEditorStateChange((state) => {
+        this.messageService.send({
+          type: 'updateEditorState',
+          editorState: state,
+        });
+      }),
+    );
+
+    this.registerMessageHandlers();
+  }
+
+  private registerMessageHandlers(): void {
     this.messageService.on('ready', (_msg, sender) => {
       this.messageService.send(
         {
@@ -24,8 +43,13 @@ export class BoardCustomDocument implements vscode.CustomDocument {
         sender,
       );
     });
-    this.messageService.on('focus', () => {
-      EXTENSION.activeEditorDocument = this;
+    this.messageService.on('focus', ({ focus }) => {
+      console.log('focus: ', this.uri);
+      if (focus) {
+        EXTENSION.activeEditorDocument = this;
+      } else {
+        this.clearActiveEditorDocument();
+      }
     });
 
     this.messageService.on('selectElement', (msg) => {
@@ -61,19 +85,19 @@ export class BoardCustomDocument implements vscode.CustomDocument {
         }
       });
     });
-    this.onDocumentChange((document) => {
-      this.messageService.send({ type: 'updateDocument', document });
-    });
-    EXTENSION.onEditorStateChange((state) => {
-      this.messageService.send({
-        type: 'updateEditorState',
-        editorState: state,
-      });
-    });
   }
 
   dispose(): void {
-    EXTENSION.activeEditorDocument = null;
+    for (const disposable of this.disposables) {
+      disposable.dispose();
+    }
+    this.clearActiveEditorDocument();
+  }
+
+  private clearActiveEditorDocument() {
+    if (EXTENSION.activeEditorDocument === this) {
+      EXTENSION.activeEditorDocument = null;
+    }
   }
 
   public async reloadDocument(): Promise<void> {

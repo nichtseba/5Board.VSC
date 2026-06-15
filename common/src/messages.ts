@@ -32,7 +32,7 @@ export type WebviewToExtensionMessageType = AllWebviewToExtensionMessage['type']
 // All Messages from webviews to the extension
 type AllWebviewToExtensionMessage =
   | { type: 'ready' }
-  | { type: 'focus' }
+  | { type: 'focus'; focus: boolean }
   | { type: 'selectElement'; id: string | null }
   | { type: 'selectTool'; tool: EditorTool }
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }

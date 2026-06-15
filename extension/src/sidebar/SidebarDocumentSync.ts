@@ -1,10 +1,10 @@
 import vscode from 'vscode';
-import { EXTENSION } from './extension';
-import { MessageService } from './MessageService';
+import { EXTENSION } from '../extension';
+import { MessageService } from '../MessageService';
 
 export class SidebarDocumentSync implements vscode.Disposable {
-  private listener?: vscode.Disposable;
-  private activeDocSubscription?: vscode.Disposable;
+  private activeDocumentListener?: vscode.Disposable;
+  private documentListener?: vscode.Disposable;
 
   constructor(private readonly messages: MessageService) {
     messages.on('ready', (_msg, sender) => {
@@ -19,9 +19,7 @@ export class SidebarDocumentSync implements vscode.Disposable {
       );
     });
 
-    this.activeDocSubscription = EXTENSION.onActiveDocumentChange((doc) => {
-      this.listener?.dispose();
-
+    this.documentListener = EXTENSION.onActiveDocumentChange((doc) => {
       if (!doc) {
         return;
       }
@@ -31,7 +29,8 @@ export class SidebarDocumentSync implements vscode.Disposable {
         document: doc.boardPackage.document,
       });
 
-      this.listener = doc.onDocumentChange((document) => {
+      this.activeDocumentListener?.dispose();
+      this.activeDocumentListener = doc.onDocumentChange((document) => {
         this.messages.send({
           type: 'updateDocument',
           document,
@@ -41,7 +40,7 @@ export class SidebarDocumentSync implements vscode.Disposable {
   }
 
   dispose(): void {
-    this.listener?.dispose();
-    this.activeDocSubscription?.dispose();
+    this.activeDocumentListener?.dispose();
+    this.documentListener?.dispose();
   }
 }

@@ -10,6 +10,7 @@ export default function Editor() {
 
   useEffect(() => {
     messages.send({ type: 'ready' });
+    messages.send({ type: 'focus', focus: true });
   }, []);
 
   useOnMessage((msg) => {
@@ -18,15 +19,6 @@ export default function Editor() {
     }
   });
 
-  useEffect(() => {
-    const setFocus = () => {
-      messages.send({ type: 'focus' });
-    };
-    window.addEventListener('focus', setFocus);
-    return () => {
-      window.removeEventListener('focus', setFocus);
-    };
-  }, []);
   return (
     <>
       <p>
