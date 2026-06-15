@@ -22,7 +22,15 @@ export default function ElementInteractionController<ElementType extends EditorE
   const profile: ElementInteractionProfile = ELEMENT_INTERACTION_CONFIG[element.type];
   const messages = useMessageService();
 
+  const pendingPositionUpdate = useRef(false);
+
   useLayoutEffect(() => {
+    if (pendingPositionUpdate.current && targetRef.current) {
+      pendingPositionUpdate.current = false;
+      targetRef.current.style.transform = '';
+      targetRef.current.style.width = '';
+      targetRef.current.style.height = '';
+    }
     if (selected) {
       moveableRef.current?.updateRect();
     }
@@ -41,6 +49,7 @@ export default function ElementInteractionController<ElementType extends EditorE
     let yDelta = Math.round(dy / cellSize.height);
 
     if (xDelta !== 0 || yDelta !== 0) {
+      pendingPositionUpdate.current = true;
       switch (profile.dragDirection) {
         case 'vertical':
           xDelta = 0;
@@ -57,15 +66,8 @@ export default function ElementInteractionController<ElementType extends EditorE
           yPos: element.layout.yPos + yDelta,
         },
       });
-      console.log('persisted position on drag end', element.id, {
-        xPos: element.layout.xPos + xDelta,
-        yPos: element.layout.yPos + yDelta,
-      });
     }
 
-    if (target instanceof HTMLElement) {
-      target.style.transform = '';
-    }
     moveableRef.current?.updateRect();
   };
 
@@ -77,6 +79,8 @@ export default function ElementInteractionController<ElementType extends EditorE
     const newHeight = Math.max(1, Math.round(height / cellSize.height));
 
     if (newWidth !== element.layout.width || newHeight !== element.layout.height) {
+      pendingPositionUpdate.current = true;
+
       messages.send({
         type: 'updateElementLayout',
         id: element.id,
@@ -85,16 +89,8 @@ export default function ElementInteractionController<ElementType extends EditorE
           height: newHeight,
         },
       });
-      console.log('persisted resize on resize end', element.id, {
-        width: newWidth,
-        height: newHeight,
-      });
     }
 
-    if (target instanceof HTMLElement) {
-      target.style.width = '';
-      target.style.height = '';
-    }
     moveableRef.current?.updateRect();
   };
 
