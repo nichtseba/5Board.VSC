@@ -3,12 +3,14 @@ import { BoardPackage } from './package';
 import { BoardDocument } from '5board.vsc-common';
 import { MessageService } from '../MessageService';
 import { EXTENSION } from '../extension';
+import { DocumentMessageHandlers } from './DocumentMessageHandlers';
 
 export class BoardCustomDocument implements vscode.CustomDocument {
   public readonly documentChange = new vscode.EventEmitter<BoardDocument>();
   public readonly onDocumentChange = this.documentChange.event;
   public readonly messageService = new MessageService();
   private readonly disposables: vscode.Disposable[] = []; // Todo dispose of them
+  private readonly unsubscribers: (() => void)[] = [];
 
   constructor(
     public boardPackage: BoardPackage,
@@ -32,62 +34,36 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   }
 
   private registerMessageHandlers(): void {
-    this.messageService.on('ready', (_msg, sender) => {
-      this.messageService.send(
-        {
-          type: 'init',
-          document: this.boardPackage.document,
-          editorState: EXTENSION.editorState,
-          language: 'en',
-        },
-        sender,
-      );
-    });
-    this.messageService.on('focus', ({ focus }) => {
-      console.log('focus: ', this.uri);
-      if (focus) {
-        EXTENSION.activeEditorDocument = this;
-      } else {
-        this.clearActiveEditorDocument();
-      }
-    });
-
-    this.messageService.on('selectElement', (msg) => {
-      console.log('selectElement: ', msg.id);
-      this.applyEdit((document) => {
-        document.content.selectedElementId = msg.id;
-      });
-    });
-
-    this.messageService.on('updateElementLayout', (msg) => {
-      this.applyEdit((document) => {
-        const element = document.content.elements.find((e) => e.id === msg.id);
-
-        if (!element) {
-          return;
+    this.unsubscribers.push(
+      this.messageService.on('ready', (_msg, sender) => {
+        this.messageService.send(
+          {
+            type: 'init',
+            document: this.boardPackage.document,
+            editorState: EXTENSION.editorState,
+            language: 'en',
+          },
+          sender,
+        );
+      }),
+    );
+    this.unsubscribers.push(
+      this.messageService.on('focus', ({ focus }) => {
+        console.log('focus: ', this.uri);
+        if (focus) {
+          EXTENSION.activeEditorDocument = this;
+        } else {
+          this.clearActiveEditorDocument();
         }
-
-        element.layout = {
-          ...element.layout,
-          ...msg.changes,
-        };
-      });
-    });
-    this.messageService.on('insertSpacerRows', (msg) => {
-      this.applyEdit((document) => {
-        for (const element of document.content.elements) {
-          if (element.layout.yPos >= msg.startRow) {
-            element.layout = {
-              ...element.layout,
-              yPos: element.layout.yPos + msg.rowCount,
-            };
-          }
-        }
-      });
-    });
+      }),
+    );
+    this.unsubscribers.push(...new DocumentMessageHandlers(this).register());
   }
 
   dispose(): void {
+    for (const unsubscribe of this.unsubscribers) {
+      unsubscribe();
+    }
     for (const disposable of this.disposables) {
       disposable.dispose();
     }
