@@ -20,7 +20,7 @@ export default function ElementSettingsSidebar() {
   }, []);
 
   useOnMessage((msg) => {
-    if (msg.type === 'init' || msg.type === 'initSidebar' || msg.type === 'updateDocument') {
+    if (msg.type === 'initSidebar' || msg.type === 'updateDocument') {
       setDocument(msg.document);
     }
   });

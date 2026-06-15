@@ -9,7 +9,7 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   public readonly documentChange = new vscode.EventEmitter<BoardDocument>();
   public readonly onDocumentChange = this.documentChange.event;
   public readonly messageService = new MessageService();
-  private readonly disposables: vscode.Disposable[] = []; // Todo dispose of them
+  private readonly disposables: vscode.Disposable[] = [];
   private readonly unsubscribers: (() => void)[] = [];
 
   constructor(
