@@ -5,14 +5,10 @@ import { EditorEditorProvider } from './providers/EditorEditorProvider';
 import { t } from './localization';
 import path from 'path';
 import { BoardPackage } from './board/package';
-import {
-  ElementSettingsSidebarViewProvider,
-  SidebarViewProvider,
-} from './providers/SidebarViewProvider';
-import { StructureTreeProvider } from './providers/StructureTreeProvider';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
 import { BoardDocument, DEFAULT_TOOL_ID, EditorState } from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
+import { SidebarManager } from './sidebar/SidebarManager';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
@@ -47,9 +43,7 @@ export class FiveBoardExtension extends ExtensionBase {
   public activate(context: vscode.ExtensionContext): void {
     super.activate(context);
     new EditorEditorProvider(context, this.packageManager).register();
-    new SidebarViewProvider(context, this.messages).register();
-    new ElementSettingsSidebarViewProvider(context, this.messages).register();
-    new StructureTreeProvider(context).register();
+    context.subscriptions.push(new SidebarManager(context, this.messages));
   }
 
   @Command('5board-vsc.newBoard')

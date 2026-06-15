@@ -10,24 +10,15 @@ export default function Editor() {
 
   useEffect(() => {
     messages.send({ type: 'ready' });
+    messages.send({ type: 'focus', focus: true });
   }, []);
 
   useOnMessage((msg) => {
-    console.log('Received message in Editor:', msg.type);
     if (msg.type === 'updateDocument' || msg.type === 'init') {
       setDocument(msg.document);
     }
   });
 
-  useEffect(() => {
-    const setFocus = () => {
-      messages.send({ type: 'focus' });
-    };
-    window.addEventListener('focus', setFocus);
-    return () => {
-      window.removeEventListener('focus', setFocus);
-    };
-  }, []);
   return (
     <>
       <p>
