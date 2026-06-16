@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import MonacoEditor, { loader } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor';
 import { EditorElementType } from '5board.vsc-common';
 import type { EditorElementProps } from '../EditorElement';
-import { CustomSelect } from './CustomSelect';
 
 loader.config({ monaco });
 
@@ -18,18 +17,20 @@ function getMonacoTheme(): string {
 }
 
 export function CodeElement({ element }: EditorElementProps<EditorElementType.Code>) {
-  const {
-    language: initialLanguage,
-    className: initialClassName,
-    content,
-    output,
-    errorOutput,
-  } = element.data;
-  const [language, setLanguage] = useState(initialLanguage ?? 'java');
-  const [className, setClassName] = useState(initialClassName ?? '');
+  const { language, content, output, errorOutput } = element.data;
   const hasOutput = Boolean(output || errorOutput);
   const [outputVisible, setOutputVisible] = useState(true);
   const [editorHeight, setEditorHeight] = useState(MIN_HEIGHT);
+  const [monacoTheme, setMonacoTheme] = useState(getMonacoTheme);
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => setMonacoTheme(getMonacoTheme()));
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['data-vscode-theme-kind'],
+    });
+    return () => observer.disconnect();
+  }, []);
 
   function handleMount(editor: monaco.editor.IStandaloneCodeEditor) {
     const updateHeight = () => {
@@ -40,56 +41,43 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
   }
 
   return (
-    <div className="border border-gray-300 dark:border-gray-700 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-900 relative z-0">
+    <div className="border border-editor-widget-border rounded-sm overflow-hidden bg-editor-background relative">
       {/* Header */}
-      <div className="relative z-10 flex items-center gap-4 px-4 py-3 border-b border-gray-300 dark:border-gray-700 bg-gray-200 dark:bg-gray-800">
-        <CustomSelect
-          value={language}
-          onChange={setLanguage}
-          options={[
-            { value: 'java', label: 'java' },
-            { value: 'python', label: 'python' },
-            { value: 'javascript', label: 'javascript' },
-          ]}
-        />
+      <div className="flex items-center gap-2 px-3 py-1.5 border-b border-editor-widget-border bg-editorGroupHeader-tabsBackground">
+        <span className="font-sans text-base text-tab-activeForeground flex items-center gap-1.5 select-none">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 16 16"
+            className="text-symbolIcon-classForeground"
+            fill="currentColor"
+          >
+            <path d="M5.854 4.854a.5.5 0 1 0-.708-.708l-3.5 3.5a.5.5 0 0 0 0 .708l3.5 3.5a.5.5 0 0 0 .708-.708L2.707 8l3.147-3.146zm4 0a.5.5 0 1 1 .708-.708l3.5 3.5a.5.5 0 0 1 0 .708l-3.5 3.5a.5.5 0 0 1-.708-.708L13.293 8l-3.147-3.146z" />
+          </svg>
+          {language ?? 'code'}
+        </span>
 
-        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">|</span>
-
-        {className && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-gray-600 dark:text-gray-400">CLASS:</span>
-            <CustomSelect
-              value={className}
-              onChange={setClassName}
-              options={[{ value: className, label: className }]}
-            />
-          </div>
-        )}
-
-        {/* Right side buttons */}
-        <div className="ml-auto flex items-center gap-2">
-          <button className="flex items-center gap-2 px-4 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg border border-blue-600 cursor-pointer transition-colors active:bg-blue-700">
-            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+        <div className="ml-auto">
+          <button className="flex items-center gap-1.5 px-2.5 py-1 bg-button-background text-button-foreground font-sans text-base rounded-xs border-none cursor-pointer hover:bg-button-hover-background">
+            <svg width="11" height="11" viewBox="0 0 20 20" fill="currentColor">
               <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
             </svg>
             Run
           </button>
-          <button className="px-3 py-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 cursor-pointer transition-colors rounded-lg">
-            &#8943;
-          </button>
         </div>
       </div>
 
-      {/* Code Editor */}
+      {/* Monaco Editor */}
       <MonacoEditor
         height={editorHeight}
         width="100%"
         defaultValue={content}
-        language={language ?? 'java'}
-        theme={getMonacoTheme()}
+        language={language ?? 'plaintext'}
+        theme={monacoTheme}
         onMount={handleMount}
         options={{
           minimap: { enabled: false },
+          padding: { top: 8, bottom: 8 },
           scrollBeyondLastLine: false,
           lineNumbers: 'on',
           renderLineHighlight: 'none',
@@ -98,45 +86,20 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
         }}
       />
 
-      {/* Output Section */}
+      {/* Output */}
       {hasOutput && (
-        <div className="border-t border-gray-300 dark:border-gray-700">
+        <div className="border-t border-editor-widget-border">
           <button
             onClick={() => setOutputVisible((v) => !v)}
-            className="w-full px-4 py-2 text-left text-xs font-medium text-gray-600 dark:text-gray-400 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 flex items-center gap-2 border-b border-gray-300 dark:border-gray-700"
+            className="w-full px-3 py-1 text-left font-sans text-base font-semibold uppercase tracking-wide text-panelTitle-activeForeground bg-panel-background border-none border-b border-panel-border flex items-center gap-2 cursor-pointer hover:bg-list-hover-background"
           >
-            <span className="font-bold">{errorOutput ? 'ERR' : 'OUT'}</span>
-            <span className="ml-auto flex items-center justify-center w-4 h-4">
-              {outputVisible ? (
-                <svg
-                  className="w-4 h-4 text-gray-600 dark:text-gray-400"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M14.77 12.79a1 1 0 01-1.41-1.41L10 9.41 6.64 12.77a1 1 0 11-1.41-1.41l4.24-4.24a1 1 0 011.41 0l4.24 4.24a1 1 0 010 1.41z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className="w-4 h-4 text-gray-600 dark:text-gray-400"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M5.23 7.21a1 1 0 011.41 0L10 10.59l3.36-3.36a1 1 0 111.41 1.41l-4.24 4.24a1 1 0 01-1.41 0L5.23 8.62a1 1 0 010-1.41z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              )}
-            </span>
+            <span>{errorOutput ? 'Output (Error)' : 'Output'}</span>
+            <span className="ml-auto text-[10px]">{outputVisible ? '▲' : '▼'}</span>
           </button>
+
           {outputVisible && (
-            <pre className="px-4 py-3 text-xs text-gray-800 dark:text-gray-200 bg-gray-200 dark:bg-gray-900 overflow-x-auto font-mono">
-              {errorOutput ?? output}
+            <pre className="m-0 px-3 py-2 font-mono text-editor leading-relaxed overflow-x-auto bg-editor-background text-terminal-foreground">
+              {errorOutput ? <span className="text-terminal-ansiRed">{errorOutput}</span> : output}
             </pre>
           )}
         </div>
