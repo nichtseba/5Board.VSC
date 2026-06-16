@@ -6,6 +6,7 @@ import SpacerOverlay from './SpacerOverlay';
 import { useMessageService, useOnMessage } from '../../services/MessageService';
 import './EditorCanvas.css';
 import { useGrid } from '../../providers/GridProvider';
+import { createAssetUrls, revokeAssetUrls } from './assetUrlsUtil';
 
 export type EditorCanvasProps = {
   document: BoardDocument;
@@ -136,6 +137,16 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
     );
   };
 
+  const [assetUrls, setAssetUrls] = useState<Record<string, string>>({});
+  useEffect(() => {
+    const urls = createAssetUrls(document.assets);
+    setAssetUrls(urls);
+
+    return () => {
+      revokeAssetUrls(urls);
+    };
+  }, [document.assets]);
+
   return (
     <>
       {`Selected element ID: ${selectedElementId}`}
@@ -155,6 +166,7 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
             selected={element.id === selectedElementId}
             onSelect={handleSelectElement}
             activeToolId={activeToolId}
+            assetUrls={assetUrls}
           />
         ))}
       </div>

@@ -51,6 +51,14 @@ export default function ToolSidebar() {
               <span className={`codicon codicon-${tool.icon}`} />
             </Button>
           ))}
+          <Button
+            title="Image"
+            appearance="secondary"
+            className="h-8 flex flex-col items-center justify-center gap-2"
+            onClick={() => messages.send({ type: 'addImageFromFile' })}
+          >
+            <span className="codicon codicon-file-media" />
+          </Button>
         </div>
       </SidebarShell>
     </>
