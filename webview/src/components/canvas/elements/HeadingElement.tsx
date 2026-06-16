@@ -1,10 +1,14 @@
 import { EditorElementType } from '5board.vsc-common';
 import { EditorElementProps } from '../EditorElement';
+import { useHeadingNumber } from '../HeadingNumberingContext';
 
 /**
  * Renders a heading element. The heading level (h1, h2, etc.) is determined by the `level` property in the element's data.
+ * A hierarchical index (e.g. "1.", "1.1") derived from the heading's position is prefixed to the content.
  */
 export function HeadingElement({ element }: EditorElementProps<EditorElementType.Heading>) {
+  const number = useHeadingNumber(element.id);
+
   /** Utility component for rendering the appropriate heading tag based on the level */
   function HeadingTag({
     children,
@@ -31,5 +35,10 @@ export function HeadingElement({ element }: EditorElementProps<EditorElementType
     }
   }
 
-  return <HeadingTag level={element.data.level}>{element.data.content}</HeadingTag>;
+  return (
+    <HeadingTag level={element.data.level}>
+      {number ? <span className="heading-index">{number} </span> : null}
+      {element.data.content}
+    </HeadingTag>
+  );
 }
