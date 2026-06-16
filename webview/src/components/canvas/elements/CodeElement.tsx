@@ -4,11 +4,16 @@ import * as monaco from 'monaco-editor';
 import { EditorElementType } from '5board.vsc-common';
 import type { EditorElementProps } from '../EditorElement';
 
+// Reuses the already-loaded Monaco instance instead of fetching a separate copy via CDN.
 loader.config({ monaco });
 
 const LINE_HEIGHT = 19;
 const MIN_HEIGHT = 5 * LINE_HEIGHT;
 
+/**
+ * VS Code signals the active theme via a `data-vscode-theme-kind` attribute on `<body>`.
+ * Maps that value to the corresponding built-in Monaco theme name.
+ */
 function getMonacoTheme(): string {
   const kind = document.body.getAttribute('data-vscode-theme-kind');
   if (kind === 'vscode-light') return 'vs';
@@ -29,6 +34,7 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
       attributes: true,
       attributeFilter: ['data-vscode-theme-kind'],
     });
+    /** Grows the editor to fit its content so the canvas element never shows a scroll bar. */
     return () => observer.disconnect();
   }, []);
 
@@ -45,23 +51,13 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-1.5 border-b border-editor-widget-border bg-editorGroupHeader-tabsBackground">
         <span className="font-sans text-base text-tab-activeForeground flex items-center gap-1.5 select-none">
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 16 16"
-            className="text-symbolIcon-classForeground"
-            fill="currentColor"
-          >
-            <path d="M5.854 4.854a.5.5 0 1 0-.708-.708l-3.5 3.5a.5.5 0 0 0 0 .708l3.5 3.5a.5.5 0 0 0 .708-.708L2.707 8l3.147-3.146zm4 0a.5.5 0 1 1 .708-.708l3.5 3.5a.5.5 0 0 1 0 .708l-3.5 3.5a.5.5 0 0 1-.708-.708L13.293 8l-3.147-3.146z" />
-          </svg>
+          <span className="codicon codicon-code text-symbolIcon-classForeground" />
           {language ?? 'code'}
         </span>
 
         <div className="ml-auto">
           <button className="flex items-center gap-1.5 px-2.5 py-1 bg-button-background text-button-foreground font-sans text-base rounded-xs border-none cursor-pointer hover:bg-button-hover-background">
-            <svg width="11" height="11" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
-            </svg>
+            <span className="codicon codicon-run" />
             Run
           </button>
         </div>
@@ -94,7 +90,9 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
             className="w-full px-3 py-1 text-left font-sans text-base font-semibold uppercase tracking-wide text-panelTitle-activeForeground bg-panel-background border-none border-b border-panel-border flex items-center gap-2 cursor-pointer hover:bg-list-hover-background"
           >
             <span>{errorOutput ? 'Output (Error)' : 'Output'}</span>
-            <span className="ml-auto text-[10px]">{outputVisible ? '▲' : '▼'}</span>
+            <span
+              className={`ml-auto codicon ${outputVisible ? 'codicon-chevron-up' : 'codicon-chevron-down'}`}
+            />
           </button>
 
           {outputVisible && (
