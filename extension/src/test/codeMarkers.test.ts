@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert';
-import { extractBlock, hasBlock, insertBlock, updateBlock } from '../runner/codeMarkers';
+import { extractBlock, hasBlock, insertBlock, updateBlock } from '5board.vsc-common';
 
 const BLOCK_ID = 'test-uuid-123';
 

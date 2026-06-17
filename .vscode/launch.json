@@ -9,7 +9,11 @@
       "name": "Run Extension",
       "type": "extensionHost",
       "request": "launch",
-      "args": ["--extensionDevelopmentPath=${workspaceFolder}/extension", "--disable-extensions"],
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}/extension",
+        "--disable-extensions",
+        "${workspaceFolder}"
+      ],
       "outFiles": ["${workspaceFolder}/extension/dist/**/*.js"],
       "sourceMaps": true,
       "sourceMapPathOverrides": {

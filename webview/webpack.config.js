@@ -4,6 +4,7 @@ const path = require('path');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
 // Multiple entry points for different webviews. Each entry point will generate a separate HTML file and JavaScript bundle.
 const VIEWS = ['Editor', 'ToolSidebar', 'ElementSettingsSidebar'];
@@ -60,6 +61,7 @@ const extensionConfig = {
   devtool: 'nosources-source-map',
   plugins: [
     new MiniCssExtractPlugin(),
+    new MonacoWebpackPlugin({ languages: ['java', 'python', 'javascript'] }),
     ...VIEWS.map(
       (view) =>
         new HtmlWebpackPlugin({

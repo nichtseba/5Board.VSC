@@ -13,7 +13,6 @@ export default function Editor() {
   }, []);
 
   useOnMessage((msg) => {
-    console.log('Received message in Editor:', msg.type);
     if (msg.type === 'updateDocument' || msg.type === 'init') {
       setDocument(msg.document);
     }

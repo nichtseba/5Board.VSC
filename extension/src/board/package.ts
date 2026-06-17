@@ -106,6 +106,7 @@ async function readSources(zip: JSZip): Promise<Source[]> {
   const promises: Promise<Source>[] = [];
 
   sources_zip.forEach((language, _file) => {
+    const lang = language.replace(/\/$/, '');
     const lang_zip = sources_zip.folder(language)!;
 
     lang_zip.forEach((relativePath, file) => {
@@ -114,7 +115,7 @@ async function readSources(zip: JSZip): Promise<Source[]> {
         try {
           const code = await file.async('string');
           const source: Source = {
-            language,
+            language: lang,
             name: relativePath,
             code,
           };

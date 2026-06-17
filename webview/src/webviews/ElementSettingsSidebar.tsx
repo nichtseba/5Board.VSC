@@ -11,10 +11,12 @@ export default function ElementSettingsSidebar() {
   const messages = useMessageService();
   const { t } = useLocalization();
   const selectedElement: EditorElement = {
-    id: '123',
-    type: EditorElementType.Heading,
+    id: 'code-test-1',
+    type: EditorElementType.Code,
     data: {
-      level: 1,
+      codeBlockId: 'test-block-1',
+      fileName: 'Student.java',
+      language: 'java',
       content: '',
     },
     layout: {

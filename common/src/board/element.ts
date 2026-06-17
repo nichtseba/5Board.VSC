@@ -89,7 +89,6 @@ export type TextDecorationStyle = {
 
 export type CodeElementData = {
   codeBlockId: string;
-  // Relative path incl. package structure: "com/example/Student.java" or "Student.java"
   fileName: string;
   language: string;
 

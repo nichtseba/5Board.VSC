@@ -53,7 +53,6 @@ export function hasBlock(
 
 /**
  * Appends a new block with the given blockId and code to the end of the source.
- * Used during code block creation (future issue).
  */
 export function insertBlock(
   sourceCode: string,
@@ -67,7 +66,6 @@ export function insertBlock(
 
 /**
  * Replaces the content of an existing block in-place.
- * Used during bidirectional sync (future issue).
  */
 export function updateBlock(
   sourceCode: string,
