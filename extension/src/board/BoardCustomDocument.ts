@@ -1,13 +1,21 @@
 import vscode from 'vscode';
 import { BoardPackage } from './package';
-import { BoardDocument } from '5board.vsc-common';
+import {
+  BoardDocument,
+  CodeExecutionOutput,
+  EditorElement,
+  EditorElementType,
+} from '5board.vsc-common';
 import { MessageService } from '../MessageService';
+import { ExecutionService } from '../runner/ExecutionService';
 import { EXTENSION } from '../extension';
 
 export class BoardCustomDocument implements vscode.CustomDocument {
   public readonly documentChange = new vscode.EventEmitter<BoardDocument>();
   public readonly onDocumentChange = this.documentChange.event;
   public readonly messageService = new MessageService();
+
+  private readonly executionService = new ExecutionService();
 
   constructor(
     public boardPackage: BoardPackage,
@@ -19,9 +27,15 @@ export class BoardCustomDocument implements vscode.CustomDocument {
         sender,
       );
     });
+
     this.messageService.on('focus', () => {
       EXTENSION.activeEditorDocument = this;
     });
+
+    this.messageService.on('executeCodeblock', (msg) => {
+      void this.executeBlock(msg.elementId);
+    });
+
     this.onDocumentChange((document) => {
       this.messageService.send({ type: 'updateDocument', document });
     });
@@ -45,5 +59,23 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   public applyEdit(edit: (document: BoardDocument) => void): void {
     edit(this.boardPackage.document);
     this.documentChange.fire(this.boardPackage.document);
+  }
+
+  public async executeBlock(elementId: string): Promise<void> {
+    const result = await this.executionService.execute(this.boardPackage.document, elementId);
+
+    const output: CodeExecutionOutput = {
+      stdout: result.stdout,
+      stderr: result.stderr,
+      success: result.success,
+      exitCode: result.exitCode,
+    };
+
+    this.applyEdit((doc) => {
+      const element = doc.content.elements.find((e) => e.id === elementId);
+      if (element?.type === EditorElementType.Code) {
+        (element as EditorElement<EditorElementType.Code>).data.output = output;
+      }
+    });
   }
 }

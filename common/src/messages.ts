@@ -1,5 +1,5 @@
-import { BoardDocument } from './board/document';
-import { Language } from './localization';
+import { BoardDocument } from './board/document.js';
+import { Language } from './localization/index.js';
 
 /**
  * Messages from the extension to webviews
@@ -27,4 +27,7 @@ export type WebviewToExtensionMessage<
 export type WebviewToExtensionMessageType = AllWebviewToExtensionMessage['type'];
 
 // All Messages from webviews to the extension
-type AllWebviewToExtensionMessage = { type: 'ready' } | { type: 'focus' };
+type AllWebviewToExtensionMessage =
+  | { type: 'ready' }
+  | { type: 'focus' }
+  | { type: 'executeCodeblock'; elementId: string };

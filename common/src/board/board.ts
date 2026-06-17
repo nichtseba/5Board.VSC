@@ -1,3 +1,3 @@
-export * from './legacy';
-export * from './element';
-export * from './document';
+export * from './legacy.js';
+export * from './element.js';
+export * from './document.js';

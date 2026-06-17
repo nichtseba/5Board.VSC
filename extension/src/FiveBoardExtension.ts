@@ -86,6 +86,22 @@ export class FiveBoardExtension extends ExtensionBase {
     vscode.window.showInformationMessage('Presentation started');
   }
 
+  @Command('5board-vsc.executeCodeblock')
+  async executeCodeblockCommand(elementId?: string): Promise<void> {
+    const document = this.activeEditorDocument;
+    if (!document) {
+      vscode.window.showWarningMessage('No active 5Board document.');
+      return;
+    }
+    // elementId is passed when triggered via message; without it the command
+    // requires active-element tracking (future issue).
+    if (!elementId) {
+      vscode.window.showWarningMessage('No code block selected.');
+      return;
+    }
+    await document.executeBlock(elementId);
+  }
+
   public applyEditToActiveDocument(edit: (document: BoardDocument) => void): void {
     if (!this.activeEditorDocument) {
       return;

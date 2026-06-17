@@ -89,11 +89,19 @@ export type TextDecorationStyle = {
 
 export type CodeElementData = {
   codeBlockId: string;
-  fileName?: string;
-  language?: string;
+  // Relative path incl. package structure: "com/example/Student.java" or "Student.java"
+  fileName: string;
+  language: string;
 
   content: string;
-  output?: string;
+  output?: CodeExecutionOutput;
+};
+
+export type CodeExecutionOutput = {
+  stdout: string;
+  stderr: string;
+  success: boolean;
+  exitCode: number | null;
 };
 
 export type ImageElementData = {

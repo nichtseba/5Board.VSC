@@ -1,4 +1,4 @@
-import { EditorElement, TranslationKey } from './main';
+import { EditorElement, TranslationKey } from './main.js';
 
 export enum EditorToolId {
   POINTER = 'pointer',

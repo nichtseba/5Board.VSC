@@ -1,4 +1,4 @@
-import { BoardManifest } from './document';
+import { BoardManifest } from './document.js';
 
 export const MANIFEST_PATH = 'manifest.json';
 export const CONTENT_PATH = 'content.json';

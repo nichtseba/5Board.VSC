@@ -90,6 +90,11 @@
         "command": "5board-vsc.startPresentation",
         "title": "%commands.startPresentation%",
         "icon": "$(play)"
+      },
+      {
+        "command": "5board-vsc.executeCodeblock",
+        "title": "%commands.executeCodeblock%",
+        "icon": "$(run)"
       }
     ],
     "menus": {
@@ -123,8 +128,8 @@
     "watch:copy-webview": "nodemon --watch ../webview/dist -e css,css.map,html,js,js.map --delay 1000ms --exec \"pnpm run copy-webview\"",
     "prebuild": "pnpm run copy-webview",
     "build": "webpack",
-    "compile-tests": "tsc -p . --outDir out",
-    "watch-tests": "tsc -p . -w --outDir out",
+    "compile-tests": "tsc -p tsconfig.test.json",
+    "watch-tests": "tsc -p tsconfig.test.json -w",
     "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
     "lint": "eslint src",
     "test": "vscode-test",

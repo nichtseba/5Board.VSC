@@ -17,19 +17,24 @@ describe('JavaCodeblockRunner', function () {
     assert.equal(typeof result.available, 'boolean');
   });
 
-  it('executes a simple java snippet when tools are available', async function () {
+  it('executes a java class with main method when tools are available', async function () {
     const toolCheck = await runner.checkTools();
     if (!toolCheck.available) {
       this.skip();
     }
 
-    const request = {
-      id: 'test-execution',
+    const source = {
+      name: 'Hello.java',
       language: 'java' as const,
-      code: 'System.out.println("hello from 5board");',
+      code: 'public class Hello { public static void main(String[] args) { System.out.println("hello from 5board"); } }',
     };
 
-    const result = await runner.execute(request);
+    const result = await runner.execute({
+      language: 'java',
+      fileName: 'Hello.java',
+      sources: [source],
+    });
+
     assert.equal(result.success, true);
     assert.ok(result.stdout.includes('hello from 5board'));
   });

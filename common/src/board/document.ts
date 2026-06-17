@@ -1,4 +1,4 @@
-import { BoardElement } from './element';
+import { BoardElement } from './element.js';
 
 /**
  * Represents a single .5boardz file in memory

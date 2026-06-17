@@ -1,10 +1,11 @@
+import { Source } from './board/document.js';
+
 export type CodeblockLanguage = 'java' | 'python' | 'javascript';
 
 export interface CodeblockExecutionRequest {
-  id: string;
+  fileName: string;
+  sources: Source[];
   language: CodeblockLanguage;
-  code: string;
-  className?: string;
 }
 
 export interface GeneratedSourceFile {
@@ -24,7 +25,6 @@ export interface CodeblockExecutionResult {
   stdout: string;
   stderr: string;
   exitCode: number | null;
-  generatedFiles?: GeneratedSourceFile[];
   error?: string;
 }
 
