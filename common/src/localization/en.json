@@ -28,6 +28,11 @@
       "headingSettings": {
         "title": "Heading",
         "levelLabel": "Hierarchy level"
+      },
+      "codeSettings": {
+        "title": "Code",
+        "languageLabel": "Language",
+        "classNameLabel": "Class"
       }
     }
   }

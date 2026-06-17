@@ -28,6 +28,11 @@
       "headingSettings": {
         "title": "Überschrift",
         "levelLabel": "Hierarchiestufe"
+      },
+      "codeSettings": {
+        "title": "Code",
+        "languageLabel": "Sprache",
+        "classNameLabel": "Klasse"
       }
     }
   }

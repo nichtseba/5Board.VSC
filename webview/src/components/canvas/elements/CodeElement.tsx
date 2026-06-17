@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import MonacoEditor, { loader } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor';
 import { EditorElementType } from '5board.vsc-common';
@@ -22,11 +22,11 @@ function getMonacoTheme(): string {
 }
 
 export function CodeElement({ element }: EditorElementProps<EditorElementType.Code>) {
-  const { language, content, output, errorOutput } = element.data;
+  const { language, className, content, output, errorOutput } = element.data;
   const hasOutput = Boolean(output || errorOutput);
   const [outputVisible, setOutputVisible] = useState(true);
-  const [editorHeight, setEditorHeight] = useState(MIN_HEIGHT);
   const [monacoTheme, setMonacoTheme] = useState(getMonacoTheme);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const observer = new MutationObserver(() => setMonacoTheme(getMonacoTheme()));
@@ -38,9 +38,14 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
     return () => observer.disconnect();
   }, []);
 
+  /** Grows the editor to fit its content so the canvas element never shows a scroll bar. */
   function handleMount(editor: monaco.editor.IStandaloneCodeEditor) {
     const updateHeight = () => {
-      setEditorHeight(Math.max(MIN_HEIGHT, editor.getContentHeight()));
+      const height = Math.max(MIN_HEIGHT, editor.getContentHeight());
+      if (wrapperRef.current) {
+        wrapperRef.current.style.height = `${height}px`;
+        editor.layout();
+      }
     };
     updateHeight();
     editor.onDidContentSizeChange(updateHeight);
@@ -53,6 +58,13 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
         <span className="font-sans text-base text-tab-activeForeground flex items-center gap-1.5 select-none">
           <span className="codicon codicon-code text-symbolIcon-classForeground" />
           {language ?? 'code'}
+          {className && (
+            <>
+              <span className="text-editor-widget-border">·</span>
+              <span className="codicon codicon-symbol-class text-symbolIcon-classForeground" />
+              {className}
+            </>
+          )}
         </span>
 
         <div className="ml-auto">
@@ -64,23 +76,25 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
       </div>
 
       {/* Monaco Editor */}
-      <MonacoEditor
-        height={editorHeight}
-        width="100%"
-        defaultValue={content}
-        language={language ?? 'plaintext'}
-        theme={monacoTheme}
-        onMount={handleMount}
-        options={{
-          minimap: { enabled: false },
-          padding: { top: 8, bottom: 8 },
-          scrollBeyondLastLine: false,
-          lineNumbers: 'on',
-          renderLineHighlight: 'none',
-          overviewRulerLanes: 0,
-          automaticLayout: true,
-        }}
-      />
+      <div ref={wrapperRef} style={{ height: MIN_HEIGHT }}>
+        <MonacoEditor
+          height="100%"
+          width="100%"
+          defaultValue={content}
+          language={language ?? 'plaintext'}
+          theme={monacoTheme}
+          onMount={handleMount}
+          options={{
+            minimap: { enabled: false },
+            padding: { top: 8, bottom: 8 },
+            scrollBeyondLastLine: false,
+            lineNumbers: 'on',
+            renderLineHighlight: 'none',
+            overviewRulerLanes: 0,
+            automaticLayout: true,
+          }}
+        />
+      </div>
 
       {/* Output */}
       {hasOutput && (
