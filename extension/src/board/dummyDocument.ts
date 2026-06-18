@@ -27,7 +27,10 @@ export const DUMMY_BOARD_DOCUMENT: BoardDocument = {
         type: EditorElementType.Text,
         layout: { yPos: 15, xPos: 0, height: 8, width: 100 },
         style: { visible: true },
-        data: { content: 'This is a placeholder slide. Add real content to your .5boardz file.' },
+        data: {
+          content: 'This is a placeholder slide. Add real content to your .5boardz file.',
+          textStyle: { fontWeight: 'bold' },
+        },
       },
       {
         id: 'dummy-3',

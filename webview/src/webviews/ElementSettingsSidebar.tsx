@@ -12,10 +12,10 @@ export default function ElementSettingsSidebar() {
   const { t } = useLocalization();
   const selectedElement: EditorElement = {
     id: '123',
-    type: EditorElementType.Heading,
+    type: EditorElementType.Text,
     data: {
-      level: 1,
       content: '',
+      //textStyle: { fontWeight: 'bold' },
     },
     layout: {
       xPos: 0,

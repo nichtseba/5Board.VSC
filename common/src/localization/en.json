@@ -34,6 +34,9 @@
       "headingSettings": {
         "title": "Heading",
         "levelLabel": "Hierarchy level"
+      },
+      "textSettings": {
+        "title": "Text"
       }
     }
   }
