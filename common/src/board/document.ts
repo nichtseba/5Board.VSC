@@ -48,6 +48,6 @@ export interface BoardContent {
  */
 export interface Asset {
   name: string;
-  mime: string;
+  mime?: string;
   bytes: Uint8Array;
 }

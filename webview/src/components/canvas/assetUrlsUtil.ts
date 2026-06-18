@@ -5,10 +5,9 @@ export function createAssetUrls(assets: Asset[]): Record<string, string> {
   return Object.fromEntries(
     assets.map((asset) => {
       const bytes = toUint8Array(asset.bytes);
-      const blob = new Blob(
-        [bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer],
-        { type: asset.mime },
-      );
+      const blob = new Blob([
+        bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer,
+      ]);
       const url = URL.createObjectURL(blob);
 
       return [asset.name, url];

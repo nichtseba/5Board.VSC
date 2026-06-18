@@ -6,7 +6,7 @@ import { t } from './localization';
 import path from 'path';
 import { BoardPackage } from './board/package';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
-import { BoardDocument, DEFAULT_TOOL_ID, EditorState } from '5board.vsc-common';
+import { BoardDocument, DEFAULT_TOOL_ID, EditorElementType, EditorState } from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
 import { SidebarManager } from './sidebar/SidebarManager';
 
@@ -78,6 +78,68 @@ export class FiveBoardExtension extends ExtensionBase {
   @Command('5board-vsc.startPresentation')
   startPresentationCommand(): void {
     vscode.window.showInformationMessage('Presentation started');
+  }
+
+  @Command('5board-vsc.addImageFromFile')
+  async addImageFromFileCommand(): Promise<void> {
+    const activeDocument = this.activeEditorDocument;
+
+    if (!activeDocument) {
+      vscode.window.showInformationMessage('No active 5board document');
+      return;
+    }
+
+    const uris = await vscode.window.showOpenDialog({
+      canSelectMany: false,
+      filters: {
+        Images: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'],
+      },
+    });
+
+    const fileUri = uris?.[0];
+
+    if (!fileUri) {
+      return;
+    }
+
+    const bytes = await vscode.workspace.fs.readFile(fileUri);
+    let assetName = path.basename(fileUri.fsPath);
+    if (activeDocument.boardPackage.document.assets.some((a) => a.name === assetName)) {
+      const nameWithoutExt = assetName.replace(path.extname(assetName), '');
+      const ext = path.extname(assetName);
+      let counter = 1;
+      while (activeDocument.boardPackage.document.assets.some((a) => a.name === assetName)) {
+        assetName = `${nameWithoutExt}_${counter}${ext}`;
+        counter++;
+      }
+    }
+
+    activeDocument.applyEdit((document) => {
+      document.assets.push({
+        name: assetName,
+        bytes,
+      });
+
+      document.content.elements.push({
+        id: assetName,
+        type: EditorElementType.Image,
+        layout: {
+          xPos: 0,
+          yPos: 0,
+          width: 16,
+          height: 9,
+        },
+        style: {
+          visible: true,
+        },
+        data: {
+          src: assetName,
+          content: '',
+          title: assetName,
+          altText: assetName,
+        },
+      });
+    });
   }
 
   public applyEditToActiveDocument(edit: (document: BoardDocument) => void): void {
