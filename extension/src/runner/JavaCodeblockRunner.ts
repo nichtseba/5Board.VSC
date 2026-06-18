@@ -1,5 +1,5 @@
-import { join, dirname } from 'path';
-import { mkdtemp, rm, writeFile, mkdir, readdir } from 'fs/promises';
+import { join } from 'path';
+import { mkdtemp, rm, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import type {
   CodeblockExecutionRequest,
@@ -35,11 +35,16 @@ export class JavaCodeblockRunner implements CodeblockRunner {
   async execute(request: CodeblockExecutionRequest): Promise<CodeblockExecutionResult> {
     const tempDir = await mkdtemp(join(tmpdir(), '5board-'));
     try {
+      // Packages are not supported yet — all Java sources are written flat into tempDir.
       const javaSources = request.sources.filter((s) => s.language === 'java');
       await writeProjectSources(javaSources, tempDir);
 
-      const allJavaFiles = await collectJavaFiles(tempDir);
-      const compile = await runCommand('javac', allJavaFiles, tempDir, 30_000);
+      const compile = await runCommand(
+        'javac',
+        javaSources.map((s) => s.name),
+        tempDir,
+        30_000,
+      );
       if (compile.status !== 0) {
         return {
           success: false,
@@ -66,33 +71,14 @@ export class JavaCodeblockRunner implements CodeblockRunner {
 }
 
 /**
- * "com/example/Main.java" → "com.example.Main", "Main.java" → "Main"
+ * "Main.java" → "Main". Packages are not supported yet.
  */
 function fileNameToClassName(fileName: string): string {
-  return fileName.replace(/\.java$/, '').replace(/\//g, '.');
+  return fileName.replace(/\.java$/, '');
 }
 
 async function writeProjectSources(sources: Source[], tempDir: string): Promise<void> {
   await Promise.all(
-    sources.map(async (source) => {
-      const destPath = join(tempDir, ...source.name.split('/'));
-      await mkdir(dirname(destPath), { recursive: true });
-      await writeFile(destPath, source.code, 'utf8');
-    }),
+    sources.map((source) => writeFile(join(tempDir, source.name), source.code, 'utf8')),
   );
-}
-
-async function collectJavaFiles(dir: string): Promise<string[]> {
-  const results: string[] = [];
-  const entries = await readdir(dir, { withFileTypes: true });
-  for (const entry of entries) {
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      const nested = await collectJavaFiles(full);
-      results.push(...nested.map((f) => join(entry.name, f)));
-    } else if (entry.name.endsWith('.java')) {
-      results.push(entry.name);
-    }
-  }
-  return results;
 }

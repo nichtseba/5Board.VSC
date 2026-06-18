@@ -2,6 +2,7 @@ import { BoardDocument } from '5board.vsc-common';
 import { useState } from 'react';
 import EditorElement from './EditorElement';
 import { SourcesProvider } from './SourcesContext';
+import { ExecutionOutputProvider } from './ExecutionOutputContext';
 import './EditorCanvas.css';
 
 export type EditorCanvasProps = {
@@ -16,17 +17,19 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
 
   return (
     <SourcesProvider value={document.sources}>
-      {`Selected element ID: ${selectedElementId}`}
-      <div className="editor-canvas bg-editor-background">
-        {document.content.elements.map((element) => (
-          <EditorElement
-            key={element.id}
-            element={element}
-            selected={element.id === selectedElementId}
-            onSelect={setSelectedElementId}
-          />
-        ))}
-      </div>
+      <ExecutionOutputProvider>
+        {`Selected element ID: ${selectedElementId}`}
+        <div className="editor-canvas bg-editor-background">
+          {document.content.elements.map((element) => (
+            <EditorElement
+              key={element.id}
+              element={element}
+              selected={element.id === selectedElementId}
+              onSelect={setSelectedElementId}
+            />
+          ))}
+        </div>
+      </ExecutionOutputProvider>
     </SourcesProvider>
   );
 }

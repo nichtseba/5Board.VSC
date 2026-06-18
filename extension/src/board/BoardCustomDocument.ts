@@ -1,11 +1,6 @@
 import vscode from 'vscode';
 import { BoardPackage } from './package';
-import {
-  BoardDocument,
-  CodeExecutionOutput,
-  EditorElement,
-  EditorElementType,
-} from '5board.vsc-common';
+import { BoardDocument } from '5board.vsc-common';
 import { MessageService } from '../MessageService';
 import { ExecutionService } from '../runner/ExecutionService';
 import { EXTENSION } from '../extension';
@@ -64,18 +59,19 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   public async executeBlock(elementId: string): Promise<void> {
     const result = await this.executionService.execute(this.boardPackage.document, elementId);
 
-    const output: CodeExecutionOutput = {
-      stdout: result.stdout,
-      stderr: result.stderr,
-      success: result.success,
-      exitCode: result.exitCode,
-    };
-
-    this.applyEdit((doc) => {
-      const element = doc.content.elements.find((e) => e.id === elementId);
-      if (element?.type === EditorElementType.Code) {
-        (element as EditorElement<EditorElementType.Code>).data.output = output;
-      }
+    // Execution results are transient UI state — they are sent to the webviews and held
+    // in local React state there, never written back into the (persisted) document.
+    this.messageService.send({
+      type: 'codeblockResult',
+      elementId,
+      output: {
+        stdout: result.stdout,
+        // Surface execution-level errors (no runner, source missing, timeout) that have
+        // no stderr of their own, so the user sees them instead of an empty output.
+        stderr: result.stderr || result.error || '',
+        success: result.success,
+        exitCode: result.exitCode,
+      },
     });
   }
 }

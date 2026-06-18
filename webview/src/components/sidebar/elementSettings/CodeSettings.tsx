@@ -14,13 +14,9 @@ const LANGUAGE_OPTIONS = [
   { value: 'javascript', label: 'JavaScript' },
 ];
 
-function fileNameToClassName(fileName: string): string {
-  return fileName.replace(/\//g, '.').replace(/\.java$/, '');
-}
-
 export function CodeSettings({ element }: Props) {
   const { t } = useLocalization();
-  const className = fileNameToClassName(element.data.fileName);
+  const className = element.data.className;
 
   return (
     <>

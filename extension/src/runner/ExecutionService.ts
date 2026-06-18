@@ -3,6 +3,7 @@ import {
   CodeblockExecutionResult,
   CodeblockLanguage,
   EditorElementType,
+  fileNameFromClassName,
 } from '5board.vsc-common';
 import type { EditorElement } from '5board.vsc-common';
 import type { CodeElementData } from '5board.vsc-common';
@@ -17,17 +18,20 @@ export class ExecutionService {
     }
 
     const data = (element as EditorElement<EditorElementType.Code>).data as CodeElementData;
-    const { fileName, language } = data;
+    const { className, language } = data;
 
+    // Resolve the runner first: only then is the language known to be supported and its
+    // file extension well-defined, so deriving the file name below is safe.
+    const runner = getRunner(language as CodeblockLanguage);
+    if (!runner) {
+      return this.error(`No runner available for language: ${language}`);
+    }
+
+    const fileName = fileNameFromClassName(className, language);
     const source = document.sources.find((s) => s.language === language && s.name === fileName);
 
     if (!source) {
       return this.error(`Source file "${fileName}" not found in document.`);
-    }
-
-    const runner = getRunner(language as CodeblockLanguage);
-    if (!runner) {
-      return this.error(`No runner available for language: ${language}`);
     }
 
     return runner.execute({

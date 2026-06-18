@@ -19,11 +19,8 @@ function makeCodeElement(
   data: Partial<CodeElementData> = {},
 ): EditorElement<EditorElementType.Code> {
   const elementData: CodeElementData = {
-    codeBlockId: data.codeBlockId ?? 'block-1',
-    fileName: data.fileName ?? 'Main.java',
+    className: data.className ?? 'Main',
     language: data.language ?? 'java',
-    content: data.content ?? '',
-    output: data.output,
   };
   return {
     id: 'element-1',
@@ -43,7 +40,7 @@ describe('ExecutionService', function () {
 
   it('returns error when source file not in document', async function () {
     const doc = makeDocument({
-      content: { elements: [makeCodeElement({ fileName: 'Student.java', language: 'java' })] },
+      content: { elements: [makeCodeElement({ className: 'Student', language: 'java' })] },
       sources: [],
     });
     const result = await service.execute(doc, 'element-1');
@@ -53,7 +50,7 @@ describe('ExecutionService', function () {
 
   it('returns error when language has no runner', async function () {
     const doc = makeDocument({
-      content: { elements: [makeCodeElement({ fileName: 'script.rb', language: 'ruby' })] },
+      content: { elements: [makeCodeElement({ className: 'script', language: 'ruby' })] },
       sources: [{ name: 'script.rb', language: 'ruby', code: 'puts "hello"' }],
     });
     const result = await service.execute(doc, 'element-1');

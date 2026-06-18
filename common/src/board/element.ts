@@ -88,12 +88,8 @@ export type TextDecorationStyle = {
 };
 
 export type CodeElementData = {
-  codeBlockId: string;
-  fileName: string;
+  className: string;
   language: string;
-
-  content: string;
-  output?: CodeExecutionOutput;
 };
 
 export type CodeExecutionOutput = {

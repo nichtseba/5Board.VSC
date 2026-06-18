@@ -40,7 +40,26 @@ export function extractBlock(
   const endIndex = sourceCode.indexOf(close, contentStart);
   if (endIndex === -1) return null;
 
-  return sourceCode.slice(contentStart, endIndex).replace(/^\n/, '').replace(/\n$/, '');
+  return dedentBlock(sourceCode.slice(contentStart, endIndex));
+}
+
+/**
+ * Normalizes raw block content for display/editing. Drops the blank edge lines left by the
+ * marker lines (the newline after the open tag and the close tag's own indentation), then
+ * removes the common leading indentation so the block is not shown indented by its
+ * surrounding class/method nesting. Relative indentation inside the block is preserved.
+ */
+function dedentBlock(raw: string): string {
+  const lines = raw.split('\n');
+  while (lines.length > 0 && lines[0].trim() === '') lines.shift();
+  while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
+
+  const indents = lines
+    .filter((line) => line.trim() !== '')
+    .map((line) => line.match(/^[ \t]*/)![0].length);
+  const minIndent = indents.length > 0 ? Math.min(...indents) : 0;
+
+  return lines.map((line) => line.slice(minIndent)).join('\n');
 }
 
 export function hasBlock(

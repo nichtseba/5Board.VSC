@@ -1,15 +1,49 @@
 import { useState, useEffect, useRef } from 'react';
 import MonacoEditor, { loader } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor';
-import { EditorElementType, extractBlock, COMMENT_PREFIX_BY_LANGUAGE } from '5board.vsc-common';
+import {
+  EditorElementType,
+  extractBlock,
+  COMMENT_PREFIX_BY_LANGUAGE,
+  parseOutputColors,
+  fileNameFromClassName,
+} from '5board.vsc-common';
 import type { EditorElementProps } from '../EditorElement';
 import { useMessageService } from '../../../services/MessageService';
 import { useSources } from '../SourcesContext';
+import { useExecutionOutput } from '../ExecutionOutputContext';
 
 loader.config({ monaco });
 
 const LINE_HEIGHT = 19;
 const MIN_HEIGHT = 5 * LINE_HEIGHT;
+
+/**
+ * Maps the output color indices (see {@link parseOutputColors}) to terminal ANSI theme colors.
+ * Order matches the documented palette: red, green, yellow, blue, magenta, cyan, white, gray.
+ */
+const OUTPUT_COLOR_CLASSES = [
+  'text-terminal-ansiRed',
+  'text-terminal-ansiGreen',
+  'text-terminal-ansiYellow',
+  'text-terminal-ansiBlue',
+  'text-terminal-ansiMagenta',
+  'text-terminal-ansiCyan',
+  'text-terminal-ansiWhite',
+  'text-terminal-ansiBrightBlack',
+];
+
+function renderColoredOutput(raw: string) {
+  return parseOutputColors(raw).map((segment, index) =>
+    segment.kind === 'colored' ? (
+      <span key={index} className={OUTPUT_COLOR_CLASSES[segment.colorIndex] ?? ''}>
+        {segment.value}
+      </span>
+    ) : (
+      <span key={index}>{segment.value}</span>
+    ),
+  );
+}
 
 function getMonacoTheme(): string {
   const kind = document.body.getAttribute('data-vscode-theme-kind');
@@ -18,21 +52,19 @@ function getMonacoTheme(): string {
   return 'vs-dark';
 }
 
-function fileNameToClassName(fileName: string): string {
-  return fileName.replace(/\//g, '.').replace(/\.java$/, '');
-}
-
 export function CodeElement({ element }: EditorElementProps<EditorElementType.Code>) {
   const messages = useMessageService();
   const sources = useSources();
-  const { language, fileName, codeBlockId, output } = element.data;
+  const output = useExecutionOutput(element.id);
+  const { language, className } = element.data;
 
+  const fileName = fileNameFromClassName(className, language);
   const source = sources.find((s) => s.name === fileName && s.language === language);
   const prefix = COMMENT_PREFIX_BY_LANGUAGE[language] ?? '//';
-  const blockCode = source ? extractBlock(source.code, codeBlockId, prefix) : null;
+  // The source block is marked with this element's own id (one element ↔ one block).
+  const blockCode = source ? extractBlock(source.code, element.id, prefix) : null;
 
   const [code, setCode] = useState(blockCode ?? '');
-  const className = fileNameToClassName(fileName);
   const hasOutput = Boolean(output);
   const [outputVisible, setOutputVisible] = useState(true);
   const [monacoTheme, setMonacoTheme] = useState(getMonacoTheme);
@@ -140,7 +172,7 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
               {output && !output.success && output.stderr ? (
                 <span className="text-terminal-ansiRed">{output.stderr}</span>
               ) : (
-                output?.stdout
+                output && renderColoredOutput(output.stdout)
               )}
             </pre>
           )}

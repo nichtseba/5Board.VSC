@@ -1,4 +1,5 @@
 import { BoardDocument } from './board/document.js';
+import { CodeExecutionOutput } from './board/element.js';
 import { Language } from './localization/index.js';
 
 /**
@@ -14,7 +15,8 @@ export type ExtensionToWebviewMessageType = AllExtensionToWebviewMessage['type']
 // All Messages from the extension to webviews
 type AllExtensionToWebviewMessage =
   | { type: 'updateDocument'; document: BoardDocument }
-  | { type: 'init'; document: BoardDocument; language: Language };
+  | { type: 'init'; document: BoardDocument; language: Language }
+  | { type: 'codeblockResult'; elementId: string; output: CodeExecutionOutput };
 
 /**
  * Messages from the webviews to the extension
