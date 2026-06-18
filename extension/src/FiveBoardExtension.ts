@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { MessageService } from './MessageService';
-import { PackageManager } from './PackageManager';
 import { EditorEditorProvider } from './providers/EditorEditorProvider';
 import { t } from './localization';
 import path from 'path';
@@ -8,6 +7,8 @@ import { BoardPackage } from './board/package';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
 import { BoardDocument, DEFAULT_TOOL_ID, EditorState } from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
+import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
+import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
 
 export class FiveBoardExtension extends ExtensionBase {
@@ -44,6 +45,7 @@ export class FiveBoardExtension extends ExtensionBase {
     super.activate(context);
     new EditorEditorProvider(context, this.packageManager).register();
     context.subscriptions.push(new SidebarManager(context, this.messages));
+    new FiveBoardFileSystemProvider(this.packageManager).register(context);
   }
 
   @Command('5board-vsc.newBoard')
