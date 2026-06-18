@@ -84,6 +84,7 @@ export class EditorEditorProvider implements vscode.CustomEditorProvider<BoardCu
     this.context.subscriptions.push(
       vscode.window.registerCustomEditorProvider(EditorEditorProvider.VIEW_TYPE, this, {
         supportsMultipleEditorsPerDocument: true,
+        webviewOptions: {},
       }),
     );
   }

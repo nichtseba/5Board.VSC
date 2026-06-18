@@ -22,6 +22,9 @@ export default function Editor() {
   return (
     <>
       <p>
+        <a href="5board:/c/Users/benno/OneDrive/Dokumente/bs-dnd-tools/Vorlesung.5boardz#content.json">
+          TEST
+        </a>
         Document: <code>{JSON.stringify(document, null, 2)}</code>
       </p>
       {document && <EditorCanvas document={document} />}
