@@ -15,7 +15,16 @@ export class MessageService {
   /**
    * Registers a webview panel or view.
    */
-  registerPanel(panel: vscode.WebviewPanel): void {
+  public registerView(view: vscode.WebviewView) {
+    this.registerPanelOrView(view);
+  }
+  public registerPanel(view: vscode.WebviewPanel) {
+    this.registerPanelOrView(view);
+    view.onDidChangeViewState((e) => {
+      this.handleMessage({ type: 'focus', focus: e.webviewPanel.active }, e.webviewPanel.webview);
+    });
+  }
+  private registerPanelOrView(panel: vscode.WebviewPanel | vscode.WebviewView): void {
     this.webviews.add(panel.webview);
     panel.webview.onDidReceiveMessage((msg) => this.handleMessage(msg, panel.webview));
     panel.onDidDispose(() => {
