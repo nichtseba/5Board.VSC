@@ -49,7 +49,6 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     );
     this.unsubscribers.push(
       this.messageService.on('focus', ({ focus }) => {
-        console.log('focus: ', this.uri);
         if (focus) {
           EXTENSION.activeEditorDocument = this;
         } else {
