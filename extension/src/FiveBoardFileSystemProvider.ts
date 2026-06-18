@@ -10,6 +10,7 @@ import {
 } from './board/package';
 import { Asset } from '5board.vsc-common';
 import { PackageManager } from './PackageManager';
+import { randomUUID } from 'crypto';
 
 /**
  * Handles 5board uris of the form `5board:/path/to/fiveboard.5board#/path/inside/fiveboard`
@@ -28,11 +29,45 @@ export class FiveBoardFileSystemProvider implements vscode.FileSystemProvider {
     );
   }
 
+  private watching = new Map<
+    string,
+    {
+      uri: vscode.Uri;
+      options: { readonly recursive: boolean; readonly excludes: readonly string[] };
+    }
+  >();
+
   watch(
-    _uri: vscode.Uri,
-    _options: { readonly recursive: boolean; readonly excludes: readonly string[] },
+    uri: vscode.Uri,
+    options: { readonly recursive: boolean; readonly excludes: readonly string[] },
   ): vscode.Disposable {
-    return { dispose: () => {} };
+    const key = randomUUID();
+    this.watching.set(key, {
+      uri,
+      options: {
+        recursive: options.recursive,
+        excludes: options.excludes.map((exclude) => normalizeExcludePath(uri, exclude)),
+      },
+    });
+    return {
+      dispose: () => {
+        this.watching.delete(key);
+      },
+    };
+  }
+
+  private fireChange(uri: vscode.Uri, type: vscode.FileChangeType): void {
+    const event: vscode.FileChangeEvent = { uri, type };
+    for (const { uri: watchUri, options } of this.watching.values()) {
+      if (!isWatchedPath(watchUri.path, uri.path, options.recursive)) {
+        continue;
+      }
+      if (options.excludes.some((excludePath) => isSameOrDescendantPath(excludePath, uri.path))) {
+        continue;
+      }
+      this.onDidChangeFileEmitter.fire([event]);
+      return;
+    }
   }
 
   private async getPackage(uri: vscode.Uri): Promise<BoardPackage> {
@@ -231,6 +266,7 @@ export class FiveBoardFileSystemProvider implements vscode.FileSystemProvider {
       }
       source.code = Buffer.from(content).toString('utf8');
       source.modifiedAt = Date.now();
+      this.fireChange(uri, vscode.FileChangeType.Changed);
     } else {
       if (!options.create) {
         throw FileSystemError.FileNotFound(uri);
@@ -243,6 +279,7 @@ export class FiveBoardFileSystemProvider implements vscode.FileSystemProvider {
         modifiedAt: Date.now(),
       };
       pkg.document.sources.push(source);
+      this.fireChange(uri, vscode.FileChangeType.Created);
     }
     this.savePackage(pkg, uri);
   }
@@ -262,6 +299,7 @@ export class FiveBoardFileSystemProvider implements vscode.FileSystemProvider {
       }
       asset.bytes = content;
       asset.modifiedAt = Date.now();
+      this.fireChange(uri, vscode.FileChangeType.Changed);
     } else {
       if (!options.create) {
         throw FileSystemError.FileNotFound(uri);
@@ -274,7 +312,9 @@ export class FiveBoardFileSystemProvider implements vscode.FileSystemProvider {
         mime: 'application/octet-stream', // Todo: Store and read actual mime types for assets
       };
       pkg.document.assets.push(asset);
+      this.fireChange(uri, vscode.FileChangeType.Created);
     }
+    this.savePackage(pkg, uri);
   }
 
   createDirectory(uri: vscode.Uri): void {
@@ -326,6 +366,14 @@ export class FiveBoardFileSystemProvider implements vscode.FileSystemProvider {
         if (languages.has(newLanguage)) {
           if (options.overwrite) {
             pkg.document.sources = pkg.document.sources.filter((s) => s.language !== newLanguage);
+            for (const source of pkg.document.sources) {
+              if (source.language === newLanguage) {
+                this.fireChange(
+                  vscode.Uri.joinPath(newUri, source.name),
+                  vscode.FileChangeType.Deleted,
+                );
+              }
+            }
           } else {
             throw FileSystemError.FileExists(newUri);
           }
@@ -333,6 +381,14 @@ export class FiveBoardFileSystemProvider implements vscode.FileSystemProvider {
         for (const source of pkg.document.sources) {
           if (source.language === oldLanguage) {
             source.language = newLanguage;
+            this.fireChange(
+              vscode.Uri.joinPath(oldUri, source.name),
+              vscode.FileChangeType.Deleted,
+            );
+            this.fireChange(
+              vscode.Uri.joinPath(newUri, source.name),
+              vscode.FileChangeType.Created,
+            );
           }
         }
       } else {
@@ -349,16 +405,21 @@ export class FiveBoardFileSystemProvider implements vscode.FileSystemProvider {
         (s) => s.language === newInfo.language && s.name === newInfo.name,
       );
       if (newSource) {
-        if (options.overwrite) {
-          pkg.document.sources = pkg.document.sources.filter(
-            (s) => !(s.language === newInfo.language && s.name === newInfo.name),
-          );
-        } else {
+        if (!options.overwrite) {
           throw FileSystemError.FileExists(newUri);
         }
+        pkg.document.sources = pkg.document.sources.filter(
+          (s) => !(s.language === newInfo.language && s.name === newInfo.name),
+        );
       }
       oldSource.language = newInfo.language;
       oldSource.name = newInfo.name;
+      oldSource.modifiedAt = Date.now();
+      this.fireChange(oldUri, vscode.FileChangeType.Deleted);
+      this.fireChange(
+        newUri,
+        newSource ? vscode.FileChangeType.Changed : vscode.FileChangeType.Created,
+      );
     } else if (oldInfo.type === 'asset' && newInfo.type === 'asset') {
       const oldAsset = pkg.document.assets.find((a) => a.name === oldInfo.name);
       if (!oldAsset) {
@@ -366,12 +427,18 @@ export class FiveBoardFileSystemProvider implements vscode.FileSystemProvider {
       }
       const newAsset = pkg.document.assets.find((a) => a.name === newInfo.name);
       if (newAsset) {
-        if (options.overwrite) {
-          pkg.document.assets = pkg.document.assets.filter((a) => a.name !== newInfo.name);
-        } else {
+        if (!options.overwrite) {
           throw FileSystemError.FileExists(newUri);
         }
+        pkg.document.assets = pkg.document.assets.filter((a) => a.name !== newInfo.name);
       }
+      oldAsset.name = newInfo.name;
+      oldAsset.modifiedAt = Date.now();
+      this.fireChange(oldUri, vscode.FileChangeType.Deleted);
+      this.fireChange(
+        newUri,
+        newAsset ? vscode.FileChangeType.Changed : vscode.FileChangeType.Created,
+      );
     }
   }
 }
@@ -452,4 +519,65 @@ function pathInfo(uri: vscode.Uri): PathInfo | null {
     return { path, type: 'export', name, writeable: false };
   }
   return null;
+}
+
+function normalizeExcludePath(watchUri: vscode.Uri, exclude: string): string {
+  if (containsGlobSyntax(exclude)) {
+    throw new Error(
+      `Glob excludes are not supported by the 5board file system provider: ${exclude}`,
+    );
+  }
+
+  const normalizedExclude = normalizePath(exclude);
+  if (normalizedExclude.startsWith('/')) {
+    return normalizedExclude;
+  }
+
+  return normalizePath(vscode.Uri.joinPath(watchUri, normalizedExclude).path);
+}
+
+function isWatchedPath(watchPath: string, changedPath: string, recursive: boolean): boolean {
+  const normalizedWatchPath = normalizePath(watchPath);
+  const normalizedChangedPath = normalizePath(changedPath);
+
+  if (normalizedWatchPath === normalizedChangedPath) {
+    return true;
+  }
+
+  if (recursive) {
+    return isSameOrDescendantPath(normalizedWatchPath, normalizedChangedPath);
+  }
+
+  return isDirectChildPath(normalizedWatchPath, normalizedChangedPath);
+}
+
+function isSameOrDescendantPath(parentPath: string, candidatePath: string): boolean {
+  const normalizedParentPath = normalizePath(parentPath);
+  const normalizedCandidatePath = normalizePath(candidatePath);
+
+  return (
+    normalizedParentPath === normalizedCandidatePath ||
+    normalizedCandidatePath.startsWith(normalizedParentPath + '/')
+  );
+}
+
+function isDirectChildPath(parentPath: string, candidatePath: string): boolean {
+  const normalizedParentPath = normalizePath(parentPath);
+  const normalizedCandidatePath = normalizePath(candidatePath);
+
+  if (!normalizedCandidatePath.startsWith(normalizedParentPath + '/')) {
+    return false;
+  }
+
+  return !normalizedCandidatePath.substring(normalizedParentPath.length + 1).includes('/');
+}
+
+function containsGlobSyntax(path: string): boolean {
+  return /[*?[\]{}]/.test(path);
+}
+
+function normalizePath(path: string): string {
+  const slashNormalized = path.replace(/\\/g, '/');
+  const withoutTrailingSlash = slashNormalized.replace(/\/+$/, '');
+  return withoutTrailingSlash === '' ? '/' : withoutTrailingSlash;
 }
