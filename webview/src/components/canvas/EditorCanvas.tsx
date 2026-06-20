@@ -2,6 +2,7 @@ import type React from 'react';
 import { useRef, useState } from 'react';
 import { BoardDocument } from '5board.vsc-common';
 import EditorElement from './EditorElement';
+import ProjectorMouse, { ProjectorCursor } from '../projector/ProjectorMouse';
 import './EditorCanvas.css';
 
 export type EditorCanvasProps = {
@@ -17,7 +18,7 @@ export type EditorCanvasProps = {
   onElementSelect?: (id: string | null) => void;
   // Normalized (0–1) cursor position to display as a live overlay.
   // Only the projector passes this to mirror the editor's mouse position.
-  cursor?: { x: number; y: number } | null;
+  cursor?: ProjectorCursor | null;
   // Externally controlled selected element ID (projector only).
   // When provided (even as null), this overrides the internal click-selection state.
   selectedElementId?: string | null;
@@ -83,23 +84,7 @@ export default function EditorCanvas({
         ))}
 
         {/* Cursor overlay — only rendered in the projector via the cursor prop */}
-        {cursor && (
-          <div
-            style={{
-              position: 'absolute',
-              left: `${cursor.x * 100}%`,
-              top: `${cursor.y * 100}%`,
-              width: 20,
-              height: 20,
-              borderRadius: '50%',
-              background: 'rgba(220, 38, 38, 0.75)',
-              border: '2px solid #dc2626',
-              transform: 'translate(-50%, -50%)',
-              pointerEvents: 'none',
-              zIndex: 1000,
-            }}
-          />
-        )}
+        <ProjectorMouse cursor={cursor ?? null} />
       </div>
     </>
   );
