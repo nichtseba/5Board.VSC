@@ -89,11 +89,7 @@ export default function Editor() {
 
   return (
     <>
-      <p>
-        Document: <code>{JSON.stringify(boardDocument, null, 2)}</code>
-      </p>
-
-      {/* Cursor tracking toggle — shown in the editor toolbar area */}
+    {/* Cursor tracking toggle — shown in the editor toolbar area */}
       <div style={{ padding: '4px 8px', borderBottom: '1px solid var(--vscode-panel-border)' }}>
         <button
           onClick={handleToggleCursorTracking}
