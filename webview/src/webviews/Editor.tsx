@@ -4,6 +4,7 @@ import { useLocalization } from '../providers/LocalizationProvider';
 import { BoardDocument } from '5board.vsc-common';
 import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
+import ProjectorViewPort, { ProjectorViewport } from '../components/projector/ProjectorViewPort';
 
 export default function Editor() {
   const messages = useMessageService();
@@ -12,12 +13,7 @@ export default function Editor() {
   // Cursor tracking starts OFF (matches the extension's default) for performance.
   // The extension confirms the actual state via 'cursorTrackingChanged' on ready.
   const [cursorTrackingEnabled, setCursorTrackingEnabled] = useState(false);
-  const [projectorViewport, setProjectorViewport] = useState<null | {
-    top: number;
-    left: number;
-    width: number;
-    height: number;
-  }>(null);
+  const [projectorViewport, setProjectorViewport] = useState<ProjectorViewport | null>(null);
 
   // Called by EditorCanvas with canvas-relative (0–1) coordinates.
   // Only fires when tracking is enabled (onCursorMove is only passed when enabled).
@@ -135,18 +131,7 @@ export default function Editor() {
             onElementSelect={handleElementSelect}
           />
         )}
-        {/* Auslagern in Komponente */}
-        {projectorViewport && (
-          <div
-            className="absolute border-2 pointer-events-none z-9999 border-activity-error-badge-background"
-            style={{
-              left: projectorViewport.left,
-              top: projectorViewport.top,
-              width: projectorViewport.width,
-              height: projectorViewport.height
-            }}
-          />
-        )}
+        <ProjectorViewPort viewport={projectorViewport} />
       </div>
     </>
   );
