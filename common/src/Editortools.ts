@@ -34,7 +34,35 @@ type TYPE_TOOL_PARAMETERS = {
   [EditorToolId.FREEHAND]: FreehandToolParameters;
 };
 
-type FreehandToolParameters = unknown;
+// Color and width the freehand tool draws with. Chosen in the sidebar.
+export type FreehandToolParameters = {
+  color: string;
+  width: number;
+};
+
+// Selectable freehand colors. The `id` maps to a localized name for the tooltip.
+export const FREEHAND_COLORS = [
+  { id: 'red', value: '#e06c75' },
+  { id: 'orange', value: '#d19a66' },
+  { id: 'yellow', value: '#e5c07b' },
+  { id: 'green', value: '#98c379' },
+  { id: 'blue', value: '#61afef' },
+  { id: 'purple', value: '#c678dd' },
+  { id: 'black', value: '#000000' },
+  { id: 'white', value: '#ffffff' },
+] as const;
+
+// Selectable freehand stroke widths (in pixels). The `id` maps to a localized name.
+export const FREEHAND_WIDTHS = [
+  { id: 'thin', value: 2 },
+  { id: 'medium', value: 4 },
+  { id: 'thick', value: 8 },
+] as const;
+
+export const DEFAULT_FREEHAND_PARAMETERS: FreehandToolParameters = {
+  color: FREEHAND_COLORS[0].value,
+  width: FREEHAND_WIDTHS[1].value,
+};
 
 export type EditorTool<EditorToolType extends EditorToolId = EditorToolId> = {
   type: EditorToolType;

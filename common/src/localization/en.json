@@ -32,6 +32,39 @@
         "image": "Image",
         "spacer": "Spacer Tool",
         "freehand": "Freehand Tool"
+      },
+      "projector": {
+        "cursorTracking": "Cursor Tracking",
+        "on": "On",
+        "off": "Off",
+        "moreSettings": "More settings",
+        "comingSoon": "Coming soon",
+        "dummies": {
+          "cursorColor": "Cursor Color",
+          "cursorSize": "Cursor Size",
+          "showViewport": "Show Viewport Rectangle",
+          "background": "Background Color"
+        }
+      },
+      "freehand": {
+        "title": "Freehand Options",
+        "color": "Color",
+        "width": "Thickness",
+        "colors": {
+          "red": "Red",
+          "orange": "Orange",
+          "yellow": "Yellow",
+          "green": "Green",
+          "blue": "Blue",
+          "purple": "Purple",
+          "black": "Black",
+          "white": "White"
+        },
+        "widths": {
+          "thin": "Thin",
+          "medium": "Medium",
+          "thick": "Thick"
+        }
       }
     },
     "sidebar-element-settings": {

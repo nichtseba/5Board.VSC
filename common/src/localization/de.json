@@ -32,6 +32,39 @@
         "link": "Link",
         "code": "Code",
         "image": "Bild"
+      },
+      "projector": {
+        "cursorTracking": "Mauszeiger-Tracking",
+        "on": "An",
+        "off": "Aus",
+        "moreSettings": "Weitere Einstellungen",
+        "comingSoon": "Demnächst",
+        "dummies": {
+          "cursorColor": "Cursor-Farbe",
+          "cursorSize": "Cursor-Größe",
+          "showViewport": "Sichtfeld-Rechteck anzeigen",
+          "background": "Hintergrundfarbe"
+        }
+      },
+      "freehand": {
+        "title": "Freihand-Optionen",
+        "color": "Farbe",
+        "width": "Dicke",
+        "colors": {
+          "red": "Rot",
+          "orange": "Orange",
+          "yellow": "Gelb",
+          "green": "Grün",
+          "blue": "Blau",
+          "purple": "Lila",
+          "black": "Schwarz",
+          "white": "Weiß"
+        },
+        "widths": {
+          "thin": "Dünn",
+          "medium": "Mittel",
+          "thick": "Dick"
+        }
       }
     },
     "sidebar-element-settings": {

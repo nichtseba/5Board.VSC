@@ -6,6 +6,7 @@ import { CodeElement } from './elements/CodeElement';
 import { ImageElement } from './elements/ImageElement';
 import { ShapeElement } from './elements/ShapeElement';
 import { ArrowElement } from './elements/ArrowElement';
+import { FreehandElement } from './elements/FreehandElement';
 
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
@@ -26,10 +27,15 @@ export default function EditorElement<ElementType extends EditorElementType>({
     (ELEMENT_COMPONENTS[element.type] as React.ComponentType<EditorElementProps<ElementType>>) ??
     UnknownElement;
 
+  // Most elements get a one-cell left padding for text spacing. Freehand draws
+  // absolute coordinates, so the padding would shift the stroke a cell to the right.
+  const leftPadding =
+    element.type === EditorElementType.Freehand ? '' : 'pl-[var(--editor-spacing)]';
+
   return (
     <div
       onClick={() => onSelect?.(element.id)}
-      className={`editor-element editor-element-hover ${selected ? 'editor-element-selected' : ''} pl-[var(--editor-spacing)] font-bold`}
+      className={`editor-element editor-element-hover ${selected ? 'editor-element-selected' : ''} ${leftPadding} font-bold`}
       style={{
         gridRowStart: element.layout.yPos + 1,
         gridRowEnd: `span ${element.layout.height}`,
@@ -52,6 +58,7 @@ const ELEMENT_COMPONENTS = {
   [EditorElementType.Image]: ImageElement,
   [EditorElementType.Shape]: ShapeElement,
   [EditorElementType.Arrow]: ArrowElement,
+  [EditorElementType.Freehand]: FreehandElement,
 } as const satisfies {
   [ElementType in EditorElementType]: React.ComponentType<EditorElementProps<ElementType>>;
 };

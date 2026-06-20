@@ -13,9 +13,10 @@ export class MessageService {
   } = {};
 
   /**
-   * Registers a webview panel or view.
+   * Registers a webview panel or view. Accepts both WebviewPanel and
+   * WebviewView since they share the webview + onDidDispose shape.
    */
-  registerPanel(panel: vscode.WebviewPanel): void {
+  registerPanel(panel: { webview: vscode.Webview; onDidDispose: vscode.Event<void> }): void {
     this.webviews.add(panel.webview);
     panel.webview.onDidReceiveMessage((msg) => this.handleMessage(msg, panel.webview));
     panel.onDidDispose(() => {

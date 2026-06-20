@@ -73,6 +73,11 @@
         },
         {
           "type": "webview",
+          "id": "5board-vsc.sidebar-projector-view",
+          "name": "%views.sidebar.projector-title%"
+        },
+        {
+          "type": "webview",
           "id": "5board-vsc.sidebar-element-settings-view",
           "name": "%views.sidebar.element-settings-title%"
         },

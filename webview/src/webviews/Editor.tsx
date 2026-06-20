@@ -1,17 +1,28 @@
 import { useEffect, useState } from 'react';
 import { useMessageService, useOnMessage } from '../services/MessageService';
-import { useLocalization } from '../providers/LocalizationProvider';
-import { BoardDocument } from '5board.vsc-common';
+import {
+  BoardDocument,
+  BoardElement,
+  DEFAULT_FREEHAND_PARAMETERS,
+  DEFAULT_TOOL_ID,
+  EditorToolId,
+  FreehandToolParameters,
+} from '5board.vsc-common';
 import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
 
 export default function Editor() {
   const messages = useMessageService();
-  const { t } = useLocalization();
   const [boardDocument, setBoardDocument] = useState<BoardDocument | null>(null);
   // Cursor tracking starts OFF (matches the extension's default) for performance.
   // The extension confirms the actual state via 'cursorTrackingChanged' on ready.
   const [cursorTrackingEnabled, setCursorTrackingEnabled] = useState(false);
+  // The currently active tool, set by the sidebar via the extension ('toolChanged').
+  const [activeTool, setActiveTool] = useState<EditorToolId>(DEFAULT_TOOL_ID);
+  // Freehand color/width, also driven by the sidebar through 'toolChanged'.
+  const [freehandParams, setFreehandParams] = useState<FreehandToolParameters>(
+    DEFAULT_FREEHAND_PARAMETERS,
+  );
   const [projectorViewport, setProjectorViewport] = useState<null | {
     top: number;
     left: number;
@@ -37,10 +48,23 @@ export default function Editor() {
     messages.send({ type: 'selectElement', elementId: id });
   };
 
-  // Sends a toggle request to the extension, which flips the state and broadcasts
-  // 'cursorTrackingChanged' back to all panels (including this editor).
-  const handleToggleCursorTracking = () => {
-    messages.send({ type: 'toggleCursorTracking' });
+  // Called by EditorCanvas when a freehand stroke is finished.
+  // The extension appends the element and broadcasts the updated document.
+  const handleAddElement = (element: BoardElement) => {
+    messages.send({ type: 'addElement', element });
+  };
+
+  // Streams the in-progress freehand stroke to the projector (null = stroke ended).
+  const handleFreehandPreview = (
+    points: { x: number; y: number }[] | null,
+    color: string,
+    width: number,
+  ) => {
+    if (points) {
+      messages.send({ type: 'freehandPreview', points, color, width });
+    } else {
+      messages.send({ type: 'freehandPreviewEnd' });
+    }
   };
 
   useEffect(() => {
@@ -74,6 +98,12 @@ export default function Editor() {
     if (msg.type === 'cursorTrackingChanged') {
       setCursorTrackingEnabled(msg.enabled);
     }
+    if (msg.type === 'toolChanged') {
+      setActiveTool(msg.tool.type);
+      if (msg.tool.type === EditorToolId.FREEHAND && msg.tool.parameters) {
+        setFreehandParams(msg.tool.parameters);
+      }
+    }
     if (msg.type === 'viewportUpdate') {
       setProjectorViewport(msg.viewport);
     }
@@ -91,37 +121,6 @@ export default function Editor() {
 
   return (
     <>
-      <p>
-        Document: <code>{JSON.stringify(boardDocument, null, 2)}</code>
-      </p>
-
-      {/* Cursor tracking toggle — shown in the editor toolbar area */}
-      <div style={{ padding: '4px 8px', borderBottom: '1px solid var(--vscode-panel-border)' }}>
-        <button
-          onClick={handleToggleCursorTracking}
-          style={{
-            padding: '3px 10px',
-            fontSize: '0.75rem',
-            fontWeight: 'bold',
-            letterSpacing: '0.04em',
-            textTransform: 'uppercase',
-            cursor: 'pointer',
-            border: '1px solid var(--vscode-button-border, currentColor)',
-            borderRadius: '3px',
-            background: cursorTrackingEnabled
-              ? 'var(--vscode-button-background)'
-              : 'var(--vscode-button-secondaryBackground)',
-            color: cursorTrackingEnabled
-              ? 'var(--vscode-button-foreground)'
-              : 'var(--vscode-button-secondaryForeground)',
-          }}
-        >
-          {cursorTrackingEnabled
-            ? t('extension.projector.cursorTrackingOn')
-            : t('extension.projector.cursorTrackingOff')}
-        </button>
-      </div>
-
       <div className="relative">
         {boardDocument && (
           <EditorCanvas
@@ -131,6 +130,11 @@ export default function Editor() {
             onCursorMove={cursorTrackingEnabled ? handleCursorMove : undefined}
             onCursorLeave={handleCursorLeave}
             onElementSelect={handleElementSelect}
+            freehandActive={activeTool === EditorToolId.FREEHAND}
+            freehandColor={freehandParams.color}
+            freehandWidth={freehandParams.width}
+            onAddElement={handleAddElement}
+            onFreehandPreview={handleFreehandPreview}
           />
         )}
         {projectorViewport && (
@@ -140,7 +144,7 @@ export default function Editor() {
               left: projectorViewport.left,
               top: projectorViewport.top,
               width: projectorViewport.width,
-              height: projectorViewport.height
+              height: projectorViewport.height,
             }}
           />
         )}

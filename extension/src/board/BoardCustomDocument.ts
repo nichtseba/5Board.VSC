@@ -10,8 +10,21 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   public readonly messageService = new MessageService();
 
   // Cursor tracking is ON by default.
-  // The toggle button in the editor sends 'toggleCursorTracking' to flip this.
-  private cursorTrackingEnabled = true;
+  // The toggle in the sidebar drives this via FiveBoardExtension.toggleCursorTracking().
+  private cursorTrackingEnabled_ = true;
+  public get cursorTrackingEnabled(): boolean {
+    return this.cursorTrackingEnabled_;
+  }
+
+  /** Flips cursor tracking and notifies this document's panels. Returns the new state. */
+  public toggleCursorTracking(): boolean {
+    this.cursorTrackingEnabled_ = !this.cursorTrackingEnabled_;
+    this.messageService.send({
+      type: 'cursorTrackingChanged',
+      enabled: this.cursorTrackingEnabled_,
+    });
+    return this.cursorTrackingEnabled_;
+  }
 
   constructor(
     public boardPackage: BoardPackage,
@@ -22,14 +35,21 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     EXTENSION.registerDocument(this);
 
     this.messageService.on('ready', (_msg, sender) => {
+      // Mark this document as the active one so the sidebar's tool selection
+      // (which arrives via the global message service) can be forwarded here.
+      EXTENSION.activeEditorDocument = this;
       this.messageService.send(
-        { type: 'init', document: this.boardPackage.document, language: 'en' },
+        {
+          type: 'init',
+          document: this.boardPackage.document,
+          language: 'en',
+        },
         sender,
       );
       // Sync current tracking state so the new panel starts in the correct state.
       this.messageService.send(
-        { type: 'cursorTrackingChanged', enabled: this.cursorTrackingEnabled },
-        sender
+        { type: 'cursorTrackingChanged', enabled: this.cursorTrackingEnabled_ },
+        sender,
       );
     });
 
@@ -41,7 +61,7 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     // The editor gates its own sending too (for rAF performance), so this is a
     // second line of defence and keeps the projector in sync when tracking is toggled.
     this.messageService.on('cursorMove', (msg) => {
-      if (this.cursorTrackingEnabled) {
+      if (this.cursorTrackingEnabled_) {
         this.messageService.send({ type: 'cursorMove', x: msg.x, y: msg.y });
       }
     });
@@ -51,18 +71,30 @@ export class BoardCustomDocument implements vscode.CustomDocument {
       this.messageService.send({ type: 'cursorHide' });
     });
 
-    // Toggle cursor tracking state and notify all panels so they can update their UI.
-    this.messageService.on('toggleCursorTracking', () => {
-      this.cursorTrackingEnabled = !this.cursorTrackingEnabled;
-      this.messageService.send({
-        type: 'cursorTrackingChanged',
-        enabled: this.cursorTrackingEnabled,
-      });
-    });
-
     // Forward the selected element so the projector highlights the same element.
     this.messageService.on('selectElement', (msg) => {
       this.messageService.send({ type: 'selectElement', elementId: msg.elementId });
+    });
+
+    // The editor sends a freshly drawn element (e.g. a freehand stroke).
+    // Append it to the document; the change broadcasts 'updateDocument' to all panels.
+    this.messageService.on('addElement', (msg) => {
+      this.applyEdit((document) => {
+        document.content.elements.push(msg.element);
+      });
+    });
+
+    // Mirror the in-progress freehand stroke to the projector while drawing.
+    this.messageService.on('freehandPreview', (msg) => {
+      this.messageService.send({
+        type: 'freehandPreview',
+        points: msg.points,
+        color: msg.color,
+        width: msg.width,
+      });
+    });
+    this.messageService.on('freehandPreviewEnd', () => {
+      this.messageService.send({ type: 'freehandPreviewEnd' });
     });
 
     // Forward scroll position from any panel to all other panels.

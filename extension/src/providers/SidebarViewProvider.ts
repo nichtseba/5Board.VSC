@@ -20,6 +20,10 @@ export abstract class WebviewProvider implements vscode.WebviewViewProvider {
       localResourceRoots: [vscode.Uri.joinPath(this.context.extensionUri, 'media')],
     };
 
+    // Connect this sidebar to the shared message service so it can talk to the
+    // extension (e.g. send the selected tool to the active editor).
+    this.messages.registerPanel(webviewView);
+
     setWebviewHtml(this.context, webviewView.webview, this.htmlFileName);
   }
 
@@ -35,6 +39,17 @@ export class SidebarViewProvider extends WebviewProvider {
   public static readonly VIEW_ID = '5board-vsc.sidebar-tool-view';
   constructor(context: vscode.ExtensionContext, messages: MessageService) {
     super(context, messages, 'ToolSidebar.html', SidebarViewProvider.VIEW_ID);
+  }
+}
+export class ProjectorSettingsSidebarViewProvider extends WebviewProvider {
+  public static readonly VIEW_ID = '5board-vsc.sidebar-projector-view';
+  constructor(context: vscode.ExtensionContext, messages: MessageService) {
+    super(
+      context,
+      messages,
+      'ProjectorSettingsSidebar.html',
+      ProjectorSettingsSidebarViewProvider.VIEW_ID,
+    );
   }
 }
 export class ElementSettingsSidebarViewProvider extends WebviewProvider {

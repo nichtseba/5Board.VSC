@@ -1,4 +1,6 @@
 import { BoardDocument } from './board/document';
+import type { EditorElement } from './board/element';
+import type { EditorTool } from './Editortools';
 import { Language } from './localization';
 
 /**
@@ -20,6 +22,14 @@ type AllExtensionToWebviewMessage =
   | { type: 'cursorTrackingChanged'; enabled: boolean }
   | { type: 'scroll'; top: number; left: number }
   | { type: 'selectElement'; elementId: string | null }
+  // Tells the editor which tool is active, including its parameters (e.g. freehand color/width).
+  | { type: 'toolChanged'; tool: EditorTool }
+  // Sent to the sidebar so it can reflect the current projector settings.
+  | { type: 'sidebarSync'; cursorTrackingEnabled: boolean }
+  // Live preview of an in-progress freehand stroke, mirrored to the projector.
+  // Points are normalized (0–1) to the canvas, like the cursor position.
+  | { type: 'freehandPreview'; points: { x: number; y: number }[]; color: string; width: number }
+  | { type: 'freehandPreviewEnd' }
   | {
       type: 'viewportUpdate';
       viewport: { top: number; left: number; height: number; width: number };
@@ -44,6 +54,13 @@ type AllWebviewToExtensionMessage =
   | { type: 'scroll'; top: number; left: number }
   | { type: 'selectElement'; elementId: string | null }
   | { type: 'toggleCursorTracking' }
+  // Sent by the sidebar when the user picks a tool or changes its options.
+  | { type: 'setTool'; tool: EditorTool }
+  // Sent by the editor after drawing a new element (e.g. a freehand stroke).
+  | { type: 'addElement'; element: EditorElement }
+  // Live preview of the stroke the editor is currently drawing (normalized 0–1).
+  | { type: 'freehandPreview'; points: { x: number; y: number }[]; color: string; width: number }
+  | { type: 'freehandPreviewEnd' }
   | {
       type: 'updateViewport';
       viewport: { top: number; left: number; height: number; width: number };

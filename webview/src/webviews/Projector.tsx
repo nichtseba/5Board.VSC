@@ -15,6 +15,12 @@ export default function Projector() {
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
   // Mirrors the editor's selected element so the projector highlights the same one.
   const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+  // Live freehand stroke the editor is currently drawing (cleared when finished).
+  const [freehandPreview, setFreehandPreview] = useState<{
+    points: { x: number; y: number }[];
+    color: string;
+    width: number;
+  } | null>(null);
 
   // Tell the extension that this webview is ready to receive messages.
   // The extension will respond with 'init' and 'cursorTrackingChanged'.
@@ -71,6 +77,14 @@ export default function Projector() {
     if (msg.type === 'init' || msg.type === 'updateDocument') {
       // Replace the displayed document whenever the extension sends fresh data.
       setBoardDocument(msg.document);
+      // The finished stroke is now part of the document — drop the live preview.
+      setFreehandPreview(null);
+    }
+    if (msg.type === 'freehandPreview') {
+      setFreehandPreview({ points: msg.points, color: msg.color, width: msg.width });
+    }
+    if (msg.type === 'freehandPreviewEnd') {
+      setFreehandPreview(null);
     }
     if (msg.type === 'cursorMove') {
       setCursor({ x: msg.x, y: msg.y });
@@ -131,6 +145,7 @@ export default function Projector() {
             document={boardDocument}
             cursor={cursor}
             selectedElementId={selectedElementId}
+            freehandPreview={freehandPreview}
           />
         ) : (
           // Shown while waiting for the first 'init' message from the extension.
