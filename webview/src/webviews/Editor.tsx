@@ -43,6 +43,7 @@ export default function Editor() {
     messages.send({ type: 'toggleCursorTracking' });
   };
 
+  // in EditorCanvas
   useEffect(() => {
     messages.send({ type: 'ready' });
   }, []);
@@ -74,6 +75,7 @@ export default function Editor() {
     if (msg.type === 'cursorTrackingChanged') {
       setCursorTrackingEnabled(msg.enabled);
     }
+    // in Komponente ProjectorViewPort in projector Ordner mit Mouse
     if (msg.type === 'viewportUpdate') {
       setProjectorViewport(msg.viewport);
     }
@@ -133,6 +135,7 @@ export default function Editor() {
             onElementSelect={handleElementSelect}
           />
         )}
+        {/* Auslagern in Komponente */}
         {projectorViewport && (
           <div
             className="absolute border-2 pointer-events-none z-9999 border-activity-error-badge-background"
