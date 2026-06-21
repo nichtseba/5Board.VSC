@@ -137,6 +137,7 @@ export class FiveBoardExtension extends ExtensionBase {
           content: '',
           title: assetName,
           altText: assetName,
+          configuredWidth: false,
         },
       });
     });

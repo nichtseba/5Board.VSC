@@ -4,6 +4,7 @@ export type ElementInteractionProfile = {
   draggable: boolean;
   dragDirection: 'free' | 'vertical' | 'horizontal';
   resizable: boolean;
+  keepRatio?: boolean;
   rotatable: boolean;
   scalable?: boolean; // TODO for future use
   clipable?: boolean; // TODO for future use
@@ -32,6 +33,7 @@ export const ELEMENT_INTERACTION_CONFIG = {
     draggable: true,
     dragDirection: 'free',
     resizable: true,
+    keepRatio: true,
     rotatable: true,
     scalable: true,
     clipable: true,

@@ -1,3 +1,4 @@
+import { EditorElementType } from '5board.vsc-common';
 import { BoardCustomDocument } from './BoardCustomDocument';
 
 export class DocumentMessageHandlers {
@@ -23,6 +24,13 @@ export class DocumentMessageHandlers {
             ...element.layout,
             ...msg.changes,
           };
+
+          if (element.type === EditorElementType.Image) {
+            element.data = {
+              ...element.data,
+              configuredWidth: true,
+            };
+          }
         });
       }),
       this.document.messageService.on('insertSpacerRows', (msg) => {
