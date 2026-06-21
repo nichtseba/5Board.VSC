@@ -34,7 +34,7 @@ type Props = {
   children: React.ReactNode;
 };
 
-export default function GridProvider({ children }: Props) {
+export function GridProvider({ children }: Props) {
   const [cellSize, setCellSize] = useState<GridSize>({
     width: 1,
     height: 1,
