@@ -1,4 +1,4 @@
-import vscode from 'vscode';
+import vscode, { CustomDocumentEditEvent } from 'vscode';
 import { BoardPackage } from './package';
 import { BoardDocument } from '5board.vsc-common';
 import { MessageService } from '../MessageService';
@@ -6,7 +6,9 @@ import { EXTENSION } from '../extension';
 import { DocumentMessageHandlers } from './DocumentMessageHandlers';
 
 export class BoardCustomDocument implements vscode.CustomDocument {
-  public readonly documentChange = new vscode.EventEmitter<BoardDocument>();
+  public readonly documentChange = new vscode.EventEmitter<
+    CustomDocumentEditEvent<BoardCustomDocument>
+  >();
   public readonly onDocumentChange = this.documentChange.event;
   public readonly messageService = new MessageService();
   private readonly disposables: vscode.Disposable[] = [];
@@ -17,8 +19,11 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     public uri: vscode.Uri,
   ) {
     this.disposables.push(
-      this.onDocumentChange((document) => {
-        this.messageService.send({ type: 'updateDocument', document });
+      this.onDocumentChange((e) => {
+        this.messageService.send({
+          type: 'updateDocument',
+          document: e.document.boardPackage.document,
+        });
       }),
     );
     this.disposables.push(
@@ -88,7 +93,27 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   }
 
   public applyEdit(edit: (document: BoardDocument) => void): void {
+    const before = structuredClone(this.boardPackage.document);
     edit(this.boardPackage.document);
-    this.documentChange.fire(this.boardPackage.document);
+    const after = structuredClone(this.boardPackage.document);
+
+    this.documentChange.fire({
+      document: this,
+      undo: async () => {
+        this.boardPackage.document = structuredClone(before);
+        this.messageService.send({
+          type: 'updateDocument',
+          document: this.boardPackage.document,
+        });
+      },
+
+      redo: async () => {
+        this.boardPackage.document = structuredClone(after);
+        this.messageService.send({
+          type: 'updateDocument',
+          document: this.boardPackage.document,
+        });
+      },
+    });
   }
 }
