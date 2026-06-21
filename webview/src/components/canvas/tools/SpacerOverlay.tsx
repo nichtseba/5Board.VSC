@@ -1,5 +1,5 @@
 import type { RefObject } from 'react';
-import { useLocalization } from '../../providers/LocalizationProvider';
+import { useLocalization } from '../../../providers/LocalizationProvider';
 
 export type SpacerOverlayProps = {
   dragState: {

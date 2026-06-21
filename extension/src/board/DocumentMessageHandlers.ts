@@ -6,7 +6,6 @@ export class DocumentMessageHandlers {
   register(): (() => void)[] {
     return [
       this.document.messageService.on('selectElement', (msg) => {
-        console.log('selectElement: ', msg.id);
         this.document.applyEdit((document) => {
           document.content.selectedElementId = msg.id;
         });

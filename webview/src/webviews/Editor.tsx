@@ -3,6 +3,7 @@ import { useMessageService } from '../services/MessageService';
 import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
+import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
 
 export default function Editor() {
   const messages = useMessageService();
@@ -21,7 +22,11 @@ export default function Editor() {
         </a>
         Document: <code>{JSON.stringify(document, null, 2)}</code>
       </p>
-      {document && <EditorCanvas />}
+      {document && (
+        <CanvasEventsProvider>
+          <EditorCanvas />
+        </CanvasEventsProvider>
+      )}
     </>
   );
 }
