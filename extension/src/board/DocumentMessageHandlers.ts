@@ -37,6 +37,29 @@ export class DocumentMessageHandlers {
           }
         });
       }),
+      this.document.messageService.on('updateElement', (msg) => {
+        this.document.applyEdit((document) => {
+          const element = document.content.elements.find((e) => e.id === msg.id);
+
+          if (!element) {
+            return;
+          }
+
+          document.content.elements = document.content.elements.map((el) => {
+            if (el.id !== msg.id) {
+              return el;
+            }
+
+            return {
+              ...el,
+              data: {
+                ...el.data,
+                ...msg.changes.data,
+              },
+            };
+          });
+        });
+      }),
     ];
   }
 }

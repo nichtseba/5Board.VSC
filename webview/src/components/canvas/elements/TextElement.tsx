@@ -4,11 +4,14 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
 import { Button } from 'vscrui';
+import { useMessageService } from '../../../services/MessageService';
 
 /**
  * Renders a text element.
  */
 export function TextElement({ element }: EditorElementProps<EditorElementType.Text>) {
+  const messages = useMessageService();
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -16,6 +19,13 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
       }),
     ],
     content: element.data.content,
+    onUpdate({ editor }) {
+      messages.send({
+        type: 'updateElement',
+        id: element.id,
+        changes: { data: { content: JSON.stringify(editor.getJSON()) } },
+      });
+    },
   });
 
   return (
