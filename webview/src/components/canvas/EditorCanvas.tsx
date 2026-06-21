@@ -6,7 +6,7 @@ import './EditorCanvas.css';
 import { useBoardDocument } from '../../providers/BoardDocumentProvider';
 import { useEditorState } from '../../providers/EditorStateProvider';
 import { useCanvasEventDispatcher } from '../../providers/CanvasEventsProvider';
-import SpacerTool from './tools/SpacerTool';
+import { CanvasTools } from './tools/CanvasTools';
 
 /**
  * Renders the editor canvas, which displays all editor elements based on their yPos.
@@ -23,6 +23,7 @@ export default function EditorCanvas() {
   const canvasRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
+    // Todo: move to correct component
     if (activeToolId !== EditorToolId.POINTER && document?.content.selectedElementId) {
       messages.send({
         type: 'selectElement',
@@ -30,15 +31,6 @@ export default function EditorCanvas() {
       });
     }
   }, [activeToolId, document?.content.selectedElementId, messages]);
-
-  const handleSelectElement = (id: string) => {
-    if (activeToolId !== EditorToolId.POINTER) return;
-
-    messages.send({
-      type: 'selectElement',
-      id,
-    });
-  };
 
   return (
     <>
@@ -51,14 +43,12 @@ export default function EditorCanvas() {
         onPointerUp={(e) => emit('pointerUp', e.nativeEvent)}
         onPointerCancel={(e) => emit('pointerCancel', e.nativeEvent)}
       >
-        <SpacerTool canvasRef={canvasRef} />
+        <CanvasTools canvasRef={canvasRef} />
         {document?.content.elements.map((element) => (
           <EditorElement
             key={element.id}
             element={element}
             selected={element.id === selectedElementId}
-            onSelect={handleSelectElement}
-            activeToolId={activeToolId}
           />
         ))}
       </div>
