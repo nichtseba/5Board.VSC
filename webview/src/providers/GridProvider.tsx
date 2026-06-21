@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useRef, useState, useCallback } from 'react';
 
+/**
+ * Provides the current grid cell dimensions to all editor components.
+ * Cell sizes are derived from the rendered grid and updated automatically
+ * whenever the grid container is resized.
+ */
+
 export type GridSize = {
   width: number;
   height: number;
@@ -51,7 +57,11 @@ export function GridProvider({ children }: Props) {
     if (!el) return;
 
     const update = () => {
-      setCellSize(getGridCellSize(el));
+      const next = getGridCellSize(el);
+
+      setCellSize((prev) =>
+        prev.width === next.width && prev.height === next.height ? prev : next,
+      );
     };
 
     update();

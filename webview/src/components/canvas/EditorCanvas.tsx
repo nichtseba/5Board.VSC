@@ -1,27 +1,23 @@
-import { EditorState, EditorToolId } from '5board.vsc-common';
+import { EditorToolId } from '5board.vsc-common';
 import { useEffect, useRef, useState } from 'react';
 import type React from 'react';
 import EditorElement from './EditorElement';
 import SpacerOverlay from './SpacerOverlay';
-import { useMessageService, useOnMessage } from '../../services/MessageService';
+import { useMessageService } from '../../services/MessageService';
 import './EditorCanvas.css';
 import { useGrid } from '../../providers/GridProvider';
 import { useBoardDocument } from '../../providers/BoardDocumentProvider';
+import { useEditorState } from '../../providers/EditorStateProvider';
 
 /**
  * Renders the editor canvas, which displays all editor elements based on their yPos.
  */
 export default function EditorCanvas() {
   const document = useBoardDocument();
+  const editorState = useEditorState();
 
-  const [editorState, setEditorState] = useState<EditorState>({
-    tool: {
-      type: EditorToolId.POINTER,
-      parameters: undefined,
-    },
-  });
   const selectedElementId = document?.content.selectedElementId ?? null;
-  const activeToolId = editorState.tool.type;
+  const activeToolId = editorState?.tool.type;
 
   const messages = useMessageService();
   const canvasRef = useRef<HTMLDivElement | null>(null);
@@ -38,12 +34,6 @@ export default function EditorCanvas() {
     startRow: number;
     draggedRows: number;
   } | null>(null);
-
-  useOnMessage((msg) => {
-    if (msg.type === 'updateEditorState' || msg.type === 'init') {
-      setEditorState(msg.editorState);
-    }
-  });
 
   useEffect(() => {
     if (activeToolId !== EditorToolId.POINTER && document?.content.selectedElementId) {
