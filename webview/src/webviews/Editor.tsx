@@ -21,9 +21,9 @@ export default function Editor() {
 
   return (
     <>
-      <p>
+      {/*<p>
         Document: <code>{JSON.stringify(document, null, 2)}</code>
-      </p>
+      </p>*/}
       {document && <EditorCanvas document={document} />}
     </>
   );

@@ -138,7 +138,7 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
 
   return (
     <>
-      {`Selected element ID: ${selectedElementId}`}
+      {/*`Selected element ID: ${selectedElementId}`*/}
       <div
         ref={canvasRef}
         className={`editor-canvas bg-editor-background ${activeToolId === EditorToolId.SPACER ? 'cursor-row-resize' : ''}`}

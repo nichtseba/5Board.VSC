@@ -1,6 +1,6 @@
 import { BoardDocument } from './board/document';
 import { Language } from './localization';
-import { EditorElement, EditorState, EditorTool, ElementLayout } from './main';
+import { EditorElement, EditorElementType, EditorState, EditorTool, ElementLayout } from './main';
 
 /**
  * Messages from the extension to webviews
@@ -36,5 +36,7 @@ type AllWebviewToExtensionMessage =
   | { type: 'selectElement'; id: string | null }
   | { type: 'selectTool'; tool: EditorTool }
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
+  | { type: 'addElement'; elementType: EditorElementType }
+  | { type: 'deleteElement'; id: string }
   | { type: 'updateElementLayout'; id: string; changes: Partial<ElementLayout> } // Update the Layout when Element was moved or resized
   | { type: 'updateElement'; id: string; changes: Partial<EditorElement> }; // Update element with it's settings

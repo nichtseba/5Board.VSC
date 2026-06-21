@@ -20,12 +20,7 @@
         "pointer": "Zeiger",
         "spacer": "Abstand-Tool",
         "freehand": "Freihand-Tool",
-        "addElement": "Element hinzufügen",
-        "text": "Text",
-        "heading": "Überschrift",
-        "link": "Link",
-        "code": "Code",
-        "image": "Bild"
+        "addElement": "Element hinzufügen"
       }
     },
     "sidebar-element-settings": {
@@ -35,7 +30,8 @@
       "headingSettings": {
         "title": "Überschrift",
         "levelLabel": "Hierarchiestufe"
-      }
+      },
+      "delete": "Löschen"
     }
   }
 }

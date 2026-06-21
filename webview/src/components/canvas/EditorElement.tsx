@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { EditorElement, EditorElementType, EditorToolId } from '5board.vsc-common';
 import type React from 'react';
 import { TextElement } from './elements/TextElement';
@@ -8,6 +8,7 @@ import { CodeElement } from './elements/CodeElement';
 import { ImageElement } from './elements/ImageElement';
 import { ShapeElement } from './elements/ShapeElement';
 import { ArrowElement } from './elements/ArrowElement';
+import { useMessageService } from '../../services/MessageService';
 
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
@@ -33,6 +34,28 @@ export default function EditorElement<ElementType extends EditorElementType>({
   const ElementComponent =
     (ELEMENT_COMPONENTS[element.type] as React.ComponentType<EditorElementProps<ElementType>>) ??
     UnknownElement;
+  const messages = useMessageService();
+
+  useEffect(() => {
+    const listener = (event: KeyboardEvent) => {
+      if (event.key !== 'Backspace') {
+        return;
+      }
+
+      if (!selected) {
+        return;
+      }
+
+      messages.send({
+        type: 'deleteElement',
+        id: element.id,
+      });
+    };
+
+    window.addEventListener('keydown', listener);
+
+    return () => window.removeEventListener('keydown', listener);
+  }, [selected]);
 
   return (
     <>

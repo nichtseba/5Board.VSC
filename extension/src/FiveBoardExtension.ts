@@ -6,7 +6,13 @@ import { t } from './localization';
 import path from 'path';
 import { BoardPackage } from './board/package';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
-import { BoardDocument, DEFAULT_TOOL_ID, EditorState } from '5board.vsc-common';
+import {
+  BoardDocument,
+  DEFAULT_TOOL_ID,
+  EditorElement,
+  EditorElementType,
+  EditorState,
+} from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
 import { SidebarManager } from './sidebar/SidebarManager';
 
@@ -78,6 +84,102 @@ export class FiveBoardExtension extends ExtensionBase {
   @Command('5board-vsc.startPresentation')
   startPresentationCommand(): void {
     vscode.window.showInformationMessage('Presentation started');
+  }
+
+  @Command('5board-vsc.deleteEditorElement')
+  deleteEditorElement(id: string): void {
+    this.applyEditToActiveDocument((document) => {
+      document.content.elements = document.content.elements.filter((e) => e.id !== id);
+    });
+  }
+
+  @Command('5board-vsc.addNewEditorElement')
+  addNewEditorElement(type: EditorElementType): void {
+    const element = this.createDefaultElement(type);
+
+    this.applyEditToActiveDocument((document) => {
+      document.content.elements.push(element);
+    });
+  }
+  private createDefaultElement(type: EditorElementType): EditorElement {
+    const base = {
+      id: crypto.randomUUID(),
+      type,
+      layout: {
+        xPos: 0,
+        yPos: 0,
+        width: 20,
+        height: 10,
+      },
+      style: {
+        visible: true,
+      },
+    };
+
+    switch (type) {
+      case EditorElementType.Heading:
+        return {
+          ...base,
+          type,
+          data: {
+            level: 1,
+            content: 'Heading created',
+          },
+        };
+
+      case EditorElementType.Text:
+        return {
+          ...base,
+          type,
+          data: {
+            content: 'Text created',
+          },
+        };
+
+      case EditorElementType.Code:
+        return {
+          ...base,
+          type,
+          data: {
+            codeBlockId: crypto.randomUUID(),
+            content: '',
+          },
+        };
+
+      case EditorElementType.Image:
+        return {
+          ...base,
+          type,
+          data: {
+            src: '',
+            content: '',
+          },
+        };
+
+      case EditorElementType.Shape:
+        return {
+          ...base,
+          type,
+          data: {
+            shapeType: 'rectangle',
+          },
+        };
+
+      case EditorElementType.Arrow:
+        return {
+          ...base,
+          type,
+          data: {
+            points: [
+              { x: 0, y: 0 },
+              { x: 100, y: 0 },
+            ],
+          },
+        };
+
+      default:
+        throw new Error(`Unsupported element type: ${type}`);
+    }
   }
 
   public applyEditToActiveDocument(edit: (document: BoardDocument) => void): void {

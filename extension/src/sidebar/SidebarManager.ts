@@ -31,6 +31,13 @@ export class SidebarManager implements vscode.Disposable {
       };
     });
 
+    this.messages.on('addElement', (msg) => {
+      EXTENSION.addNewEditorElement(msg.elementType);
+    });
+    this.messages.on('deleteElement', (msg) => {
+      EXTENSION.deleteEditorElement(msg.id);
+    });
+
     // Todo: move to document handling
     this.messages.on('updateElement', (msg) => {
       if (!EXTENSION.activeEditorDocument) {

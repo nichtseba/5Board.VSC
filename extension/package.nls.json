@@ -1,7 +1,7 @@
 {
   "customEditors.editor": "5Board Editor",
   "customEditors.legacy-converter": "5Board Legacy Converter",
-  "views.sidebar.sidebar-title": "Tools & Presets",
+  "views.sidebar.sidebar-title": "Tools & Elements",
   "views.sidebar.element-settings-title": "Element Settings",
   "views.sidebar.structure-title": "Structure",
   "commands.openCustomEditor": "Open 5Board Editor",

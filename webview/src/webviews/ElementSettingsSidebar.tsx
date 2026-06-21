@@ -6,6 +6,7 @@ import ElementSettings from '../components/sidebar/elementSettings/ElementSettin
 import { useMessageService, useOnMessage } from '../services/MessageService';
 import { useLocalization } from '../providers/LocalizationProvider';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
+import { Button, Icon } from 'vscrui';
 
 export default function ElementSettingsSidebar() {
   const messages = useMessageService();
@@ -36,7 +37,25 @@ export default function ElementSettingsSidebar() {
     content = <ElementSettings element={selectedElement} />;
   }
 
-  return <SidebarShell>{content}</SidebarShell>;
+  return (
+    <SidebarShell>
+      {content}
+      {selectedElement && (
+        <Button
+          className="justify-center gap-2"
+          onClick={() =>
+            messages.send({
+              type: 'deleteElement',
+              id: selectedElement.id,
+            })
+          }
+        >
+          {t('webview.sidebar-element-settings.delete')}
+          <Icon name="trash" color="color-editor-error-foreground" />
+        </Button>
+      )}
+    </SidebarShell>
+  );
 }
 
 init(ElementSettingsSidebar);

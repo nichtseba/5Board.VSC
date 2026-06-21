@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { init } from '../app/init';
 import {
+  EditorElementType,
   EditorTool,
   EditorToolDefinition,
   EditorToolId,
@@ -35,23 +36,45 @@ export default function ToolSidebar() {
       return { type: toolId, parameters: undefined };
     });
   };
+  const handleAddElementClick = (type: EditorElementType) => {
+    messages.send({ type: 'addElement', elementType: type });
+  };
 
   return (
     <>
       <SidebarShell>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3">
-          {tools.map(([key, tool]) => (
+          {tools
+            .filter(([key]) => key !== EditorToolId.AddElement)
+            .map(([key, tool]) => (
+              <Button
+                key={key}
+                title={t(tool.labelKey)}
+                appearance={selectedTool.type === key ? 'primary' : 'secondary'}
+                className="h-8 flex flex-col items-center justify-center gap-2"
+                onClick={() => handleToolClick(key)}
+              >
+                <span className={`codicon codicon-${tool.icon}`} />
+              </Button>
+            ))}
+        </div>
+        <div className="mt-1 mb-2 text-xs font-medium uppercase tracking-wide text-descriptionForeground">
+          Elements
+        </div>{' '}
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3">
+          {Object.values(EditorElementType).map((type) => (
             <Button
-              key={key}
-              title={t(tool.labelKey)}
-              appearance={selectedTool.type === key ? 'primary' : 'secondary'}
+              key={type}
+              onClick={() => handleAddElementClick(type)}
               className="h-8 flex flex-col items-center justify-center gap-2"
-              onClick={() => handleToolClick(key)}
             >
-              <span className={`codicon codicon-${tool.icon}`} />
+              <span>{type}</span>
             </Button>
           ))}
         </div>
+        <div className="mt-1 mb-2 text-xs font-medium uppercase tracking-wide text-descriptionForeground">
+          Custom Elements
+        </div>{' '}
       </SidebarShell>
     </>
   );

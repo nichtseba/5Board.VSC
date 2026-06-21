@@ -20,12 +20,7 @@
         "pointer": "Pointer",
         "spacer": "Spacer Tool",
         "freehand": "Freehand Tool",
-        "addElement": "Add Element",
-        "text": "Text",
-        "heading": "Heading",
-        "link": "Link",
-        "code": "Code",
-        "image": "Image"
+        "addElement": "Add Element"
       }
     },
     "sidebar-element-settings": {
@@ -35,7 +30,8 @@
       "headingSettings": {
         "title": "Heading",
         "levelLabel": "Hierarchy level"
-      }
+      },
+      "delete": "Delete"
     }
   }
 }

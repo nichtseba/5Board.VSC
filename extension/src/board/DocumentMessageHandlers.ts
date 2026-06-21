@@ -1,3 +1,4 @@
+import { EXTENSION } from '../extension';
 import { BoardCustomDocument } from './BoardCustomDocument';
 
 export class DocumentMessageHandlers {
@@ -10,6 +11,9 @@ export class DocumentMessageHandlers {
         this.document.applyEdit((document) => {
           document.content.selectedElementId = msg.id;
         });
+      }),
+      this.document.messageService.on('deleteElement', (msg) => {
+        EXTENSION.deleteEditorElement(msg.id);
       }),
       this.document.messageService.on('updateElementLayout', (msg) => {
         this.document.applyEdit((document) => {
