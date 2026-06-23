@@ -87,8 +87,15 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     await this.boardPackage.write(targetUri ?? this.uri);
   }
 
-  public applyEdit(edit: (document: BoardDocument) => void): void {
-    edit(this.boardPackage.document);
-    this.documentChange.fire(this.boardPackage.document);
+  /**
+   * Applies an edit to the document and fires the document change event if the document was changed.
+   * @param edit A function that takes the current document and returns a boolean indicating whether the document was changed.
+   */
+  public applyEdit(edit: (document: BoardDocument) => boolean): boolean {
+    if (edit(this.boardPackage.document)) {
+      this.documentChange.fire(this.boardPackage.document);
+      return true;
+    }
+    return false;
   }
 }
