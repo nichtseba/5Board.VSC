@@ -24,6 +24,11 @@ export default function ElementInteractionController<ElementType extends EditorE
 
   const pendingPositionUpdate = useRef(false);
 
+  const shouldKeepRatio =
+    element.type === EditorElementType.Image
+      ? ((element as EditorElement<EditorElementType.Image>).data.keepAspectRatio ?? true)
+      : profile.keepRatio;
+
   useLayoutEffect(() => {
     if (pendingPositionUpdate.current && targetRef.current) {
       pendingPositionUpdate.current = false;
@@ -102,7 +107,7 @@ export default function ElementInteractionController<ElementType extends EditorE
       target={targetRef}
       draggable={profile.draggable}
       resizable={profile.resizable}
-      keepRatio={profile.keepRatio}
+      keepRatio={shouldKeepRatio}
       snappable={true}
       snapGridWidth={cellSize.width}
       snapGridHeight={cellSize.height}

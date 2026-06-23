@@ -6,9 +6,10 @@ import { t } from './localization';
 import path from 'path';
 import { BoardPackage } from './board/package';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
-import { BoardDocument, DEFAULT_TOOL_ID, EditorElementType, EditorState } from '5board.vsc-common';
+import { BoardDocument, DEFAULT_TOOL_ID, EditorState } from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
 import { SidebarManager } from './sidebar/SidebarManager';
+import { addImageToDocument } from './board/addImageToDocument';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
@@ -103,43 +104,9 @@ export class FiveBoardExtension extends ExtensionBase {
     }
 
     const bytes = await vscode.workspace.fs.readFile(fileUri);
-    let assetName = path.basename(fileUri.fsPath);
-    if (activeDocument.boardPackage.document.assets.some((a) => a.name === assetName)) {
-      const nameWithoutExt = assetName.replace(path.extname(assetName), '');
-      const ext = path.extname(assetName);
-      let counter = 1;
-      while (activeDocument.boardPackage.document.assets.some((a) => a.name === assetName)) {
-        assetName = `${nameWithoutExt}_${counter}${ext}`;
-        counter++;
-      }
-    }
-
+    const assetName = path.basename(fileUri.fsPath);
     activeDocument.applyEdit((document) => {
-      document.assets.push({
-        name: assetName,
-        bytes,
-      });
-
-      document.content.elements.push({
-        id: assetName,
-        type: EditorElementType.Image,
-        layout: {
-          xPos: 0,
-          yPos: 0,
-          width: 16,
-          height: 9,
-        },
-        style: {
-          visible: true,
-        },
-        data: {
-          src: assetName,
-          content: '',
-          title: assetName,
-          altText: assetName,
-          configuredWidth: false,
-        },
-      });
+      addImageToDocument(document, assetName, bytes);
     });
   }
 

@@ -35,6 +35,10 @@
       "headingSettings": {
         "title": "Überschrift",
         "levelLabel": "Hierarchiestufe"
+      },
+      "imageSettings": {
+        "title": "Bild",
+        "keepAspectRatio": "Seitenverhältnis beibehalten"
       }
     }
   }

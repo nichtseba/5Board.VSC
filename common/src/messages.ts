@@ -38,4 +38,5 @@ type AllWebviewToExtensionMessage =
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
   | { type: 'updateElementLayout'; id: string; changes: Partial<ElementLayout> } // Update the Layout when Element was moved or resized
   | { type: 'updateElement'; id: string; changes: Partial<EditorElement> } // Update element with it's settings
-  | { type: 'addImageFromFile' };
+  | { type: 'addImageFromFile' }
+  | { type: 'addImageFromBytes'; name: string; bytes: number[] };

@@ -1,5 +1,6 @@
 import { EditorElementType } from '5board.vsc-common';
 import { BoardCustomDocument } from './BoardCustomDocument';
+import { addImageToDocument } from './addImageToDocument';
 
 export class DocumentMessageHandlers {
   constructor(private readonly document: BoardCustomDocument) {}
@@ -43,6 +44,12 @@ export class DocumentMessageHandlers {
               };
             }
           }
+        });
+      }),
+      this.document.messageService.on('addImageFromBytes', (msg) => {
+        const bytes = new Uint8Array(msg.bytes);
+        this.document.applyEdit((document) => {
+          addImageToDocument(document, msg.name, bytes);
         });
       }),
     ];

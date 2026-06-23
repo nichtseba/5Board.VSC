@@ -39,6 +39,7 @@ export function ImageElement({ element, assetUrls }: EditorElementProps<EditorEl
     <img
       ref={imgRef}
       src={imageSrc}
+      draggable={false}
       alt={element.data.altText ?? element.data.title ?? ''}
       title={element.data.title}
       className={element.data.configuredWidth === false ? 'overflow-hidden' : 'w-full h-full'}

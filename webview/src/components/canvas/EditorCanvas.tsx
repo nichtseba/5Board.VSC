@@ -7,6 +7,7 @@ import { useMessageService, useOnMessage } from '../../services/MessageService';
 import './EditorCanvas.css';
 import { useGrid } from '../../providers/GridProvider';
 import { createAssetUrls, revokeAssetUrls } from './assetUrlsUtil';
+import { useImageImport } from './useImageImport';
 
 export type EditorCanvasProps = {
   document: BoardDocument;
@@ -27,6 +28,7 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
 
   const messages = useMessageService();
   const canvasRef = useRef<HTMLDivElement | null>(null);
+  const imageImportHandlers = useImageImport();
 
   const { cellSize, setGridElement } = useGrid();
   useEffect(() => {
@@ -155,6 +157,7 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
         className={`editor-canvas bg-editor-background ${activeToolId === EditorToolId.SPACER ? 'cursor-row-resize' : ''}`}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
+        {...imageImportHandlers}
       >
         {activeToolId === EditorToolId.SPACER ? (
           <SpacerOverlay dragState={dragState} canvasRef={canvasRef} />
