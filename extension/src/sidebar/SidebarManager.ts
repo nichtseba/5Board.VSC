@@ -7,6 +7,7 @@ import {
 } from '../providers/SidebarViewProvider';
 import { StructureTreeProvider } from '../providers/StructureTreeProvider';
 import { EXTENSION } from '../extension';
+import deepEquals from 'deep-equal';
 
 export class SidebarManager implements vscode.Disposable {
   private readonly sync: SidebarDocumentSync;
@@ -37,14 +38,30 @@ export class SidebarManager implements vscode.Disposable {
         return;
       }
       EXTENSION.activeEditorDocument.applyEdit((document) => {
-        const index = document.content.elements.findIndex((e) => e.id === msg.id);
-
-        if (index !== -1) {
-          document.content.elements[index] = {
-            ...document.content.elements[index],
-            ...msg.changes,
-          };
+        const element = document.content.elements.find((e) => e.id === msg.id);
+        if (!element) {
+          throw new Error(
+            `Tried to update element with id ${msg.id}, but it does not exist in the document`,
+          );
         }
+        if (deepEquals(msg.changes.data, element.data)) {
+          console.log("Skipping updateElement message because the data hasn't changed");
+          return false;
+        }
+        document.content.elements = document.content.elements.map((el) => {
+          if (el.id !== msg.id) {
+            return el;
+          }
+
+          return {
+            ...el,
+            data: {
+              ...el.data,
+              ...msg.changes.data,
+            },
+          };
+        });
+        return true;
       });
     });
   }

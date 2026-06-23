@@ -82,11 +82,12 @@ export class FiveBoardExtension extends ExtensionBase {
     vscode.window.showInformationMessage('Presentation started');
   }
 
-  public applyEditToActiveDocument(edit: (document: BoardDocument) => void): void {
+  public applyEditToActiveDocument(edit: (document: BoardDocument) => boolean): void {
     if (!this.activeEditorDocument) {
       return;
     }
-    this.activeEditorDocument.applyEdit(edit);
-    this.activeDocumentChange.fire(this.activeEditorDocument);
+    if (this.activeEditorDocument.applyEdit(edit)) {
+      this.activeDocumentChange.fire(this.activeEditorDocument);
+    }
   }
 }
