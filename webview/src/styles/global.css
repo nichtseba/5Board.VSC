@@ -1,6 +1,4 @@
 @import 'tailwindcss';
-@import './utilities/editor.css';
-@import './utilities/sidebar.css';
 
 @theme {
   --color-*: initial; /* Disable default theme for colors */
@@ -22,7 +20,7 @@
   --radius-circle: var(--vscode-cornerRadius-circle);
 
   /* Editor System */
-  --editor-spacing: 1rem;
+  --spacing-editor: 1rem;
   --editor-grid-size: 1rem;
   --editor-columns: 40;
 

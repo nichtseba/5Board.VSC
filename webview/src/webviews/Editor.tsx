@@ -10,6 +10,7 @@ export default function Editor() {
 
   useEffect(() => {
     messages.send({ type: 'ready' });
+    messages.send({ type: 'focus', focus: true });
   }, []);
 
   useOnMessage((msg) => {
@@ -18,18 +19,12 @@ export default function Editor() {
     }
   });
 
-  useEffect(() => {
-    const setFocus = () => {
-      messages.send({ type: 'focus' });
-    };
-    window.addEventListener('focus', setFocus);
-    return () => {
-      window.removeEventListener('focus', setFocus);
-    };
-  }, []);
   return (
     <>
       <p>
+        <a href="5board:/c/Users/benno/OneDrive/Dokumente/bs-dnd-tools/Vorlesung.5boardz#content.json">
+          TEST
+        </a>
         Document: <code>{JSON.stringify(document, null, 2)}</code>
       </p>
       {document && <EditorCanvas document={document} />}

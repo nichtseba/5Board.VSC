@@ -1,6 +1,7 @@
 import { BoardDocument } from './board/document.js';
-import { CodeExecutionOutput } from './board/element.js';
 import { Language } from './localization/index.js';
+import { EditorElement, EditorState, EditorTool, ElementLayout } from './main.js';
+import { CodeExecutionOutput } from './board/element.js';
 
 /**
  * Messages from the extension to webviews
@@ -15,7 +16,9 @@ export type ExtensionToWebviewMessageType = AllExtensionToWebviewMessage['type']
 // All Messages from the extension to webviews
 type AllExtensionToWebviewMessage =
   | { type: 'updateDocument'; document: BoardDocument }
-  | { type: 'init'; document: BoardDocument; language: Language }
+  | { type: 'init'; document: BoardDocument; editorState: EditorState; language: Language }
+  | { type: 'initSidebar'; document: BoardDocument }
+  | { type: 'updateEditorState'; editorState: EditorState }
   | { type: 'codeblockResult'; elementId: string; output: CodeExecutionOutput };
 
 /**
@@ -31,5 +34,10 @@ export type WebviewToExtensionMessageType = AllWebviewToExtensionMessage['type']
 // All Messages from webviews to the extension
 type AllWebviewToExtensionMessage =
   | { type: 'ready' }
-  | { type: 'focus' }
+  | { type: 'focus'; focus: boolean }
+  | { type: 'selectElement'; id: string | null }
+  | { type: 'selectTool'; tool: EditorTool }
+  | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
+  | { type: 'updateElementLayout'; id: string; changes: Partial<ElementLayout> } // Update the Layout when Element was moved or resized
+  | { type: 'updateElement'; id: string; changes: Partial<EditorElement> } // Update element with it's settings
   | { type: 'executeCodeblock'; elementId: string };

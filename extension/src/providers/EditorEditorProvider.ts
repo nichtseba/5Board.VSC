@@ -7,8 +7,6 @@ import { PackageManager } from '../PackageManager';
 export class EditorEditorProvider implements vscode.CustomEditorProvider<BoardCustomDocument> {
   public static readonly VIEW_TYPE = '5board-vsc.editor';
 
-  // Todo: Actually fire this event whenever the document changes, so the editor knows to update
-
   private didChangeCustomDocument = new vscode.EventEmitter<
     vscode.CustomDocumentContentChangeEvent<BoardCustomDocument>
   >();
@@ -86,6 +84,7 @@ export class EditorEditorProvider implements vscode.CustomEditorProvider<BoardCu
     this.context.subscriptions.push(
       vscode.window.registerCustomEditorProvider(EditorEditorProvider.VIEW_TYPE, this, {
         supportsMultipleEditorsPerDocument: true,
+        webviewOptions: {},
       }),
     );
   }
