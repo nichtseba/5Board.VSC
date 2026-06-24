@@ -1,3 +1,5 @@
+import type { JSONContent } from '@tiptap/core';
+
 export type BoardElement = EditorElement; // Todo: Replace with new Element type when we have it defined
 // Todo: Add additional element types
 export enum EditorElementType {
@@ -68,7 +70,7 @@ export type HeadingElementData = {
 };
 
 export type TextElementData = {
-  content: string;
+  content: JSONContent;
   textStyle?: TextStyle;
 };
 
