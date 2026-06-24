@@ -27,6 +27,8 @@ describe('JavaCodeblockRunner', function () {
       name: 'Hello.java',
       language: 'java' as const,
       code: 'public class Hello { public static void main(String[] args) { System.out.println("hello from 5board"); } }',
+      createdAt: 0,
+      modifiedAt: 0,
     };
 
     const result = await runner.execute({

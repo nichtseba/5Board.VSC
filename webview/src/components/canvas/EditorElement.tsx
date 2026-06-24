@@ -4,7 +4,7 @@ import type React from 'react';
 import { TextElement } from './elements/TextElement';
 import { HeadingElement } from './elements/HeadingElement';
 import ElementInteractionController from './elementInteraction/ElementInteractionController';
-import { CodeElement } from './elements/CodeElement';
+import { CodeElement } from './elements/code/CodeElement';
 import { ImageElement } from './elements/ImageElement';
 import { ShapeElement } from './elements/ShapeElement';
 import { ArrowElement } from './elements/ArrowElement';

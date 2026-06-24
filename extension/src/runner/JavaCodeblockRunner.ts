@@ -1,5 +1,5 @@
 import { join } from 'path';
-import { mkdtemp, rm, writeFile } from 'fs/promises';
+import { mkdir, mkdtemp, rm, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import type {
   CodeblockExecutionRequest,
@@ -34,14 +34,19 @@ export class JavaCodeblockRunner implements CodeblockRunner {
 
   async execute(request: CodeblockExecutionRequest): Promise<CodeblockExecutionResult> {
     const tempDir = await mkdtemp(join(tmpdir(), '5board-'));
+    const outDir = join(tempDir, 'out');
     try {
-      // Packages are not supported yet — all Java sources are written flat into tempDir.
+      // Packages are not supported yet — all Java sources are written flat into tempDir, which
+      // doubles as the sourcepath root so javac can resolve the target's dependencies on demand.
       const javaSources = request.sources.filter((s) => s.language === 'java');
       await writeProjectSources(javaSources, tempDir);
+      await mkdir(outDir, { recursive: true });
 
+      // Only the target file is handed to javac; classes it references are compiled automatically
+      // from the sourcepath, so unrelated (possibly broken) sources don't block execution.
       const compile = await runCommand(
         'javac',
-        javaSources.map((s) => s.name),
+        ['-d', outDir, '-sourcepath', tempDir, request.fileName],
         tempDir,
         30_000,
       );
@@ -56,7 +61,7 @@ export class JavaCodeblockRunner implements CodeblockRunner {
       }
 
       const mainClass = fileNameToClassName(request.fileName);
-      const run = await runCommand('java', ['-cp', tempDir, mainClass], tempDir, 30_000);
+      const run = await runCommand('java', ['-cp', outDir, mainClass], tempDir, 30_000);
       return {
         success: run.status === 0,
         stdout: run.stdout,

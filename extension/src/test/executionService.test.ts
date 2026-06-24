@@ -7,8 +7,8 @@ const service = new ExecutionService();
 
 function makeDocument(overrides: Partial<BoardDocument> = {}): BoardDocument {
   return {
-    manifest: { title: 'test', createdAt: '', modifiedAt: '', version: '1' },
-    content: { elements: [] },
+    manifest: { title: 'test', createdAt: 0, modifiedAt: 0, version: '1' },
+    content: { selectedElementId: null, elements: [] },
     sources: [],
     assets: [],
     ...overrides,
@@ -40,7 +40,10 @@ describe('ExecutionService', function () {
 
   it('returns error when source file not in document', async function () {
     const doc = makeDocument({
-      content: { elements: [makeCodeElement({ className: 'Student', language: 'java' })] },
+      content: {
+        selectedElementId: null,
+        elements: [makeCodeElement({ className: 'Student', language: 'java' })],
+      },
       sources: [],
     });
     const result = await service.execute(doc, 'element-1');
@@ -50,8 +53,13 @@ describe('ExecutionService', function () {
 
   it('returns error when language has no runner', async function () {
     const doc = makeDocument({
-      content: { elements: [makeCodeElement({ className: 'script', language: 'ruby' })] },
-      sources: [{ name: 'script.rb', language: 'ruby', code: 'puts "hello"' }],
+      content: {
+        selectedElementId: null,
+        elements: [makeCodeElement({ className: 'script', language: 'ruby' })],
+      },
+      sources: [
+        { name: 'script.rb', language: 'ruby', code: 'puts "hello"', createdAt: 0, modifiedAt: 0 },
+      ],
     });
     const result = await service.execute(doc, 'element-1');
     assert.equal(result.success, false);

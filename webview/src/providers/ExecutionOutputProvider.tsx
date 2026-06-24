@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import type { CodeExecutionOutput } from '5board.vsc-common';
-import { useOnMessage } from '../../services/MessageService';
+import { useOnMessage } from '../services/MessageService';
 
 /**
  * Holds code block execution results keyed by element id.

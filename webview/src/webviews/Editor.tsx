@@ -3,6 +3,8 @@ import { useMessageService, useOnMessage } from '../services/MessageService';
 import { BoardDocument } from '5board.vsc-common';
 import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
+import { SourcesProvider } from '../providers/SourcesProvider';
+import { ExecutionOutputProvider } from '../providers/ExecutionOutputProvider';
 
 export default function Editor() {
   const messages = useMessageService();
@@ -27,7 +29,13 @@ export default function Editor() {
         </a>
         Document: <code>{JSON.stringify(document, null, 2)}</code>
       </p>
-      {document && <EditorCanvas document={document} />}
+      <ExecutionOutputProvider>
+        {document && (
+          <SourcesProvider value={document.sources}>
+            <EditorCanvas document={document} />
+          </SourcesProvider>
+        )}
+      </ExecutionOutputProvider>
     </>
   );
 }

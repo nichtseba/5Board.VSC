@@ -2,8 +2,6 @@ import { BoardDocument, EditorState, EditorToolId } from '5board.vsc-common';
 import { useEffect, useRef, useState } from 'react';
 import type React from 'react';
 import EditorElement from './EditorElement';
-import { SourcesProvider } from './SourcesContext';
-import { ExecutionOutputProvider } from './ExecutionOutputContext';
 import SpacerOverlay from './SpacerOverlay';
 import { useMessageService, useOnMessage } from '../../services/MessageService';
 import './EditorCanvas.css';
@@ -139,29 +137,27 @@ export default function EditorCanvas({ document }: EditorCanvasProps) {
   };
 
   return (
-    <SourcesProvider value={document.sources}>
-      <ExecutionOutputProvider>
-        {`Selected element ID: ${selectedElementId}`}
-        <div
-          ref={canvasRef}
-          className={`editor-canvas bg-editor-background ${activeToolId === EditorToolId.SPACER ? 'cursor-row-resize' : ''}`}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-        >
-          {activeToolId === EditorToolId.SPACER ? (
-            <SpacerOverlay dragState={dragState} canvasRef={canvasRef} />
-          ) : null}
-          {document.content.elements.map((element) => (
-            <EditorElement
-              key={element.id}
-              element={element}
-              selected={element.id === selectedElementId}
-              onSelect={handleSelectElement}
-              activeToolId={activeToolId}
-            />
-          ))}
-        </div>
-      </ExecutionOutputProvider>
-    </SourcesProvider>
+    <>
+      {`Selected element ID: ${selectedElementId}`}
+      <div
+        ref={canvasRef}
+        className={`editor-canvas bg-editor-background ${activeToolId === EditorToolId.SPACER ? 'cursor-row-resize' : ''}`}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+      >
+        {activeToolId === EditorToolId.SPACER ? (
+          <SpacerOverlay dragState={dragState} canvasRef={canvasRef} />
+        ) : null}
+        {document.content.elements.map((element) => (
+          <EditorElement
+            key={element.id}
+            element={element}
+            selected={element.id === selectedElementId}
+            onSelect={handleSelectElement}
+            activeToolId={activeToolId}
+          />
+        ))}
+      </div>
+    </>
   );
 }

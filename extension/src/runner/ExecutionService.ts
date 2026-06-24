@@ -34,6 +34,19 @@ export class ExecutionService {
       return this.error(`Source file "${fileName}" not found in document.`);
     }
 
+    // Verify the required toolchain (e.g. java/javac) right before running, so a missing tool
+    // yields a clear message instead of a raw spawn error buried in stderr. Kept after request
+    // validation so invalid requests fail the same way regardless of the local toolchain.
+    const tools = await runner.checkTools();
+    if (!tools.available) {
+      const missing = tools.missingTools?.join(', ');
+      return this.error(
+        missing
+          ? `Required tools not found: ${missing}. Please install them to run ${language} code blocks.`
+          : (tools.error ?? `Required tools for ${language} are not available.`),
+      );
+    }
+
     return runner.execute({
       fileName,
       sources: document.sources,
