@@ -1,6 +1,6 @@
 import { BoardDocument } from './board/document';
 import { Language } from './localization';
-import { EditorElement, EditorState, EditorTool, ElementLayout } from './main';
+import { EditorElement, EditorState, EditorTool, ElementLayout, TextEditorCommand } from './main';
 
 /**
  * Messages from the extension to webviews
@@ -17,7 +17,8 @@ type AllExtensionToWebviewMessage =
   | { type: 'updateDocument'; document: BoardDocument }
   | { type: 'init'; document: BoardDocument; editorState: EditorState; language: Language }
   | { type: 'initSidebar'; document: BoardDocument }
-  | { type: 'updateEditorState'; editorState: EditorState };
+  | { type: 'updateEditorState'; editorState: EditorState }
+  | { type: 'textEditorCommand'; command: TextEditorCommand };
 
 /**
  * Messages from the webviews to the extension
@@ -37,4 +38,5 @@ type AllWebviewToExtensionMessage =
   | { type: 'selectTool'; tool: EditorTool }
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
   | { type: 'updateElementLayout'; id: string; changes: Partial<ElementLayout> } // Update the Layout when Element was moved or resized
-  | { type: 'updateElement'; id: string; changes: Partial<EditorElement> }; // Update element with it's settings
+  | { type: 'updateElement'; id: string; changes: Partial<EditorElement> } // Update element with it's settings
+  | { type: 'textEditorCommand'; command: TextEditorCommand };

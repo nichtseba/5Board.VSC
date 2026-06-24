@@ -3,13 +3,14 @@ import SettingsPanel from '../layout/SettingsPanel';
 import { useLocalization } from '../../../providers/LocalizationProvider';
 import { Button, Dropdown } from 'vscrui';
 import SettingsField from '../layout/SettingsField';
+import { useMessageService } from '../../../services/MessageService';
 
 type Props = {
   element: EditorElement<EditorElementType.Text>;
 };
 export function TextSettings({ element }: Props) {
   const { t } = useLocalization();
-
+  const messages = useMessageService();
   return (
     <>
       <SettingsPanel
@@ -77,6 +78,9 @@ export function TextSettings({ element }: Props) {
               className="h-8 flex flex-col items-center justify-center gap-2"
               appearance={
                 element.data.textStyle?.textDecoration?.underline ? 'primary' : 'secondary'
+              }
+              onClick={() =>
+                messages.send({ type: 'textEditorCommand', command: { type: 'toggleUnderline' } })
               }
             >
               <span className={'underline'}>U</span>

@@ -4,7 +4,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
 import { Button } from 'vscrui';
-import { useMessageService } from '../../../services/MessageService';
+import { useMessageService, useOnMessage } from '../../../services/MessageService';
 
 /**
  * Renders a text element.
@@ -19,13 +19,56 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
       }),
     ],
     content: element.data.content,
-    onUpdate({ editor }) {
+
+    onTransaction({ editor }) {
       messages.send({
         type: 'updateElement',
         id: element.id,
-        changes: { data: { content: JSON.stringify(editor.getJSON()) } },
+        changes: {
+          data: {
+            content: editor.getJSON(),
+            textStyle: {
+              textDecoration: {
+                underline: editor.isActive('underline'),
+                lineThrough: editor.isActive('strike'),
+              },
+            },
+          },
+        },
       });
     },
+  });
+
+  useOnMessage((msg) => {
+    if (msg.type !== 'textEditorCommand') {
+      return;
+    }
+
+    if (!editor) {
+      return;
+    }
+
+    switch (msg.command.type) {
+      case 'toggleBold':
+        editor.chain().focus().toggleBold().run();
+        break;
+
+      case 'toggleItalic':
+        editor.chain().focus().toggleItalic().run();
+        break;
+
+      case 'toggleStrike':
+        editor.chain().focus().toggleStrike().run();
+        break;
+
+      case 'toggleUnderline':
+        editor.chain().focus().toggleUnderline().run();
+        break;
+
+      // case 'setTextAlign':
+      //   editor.commands.toggleTextAlign(msg.command.value);
+      //   break;
+    }
   });
 
   return (
