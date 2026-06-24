@@ -5,12 +5,14 @@ import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
 import { Button } from 'vscrui';
 import { useMessageService, useOnMessage } from '../../../services/MessageService';
+import { useGrid } from '../../../providers/GridProvider';
 
 /**
  * Renders a text element.
  */
 export function TextElement({ element }: EditorElementProps<EditorElementType.Text>) {
   const messages = useMessageService();
+  const grid = useGrid();
 
   const editor = useEditor({
     extensions: [
@@ -21,10 +23,23 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
     content: element.data.content,
 
     onTransaction({ editor }) {
+      //calculate if element height should grow
+      const requiredRows = Math.ceil(editor.view.dom.offsetHeight / grid.cellSize.height);
+      let elementHeight = element.layout.height;
+      if (requiredRows > elementHeight) {
+        elementHeight = requiredRows;
+      }
+
       messages.send({
         type: 'updateElement',
         id: element.id,
         changes: {
+          layout: {
+            height: elementHeight,
+            width: element.layout.width,
+            yPos: element.layout.yPos,
+            xPos: element.layout.xPos,
+          },
           data: {
             content: editor.getJSON(),
             textStyle: {

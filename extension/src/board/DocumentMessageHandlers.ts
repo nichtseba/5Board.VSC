@@ -59,10 +59,21 @@ export class DocumentMessageHandlers {
               `Tried to update element with id ${msg.id}, but it does not exist in the document`,
             );
           }
-          if (deepEquals(msg.changes.data, element.data)) {
+          const nextData = {
+            ...element.data,
+            ...msg.changes.data,
+          };
+
+          const nextLayout = {
+            ...element.layout,
+            ...msg.changes.layout,
+          };
+
+          if (deepEquals(nextData, element.data) && deepEquals(nextLayout, element.layout)) {
             console.log("Skipping updateElement message because the data hasn't changed");
             return false;
           }
+
           document.content.elements = document.content.elements.map((el) => {
             if (el.id !== msg.id) {
               return el;
@@ -70,6 +81,10 @@ export class DocumentMessageHandlers {
 
             return {
               ...el,
+              layout: {
+                ...el.layout,
+                ...msg.changes.layout,
+              },
               data: {
                 ...el.data,
                 ...msg.changes.data,
