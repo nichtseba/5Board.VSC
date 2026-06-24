@@ -77,17 +77,32 @@ export type TextElementData = {
 export type TextStyle = {
   fontFamily?: string;
   fontSize?: number;
+  marks?: {
+    bold?: boolean;
+    code?: boolean;
+    italic?: boolean;
+    link?: boolean;
+    strike?: boolean;
+    underline?: boolean;
+  };
+  nodes?: {
+    blockquote?: boolean;
+    bulletList?: boolean;
+    codeBlock?: boolean;
+    orderedList?: boolean;
+  };
   fontWeight?: 'normal' | 'bold' | 'bolder' | 'lighter' | number;
   fontStyle?: 'normal' | 'italic' | 'oblique';
-  textDecoration?: TextDecorationStyle;
+  /*textDecoration?: TextDecorationStyle;*/
   textAlign?: 'left' | 'center' | 'right' | 'justify';
   lineHeight?: number;
 };
+/*
 export type TextDecorationStyle = {
   underline?: boolean;
   overline?: boolean;
   lineThrough?: boolean;
-};
+};*/
 
 export type CodeElementData = {
   codeBlockId: string;

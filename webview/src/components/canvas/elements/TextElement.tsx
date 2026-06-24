@@ -43,9 +43,13 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
           data: {
             content: editor.getJSON(),
             textStyle: {
-              textDecoration: {
+              marks: {
+                bold: editor.isActive('bold'),
+                code: editor.isActive('code'),
+                italic: editor.isActive('italic'),
+                link: editor.isActive('link'),
+                strike: editor.isActive('strike'),
                 underline: editor.isActive('underline'),
-                lineThrough: editor.isActive('strike'),
               },
             },
           },
@@ -80,6 +84,9 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
         editor.chain().focus().toggleUnderline().run();
         break;
 
+      case 'toggleCode':
+        editor.chain().focus().toggleCode().run();
+        break;
       // case 'setTextAlign':
       //   editor.commands.toggleTextAlign(msg.command.value);
       //   break;
@@ -117,6 +124,13 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
           appearance={editor.isActive('underline') ? 'primary' : 'secondary'}
         >
           <span className={'codicon underline'}>U</span>
+        </Button>
+        <Button
+          className="h-8 flex flex-col items-center justify-center gap-2"
+          appearance={editor.isActive('code') ? 'primary' : 'secondary'}
+          onClick={() => editor.chain().focus().toggleCode().run()}
+        >
+          <span className={'codicon codicon-code'} />
         </Button>
       </BubbleMenu>
     </>

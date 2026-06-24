@@ -56,34 +56,48 @@ export function TextSettings({ element }: Props) {
           <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3 mt-4">
             <Button
               className="h-8 flex flex-col items-center justify-center gap-2"
-              appearance={element.data.textStyle?.fontWeight === 'bold' ? 'primary' : 'secondary'}
+              appearance={element.data.textStyle?.marks?.bold ? 'primary' : 'secondary'}
+              onClick={() =>
+                messages.send({ type: 'textEditorCommand', command: { type: 'toggleBold' } })
+              }
             >
               <span className={`codicon codicon-bold`} />
             </Button>
             <Button
               className="h-8 flex flex-col items-center justify-center gap-2"
-              appearance={element.data.textStyle?.fontStyle === 'italic' ? 'primary' : 'secondary'}
+              appearance={element.data.textStyle?.marks?.italic ? 'primary' : 'secondary'}
+              onClick={() =>
+                messages.send({ type: 'textEditorCommand', command: { type: 'toggleItalic' } })
+              }
             >
               <span className={`codicon codicon-italic`} />
             </Button>
             <Button
               className="h-8 flex flex-col items-center justify-center gap-2"
-              appearance={
-                element.data.textStyle?.textDecoration?.lineThrough ? 'primary' : 'secondary'
+              appearance={element.data.textStyle?.marks?.strike ? 'primary' : 'secondary'}
+              onClick={() =>
+                messages.send({ type: 'textEditorCommand', command: { type: 'toggleStrike' } })
               }
             >
               <span className={`codicon codicon-strikethrough`} />
             </Button>
             <Button
               className="h-8 flex flex-col items-center justify-center gap-2"
-              appearance={
-                element.data.textStyle?.textDecoration?.underline ? 'primary' : 'secondary'
-              }
+              appearance={element.data.textStyle?.marks?.underline ? 'primary' : 'secondary'}
               onClick={() =>
                 messages.send({ type: 'textEditorCommand', command: { type: 'toggleUnderline' } })
               }
             >
               <span className={'underline'}>U</span>
+            </Button>
+            <Button
+              className="h-8 flex flex-col items-center justify-center gap-2"
+              appearance={element.data.textStyle?.marks?.code ? 'primary' : 'secondary'}
+              onClick={() =>
+                messages.send({ type: 'textEditorCommand', command: { type: 'toggleCode' } })
+              }
+            >
+              <span className={'codicon codicon-code'} />
             </Button>
           </div>
         </SettingsField>
