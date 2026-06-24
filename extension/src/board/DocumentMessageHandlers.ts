@@ -1,3 +1,14 @@
+import {
+  EditorElementType,
+  fileNameFromClassName,
+  buildSource,
+  isDefaultClassName,
+  COMMENT_PREFIX_BY_LANGUAGE,
+  updateBlock,
+  getBlockIndent,
+  indentCode,
+  type CodeElementData,
+} from '5board.vsc-common';
 import { BoardCustomDocument } from './BoardCustomDocument';
 
 export class DocumentMessageHandlers {
@@ -37,6 +48,48 @@ export class DocumentMessageHandlers {
           }
         });
       }),
+      this.document.messageService.on('updateBlockCode', (msg) => {
+        this.updateBlockCode(msg.elementId, msg.code);
+      }),
     ];
+  }
+
+  private updateBlockCode(elementId: string, code: string): void {
+    const doc = this.document.boardPackage.document;
+    const element = doc.content.elements.find((e) => e.id === elementId);
+    if (!element || element.type !== EditorElementType.Code) return;
+
+    const { className, language } = element.data as CodeElementData;
+    const fileName = fileNameFromClassName(className, language);
+    const prefix = COMMENT_PREFIX_BY_LANGUAGE[language] ?? '//';
+
+    this.document.applyEdit((document) => {
+      const source = document.sources.find((s) => s.name === fileName && s.language === language);
+
+      if (source) {
+        const indent = getBlockIndent(source.code, elementId, prefix);
+        const reindented = indentCode(code, indent);
+        source.code = updateBlock(source.code, elementId, reindented, prefix);
+        source.modifiedAt = Date.now();
+      } else {
+        const mainWrap = isDefaultClassName(className, elementId);
+        const newSource = buildSource({
+          elementId,
+          className,
+          language,
+          code,
+          mainWrap,
+        });
+        document.sources.push({
+          name: fileName,
+          language,
+          code: newSource,
+          createdAt: Date.now(),
+          modifiedAt: Date.now(),
+        });
+      }
+    });
+
+    void this.document.saveDocument();
   }
 }

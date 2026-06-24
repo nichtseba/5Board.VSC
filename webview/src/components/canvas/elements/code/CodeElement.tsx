@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import MonacoEditor, { loader } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor';
 import {
@@ -17,6 +17,8 @@ import { useEditorAutoHeight, MIN_HEIGHT } from './useEditorAutoHeight';
 
 loader.config({ monaco });
 
+const DEBOUNCE_MS = 300;
+
 export function CodeElement({ element }: EditorElementProps<EditorElementType.Code>) {
   const messages = useMessageService();
   const sources = useSources();
@@ -26,15 +28,55 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
   const fileName = fileNameFromClassName(className, language);
   const source = sources.find((s) => s.name === fileName && s.language === language);
   const prefix = COMMENT_PREFIX_BY_LANGUAGE[language] ?? '//';
-  // The source block is marked with this element's own id (one element ↔ one block).
   const blockCode = source ? extractBlock(source.code, element.id, prefix) : null;
 
   const [code, setCode] = useState(blockCode ?? '');
   const monacoTheme = useMonacoTheme();
   const { wrapperRef, handleMount } = useEditorAutoHeight();
 
+  const codeRef = useRef(code);
+  codeRef.current = code;
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingCodeRef = useRef<string | null>(null);
+
+  const flushPendingUpdate = useCallback(() => {
+    if (debounceRef.current !== null) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+    if (pendingCodeRef.current !== null) {
+      messages.send({
+        type: 'updateBlockCode',
+        elementId: element.id,
+        code: pendingCodeRef.current,
+      });
+      pendingCodeRef.current = null;
+    }
+  }, [messages, element.id]);
+
+  const sendDebouncedUpdate = useCallback(
+    (newCode: string) => {
+      pendingCodeRef.current = newCode;
+      if (debounceRef.current !== null) {
+        clearTimeout(debounceRef.current);
+      }
+      debounceRef.current = setTimeout(() => {
+        flushPendingUpdate();
+      }, DEBOUNCE_MS);
+    },
+    [flushPendingUpdate],
+  );
+
   useEffect(() => {
-    if (blockCode !== null) {
+    return () => {
+      if (debounceRef.current !== null) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (blockCode !== null && blockCode !== codeRef.current) {
       setCode(blockCode);
     }
   }, [blockCode]);
@@ -65,7 +107,10 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
 
         <div className="ml-auto">
           <button
-            onClick={() => messages.send({ type: 'executeCodeblock', elementId: element.id })}
+            onClick={() => {
+              flushPendingUpdate();
+              messages.send({ type: 'executeCodeblock', elementId: element.id });
+            }}
             className="flex items-center gap-1.5 px-2.5 py-1 bg-button-background text-button-foreground font-sans text-base rounded-xs border-none cursor-pointer hover:bg-button-hover-background"
           >
             <span className="codicon codicon-run" />
@@ -83,7 +128,11 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
           language={language}
           theme={monacoTheme}
           onMount={handleMount}
-          onChange={(v) => setCode(v ?? '')}
+          onChange={(v) => {
+            const newCode = v ?? '';
+            setCode(newCode);
+            sendDebouncedUpdate(newCode);
+          }}
           options={{
             minimap: { enabled: false },
             padding: { top: 8, bottom: 8 },

@@ -33,6 +33,12 @@ export class BoardCustomDocument implements vscode.CustomDocument {
       }),
     );
 
+    this.disposables.push(
+      this.boardPackage.onDocumentChange(() => {
+        this.documentChange.fire(this.boardPackage.document);
+      }),
+    );
+
     this.registerMessageHandlers();
   }
 

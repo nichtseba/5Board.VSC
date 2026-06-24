@@ -42,9 +42,4 @@ export function runCommand(
   });
 }
 
-export function indent(code: string, spaces: number): string {
-  return code
-    .split('\n')
-    .map((line) => ' '.repeat(spaces) + line)
-    .join('\n');
-}
+export { indentCode as indent } from '5board.vsc-common';

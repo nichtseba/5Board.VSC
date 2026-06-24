@@ -104,3 +104,39 @@ export function updateBlock(
 
   return sourceCode.slice(0, contentStart) + '\n' + newCode + '\n' + sourceCode.slice(endIndex);
 }
+
+/**
+ * Returns the minimum indentation (number of leading spaces) of the content
+ * inside the given block. Used to re-indent edited code before writing it back.
+ */
+export function getBlockIndent(
+  sourceCode: string,
+  blockId: string,
+  prefix: CommentPrefix = '//',
+): number {
+  const open = openTag(blockId, prefix);
+  const close = closeTag(prefix);
+
+  const startIndex = sourceCode.indexOf(open);
+  if (startIndex === -1) return 0;
+
+  const contentStart = startIndex + open.length;
+  const endIndex = sourceCode.indexOf(close, contentStart);
+  if (endIndex === -1) return 0;
+
+  const raw = sourceCode.slice(contentStart, endIndex);
+  const lines = raw.split('\n').filter((line) => line.trim() !== '');
+  if (lines.length === 0) return 0;
+
+  const indents = lines.map((line) => line.match(/^[ \t]*/)![0].length);
+  return Math.min(...indents);
+}
+
+export function indentCode(code: string, spaces: number): string {
+  if (spaces <= 0) return code;
+  const pad = ' '.repeat(spaces);
+  return code
+    .split('\n')
+    .map((line) => (line.trim() === '' ? line : pad + line))
+    .join('\n');
+}
