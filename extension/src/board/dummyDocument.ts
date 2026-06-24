@@ -9,11 +9,12 @@ import { BoardDocument, EditorElementType } from '5board.vsc-common';
 export const DUMMY_BOARD_DOCUMENT: BoardDocument = {
   manifest: {
     title: 'Demo Presentation',
-    createdAt: '2026-01-01T00:00:00.000Z',
-    modifiedAt: '2026-01-01T00:00:00.000Z',
+    createdAt: 0,
+    modifiedAt: 0,
     version: '1.0.0',
   },
   content: {
+    selectedElementId: null,
     elements: [
       {
         id: 'dummy-1',

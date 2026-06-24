@@ -20,6 +20,7 @@ export abstract class WebviewProvider implements vscode.WebviewViewProvider {
       localResourceRoots: [vscode.Uri.joinPath(this.context.extensionUri, 'media')],
     };
 
+    this.messages.registerView(webviewView);
     setWebviewHtml(this.context, webviewView.webview, this.htmlFileName);
   }
 

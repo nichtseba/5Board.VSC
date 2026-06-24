@@ -1,5 +1,6 @@
 import { BoardDocument } from './board/document';
 import { Language } from './localization';
+import { EditorElement, EditorState, EditorTool, ElementLayout } from './main';
 
 /**
  * Messages from the extension to webviews
@@ -14,7 +15,7 @@ export type ExtensionToWebviewMessageType = AllExtensionToWebviewMessage['type']
 // All Messages from the extension to webviews
 type AllExtensionToWebviewMessage =
   | { type: 'updateDocument'; document: BoardDocument }
-  | { type: 'init'; document: BoardDocument; language: Language }
+  | { type: 'init'; document: BoardDocument; editorState: EditorState; language: Language }
   | { type: 'cursorMove'; x: number; y: number }
   | { type: 'cursorHide' }
   | { type: 'cursorTrackingChanged'; enabled: boolean }
@@ -23,7 +24,8 @@ type AllExtensionToWebviewMessage =
   | {
       type: 'viewportUpdate';
       viewport: { top: number; left: number; height: number; width: number };
-    };
+    }
+  | { type: 'updateEditorState'; editorState: EditorState };
 
 /**
  * Messages from the webviews to the extension
@@ -38,11 +40,15 @@ export type WebviewToExtensionMessageType = AllWebviewToExtensionMessage['type']
 // All Messages from webviews to the extension
 type AllWebviewToExtensionMessage =
   | { type: 'ready' }
-  | { type: 'focus' }
+  | { type: 'focus'; focus: boolean }
   | { type: 'cursorMove'; x: number; y: number }
   | { type: 'cursorLeave' }
   | { type: 'scroll'; top: number; left: number }
-  | { type: 'selectElement'; elementId: string | null }
+  | { type: 'selectElement'; id: string | null }
+  | { type: 'selectTool'; tool: EditorTool }
+  | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
+  | { type: 'updateElementLayout'; id: string; changes: Partial<ElementLayout> } // Update the Layout when Element was moved or resized
+  | { type: 'updateElement'; id: string; changes: Partial<EditorElement> } // Update element with it's settings
   | { type: 'toggleCursorTracking' }
   | {
       type: 'updateViewport';

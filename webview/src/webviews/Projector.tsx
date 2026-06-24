@@ -4,6 +4,7 @@ import { useLocalization } from '../providers/LocalizationProvider';
 import { BoardDocument } from '5board.vsc-common';
 import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
+import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
 
 // The projector view shows the same canvas as the editor,
 // but is read-only and display-only — no interactive controls.
@@ -127,11 +128,13 @@ export default function Projector() {
       */}
       <div>
         {boardDocument ? (
-          <EditorCanvas
-            document={boardDocument}
-            cursor={cursor}
-            selectedElementId={selectedElementId}
-          />
+          <CanvasEventsProvider>
+            <EditorCanvas
+              document={boardDocument}
+              cursor={cursor}
+              selectedElementId={selectedElementId}
+            />
+          </CanvasEventsProvider>
         ) : (
           // Shown while waiting for the first 'init' message from the extension.
           <div style={{ padding: '1rem', opacity: 0.5 }}>Loading…</div>

@@ -3,15 +3,14 @@ import { BoardPackage } from './package';
 import { BoardDocument } from '5board.vsc-common';
 import { MessageService } from '../MessageService';
 import { EXTENSION } from '../extension';
+import { DocumentMessageHandlers } from './DocumentMessageHandlers';
 
 export class BoardCustomDocument implements vscode.CustomDocument {
   public readonly documentChange = new vscode.EventEmitter<BoardDocument>();
   public readonly onDocumentChange = this.documentChange.event;
   public readonly messageService = new MessageService();
-
-  // Cursor tracking is ON by default.
-  // The toggle button in the editor sends 'toggleCursorTracking' to flip this.
-  private cursorTrackingEnabled = true;
+  private readonly disposables: vscode.Disposable[] = [];
+  private readonly unsubscribers: (() => void)[] = [];
 
   constructor(
     public boardPackage: BoardPackage,
@@ -21,68 +20,41 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     // find this document and attach the projector panel to the same MessageService.
     EXTENSION.registerDocument(this);
 
-    this.messageService.on('ready', (_msg, sender) => {
-      this.messageService.send(
-        { type: 'init', document: this.boardPackage.document, language: 'en' },
-        sender,
-      );
-      // Sync current tracking state so the new panel starts in the correct state.
-      this.messageService.send(
-        { type: 'cursorTrackingChanged', enabled: this.cursorTrackingEnabled },
-        sender
-      );
-    });
+    this.disposables.push(
+      this.onDocumentChange((document) => {
+        this.messageService.send({ type: 'updateDocument', document });
+      }),
+    );
+    this.disposables.push(
+      EXTENSION.onEditorStateChange((state) => {
+        this.messageService.send({
+          type: 'updateEditorState',
+          editorState: state,
+        });
+      }),
+    );
 
-    this.messageService.on('focus', () => {
-      EXTENSION.activeEditorDocument = this;
-    });
+    this.registerMessageHandlers();
+  }
 
-    // Forward cursor position only when tracking is enabled.
-    // The editor gates its own sending too (for rAF performance), so this is a
-    // second line of defence and keeps the projector in sync when tracking is toggled.
-    this.messageService.on('cursorMove', (msg) => {
-      if (this.cursorTrackingEnabled) {
-        this.messageService.send({ type: 'cursorMove', x: msg.x, y: msg.y });
-      }
-    });
-
-    // When the mouse leaves the editor canvas, hide the cursor dot in the projector.
-    this.messageService.on('cursorLeave', () => {
-      this.messageService.send({ type: 'cursorHide' });
-    });
-
-    // Toggle cursor tracking state and notify all panels so they can update their UI.
-    this.messageService.on('toggleCursorTracking', () => {
-      this.cursorTrackingEnabled = !this.cursorTrackingEnabled;
-      this.messageService.send({
-        type: 'cursorTrackingChanged',
-        enabled: this.cursorTrackingEnabled,
-      });
-    });
-
-    // Forward the selected element so the projector highlights the same element.
-    this.messageService.on('selectElement', (msg) => {
-      this.messageService.send({ type: 'selectElement', elementId: msg.elementId });
-    });
-
-    // Forward scroll position from any panel to all other panels.
-    // This keeps the projector's scroll position in sync with the editor.
-    this.messageService.on('scroll', (msg) => {
-      this.messageService.send({ type: 'scroll', top: msg.top, left: msg.left });
-    });
-
-    this.messageService.on('updateViewport', (msg) => {
-      this.messageService.send({ type: 'viewportUpdate', viewport: msg.viewport });
-    });
-
-    this.onDocumentChange((document) => {
-      this.messageService.send({ type: 'updateDocument', document });
-    });
+  private registerMessageHandlers(): void {
+    this.unsubscribers.push(...new DocumentMessageHandlers(this).register());
   }
 
   dispose(): void {
-    EXTENSION.unregisterDocument(this.uri);
-    EXTENSION.activeEditorDocument = null;
+    for (const unsubscribe of this.unsubscribers) {
+      unsubscribe();
+    }
+    for (const disposable of this.disposables) {
+      disposable.dispose();
+    }
+    this.clearActiveEditorDocument();
+  }
+
+  public clearActiveEditorDocument() {
+    if (EXTENSION.activeEditorDocument === this) {
+      EXTENSION.activeEditorDocument = null;
+    }
   }
 
   public async reloadDocument(): Promise<void> {

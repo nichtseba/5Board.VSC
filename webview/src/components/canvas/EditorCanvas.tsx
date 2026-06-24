@@ -1,9 +1,14 @@
 import type React from 'react';
-import { useRef, useState } from 'react';
-import { BoardDocument } from '5board.vsc-common';
+import { useEffect, useRef, useState } from 'react';
+import { BoardDocument, EditorToolId } from '5board.vsc-common';
 import EditorElement from './EditorElement';
 import ProjectorMouse, { ProjectorCursor } from '../projector/ProjectorMouse';
 import './EditorCanvas.css';
+import { useEditorState } from '../../providers/EditorStateProvider';
+import { useCanvasEventDispatcher } from '../../providers/CanvasEventsProvider';
+import { useMessageService } from '../../services/MessageService';
+import { useGrid } from '../../providers/GridProvider';
+import { CanvasTools } from './tools/CanvasTools';
 
 export type EditorCanvasProps = {
   document: BoardDocument;
@@ -28,23 +33,18 @@ export default function EditorCanvas({
   document,
   onCursorMove,
   onCursorLeave,
-  onElementSelect,
   cursor,
   selectedElementId: externalSelectedId,
 }: EditorCanvasProps) {
   // Internal selection state is used in the editor (externalSelectedId not provided).
   // The projector always passes externalSelectedId so it reflects the editor's selection.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [internalSelectedId, setInternalSelectedId] = useState<string | null>(null);
   const effectiveSelectedId =
     externalSelectedId !== undefined ? externalSelectedId : internalSelectedId;
 
   // rafRef throttles cursor messages: only one per animation frame is sent.
   const rafRef = useRef<number | null>(null);
-
-  const handleSelect = (id: string) => {
-    setInternalSelectedId(id);
-    onElementSelect?.(id);
-  };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!onCursorMove || rafRef.current !== null) return;
@@ -62,6 +62,33 @@ export default function EditorCanvas({
     });
   };
 
+  //const document = useBoardDocument();
+  const editorState = useEditorState();
+  const { emit } = useCanvasEventDispatcher();
+
+  //const selectedElementId = document?.content.selectedElementId ?? null;
+  const activeToolId = editorState?.tool.type;
+
+  const messages = useMessageService();
+  const canvasRef = useRef<HTMLDivElement | null>(null);
+  const { setGridElement } = useGrid();
+
+  useEffect(() => {
+    setGridElement(canvasRef.current);
+    return () => {
+      setGridElement(null);
+    };
+  }, [setGridElement]);
+
+  useEffect(() => {
+    if (activeToolId !== EditorToolId.POINTER && document?.content.selectedElementId) {
+      messages.send({
+        type: 'selectElement',
+        id: null,
+      });
+    }
+  }, [activeToolId, document?.content.selectedElementId, messages]);
+
   return (
     <>
       {/*
@@ -69,17 +96,23 @@ export default function EditorCanvas({
         clipped inside the canvas boundaries and does not bleed outside.
       */}
       <div
-        className="editor-canvas bg-editor-background"
+        ref={canvasRef}
+        className={`editor-canvas bg-editor-background ${activeToolId === EditorToolId.SPACER ? 'cursor-row-resize' : ''}`}
         style={{ position: 'relative' }}
         onMouseMove={handleMouseMove}
         onMouseLeave={onCursorLeave}
+        onPointerDown={(e) => emit('pointerDown', e.nativeEvent)} // Todo: do not hand over dom elements directly
+        onPointerMove={(e) => emit('pointerMove', e.nativeEvent)}
+        onPointerUp={(e) => emit('pointerUp', e.nativeEvent)}
+        onPointerCancel={(e) => emit('pointerCancel', e.nativeEvent)}
       >
-        {document.content.elements.map((element) => (
+        <CanvasTools />
+
+        {document?.content.elements.map((element) => (
           <EditorElement
             key={element.id}
             element={element}
-            selected={element.id === effectiveSelectedId}
-            onSelect={handleSelect}
+            selected={element.id === effectiveSelectedId} // to selectedElementId
           />
         ))}
 

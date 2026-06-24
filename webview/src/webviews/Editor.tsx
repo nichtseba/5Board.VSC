@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useMessageService, useOnMessage } from '../services/MessageService';
 import { useLocalization } from '../providers/LocalizationProvider';
-import { BoardDocument } from '5board.vsc-common';
 import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
 import ProjectorViewPort, { ProjectorViewport } from '../components/projector/ProjectorViewPort';
+import { useBoardDocument } from '../providers/BoardDocumentProvider';
+import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
 
 export default function Editor() {
   const messages = useMessageService();
   const { t } = useLocalization();
-  const [boardDocument, setBoardDocument] = useState<BoardDocument | null>(null);
+  const boardDocument = useBoardDocument();
+
   // Cursor tracking starts OFF (matches the extension's default) for performance.
   // The extension confirms the actual state via 'cursorTrackingChanged' on ready.
   const [cursorTrackingEnabled, setCursorTrackingEnabled] = useState(false);
@@ -30,7 +32,7 @@ export default function Editor() {
 
   // Called when the user clicks an element in the canvas.
   const handleElementSelect = (id: string | null) => {
-    messages.send({ type: 'selectElement', elementId: id });
+    messages.send({ type: 'selectElement', id });
   };
 
   // Sends a toggle request to the extension, which flips the state and broadcasts
@@ -39,9 +41,9 @@ export default function Editor() {
     messages.send({ type: 'toggleCursorTracking' });
   };
 
-  // in EditorCanvas
   useEffect(() => {
     messages.send({ type: 'ready' });
+    messages.send({ type: 'focus', focus: true });
   }, []);
 
   useEffect(() => {
@@ -64,10 +66,6 @@ export default function Editor() {
   }, []);
 
   useOnMessage((msg) => {
-    console.log('Received message in Editor:', msg.type);
-    if (msg.type === 'updateDocument' || msg.type === 'init') {
-      setBoardDocument(msg.document);
-    }
     if (msg.type === 'cursorTrackingChanged') {
       setCursorTrackingEnabled(msg.enabled);
     }
@@ -77,19 +75,9 @@ export default function Editor() {
     }
   });
 
-  useEffect(() => {
-    const setFocus = () => {
-      messages.send({ type: 'focus' });
-    };
-    window.addEventListener('focus', setFocus);
-    return () => {
-      window.removeEventListener('focus', setFocus);
-    };
-  }, []);
-
   return (
     <>
-    {/* Cursor tracking toggle — shown in the editor toolbar area */}
+      {/* Cursor tracking toggle — shown in the editor toolbar area */}
       <div style={{ padding: '4px 8px', borderBottom: '1px solid var(--vscode-panel-border)' }}>
         <button
           onClick={handleToggleCursorTracking}
@@ -118,14 +106,16 @@ export default function Editor() {
 
       <div className="relative">
         {boardDocument && (
-          <EditorCanvas
-            document={boardDocument}
-            // Pass onCursorMove only when tracking is enabled.
-            // When undefined, EditorCanvas skips rAF entirely — no CPU cost.
-            onCursorMove={cursorTrackingEnabled ? handleCursorMove : undefined}
-            onCursorLeave={handleCursorLeave}
-            onElementSelect={handleElementSelect}
-          />
+          <CanvasEventsProvider>
+            <EditorCanvas
+              document={boardDocument}
+              // Pass onCursorMove only when tracking is enabled.
+              // When undefined, EditorCanvas skips rAF entirely — no CPU cost.
+              onCursorMove={cursorTrackingEnabled ? handleCursorMove : undefined}
+              onCursorLeave={handleCursorLeave}
+              onElementSelect={handleElementSelect}
+            />
+          </CanvasEventsProvider>
         )}
         <ProjectorViewPort viewport={projectorViewport} />
       </div>
