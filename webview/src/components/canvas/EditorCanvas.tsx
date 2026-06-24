@@ -52,7 +52,7 @@ export default function EditorCanvas() {
         onPointerUp={(e) => emit('pointerUp', e.nativeEvent)}
         onPointerCancel={(e) => emit('pointerCancel', e.nativeEvent)}
       >
-        <CanvasTools canvasRef={canvasRef} />
+        <CanvasTools />
         {document?.content.elements.map((element) => (
           <EditorElement
             key={element.id}

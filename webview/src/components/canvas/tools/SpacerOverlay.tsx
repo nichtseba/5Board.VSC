@@ -1,4 +1,3 @@
-import type { RefObject } from 'react';
 import { useLocalization } from '../../../providers/LocalizationProvider';
 
 export type SpacerOverlayProps = {
@@ -6,19 +5,16 @@ export type SpacerOverlayProps = {
     currentY: number;
     draggedRows: number;
   } | null;
-  canvasRef: RefObject<HTMLDivElement | null>;
+  canvasTop: number;
+  labelTop: number;
 };
 
-export default function SpacerOverlay({ dragState, canvasRef }: SpacerOverlayProps) {
+export default function SpacerOverlay({ dragState, canvasTop, labelTop }: SpacerOverlayProps) {
   const { t } = useLocalization();
 
   if (!dragState) {
     return null;
   }
-
-  const canvasTop = canvasRef.current?.getBoundingClientRect().top ?? 0;
-  const canvasHeight = canvasRef.current?.clientHeight ?? 0;
-  const top = Math.min(Math.max(12, dragState.currentY - canvasTop - 12), canvasHeight - 36);
 
   return (
     <>
@@ -37,7 +33,7 @@ export default function SpacerOverlay({ dragState, canvasRef }: SpacerOverlayPro
           text-xs 
           text-editor-widget-foreground
           shadow-sm"
-        style={{ top }}
+        style={{ top: canvasTop }}
       >
         {t('webview.canvas.spacerLabel')}: {dragState.draggedRows >= 0 ? '+' : ''}
         {dragState.draggedRows} {t('webview.canvas.rows')}
@@ -51,7 +47,7 @@ export default function SpacerOverlay({ dragState, canvasRef }: SpacerOverlayPro
           border-t 
           border-dashed 
           border-focus-border"
-        style={{ top: dragState.currentY - canvasTop }}
+        style={{ top: labelTop }}
       />
     </>
   );

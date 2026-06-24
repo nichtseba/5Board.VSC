@@ -19,11 +19,7 @@ type DragState = {
   draggedRows: number;
 };
 
-export default function SpacerTool({
-  canvasRef,
-}: {
-  canvasRef: React.RefObject<HTMLDivElement | null>;
-}) {
+export default function SpacerTool() {
   const messages = useMessageService();
 
   /**
@@ -37,14 +33,11 @@ export default function SpacerTool({
    */
   const [overlayState, setOverlayState] = useState<DragState | null>(null);
 
-  const { cellSize } = useGrid();
+  const { cellSize, metrics } = useGrid();
   const rowHeight = cellSize.height;
 
   const getRowFromClientY = (clientY: number) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return 0;
-
-    const y = clientY - canvas.getBoundingClientRect().top;
+    const y = clientY - metrics.top;
     return Math.max(0, Math.floor(y / rowHeight));
   };
 
@@ -106,5 +99,12 @@ export default function SpacerTool({
     ),
   );
 
-  return <SpacerOverlay dragState={overlayState} canvasRef={canvasRef} />;
+  if (!overlayState) {
+    return null;
+  }
+
+  const labelTop = overlayState.currentY - metrics.top;
+  const canvasTop = Math.min(Math.max(12, labelTop - 12), metrics.height - 36);
+
+  return <SpacerOverlay dragState={overlayState} canvasTop={canvasTop} labelTop={labelTop} />;
 }

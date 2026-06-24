@@ -12,7 +12,14 @@ export type GridSize = {
 };
 export type GridContextValue = {
   cellSize: GridSize;
+  metrics: GridMetrics;
   setGridElement: (el: HTMLElement | null) => void;
+};
+export type GridMetrics = {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
 };
 
 // Context
@@ -45,6 +52,7 @@ export function GridProvider({ children }: Props) {
     width: 1,
     height: 1,
   });
+  const [metrics, setMetrics] = useState<GridMetrics>({ top: 0, left: 0, width: 0, height: 0 });
 
   const observerRef = useRef<ResizeObserver | null>(null);
 
@@ -62,6 +70,15 @@ export function GridProvider({ children }: Props) {
       setCellSize((prev) =>
         prev.width === next.width && prev.height === next.height ? prev : next,
       );
+
+      const rect = el.getBoundingClientRect();
+
+      setMetrics({
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+      });
     };
 
     update();
@@ -73,7 +90,9 @@ export function GridProvider({ children }: Props) {
   }, []);
 
   return (
-    <GridContext.Provider value={{ cellSize, setGridElement }}>{children}</GridContext.Provider>
+    <GridContext.Provider value={{ cellSize, metrics, setGridElement }}>
+      {children}
+    </GridContext.Provider>
   );
 }
 

@@ -6,10 +6,10 @@ import { useEditorState } from '../../../providers/EditorStateProvider';
  * Wrapper for all Tools & Features used in the EditorCanvas.
  */
 
-export function CanvasTools({ canvasRef }: { canvasRef: React.RefObject<HTMLDivElement | null> }) {
+export function CanvasTools() {
   const editorState = useEditorState();
 
   const activeToolId = editorState?.tool.type;
 
-  return <>{activeToolId === EditorToolId.SPACER && <SpacerTool canvasRef={canvasRef} />}</>;
+  return <>{activeToolId === EditorToolId.SPACER && <SpacerTool />}</>;
 }
