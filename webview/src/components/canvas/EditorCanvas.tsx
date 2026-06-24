@@ -1,6 +1,6 @@
 import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
-import { BoardDocument, EditorToolId } from '5board.vsc-common';
+import { useEffect, useRef } from 'react';
+import { EditorToolId } from '5board.vsc-common';
 import EditorElement from './EditorElement';
 import ProjectorMouse, { ProjectorCursor } from '../projector/ProjectorMouse';
 import './EditorCanvas.css';
@@ -9,9 +9,9 @@ import { useCanvasEventDispatcher } from '../../providers/CanvasEventsProvider';
 import { useMessageService } from '../../services/MessageService';
 import { useGrid } from '../../providers/GridProvider';
 import { CanvasTools } from './tools/CanvasTools';
+import { useBoardDocument } from '../../providers/BoardDocumentProvider';
 
 export type EditorCanvasProps = {
-  document: BoardDocument;
   // Called with normalized (0–1) canvas coordinates on mouse move.
   // Only the editor provides this; pass undefined to disable mouse tracking entirely.
   onCursorMove?: (x: number, y: number) => void;
@@ -24,25 +24,9 @@ export type EditorCanvasProps = {
   // Normalized (0–1) cursor position to display as a live overlay.
   // Only the projector passes this to mirror the editor's mouse position.
   cursor?: ProjectorCursor | null;
-  // Externally controlled selected element ID (projector only).
-  // When provided (even as null), this overrides the internal click-selection state.
-  selectedElementId?: string | null;
 };
 
-export default function EditorCanvas({
-  document,
-  onCursorMove,
-  onCursorLeave,
-  cursor,
-  selectedElementId: externalSelectedId,
-}: EditorCanvasProps) {
-  // Internal selection state is used in the editor (externalSelectedId not provided).
-  // The projector always passes externalSelectedId so it reflects the editor's selection.
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [internalSelectedId, setInternalSelectedId] = useState<string | null>(null);
-  const effectiveSelectedId =
-    externalSelectedId !== undefined ? externalSelectedId : internalSelectedId;
-
+export default function EditorCanvas({ onCursorMove, onCursorLeave, cursor }: EditorCanvasProps) {
   // rafRef throttles cursor messages: only one per animation frame is sent.
   const rafRef = useRef<number | null>(null);
 
@@ -62,11 +46,11 @@ export default function EditorCanvas({
     });
   };
 
-  //const document = useBoardDocument();
+  const document = useBoardDocument();
   const editorState = useEditorState();
   const { emit } = useCanvasEventDispatcher();
 
-  //const selectedElementId = document?.content.selectedElementId ?? null;
+  const selectedElementId = document?.content.selectedElementId ?? null;
   const activeToolId = editorState?.tool.type;
 
   const messages = useMessageService();
@@ -112,7 +96,7 @@ export default function EditorCanvas({
           <EditorElement
             key={element.id}
             element={element}
-            selected={element.id === effectiveSelectedId} // to selectedElementId
+            selected={element.id === selectedElementId}
           />
         ))}
 

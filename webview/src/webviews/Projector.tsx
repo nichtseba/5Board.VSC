@@ -15,7 +15,6 @@ export default function Projector() {
   const [boardDocument, setBoardDocument] = useState<BoardDocument | null>(null);
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
   // Mirrors the editor's selected element so the projector highlights the same one.
-  const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
 
   // Tell the extension that this webview is ready to receive messages.
   // The extension will respond with 'init' and 'cursorTrackingChanged'.
@@ -86,9 +85,6 @@ export default function Projector() {
         setCursor(null);
       }
     }
-    if (msg.type === 'selectElement') {
-      setSelectedElementId(msg.elementId);
-    }
     if (msg.type === 'scroll') {
       const canvas = document.querySelector('.editor-canvas') as HTMLElement | null;
       const canvasRect = canvas?.getBoundingClientRect();
@@ -129,11 +125,7 @@ export default function Projector() {
       <div>
         {boardDocument ? (
           <CanvasEventsProvider>
-            <EditorCanvas
-              document={boardDocument}
-              cursor={cursor}
-              selectedElementId={selectedElementId}
-            />
+            <EditorCanvas cursor={cursor} />
           </CanvasEventsProvider>
         ) : (
           // Shown while waiting for the first 'init' message from the extension.

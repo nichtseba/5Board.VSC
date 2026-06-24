@@ -30,11 +30,6 @@ export default function Editor() {
     messages.send({ type: 'cursorLeave' });
   };
 
-  // Called when the user clicks an element in the canvas.
-  const handleElementSelect = (id: string | null) => {
-    messages.send({ type: 'selectElement', id });
-  };
-
   // Sends a toggle request to the extension, which flips the state and broadcasts
   // 'cursorTrackingChanged' back to all panels (including this editor).
   const handleToggleCursorTracking = () => {
@@ -108,12 +103,10 @@ export default function Editor() {
         {boardDocument && (
           <CanvasEventsProvider>
             <EditorCanvas
-              document={boardDocument}
               // Pass onCursorMove only when tracking is enabled.
               // When undefined, EditorCanvas skips rAF entirely — no CPU cost.
               onCursorMove={cursorTrackingEnabled ? handleCursorMove : undefined}
               onCursorLeave={handleCursorLeave}
-              onElementSelect={handleElementSelect}
             />
           </CanvasEventsProvider>
         )}
