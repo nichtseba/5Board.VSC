@@ -1,6 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
-import { EditorToolId } from '5board.vsc-common';
-import { useEditorState } from '../../../providers/EditorStateProvider';
+import { useMemo, useRef, useState } from 'react';
 import { useCanvasEvents } from '../../../providers/CanvasEventsProvider';
 import { useMessageService } from '../../../services/MessageService';
 import SpacerOverlay from './SpacerOverlay';
@@ -14,29 +12,32 @@ import { useGrid } from '../../../providers/GridProvider';
  * It is only active when the SPACER tool is selected in the editor state.
  */
 
+type DragState = {
+  startY: number;
+  currentY: number;
+  startRow: number;
+  draggedRows: number;
+};
+
 export default function SpacerTool({
   canvasRef,
 }: {
   canvasRef: React.RefObject<HTMLDivElement | null>;
 }) {
-  const editorState = useEditorState();
   const messages = useMessageService();
 
-  const activeToolId = editorState?.tool.type;
+  /**
+   * Source of truth for drag interactions.
+   * Event handlers read/write this ref directly.
+   */
+  const dragStateRef = useRef<DragState | null>(null);
 
-  const isActive = activeToolId === EditorToolId.SPACER;
+  /**
+   * State only used for rendering the overlay.
+   */
+  const [overlayState, setOverlayState] = useState<DragState | null>(null);
 
-  const [dragState, setDragState] = useState<{
-    startY: number;
-    currentY: number;
-    startRow: number;
-    draggedRows: number;
-  } | null>(null);
-
-  const { cellSize, setGridElement } = useGrid();
-  useEffect(() => {
-    setGridElement(canvasRef.current);
-  }, [setGridElement]);
+  const { cellSize } = useGrid();
   const rowHeight = cellSize.height;
 
   const getRowFromClientY = (clientY: number) => {
@@ -48,52 +49,50 @@ export default function SpacerTool({
   };
 
   const handlePointerRelease = () => {
-    if (!isActive) return;
+    const dragState = dragStateRef.current;
 
-    setDragState((prev) => {
-      if (!prev || prev.draggedRows === 0) return null;
-
+    if (dragState && dragState.draggedRows !== 0) {
       messages.send({
         type: 'insertSpacerRows',
-        startRow: prev.startRow,
-        rowCount: prev.draggedRows,
+        startRow: dragState.startRow,
+        rowCount: dragState.draggedRows,
       });
+    }
 
-      return null;
-    });
+    dragStateRef.current = null;
+    setOverlayState(null);
   };
 
   useCanvasEvents(
     useMemo(
       () => ({
         pointerDown: (event) => {
-          if (!isActive || event.button !== 0) return;
-
           event.preventDefault();
 
-          setDragState({
+          const dragState: DragState = {
             startY: event.clientY,
             currentY: event.clientY,
             startRow: getRowFromClientY(event.clientY),
             draggedRows: 0,
-          });
+          };
+
+          dragStateRef.current = dragState;
+          setOverlayState(dragState);
         },
 
         pointerMove: (event) => {
-          if (!isActive) return;
-          if (!dragState) return;
+          const dragState = dragStateRef.current;
+          if (!dragState) {
+            return;
+          }
 
           const draggedRows = Math.round((event.clientY - dragState.startY) / rowHeight);
+          dragState.currentY = event.clientY;
+          dragState.draggedRows = draggedRows;
 
-          setDragState((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  currentY: event.clientY,
-                  draggedRows,
-                }
-              : prev,
-          );
+          setOverlayState({
+            ...dragState,
+          });
         },
 
         pointerUp: () => {
@@ -103,17 +102,9 @@ export default function SpacerTool({
           handlePointerRelease();
         },
       }),
-      [isActive, dragState, messages],
+      [messages, rowHeight],
     ),
   );
 
-  useEffect(() => {
-    if (!isActive) {
-      setDragState(null);
-    }
-  }, [isActive]);
-
-  if (!isActive) return null;
-
-  return <SpacerOverlay dragState={dragState} canvasRef={canvasRef} />;
+  return <SpacerOverlay dragState={overlayState} canvasRef={canvasRef} />;
 }

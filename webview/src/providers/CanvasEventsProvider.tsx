@@ -33,12 +33,10 @@ type CanvasEventContextType = {
 const CanvasEventContext = createContext<CanvasEventContextType | null>(null);
 
 export function CanvasEventsProvider({ children }: { children: React.ReactNode }) {
-  // Event Bus Storage
   const listenersRef = useRef(new Set<CanvasEventHandlers>());
 
   const subscribe = useCallback((handlers: CanvasEventHandlers) => {
     listenersRef.current.add(handlers);
-
     return () => {
       listenersRef.current.delete(handlers);
     };
