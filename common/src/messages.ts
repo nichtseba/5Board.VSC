@@ -41,4 +41,5 @@ type AllWebviewToExtensionMessage =
   | { type: 'updateElementLayout'; id: string; changes: Partial<ElementLayout> } // Update the Layout when Element was moved or resized
   | { type: 'updateElement'; id: string; changes: Partial<EditorElement> } // Update element with it's settings
   | { type: 'executeCodeblock'; elementId: string }
-  | { type: 'updateBlockCode'; elementId: string; code: string };
+  | { type: 'updateBlockCode'; elementId: string; code: string }
+  | { type: 'openSource'; elementId: string };

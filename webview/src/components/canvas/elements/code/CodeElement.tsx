@@ -105,7 +105,14 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
           )}
         </span>
 
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-1.5">
+          <button
+            title="Open source file"
+            onClick={() => messages.send({ type: 'openSource', elementId: element.id })}
+            className="flex items-center px-1.5 py-1 bg-transparent text-tab-activeForeground font-sans text-base rounded-xs border-none cursor-pointer hover:bg-list-hover-background"
+          >
+            <span className="codicon codicon-go-to-file" />
+          </button>
           <button
             onClick={() => {
               flushPendingUpdate();

@@ -1,3 +1,4 @@
+import vscode from 'vscode';
 import {
   EditorElementType,
   fileNameFromClassName,
@@ -10,6 +11,7 @@ import {
   type CodeElementData,
 } from '5board.vsc-common';
 import { BoardCustomDocument } from './BoardCustomDocument';
+import { SRC_ROOT } from './package';
 
 export class DocumentMessageHandlers {
   constructor(private readonly document: BoardCustomDocument) {}
@@ -51,7 +53,27 @@ export class DocumentMessageHandlers {
       this.document.messageService.on('updateBlockCode', (msg) => {
         this.updateBlockCode(msg.elementId, msg.code);
       }),
+      this.document.messageService.on('openSource', (msg) => {
+        this.openSource(msg.elementId);
+      }),
     ];
+  }
+
+  private openSource(elementId: string): void {
+    const element = this.document.boardPackage.document.content.elements.find(
+      (e) => e.id === elementId,
+    );
+    if (!element || element.type !== EditorElementType.Code) return;
+
+    const { className, language } = element.data as CodeElementData;
+    const fileName = fileNameFromClassName(className, language);
+    // The block's title bar (and thus this button) only renders once the source exists,
+    // so the file is guaranteed to be present in the virtual file system.
+    const uri = this.document.uri.with({
+      scheme: '5board',
+      path: `${this.document.uri.path}/${SRC_ROOT}/${language}/${fileName}`,
+    });
+    void vscode.commands.executeCommand('vscode.open', uri);
   }
 
   private updateBlockCode(elementId: string, code: string): void {

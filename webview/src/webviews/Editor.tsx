@@ -24,7 +24,7 @@ export default function Editor() {
   return (
     <>
       <p>
-        <a href="5board:/c/Users/benno/OneDrive/Dokumente/bs-dnd-tools/Vorlesung.5boardz#content.json">
+        <a href="5board:/c:/Users/leone/Uni/5Board/5board.vsc/test.5boardz/src/java/Student.java">
           TEST
         </a>
         Document: <code>{JSON.stringify(document, null, 2)}</code>
