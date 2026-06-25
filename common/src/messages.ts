@@ -16,7 +16,6 @@ export type ExtensionToWebviewMessageType = AllExtensionToWebviewMessage['type']
 type AllExtensionToWebviewMessage =
   | { type: 'updateDocument'; document: BoardDocument }
   | { type: 'init'; document: BoardDocument; editorState: EditorState; language: Language }
-  | { type: 'initSidebar'; document: BoardDocument }
   | { type: 'updateEditorState'; editorState: EditorState };
 
 /**

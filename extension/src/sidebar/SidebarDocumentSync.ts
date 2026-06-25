@@ -12,7 +12,7 @@ export class SidebarDocumentSync implements vscode.Disposable {
       if (!activeDocument) return;
       messages.send(
         {
-          type: 'initSidebar',
+          type: 'updateDocument',
           document: activeDocument.boardPackage.document,
         },
         sender,

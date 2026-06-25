@@ -8,14 +8,14 @@ import { CodeElement } from './elements/CodeElement';
 import { ImageElement } from './elements/ImageElement';
 import { ShapeElement } from './elements/ShapeElement';
 import { ArrowElement } from './elements/ArrowElement';
+import { useEditorState } from '../../providers/EditorStateProvider';
 import { useMessageService } from '../../services/MessageService';
 
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
-  onSelect?: (id: string) => void;
   selected?: boolean;
+  onSelect?: () => void;
   targetRef?: React.RefObject<HTMLDivElement>;
-  activeToolId?: string | null;
 };
 
 /**
@@ -26,15 +26,23 @@ export type EditorElementProps<T extends EditorElementType> = {
  */
 export default function EditorElement<ElementType extends EditorElementType>({
   element,
-  onSelect,
   selected,
-  activeToolId,
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
   const ElementComponent =
     (ELEMENT_COMPONENTS[element.type] as React.ComponentType<EditorElementProps<ElementType>>) ??
     UnknownElement;
   const messages = useMessageService();
+  const activeToolId = useEditorState()?.tool.type;
+
+  const handleSelectElement = (id: string) => {
+    if (activeToolId !== EditorToolId.POINTER) return;
+
+    messages.send({
+      type: 'selectElement',
+      id,
+    });
+  };
 
   useEffect(() => {
     const listener = (event: KeyboardEvent) => {
@@ -60,7 +68,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
   return (
     <>
       <div
-        onClick={() => onSelect?.(element.id)}
+        onClick={() => handleSelectElement(element.id)}
         className={`
           box-border font-bold
           ${activeToolId === EditorToolId.POINTER ? 'cursor-pointer' : ''}
@@ -83,7 +91,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
           element={element}
           targetRef={targetRef}
           selected={selected}
-          onSelect={onSelect}
+          onSelect={() => handleSelectElement(element.id)}
         />
       </div>
       {activeToolId === EditorToolId.POINTER && (

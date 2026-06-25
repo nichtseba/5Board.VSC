@@ -1,17 +1,17 @@
 import type React from 'react';
 import { init } from '../app/init';
-import { useEffect, useState } from 'react';
-import { BoardDocument } from '5board.vsc-common';
+import { useEffect } from 'react';
 import ElementSettings from '../components/sidebar/elementSettings/ElementSettings';
-import { useMessageService, useOnMessage } from '../services/MessageService';
+import { useMessageService } from '../services/MessageService';
 import { useLocalization } from '../providers/LocalizationProvider';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
 import { Button, Icon } from 'vscrui';
+import { useBoardDocument } from '../providers/BoardDocumentProvider';
 
 export default function ElementSettingsSidebar() {
   const messages = useMessageService();
   const { t } = useLocalization();
-  const [document, setDocument] = useState<BoardDocument | null>(null);
+  const document = useBoardDocument();
 
   const selectedElement =
     document?.content.elements.find((e) => e.id === document.content.selectedElementId) ?? null;
@@ -19,12 +19,6 @@ export default function ElementSettingsSidebar() {
   useEffect(() => {
     messages.send({ type: 'ready' });
   }, []);
-
-  useOnMessage((msg) => {
-    if (msg.type === 'initSidebar' || msg.type === 'updateDocument') {
-      setDocument(msg.document);
-    }
-  });
 
   let content: React.ReactNode;
   if (!selectedElement) {
