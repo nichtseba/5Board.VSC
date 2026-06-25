@@ -122,7 +122,10 @@ export default function Projector() {
         so the projector always mirrors the editor's selection (not the projector
         user's own clicks).
       */}
-      <div>
+      {/*
+        Beamer view: display only. pointerEvents:'none' aka no interactive controls.
+      */}
+      <div style={{ pointerEvents: 'none' }}>
         {boardDocument ? (
           <CanvasEventsProvider>
             <EditorCanvas cursor={cursor} />
