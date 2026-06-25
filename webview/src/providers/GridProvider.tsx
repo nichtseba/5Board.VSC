@@ -1,12 +1,25 @@
 import React, { createContext, useContext, useRef, useState, useCallback } from 'react';
 
+/**
+ * Provides the current grid cell dimensions to all editor components.
+ * Cell sizes are derived from the rendered grid and updated automatically
+ * whenever the grid container is resized.
+ */
+
 export type GridSize = {
   width: number;
   height: number;
 };
 export type GridContextValue = {
   cellSize: GridSize;
+  metrics: GridMetrics;
   setGridElement: (el: HTMLElement | null) => void;
+};
+export type GridMetrics = {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
 };
 
 // Context
@@ -34,11 +47,12 @@ type Props = {
   children: React.ReactNode;
 };
 
-export default function GridProvider({ children }: Props) {
+export function GridProvider({ children }: Props) {
   const [cellSize, setCellSize] = useState<GridSize>({
     width: 1,
     height: 1,
   });
+  const [metrics, setMetrics] = useState<GridMetrics>({ top: 0, left: 0, width: 0, height: 0 });
 
   const observerRef = useRef<ResizeObserver | null>(null);
 
@@ -51,7 +65,20 @@ export default function GridProvider({ children }: Props) {
     if (!el) return;
 
     const update = () => {
-      setCellSize(getGridCellSize(el));
+      const next = getGridCellSize(el);
+
+      setCellSize((prev) =>
+        prev.width === next.width && prev.height === next.height ? prev : next,
+      );
+
+      const rect = el.getBoundingClientRect();
+
+      setMetrics({
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+      });
     };
 
     update();
@@ -63,7 +90,9 @@ export default function GridProvider({ children }: Props) {
   }, []);
 
   return (
-    <GridContext.Provider value={{ cellSize, setGridElement }}>{children}</GridContext.Provider>
+    <GridContext.Provider value={{ cellSize, metrics, setGridElement }}>
+      {children}
+    </GridContext.Provider>
   );
 }
 
