@@ -63,4 +63,4 @@ lint:
   allow_failure: true
   script:
     - pnpm install
-    - pnpm -r run lint
+    - pnpm run lint

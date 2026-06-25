@@ -26,6 +26,14 @@
         "link": "Link",
         "code": "Code",
         "image": "Bild"
+      },
+      "elementType": {
+        "heading": "Überschrift",
+        "text": "Text",
+        "code": "Code",
+        "image": "Bild",
+        "shape": "Form",
+        "arrow": "Pfeil"
       }
     },
     "sidebar-element-settings": {
