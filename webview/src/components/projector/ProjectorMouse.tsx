@@ -12,18 +12,11 @@ export default function ProjectorMouse({ cursor }: { cursor: ProjectorCursor | n
 
   return (
     <div
+      // Colors via the projector-cursor theme utility; position stays inline (dynamic).
+      className="absolute h-5 w-5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-projector-cursor bg-projector-cursor/75 pointer-events-none z-[1000]"
       style={{
-        position: 'absolute',
         left: `${cursor.x * 100}%`,
         top: `${cursor.y * 100}%`,
-        width: 20,
-        height: 20,
-        borderRadius: '50%',
-        background: 'rgba(220, 38, 38, 0.75)',
-        border: '2px solid #dc2626',
-        transform: 'translate(-50%, -50%)',
-        pointerEvents: 'none',
-        zIndex: 1000,
       }}
     />
   );

@@ -811,4 +811,7 @@
   --color-gitDecoration-conflictingResourceForeground: var(--vscode-gitDecoration-conflictingResourceForeground);
   --color-gitDecoration-submoduleResourceForeground: var(--vscode-gitDecoration-submoduleResourceForeground);
   --color-git-blame-editorDecorationForeground: var(--vscode-git-blame\.editorDecorationForeground);
+
+  /* Projector: live mirrored cursor dot */
+  --color-projector-cursor: #dc2626;
 }
