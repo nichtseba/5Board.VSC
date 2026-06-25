@@ -3,9 +3,6 @@ import { BoardCustomDocument } from './BoardCustomDocument';
 
 export class DocumentMessageHandlers {
   constructor(private readonly document: BoardCustomDocument) {}
-  // Cursor tracking is ON by default.
-  // The toggle button in the editor sends 'toggleCursorTracking' to flip this.
-  private cursorTrackingEnabled = true;
   register(): (() => void)[] {
     return [
       //#region "General"
@@ -21,7 +18,7 @@ export class DocumentMessageHandlers {
         );
         // Sync current tracking state so the new panel starts in the correct state.
         this.document.messageService.send(
-          { type: 'cursorTrackingChanged', enabled: this.cursorTrackingEnabled },
+          { type: 'cursorTrackingChanged', enabled: EXTENSION.cursorTrackingEnabled },
           sender,
         );
       }),
@@ -76,7 +73,7 @@ export class DocumentMessageHandlers {
       // The editor gates its own sending too (for rAF performance), so this is a
       // second line of defence and keeps the projector in sync when tracking is toggled.
       this.document.messageService.on('cursorMove', (msg) => {
-        if (this.cursorTrackingEnabled) {
+        if (EXTENSION.cursorTrackingEnabled) {
           this.document.messageService.send({ type: 'cursorMove', x: msg.x, y: msg.y });
         }
       }),
@@ -86,14 +83,6 @@ export class DocumentMessageHandlers {
         this.document.messageService.send({ type: 'cursorHide' });
       }),
 
-      // Toggle cursor tracking state and notify all panels so they can update their UI.
-      this.document.messageService.on('toggleCursorTracking', () => {
-        this.cursorTrackingEnabled = !this.cursorTrackingEnabled;
-        this.document.messageService.send({
-          type: 'cursorTrackingChanged',
-          enabled: this.cursorTrackingEnabled,
-        });
-      }),
       // Forward scroll position from any panel to all other panels.
       // This keeps the projector's scroll position in sync with the editor.
       this.document.messageService.on('scroll', (msg) => {

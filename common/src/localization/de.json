@@ -10,9 +10,7 @@
     "projector": {
       "startPresentation": "Beameransicht starten",
       "title": "Beameransicht",
-      "noFileOpen": "Bitte öffne zuerst eine .5boardz Datei im Editor, bevor du die Beameransicht startest.",
-      "cursorTrackingOn": "Mauszeiger-Tracking: AN",
-      "cursorTrackingOff": "Mauszeiger-Tracking: AUS"
+      "noFileOpen": "Bitte öffne zuerst eine .5boardz Datei im Editor, bevor du die Beameransicht startest."
     }
   },
   "webview": {
@@ -33,6 +31,10 @@
         "link": "Link",
         "code": "Code",
         "image": "Bild"
+      },
+      "projectorSettings": {
+        "title": "Beameransicht-Einstellungen",
+        "cursorTracking": "Mauszeiger-Tracking"
       }
     },
     "sidebar-element-settings": {

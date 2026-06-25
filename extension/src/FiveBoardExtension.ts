@@ -39,6 +39,8 @@ export class FiveBoardExtension extends ExtensionBase {
     return this.openDocuments.get(uri.toString());
   }
 
+  public cursorTrackingEnabled = true;
+
   private activeEditorDocument_: BoardCustomDocument | null = null;
   public get activeEditorDocument(): BoardCustomDocument | null {
     return this.activeEditorDocument_;

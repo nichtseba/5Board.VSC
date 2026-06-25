@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useMessageService, useOnMessage } from '../services/MessageService';
-import { useLocalization } from '../providers/LocalizationProvider';
+//import { useLocalization } from '../providers/LocalizationProvider';
 import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
 import ProjectorViewPort, { ProjectorViewport } from '../components/projector/ProjectorViewPort';
@@ -9,11 +9,10 @@ import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
 
 export default function Editor() {
   const messages = useMessageService();
-  const { t } = useLocalization();
+  //const { t } = useLocalization();
   const boardDocument = useBoardDocument();
 
-  // Cursor tracking starts OFF (matches the extension's default) for performance.
-  // The extension confirms the actual state via 'cursorTrackingChanged' on ready.
+  // Cursor tracking is toggled from the sidebar
   const [cursorTrackingEnabled, setCursorTrackingEnabled] = useState(false);
   const [projectorViewport, setProjectorViewport] = useState<ProjectorViewport | null>(null);
 
@@ -28,12 +27,6 @@ export default function Editor() {
   // so the projector can clear the cursor dot even if tracking was just toggled on.
   const handleCursorLeave = () => {
     messages.send({ type: 'cursorLeave' });
-  };
-
-  // Sends a toggle request to the extension, which flips the state and broadcasts
-  // 'cursorTrackingChanged' back to all panels (including this editor).
-  const handleToggleCursorTracking = () => {
-    messages.send({ type: 'toggleCursorTracking' });
   };
 
   useEffect(() => {
@@ -72,33 +65,6 @@ export default function Editor() {
 
   return (
     <>
-      {/* Cursor tracking toggle — shown in the editor toolbar area */}
-      <div style={{ padding: '4px 8px', borderBottom: '1px solid var(--vscode-panel-border)' }}>
-        <button
-          onClick={handleToggleCursorTracking}
-          style={{
-            padding: '3px 10px',
-            fontSize: '0.75rem',
-            fontWeight: 'bold',
-            letterSpacing: '0.04em',
-            textTransform: 'uppercase',
-            cursor: 'pointer',
-            border: '1px solid var(--vscode-button-border, currentColor)',
-            borderRadius: '3px',
-            background: cursorTrackingEnabled
-              ? 'var(--vscode-button-background)'
-              : 'var(--vscode-button-secondaryBackground)',
-            color: cursorTrackingEnabled
-              ? 'var(--vscode-button-foreground)'
-              : 'var(--vscode-button-secondaryForeground)',
-          }}
-        >
-          {cursorTrackingEnabled
-            ? t('extension.projector.cursorTrackingOn')
-            : t('extension.projector.cursorTrackingOff')}
-        </button>
-      </div>
-
       <div className="relative">
         {boardDocument && (
           <CanvasEventsProvider>

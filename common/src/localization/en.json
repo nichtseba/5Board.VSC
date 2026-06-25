@@ -10,9 +10,7 @@
     "projector": {
       "startPresentation": "Start Presentation",
       "title": "Projector",
-      "noFileOpen": "Please open a .5boardz file in the editor before starting the projector view.",
-      "cursorTrackingOn": "Cursor Tracking: ON",
-      "cursorTrackingOff": "Cursor Tracking: OFF"
+      "noFileOpen": "Please open a .5boardz file in the editor before starting the projector view."
     }
   },
   "webview": {
@@ -33,6 +31,10 @@
         "link": "Link",
         "code": "Code",
         "image": "Image"
+      },
+      "projectorSettings": {
+        "title": "Projector Settings",
+        "cursorTracking": "Cursor Tracking"
       }
     },
     "sidebar-element-settings": {

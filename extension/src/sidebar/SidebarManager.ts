@@ -31,6 +31,25 @@ export class SidebarManager implements vscode.Disposable {
       };
     });
 
+    // Sync the current cursor tracking state to a newly opened sidebar.
+    this.messages.on('ready', (_msg, sender) => {
+      this.messages.send(
+        { type: 'cursorTrackingChanged', enabled: EXTENSION.cursorTrackingEnabled },
+        sender,
+      );
+    });
+
+    // Toggle the global cursor tracking setting from the sidebar and notify every view.
+    this.messages.on('toggleCursorTracking', () => {
+      EXTENSION.cursorTrackingEnabled = !EXTENSION.cursorTrackingEnabled;
+      const msg = {
+        type: 'cursorTrackingChanged' as const,
+        enabled: EXTENSION.cursorTrackingEnabled,
+      };
+      this.messages.send(msg); // sidebars
+      EXTENSION.activeEditorDocument?.messageService.send(msg); // editor + projector
+    });
+
     // Todo: move to document handling
     this.messages.on('updateElement', (msg) => {
       if (!EXTENSION.activeEditorDocument) {
