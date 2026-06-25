@@ -96,23 +96,21 @@ export class FiveBoardExtension extends ExtensionBase {
   }
 
   @Command('5board-vsc.addNewEditorElement')
-  addNewEditorElement(type: EditorElementType): void {
-    const element = this.createDefaultElement(type);
+  addNewEditorElement(type: EditorElementType, position: EditorElement['layout']): void {
+    const element = this.createDefaultElement(type, position);
 
     this.applyEditToActiveDocument((document) => {
       document.content.elements.push(element);
     });
   }
-  private createDefaultElement(type: EditorElementType): EditorElement {
+  private createDefaultElement(
+    type: EditorElementType,
+    position: EditorElement['layout'],
+  ): EditorElement {
     const base = {
       id: crypto.randomUUID(),
       type,
-      layout: {
-        xPos: 0,
-        yPos: 0,
-        width: 20,
-        height: 10,
-      },
+      layout: position,
       style: {
         visible: true,
       },

@@ -1,3 +1,4 @@
+import { EditorToolId } from '5board.vsc-common';
 import { EXTENSION } from '../extension';
 import { BoardCustomDocument } from './BoardCustomDocument';
 
@@ -10,6 +11,12 @@ export class DocumentMessageHandlers {
         this.document.applyEdit((document) => {
           document.content.selectedElementId = msg.id;
         });
+      }),
+      this.document.messageService.on('addElement', (msg) => {
+        EXTENSION.addNewEditorElement(msg.elementType, msg.elementPosition);
+        EXTENSION.editorState = {
+          tool: { type: EditorToolId.POINTER, parameters: null },
+        };
       }),
       this.document.messageService.on('deleteElement', (msg) => {
         EXTENSION.deleteEditorElement(msg.id);

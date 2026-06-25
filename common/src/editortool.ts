@@ -44,9 +44,9 @@ type FreehandToolParameters = unknown;
 
 type AddElementToolParameters = {
   type: EditorElement['type'];
-  layout: Omit<EditorElement['layout'], 'xPos' | 'yPos'>;
-  style: EditorElement['style'];
-  data: EditorElement['data'];
+  layout?: Omit<EditorElement['layout'], 'xPos' | 'yPos'>;
+  style?: EditorElement['style'];
+  data?: EditorElement['data'];
 };
 
 export type EditorTool<EditorToolType extends EditorToolId = EditorToolId> = {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { init } from '../app/init';
 import {
   EditorElementType,
@@ -11,34 +11,27 @@ import { useLocalization } from '../providers/LocalizationProvider';
 import { Button } from 'vscrui';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
 import { useMessageService } from '../services/MessageService';
+import { useEditorState } from '../providers/EditorStateProvider';
 
 export default function ToolSidebar() {
   const { t } = useLocalization();
   const messages = useMessageService();
+  const editorState = useEditorState();
 
-  const [selectedTool, setSelectedTool] = useState<EditorTool>({
-    type: EditorToolId.POINTER,
-    parameters: undefined,
-  });
+  const selectedTool = editorState?.tool;
   const tools = Object.entries(TOOL_DEFINITIONS) as [EditorToolId, EditorToolDefinition][];
 
   useEffect(() => {
-    messages.send({ type: 'selectTool', tool: selectedTool });
+    if (selectedTool) messages.send({ type: 'selectTool', tool: selectedTool });
   }, [messages]);
 
-  const handleToolClick = (toolId: EditorToolId) => {
-    setSelectedTool((prev) => {
-      if (prev.type === toolId) return prev;
-      messages.send({
-        type: 'selectTool',
-        tool: { type: toolId, parameters: undefined },
-      });
-      return { type: toolId, parameters: undefined };
-    });
+  const handleToolClick = (tool: EditorTool) => {
+    if (tool.type === selectedTool?.type) return;
+
+    messages.send({ type: 'selectTool', tool });
   };
-  const handleAddElementClick = (type: EditorElementType) => {
-    messages.send({ type: 'addElement', elementType: type });
-  };
+
+  useEffect(() => {}, [editorState]);
 
   return (
     <>
@@ -50,9 +43,9 @@ export default function ToolSidebar() {
               <Button
                 key={key}
                 title={t(tool.labelKey)}
-                appearance={selectedTool.type === key ? 'primary' : 'secondary'}
+                appearance={selectedTool?.type === key ? 'primary' : 'secondary'}
                 className="h-8 flex flex-col items-center justify-center gap-2"
-                onClick={() => handleToolClick(key)}
+                onClick={() => handleToolClick({ type: key, parameters: null })}
               >
                 <span className={`codicon codicon-${tool.icon}`} />
               </Button>
@@ -65,7 +58,9 @@ export default function ToolSidebar() {
           {Object.values(EditorElementType).map((type) => (
             <Button
               key={type}
-              onClick={() => handleAddElementClick(type)}
+              onClick={() =>
+                handleToolClick({ type: EditorToolId.AddElement, parameters: { type } })
+              }
               className="h-8 flex flex-col items-center justify-center gap-2"
             >
               <span>{type}</span>
