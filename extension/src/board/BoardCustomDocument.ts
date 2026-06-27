@@ -11,6 +11,7 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   public readonly messageService = new MessageService();
   private readonly disposables: vscode.Disposable[] = [];
   private readonly unsubscribers: (() => void)[] = [];
+  private projectorCount = 0;
 
   constructor(
     public boardPackage: BoardPackage,
@@ -49,6 +50,21 @@ export class BoardCustomDocument implements vscode.CustomDocument {
       disposable.dispose();
     }
     this.clearActiveEditorDocument();
+  }
+
+  /** Check if projector window is active/attached */
+  public get hasProjector(): boolean {
+    return this.projectorCount > 0;
+  }
+
+  /** Attach projector panel (init) */
+  public addProjector(): void {
+    this.projectorCount++;
+  }
+
+  /** Detach projector panel (destroy) */
+  public removeProjector(): void {
+    this.projectorCount = Math.max(0, this.projectorCount - 1);
   }
 
   public clearActiveEditorDocument() {

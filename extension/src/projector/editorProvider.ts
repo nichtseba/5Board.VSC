@@ -96,6 +96,11 @@ export class ProjectorEditorProvider
     const targetService = editorDocument?.messageService ?? document.messageService;
     targetService.registerPanel(webviewPanel);
 
+    // Lifecycle: count this projector window (init) until it closes (destroy)
+    const owner = editorDocument ?? document;
+    owner.addProjector();
+    webviewPanel.onDidDispose(() => owner.removeProjector());
+
     setProjectorWebviewHtml(this.context, webviewPanel.webview);
   }
 }

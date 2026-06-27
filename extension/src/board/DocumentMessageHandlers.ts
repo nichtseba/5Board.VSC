@@ -73,7 +73,8 @@ export class DocumentMessageHandlers {
       // The editor gates its own sending too (for rAF performance), so this is a
       // second line of defence and keeps the projector in sync when tracking is toggled.
       this.document.messageService.on('cursorMove', (msg) => {
-        if (EXTENSION.cursorTrackingEnabled) {
+        // mirror the pointer while tracking is on and projector window is attached
+        if (EXTENSION.cursorTrackingEnabled && this.document.hasProjector) {
           this.document.messageService.send({ type: 'cursorMove', x: msg.x, y: msg.y });
         }
       }),
