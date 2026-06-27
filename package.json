@@ -16,7 +16,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
+    "lint": "pnpm run /^lint:.+$/",
+    "lint:eslint": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint:check-translations": "node scripts/lint/lint.js"
   },
   "devDependencies": {
     "eslint": "^9.39.3",

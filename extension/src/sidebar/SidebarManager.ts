@@ -7,6 +7,7 @@ import {
 } from '../providers/SidebarViewProvider';
 import { StructureTreeProvider } from '../providers/StructureTreeProvider';
 import { EXTENSION } from '../extension';
+import { FileTreeProvider } from '../providers/FileTreeProvider';
 
 export class SidebarManager implements vscode.Disposable {
   private readonly sync: SidebarDocumentSync;
@@ -18,6 +19,7 @@ export class SidebarManager implements vscode.Disposable {
     new SidebarViewProvider(context, messages).register();
     new ElementSettingsSidebarViewProvider(context, messages).register();
     new StructureTreeProvider(context).register();
+    new FileTreeProvider(context).register();
 
     this.sync = new SidebarDocumentSync(messages);
 

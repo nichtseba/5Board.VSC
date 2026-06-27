@@ -32,6 +32,14 @@
         "code": "Code",
         "image": "Image"
       },
+      "elementType": {
+        "heading": "Heading",
+        "text": "Text",
+        "code": "Code",
+        "image": "Image",
+        "shape": "Shape",
+        "arrow": "Arrow"
+      },
       "projectorSettings": {
         "title": "Projector Settings",
         "cursorTracking": "Cursor Tracking"

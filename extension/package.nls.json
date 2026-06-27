@@ -5,6 +5,7 @@
   "views.sidebar.tool-title": "Tools & Presets",
   "views.sidebar.element-settings-title": "Element Settings",
   "views.sidebar.structure-title": "Structure",
+  "views.sidebar.file-title": "File Content",
   "commands.openCustomEditor": "Open 5Board Editor",
   "commands.openBoardFile": "Open 5Board File",
   "commands.newBoardFile": "New 5Board File",
