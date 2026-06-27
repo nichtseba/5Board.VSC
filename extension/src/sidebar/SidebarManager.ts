@@ -46,8 +46,9 @@ export class SidebarManager implements vscode.Disposable {
         type: 'cursorTrackingChanged' as const,
         enabled: EXTENSION.cursorTrackingEnabled,
       };
-      this.messages.send(msg); // sidebars
-      EXTENSION.activeEditorDocument?.messageService.send(msg); // editor + projector
+      this.messages.send(msg); // sidebars (reflect the checkbox)
+      // Editor + projector only care whether mirroring is now active.
+      EXTENSION.activeEditorDocument?.broadcastCursorMirrorActive();
     });
 
     // Todo: move to document handling

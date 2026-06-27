@@ -79,9 +79,9 @@ export default function Projector() {
       // Mouse left the editor canvas — remove the dot.
       setCursor(null);
     }
-    if (msg.type === 'cursorTrackingChanged') {
-      // If tracking was just disabled, clear any lingering cursor dot.
-      if (!msg.enabled) {
+    if (msg.type === 'cursorMirrorActiveChanged') {
+      // If mirroring was just turned off, clear any lingering cursor dot.
+      if (!msg.active) {
         setCursor(null);
       }
     }

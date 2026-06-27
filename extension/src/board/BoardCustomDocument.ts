@@ -60,11 +60,19 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   /** Attach projector panel (init) */
   public addProjector(): void {
     this.projectorCount++;
+    this.broadcastCursorMirrorActive();
   }
 
   /** Detach projector panel (destroy) */
   public removeProjector(): void {
     this.projectorCount = Math.max(0, this.projectorCount - 1);
+    this.broadcastCursorMirrorActive();
+  }
+
+  /** Tell the views whether the pointer should be mirrored (tracking on AND a beamer open). */
+  public broadcastCursorMirrorActive(): void {
+    const active = EXTENSION.cursorTrackingEnabled && this.hasProjector;
+    this.messageService.send({ type: 'cursorMirrorActiveChanged', active });
   }
 
   public clearActiveEditorDocument() {

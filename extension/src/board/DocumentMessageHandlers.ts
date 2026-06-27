@@ -16,9 +16,12 @@ export class DocumentMessageHandlers {
           },
           sender,
         );
-        // Sync current tracking state so the new panel starts in the correct state.
+        // Sync whether the pointer should currently be mirrored, so the new panel starts right.
         this.document.messageService.send(
-          { type: 'cursorTrackingChanged', enabled: EXTENSION.cursorTrackingEnabled },
+          {
+            type: 'cursorMirrorActiveChanged',
+            active: EXTENSION.cursorTrackingEnabled && this.document.hasProjector,
+          },
           sender,
         );
       }),
@@ -69,14 +72,9 @@ export class DocumentMessageHandlers {
 
       //#region "Projector"
 
-      // Forward cursor position only when tracking is enabled.
-      // The editor gates its own sending too (for rAF performance), so this is a
-      // second line of defence and keeps the projector in sync when tracking is toggled.
+      // The editor (ProjectorCursorMirror) only sends while mirroring is active, so just relay.
       this.document.messageService.on('cursorMove', (msg) => {
-        // mirror the pointer while tracking is on and projector window is attached
-        if (EXTENSION.cursorTrackingEnabled && this.document.hasProjector) {
-          this.document.messageService.send({ type: 'cursorMove', x: msg.x, y: msg.y });
-        }
+        this.document.messageService.send({ type: 'cursorMove', x: msg.x, y: msg.y });
       }),
 
       // When the mouse leaves the editor canvas, hide the cursor dot in the projector.

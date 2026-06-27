@@ -17,6 +17,7 @@ export type CanvasEventMap = {
   pointerMove: PointerEvent;
   pointerUp: PointerEvent;
   pointerCancel: PointerEvent;
+  pointerLeave: PointerEvent;
 };
 
 export type CanvasEventHandlers = {
