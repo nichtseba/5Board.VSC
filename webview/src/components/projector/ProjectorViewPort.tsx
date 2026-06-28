@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { useOnMessage } from '../../services/MessageService';
+
 // Projector viewport aka projector rectangle in Editor
 export type ProjectorViewport = {
   top: number;
@@ -7,7 +10,15 @@ export type ProjectorViewport = {
 };
 
 // Renders the rectangle that mirrors the projector's visible viewport on the editor canvas.
-export default function ProjectorViewPort({ viewport }: { viewport: ProjectorViewport | null }) {
+export default function ProjectorViewPort() {
+  const [viewport, setViewport] = useState<ProjectorViewport | null>(null);
+
+  useOnMessage((msg) => {
+    if (msg.type === 'viewportUpdate') {
+      setViewport(msg.viewport);
+    }
+  });
+
   if (!viewport) {
     return null;
   }

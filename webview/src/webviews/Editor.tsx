@@ -3,7 +3,7 @@ import { useMessageService, useOnMessage } from '../services/MessageService';
 //import { useLocalization } from '../providers/LocalizationProvider';
 import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
-import ProjectorViewPort, { ProjectorViewport } from '../components/projector/ProjectorViewPort';
+import ProjectorViewPort from '../components/projector/ProjectorViewPort';
 import ProjectorCursorMirror from '../components/projector/ProjectorCursorMirror';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
 import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
@@ -16,7 +16,6 @@ export default function Editor() {
   // Whether the pointer should be mirrored to the projector (tracking on AND a beamer open).
   // The extension computes this; held here (top level) so the initial sync is never missed.
   const [mirrorActive, setMirrorActive] = useState(false);
-  const [projectorViewport, setProjectorViewport] = useState<ProjectorViewport | null>(null);
 
   useEffect(() => {
     messages.send({ type: 'ready' });
@@ -46,10 +45,6 @@ export default function Editor() {
     if (msg.type === 'cursorMirrorActiveChanged') {
       setMirrorActive(msg.active);
     }
-    // in Komponente ProjectorViewPort in projector Ordner mit Mouse
-    if (msg.type === 'viewportUpdate') {
-      setProjectorViewport(msg.viewport);
-    }
   });
 
   return (
@@ -61,7 +56,7 @@ export default function Editor() {
             <ProjectorCursorMirror active={mirrorActive} />
           </CanvasEventsProvider>
         )}
-        <ProjectorViewPort viewport={projectorViewport} />
+        <ProjectorViewPort />
       </div>
     </>
   );
