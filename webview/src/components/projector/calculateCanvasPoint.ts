@@ -4,7 +4,7 @@
 //
 // Normalized coordinates are resolution-independent, so a point lands on the same
 // spot in the editor and the (differently sized) projector.
-export function canvasPointFromEvent(e: PointerEvent): { x: number; y: number } | null {
+export function calculateCanvasPoint(e: PointerEvent): { x: number; y: number } | null {
   const canvas = (e.target as HTMLElement | null)?.closest('.editor-canvas');
   if (!canvas) return null;
 

@@ -1,4 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { calculateCanvasPoint } from '../components/projector/calculateCanvasPoint';
 
 /**
  * Provides a central event hub for canvas interactions.
@@ -112,4 +113,9 @@ export function useCanvasEventDispatcher() {
   return {
     emit: context.emit,
   };
+}
+
+// Hook: Convert a canvas pointer event into a normalized (0–1) canvas position
+export function useCanvasPoint() {
+  return calculateCanvasPoint;
 }

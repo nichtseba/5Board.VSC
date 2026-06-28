@@ -1,7 +1,6 @@
 import { useRef } from 'react';
-import { useCanvasEvents } from '../../providers/CanvasEventsProvider';
+import { useCanvasEvents, useCanvasPoint } from '../../providers/CanvasEventsProvider';
 import { useMessageService } from '../../services/MessageService';
-import { canvasPointFromEvent } from '../canvas/canvasPoint';
 
 // Mirrors the editor's pointer position to the projector view by subscribing to the
 // canvas event hub. The projector-specific gating lives here (the consumer), not in
@@ -9,6 +8,7 @@ import { canvasPointFromEvent } from '../canvas/canvasPoint';
 // projector window is open — both pushed from the extension and held by the editor.
 export default function ProjectorCursorMirror({ active }: { active: boolean }) {
   const messages = useMessageService();
+  const calculateCanvasPoint = useCanvasPoint();
   // rafRef throttles position reporting: one message per animation frame.
   const rafRef = useRef<number | null>(null);
 
@@ -16,7 +16,7 @@ export default function ProjectorCursorMirror({ active }: { active: boolean }) {
     pointerMove: (e) => {
       if (!active || rafRef.current !== null) return;
 
-      const point = canvasPointFromEvent(e);
+      const point = calculateCanvasPoint(e);
       if (!point) return;
 
       rafRef.current = requestAnimationFrame(() => {
