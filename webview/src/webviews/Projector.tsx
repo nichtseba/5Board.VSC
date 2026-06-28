@@ -132,7 +132,7 @@ export default function Projector() {
           </CanvasEventsProvider>
         ) : (
           // Shown while waiting for the first 'init' message from the extension.
-          <div style={{ padding: '1rem', opacity: 0.5 }}>Loading…</div>
+          <div style={{ padding: '1rem', opacity: 0.5 }}>{t('extension.projector.loading')}</div>
         )}
       </div>
     </div>

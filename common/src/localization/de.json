@@ -10,7 +10,8 @@
     "projector": {
       "startPresentation": "Beameransicht starten",
       "title": "Beameransicht",
-      "noFileOpen": "Bitte öffne zuerst eine .5boardz Datei im Editor, bevor du die Beameransicht startest."
+      "noFileOpen": "Bitte öffne zuerst eine .5boardz Datei im Editor, bevor du die Beameransicht startest.",
+      "loading": "Lade…"
     }
   },
   "webview": {
