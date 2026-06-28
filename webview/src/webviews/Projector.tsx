@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useMessageService, useOnMessage } from '../services/MessageService';
 import { useLocalization } from '../providers/LocalizationProvider';
-import { BoardDocument } from '5board.vsc-common';
+import { useBoardDocument } from '../providers/BoardDocumentProvider';
 import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
 import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
@@ -12,7 +12,7 @@ export default function Projector() {
   const messages = useMessageService();
   const { t } = useLocalization();
   // boardDocument is null until the extension sends the initial 'init' message.
-  const [boardDocument, setBoardDocument] = useState<BoardDocument | null>(null);
+  const boardDocument = useBoardDocument();
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
   // Mirrors the editor's selected element so the projector highlights the same one.
 
@@ -68,10 +68,6 @@ export default function Projector() {
   }, []);
   // Listen for messages from the extension host.
   useOnMessage((msg) => {
-    if (msg.type === 'init' || msg.type === 'updateDocument') {
-      // Replace the displayed document whenever the extension sends fresh data.
-      setBoardDocument(msg.document);
-    }
     if (msg.type === 'cursorMove') {
       setCursor({ x: msg.x, y: msg.y });
     }
