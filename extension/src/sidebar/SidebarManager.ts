@@ -50,7 +50,7 @@ export class SidebarManager implements vscode.Disposable {
       };
       this.messages.send(msg); // sidebars (reflect the checkbox)
       // Editor + projector only care whether mirroring is now active.
-      EXTENSION.activeEditorDocument?.broadcastCursorMirrorActive();
+      EXTENSION.activeEditorDocument?.broadcastProjectorState();
     });
 
     // Todo: move to document handling

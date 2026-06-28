@@ -19,8 +19,7 @@ type AllExtensionToWebviewMessage =
   | { type: 'cursorMove'; x: number; y: number }
   | { type: 'cursorHide' }
   | { type: 'cursorTrackingChanged'; enabled: boolean }
-  // Whether the editor should mirror its pointer to the projector (tracking on AND a beamer open).
-  | { type: 'cursorMirrorActiveChanged'; active: boolean }
+  | { type: 'projectorStateChanged'; active: boolean; open: boolean }
   | { type: 'scroll'; top: number; left: number }
   | { type: 'selectElement'; elementId: string | null }
   | {

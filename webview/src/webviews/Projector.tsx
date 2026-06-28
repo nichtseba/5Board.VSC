@@ -79,7 +79,7 @@ export default function Projector() {
       // Mouse left the editor canvas — remove the dot.
       setCursor(null);
     }
-    if (msg.type === 'cursorMirrorActiveChanged') {
+    if (msg.type === 'projectorStateChanged') {
       // If mirroring was just turned off, clear any lingering cursor dot.
       if (!msg.active) {
         setCursor(null);
