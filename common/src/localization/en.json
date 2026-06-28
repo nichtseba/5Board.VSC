@@ -43,7 +43,16 @@
       },
       "projectorSettings": {
         "title": "Projector Settings",
-        "cursorTracking": "Cursor Tracking"
+        "cursorTracking": "Cursor Tracking",
+        "pointerColor": "Pointer Color",
+        "customColor": "Custom",
+        "pointerShape": "Pointer Shape",
+        "shapes": {
+          "dot": "Dot",
+          "ring": "Ring",
+          "rectangle": "Rectangle",
+          "duck": "Duck"
+        }
       }
     },
     "sidebar-element-settings": {

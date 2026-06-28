@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useMessageService, useOnMessage } from '../services/MessageService';
 import { useLocalization } from '../providers/LocalizationProvider';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
+import { DEFAULT_PROJECTOR_POINTER_STYLE, ProjectorPointerStyle } from '5board.vsc-common';
 import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
 import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
@@ -14,6 +15,10 @@ export default function Projector() {
   // boardDocument is null until the extension sends the initial 'init' message.
   const boardDocument = useBoardDocument();
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
+  // Cursor appearance, configured from the sidebar and pushed by the extension.
+  const [pointerStyle, setPointerStyle] = useState<ProjectorPointerStyle>(
+    DEFAULT_PROJECTOR_POINTER_STYLE,
+  );
   // Mirrors the editor's selected element so the projector highlights the same one.
 
   // Tell the extension that this webview is ready to receive messages.
@@ -81,6 +86,9 @@ export default function Projector() {
         setCursor(null);
       }
     }
+    if (msg.type === 'projectorPointerChanged') {
+      setPointerStyle(msg.style);
+    }
     if (msg.type === 'scroll') {
       const canvas = document.querySelector('.editor-canvas') as HTMLElement | null;
       const canvasRect = canvas?.getBoundingClientRect();
@@ -124,7 +132,7 @@ export default function Projector() {
       <div style={{ pointerEvents: 'none' }}>
         {boardDocument ? (
           <CanvasEventsProvider>
-            <EditorCanvas cursor={cursor} />
+            <EditorCanvas cursor={cursor} pointerStyle={pointerStyle} />
           </CanvasEventsProvider>
         ) : (
           // Shown while waiting for the first 'init' message from the extension.

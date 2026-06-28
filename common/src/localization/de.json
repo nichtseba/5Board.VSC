@@ -43,7 +43,16 @@
       },
       "projectorSettings": {
         "title": "Beameransicht-Einstellungen",
-        "cursorTracking": "Mauszeiger-Tracking"
+        "cursorTracking": "Mauszeiger-Tracking",
+        "pointerColor": "Zeiger-Farbe",
+        "customColor": "Eigene",
+        "pointerShape": "Zeiger-Form",
+        "shapes": {
+          "dot": "Punkt",
+          "ring": "Ring",
+          "rectangle": "Rechteck",
+          "duck": "Ente"
+        }
       }
     },
     "sidebar-element-settings": {

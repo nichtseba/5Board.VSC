@@ -25,6 +25,11 @@ export class DocumentMessageHandlers {
           },
           sender,
         );
+        // Sync the mirrored cursor appearance so the projector renders it correctly.
+        this.document.messageService.send(
+          { type: 'projectorPointerChanged', style: EXTENSION.projectorPointerStyle },
+          sender,
+        );
       }),
       this.document.messageService.on('focus', ({ focus }) => {
         if (focus) {

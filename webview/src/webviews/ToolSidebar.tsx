@@ -7,10 +7,10 @@ import {
   TOOL_DEFINITIONS,
 } from '5board.vsc-common';
 import { useLocalization } from '../providers/LocalizationProvider';
-import { Button, Checkbox } from 'vscrui';
+import { Button } from 'vscrui';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
-import SettingsPanel from '../components/sidebar/layout/SettingsPanel';
-import { useMessageService, useOnMessage } from '../services/MessageService';
+import ProjectorSettings from '../components/projector/ProjectorSettings';
+import { useMessageService } from '../services/MessageService';
 
 export default function ToolSidebar() {
   const { t } = useLocalization();
@@ -20,26 +20,12 @@ export default function ToolSidebar() {
     type: EditorToolId.POINTER,
     parameters: undefined,
   });
-  // Cursor tracking is a global projector setting, synced from the extension.
-  const [cursorTracking, setCursorTracking] = useState(true);
   const tools = Object.entries(TOOL_DEFINITIONS) as [EditorToolId, EditorToolDefinition][];
 
   useEffect(() => {
     messages.send({ type: 'selectTool', tool: selectedTool });
-    messages.send({ type: 'ready' }); // request current cursor tracking state
+    messages.send({ type: 'ready' }); // request current projector settings state
   }, [messages]);
-
-  // Reflect the current state whenever the extension broadcasts a change.
-  useOnMessage((msg) => {
-    if (msg.type === 'cursorTrackingChanged') {
-      setCursorTracking(msg.enabled);
-    }
-  });
-
-  // The extension owns the state and echoes it back via 'cursorTrackingChanged'.
-  const handleToggleCursorTracking = () => {
-    messages.send({ type: 'toggleCursorTracking' });
-  };
 
   const handleToolClick = (toolId: EditorToolId) => {
     setSelectedTool((prev) => {
@@ -71,14 +57,7 @@ export default function ToolSidebar() {
 
         {/* Projector settings as a separate panel below the tools */}
         <div className="mt-6">
-          <SettingsPanel
-            title={t('webview.sidebar.projectorSettings.title')}
-            icon="device-camera-video"
-          >
-            <Checkbox checked={cursorTracking} onChange={() => handleToggleCursorTracking()}>
-              {t('webview.sidebar.projectorSettings.cursorTracking')}
-            </Checkbox>
-          </SettingsPanel>
+          <ProjectorSettings />
         </div>
       </SidebarShell>
     </>

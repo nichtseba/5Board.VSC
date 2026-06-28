@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { EditorToolId } from '5board.vsc-common';
+import { EditorToolId, ProjectorPointerStyle } from '5board.vsc-common';
 import EditorElement from './EditorElement';
 import ProjectorMouse, { ProjectorCursor } from '../projector/ProjectorMouse';
 import './EditorCanvas.css';
@@ -14,9 +14,10 @@ export type EditorCanvasProps = {
   // Normalized (0–1) cursor position to display as a live overlay.
   // Only the projector passes this to mirror the editor's pointer position.
   cursor?: ProjectorCursor | null;
+  pointerStyle?: ProjectorPointerStyle;
 };
 
-export default function EditorCanvas({ cursor }: EditorCanvasProps) {
+export default function EditorCanvas({ cursor, pointerStyle }: EditorCanvasProps) {
   // All pointer handl lives in one hook
   const pointerHandlers = useCanvasPointer();
 
@@ -69,7 +70,7 @@ export default function EditorCanvas({ cursor }: EditorCanvasProps) {
         ))}
 
         {/* Cursor overlay — only rendered in the projector via the cursor prop */}
-        <ProjectorMouse cursor={cursor ?? null} />
+        <ProjectorMouse cursor={cursor ?? null} style={pointerStyle} />
       </div>
     </>
   );
