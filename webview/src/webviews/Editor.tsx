@@ -7,6 +7,7 @@ import ProjectorViewPort from '../components/projector/ProjectorViewPort';
 import ProjectorCursorMirror from '../components/projector/ProjectorCursorMirror';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
 import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
+import { useGrid } from '../providers/GridProvider';
 
 export default function Editor() {
   const messages = useMessageService();
@@ -14,8 +15,9 @@ export default function Editor() {
   const boardDocument = useBoardDocument();
 
   // Whether the pointer should be mirrored to the projector (tracking on AND a beamer open).
-  // The extension computes this; held here (top level) so the initial sync is never missed.
   const [mirrorActive, setMirrorActive] = useState(false);
+  // use GridProvider to get metrics
+  const { metrics } = useGrid();
 
   useEffect(() => {
     messages.send({ type: 'ready' });
@@ -24,22 +26,17 @@ export default function Editor() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const canvas = document.querySelector('.editor-canvas') as HTMLElement | null;
-      const canvasRect = canvas?.getBoundingClientRect();
-      const canvasTopOnPage = (canvasRect?.top ?? 0) + window.scrollY;
-      const canvasLeftOnPage = (canvasRect?.left ?? 0) + window.scrollX;
-
       messages.send({
         type: 'scroll',
-        top: Math.max(0, window.scrollY - canvasTopOnPage),
-        left: Math.max(0, window.scrollX - canvasLeftOnPage),
+        top: Math.max(0, window.scrollY - metrics.top),
+        left: Math.max(0, window.scrollX - metrics.left),
       });
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [messages, metrics.top, metrics.left]);
 
   useOnMessage((msg) => {
     if (msg.type === 'cursorMirrorActiveChanged') {
