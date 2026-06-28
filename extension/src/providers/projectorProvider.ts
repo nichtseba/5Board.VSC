@@ -4,7 +4,7 @@ import { BoardCustomDocument } from '../board/BoardCustomDocument';
 import { BoardPackage } from '../board/package';
 import { get5boardzAssetCacheRoot } from '../board/webview';
 import { t } from '../localization';
-import { setProjectorWebviewHtml } from './webview';
+import { setWebviewHtml } from '../webview';
 import { DUMMY_BOARD_DOCUMENT } from '../board/dummyDocument';
 import { EXTENSION } from '../extension';
 
@@ -17,9 +17,7 @@ import { EXTENSION } from '../extension';
  * retainContextWhenHidden keeps the webview alive when the tab loses focus so the
  * projector does not reload every time the teacher switches back to the editor.
  */
-export class ProjectorEditorProvider
-  implements vscode.CustomReadonlyEditorProvider<BoardCustomDocument>
-{
+export class ProjectorProvider implements vscode.CustomReadonlyEditorProvider<BoardCustomDocument> {
   /** Must match the viewType declared in package.json under "customEditors". */
   public static readonly VIEW_TYPE = '5board-vsc.projector';
 
@@ -29,11 +27,9 @@ export class ProjectorEditorProvider
   public register(): void {
     // registerCustomEditorProvider accepts CustomReadonlyEditorProvider — no separate function exists.
     this.context.subscriptions.push(
-      vscode.window.registerCustomEditorProvider(
-        ProjectorEditorProvider.VIEW_TYPE,
-        this,
-        { webviewOptions: { retainContextWhenHidden: true } },
-      ),
+      vscode.window.registerCustomEditorProvider(ProjectorProvider.VIEW_TYPE, this, {
+        webviewOptions: { retainContextWhenHidden: true },
+      }),
     );
   }
 
@@ -101,6 +97,6 @@ export class ProjectorEditorProvider
     owner.addProjector();
     webviewPanel.onDidDispose(() => owner.removeProjector());
 
-    setProjectorWebviewHtml(this.context, webviewPanel.webview);
+    setWebviewHtml(this.context, webviewPanel.webview, 'Projector.html');
   }
 }

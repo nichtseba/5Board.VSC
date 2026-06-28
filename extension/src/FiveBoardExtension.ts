@@ -7,7 +7,7 @@ import { BoardPackage } from './board/package';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
 import { BoardDocument, DEFAULT_TOOL_ID, EditorState } from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
-import { ProjectorEditorProvider } from './projector/editorProvider';
+import { ProjectorProvider } from './providers/projectorProvider';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
@@ -17,7 +17,7 @@ export class FiveBoardExtension extends ExtensionBase {
   public readonly packageManager = new PackageManager();
 
   // Registry of all currently open editor documents, keyed by URI string.
-  // ProjectorEditorProvider uses this to find the matching editor document so
+  // ProjectorProvider uses this to find the matching editor document so
   // both panels can share the same MessageService instance.
   private openDocuments = new Map<string, BoardCustomDocument>();
 
@@ -71,7 +71,7 @@ export class FiveBoardExtension extends ExtensionBase {
     super.activate(context);
     new EditorEditorProvider(context, this.packageManager).register();
     // Register the projector so VS Code knows how to open .5boardz files in presentation mode.
-    new ProjectorEditorProvider(context).register();
+    new ProjectorProvider(context).register();
     context.subscriptions.push(new SidebarManager(context, this.messages));
     new FiveBoardFileSystemProvider(this.packageManager).register(context);
   }
@@ -122,7 +122,7 @@ export class FiveBoardExtension extends ExtensionBase {
       await vscode.commands.executeCommand(
         'vscode.openWith',
         tabInput.uri,
-        ProjectorEditorProvider.VIEW_TYPE,
+        ProjectorProvider.VIEW_TYPE,
         { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
       );
       // Focus the projector column (always the rightmost group after openWith Beside).

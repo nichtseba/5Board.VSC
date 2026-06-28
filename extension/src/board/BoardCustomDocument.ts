@@ -17,7 +17,7 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     public boardPackage: BoardPackage,
     public uri: vscode.Uri,
   ) {
-    // Register in the global document registry so ProjectorEditorProvider can
+    // Register in the global document registry so ProjectorProvider can
     // find this document and attach the projector panel to the same MessageService.
     EXTENSION.registerDocument(this);
 
