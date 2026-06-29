@@ -3,118 +3,86 @@ import { BoardPackage } from './package';
 import { BoardDocument } from '5board.vsc-common';
 import { MessageService } from '../MessageService';
 import { EXTENSION } from '../extension';
+import { DocumentMessageHandlers } from './DocumentMessageHandlers';
 
 export class BoardCustomDocument implements vscode.CustomDocument {
   public readonly documentChange = new vscode.EventEmitter<BoardDocument>();
   public readonly onDocumentChange = this.documentChange.event;
   public readonly messageService = new MessageService();
-
-  // Cursor tracking is ON by default.
-  // The toggle in the sidebar drives this via FiveBoardExtension.toggleCursorTracking().
-  private cursorTrackingEnabled_ = true;
-  public get cursorTrackingEnabled(): boolean {
-    return this.cursorTrackingEnabled_;
-  }
-
-  /** Flips cursor tracking and notifies this document's panels. Returns the new state. */
-  public toggleCursorTracking(): boolean {
-    this.cursorTrackingEnabled_ = !this.cursorTrackingEnabled_;
-    this.messageService.send({
-      type: 'cursorTrackingChanged',
-      enabled: this.cursorTrackingEnabled_,
-    });
-    return this.cursorTrackingEnabled_;
-  }
+  private readonly disposables: vscode.Disposable[] = [];
+  private readonly unsubscribers: (() => void)[] = [];
+  private projectorCount = 0;
 
   constructor(
     public boardPackage: BoardPackage,
     public uri: vscode.Uri,
   ) {
-    // Register in the global document registry so ProjectorEditorProvider can
+    // Register in the global document registry so ProjectorProvider can
     // find this document and attach the projector panel to the same MessageService.
     EXTENSION.registerDocument(this);
 
-    this.messageService.on('ready', (_msg, sender) => {
-      // Mark this document as the active one so the sidebar's tool selection
-      // (which arrives via the global message service) can be forwarded here.
-      EXTENSION.activeEditorDocument = this;
-      this.messageService.send(
-        {
-          type: 'init',
-          document: this.boardPackage.document,
-          language: 'en',
-        },
-        sender,
-      );
-      // Sync current tracking state so the new panel starts in the correct state.
-      this.messageService.send(
-        { type: 'cursorTrackingChanged', enabled: this.cursorTrackingEnabled_ },
-        sender,
-      );
-    });
+    this.disposables.push(
+      this.onDocumentChange((document) => {
+        this.messageService.send({ type: 'updateDocument', document });
+      }),
+    );
+    this.disposables.push(
+      EXTENSION.onEditorStateChange((state) => {
+        this.messageService.send({
+          type: 'updateEditorState',
+          editorState: state,
+        });
+      }),
+    );
 
-    this.messageService.on('focus', () => {
-      EXTENSION.activeEditorDocument = this;
-    });
+    this.registerMessageHandlers();
+  }
 
-    // Forward cursor position only when tracking is enabled.
-    // The editor gates its own sending too (for rAF performance), so this is a
-    // second line of defence and keeps the projector in sync when tracking is toggled.
-    this.messageService.on('cursorMove', (msg) => {
-      if (this.cursorTrackingEnabled_) {
-        this.messageService.send({ type: 'cursorMove', x: msg.x, y: msg.y });
-      }
-    });
-
-    // When the mouse leaves the editor canvas, hide the cursor dot in the projector.
-    this.messageService.on('cursorLeave', () => {
-      this.messageService.send({ type: 'cursorHide' });
-    });
-
-    // Forward the selected element so the projector highlights the same element.
-    this.messageService.on('selectElement', (msg) => {
-      this.messageService.send({ type: 'selectElement', elementId: msg.elementId });
-    });
-
-    // The editor sends a freshly drawn element (e.g. a freehand stroke).
-    // Append it to the document; the change broadcasts 'updateDocument' to all panels.
-    this.messageService.on('addElement', (msg) => {
-      this.applyEdit((document) => {
-        document.content.elements.push(msg.element);
-      });
-    });
-
-    // Mirror the in-progress freehand stroke to the projector while drawing.
-    this.messageService.on('freehandPreview', (msg) => {
-      this.messageService.send({
-        type: 'freehandPreview',
-        points: msg.points,
-        color: msg.color,
-        width: msg.width,
-      });
-    });
-    this.messageService.on('freehandPreviewEnd', () => {
-      this.messageService.send({ type: 'freehandPreviewEnd' });
-    });
-
-    // Forward scroll position from any panel to all other panels.
-    // This keeps the projector's scroll position in sync with the editor.
-    this.messageService.on('scroll', (msg) => {
-      this.messageService.send({ type: 'scroll', top: msg.top, left: msg.left });
-    });
-
-    this.messageService.on('updateViewport', (msg) => {
-      this.messageService.send({ type: 'viewportUpdate', viewport: msg.viewport });
-    });
-
-    this.onDocumentChange((document) => {
-      this.messageService.send({ type: 'updateDocument', document });
-    });
+  private registerMessageHandlers(): void {
+    this.unsubscribers.push(...new DocumentMessageHandlers(this).register());
   }
 
   dispose(): void {
-    EXTENSION.unregisterDocument(this.uri);
-    EXTENSION.activeEditorDocument = null;
+    for (const unsubscribe of this.unsubscribers) {
+      unsubscribe();
+    }
+    for (const disposable of this.disposables) {
+      disposable.dispose();
+    }
+    this.clearActiveEditorDocument();
+  }
+
+  /** Check if projector window is active/attached */
+  public get hasProjector(): boolean {
+    return this.projectorCount > 0;
+  }
+
+  /** Attach projector panel (init) */
+  public addProjector(): void {
+    this.projectorCount++;
+    this.broadcastProjectorState();
+  }
+
+  /** Detach projector panel (destroy) */
+  public removeProjector(): void {
+    this.projectorCount = Math.max(0, this.projectorCount - 1);
+    this.broadcastProjectorState();
+  }
+
+  /**
+   * Tell the views about the current projector state
+   * - active: pointer should be mirrored (tracking on AND a beamer open)
+   * - open: projector/beamer window is open
+   */
+  public broadcastProjectorState(): void {
+    const active = EXTENSION.cursorTrackingEnabled && this.hasProjector;
+    this.messageService.send({ type: 'projectorStateChanged', active, open: this.hasProjector });
+  }
+
+  public clearActiveEditorDocument() {
+    if (EXTENSION.activeEditorDocument === this) {
+      EXTENSION.activeEditorDocument = null;
+    }
   }
 
   public async reloadDocument(): Promise<void> {

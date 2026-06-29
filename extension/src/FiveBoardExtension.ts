@@ -1,27 +1,23 @@
 import * as vscode from 'vscode';
 import { MessageService } from './MessageService';
-import { PackageManager } from './PackageManager';
 import { EditorEditorProvider } from './providers/EditorEditorProvider';
 import { t } from './localization';
 import path from 'path';
 import { BoardPackage } from './board/package';
-import {
-  ElementSettingsSidebarViewProvider,
-  ProjectorSettingsSidebarViewProvider,
-  SidebarViewProvider,
-} from './providers/SidebarViewProvider';
-import { StructureTreeProvider } from './providers/StructureTreeProvider';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
-import { BoardDocument, DEFAULT_TOOL_ID, EditorState } from '5board.vsc-common';
+import { BoardDocument, DEFAULT_PROJECTOR_POINTER_STYLE, DEFAULT_TOOL_ID, EditorState, ProjectorPointerStyle } from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
-import { ProjectorEditorProvider } from './projector/editorProvider';
+import { ProjectorProvider } from './providers/projectorProvider';
+import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
+import { PackageManager } from './PackageManager';
+import { SidebarManager } from './sidebar/SidebarManager';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
   public readonly packageManager = new PackageManager();
 
   // Registry of all currently open editor documents, keyed by URI string.
-  // ProjectorEditorProvider uses this to find the matching editor document so
+  // ProjectorProvider uses this to find the matching editor document so
   // both panels can share the same MessageService instance.
   private openDocuments = new Map<string, BoardCustomDocument>();
 
@@ -42,6 +38,9 @@ export class FiveBoardExtension extends ExtensionBase {
   public getDocumentForUri(uri: vscode.Uri): BoardCustomDocument | undefined {
     return this.openDocuments.get(uri.toString());
   }
+
+  public cursorTrackingEnabled = true;
+  public projectorPointerStyle: ProjectorPointerStyle = DEFAULT_PROJECTOR_POINTER_STYLE;
 
   private activeEditorDocument_: BoardCustomDocument | null = null;
   public get activeEditorDocument(): BoardCustomDocument | null {
@@ -73,41 +72,9 @@ export class FiveBoardExtension extends ExtensionBase {
     super.activate(context);
     new EditorEditorProvider(context, this.packageManager).register();
     // Register the projector so VS Code knows how to open .5boardz files in presentation mode.
-    new ProjectorEditorProvider(context).register();
-    new SidebarViewProvider(context, this.messages).register();
-    new ProjectorSettingsSidebarViewProvider(context, this.messages).register();
-    new ElementSettingsSidebarViewProvider(context, this.messages).register();
-    new StructureTreeProvider(context).register();
-
-    // The sidebars live in their own webviews on the global message service.
-    // On load they ask for the current projector settings.
-    this.messages.on('ready', (_msg, sender) => {
-      this.messages.send(
-        {
-          type: 'sidebarSync',
-          cursorTrackingEnabled: this.activeEditorDocument?.cursorTrackingEnabled ?? true,
-        },
-        sender,
-      );
-    });
-
-    // When a tool is picked in the sidebar, forward it (with its parameters) to the
-    // active editor document so its webview (a separate per-document service) reacts.
-    this.messages.on('setTool', (msg) => {
-      this.editorState = { tool: msg.tool };
-      this.activeEditorDocument?.messageService.send({ type: 'toolChanged', tool: msg.tool });
-    });
-
-    // The projector-settings toggle in the sidebar flips cursor tracking on the active
-    // document and the new state is reflected back to the sidebar.
-    this.messages.on('toggleCursorTracking', () => {
-      const document = this.activeEditorDocument;
-      if (!document) {
-        return;
-      }
-      const enabled = document.toggleCursorTracking();
-      this.messages.send({ type: 'cursorTrackingChanged', enabled });
-    });
+    new ProjectorProvider(context).register();
+    context.subscriptions.push(new SidebarManager(context, this.messages));
+    new FiveBoardFileSystemProvider(this.packageManager).register(context);
   }
 
   @Command('5board-vsc.newBoard')
@@ -156,7 +123,7 @@ export class FiveBoardExtension extends ExtensionBase {
       await vscode.commands.executeCommand(
         'vscode.openWith',
         tabInput.uri,
-        ProjectorEditorProvider.VIEW_TYPE,
+        ProjectorProvider.VIEW_TYPE,
         { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
       );
       // Focus the projector column (always the rightmost group after openWith Beside).

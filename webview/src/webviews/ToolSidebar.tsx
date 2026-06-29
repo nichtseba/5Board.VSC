@@ -2,115 +2,93 @@ import { useEffect, useState } from 'react';
 import { init } from '../app/init';
 import {
   DEFAULT_FREEHAND_PARAMETERS,
+  EditorTool,
+  EditorToolDefinition,
   EditorToolId,
   FREEHAND_COLORS,
   FREEHAND_WIDTHS,
-  ToolItem,
+  TOOL_DEFINITIONS,
   TranslationKey,
 } from '5board.vsc-common';
 import { useLocalization } from '../providers/LocalizationProvider';
-import { useMessageService } from '../services/MessageService';
 import { Button } from 'vscrui';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
+import ProjectorSettings from '../components/projector/ProjectorSettings';
+import { useMessageService } from '../services/MessageService';
 
 export default function ToolSidebar() {
   const { t } = useLocalization();
   const messages = useMessageService();
-  const [selectedTool, setSelectedTool] = useState<string | null>(null);
-  // Freehand drawing options, mirrored to the editor via 'setTool'.
+
+  const [selectedTool, setSelectedTool] = useState<EditorTool>({
+    type: EditorToolId.POINTER,
+    parameters: undefined,
+  });
+  // Freehand drawing options, sent with the tool via 'selectTool'.
   const [freehandColor, setFreehandColor] = useState(DEFAULT_FREEHAND_PARAMETERS.color);
   const [freehandWidth, setFreehandWidth] = useState(DEFAULT_FREEHAND_PARAMETERS.width);
+  const tools = Object.entries(TOOL_DEFINITIONS) as [EditorToolId, EditorToolDefinition][];
 
-  // Ask the extension for the current language so the sidebar is localized.
   useEffect(() => {
-    messages.send({ type: 'ready' });
-  }, []);
+    messages.send({ type: 'selectTool', tool: selectedTool });
+    messages.send({ type: 'ready' }); // request current projector settings state
+  }, [messages]);
 
-  // Sends the freehand tool together with its current color/width to the editor.
-  const sendFreehandTool = (color: string, width: number) => {
-    messages.send({
-      type: 'setTool',
-      tool: { type: EditorToolId.FREEHAND, parameters: { color, width } },
-    });
+  // Builds the tool payload, attaching freehand parameters for the freehand tool.
+  const toolFor = (toolId: EditorToolId): EditorTool =>
+    toolId === EditorToolId.FREEHAND
+      ? { type: EditorToolId.FREEHAND, parameters: { color: freehandColor, width: freehandWidth } }
+      : { type: toolId, parameters: undefined };
+
+  const selectTool = (toolId: EditorToolId) => {
+    const tool = toolFor(toolId);
+    setSelectedTool(tool);
+    messages.send({ type: 'selectTool', tool });
   };
 
-  const handleToolClick = (tool: ToolItem) => {
-    const next = selectedTool === tool.id ? null : tool.id;
-    setSelectedTool(next);
+  const handleToolClick = (toolId: EditorToolId) => {
+    if (selectedTool.type === toolId) return;
+    selectTool(toolId);
+  };
 
-    // Freehand tool wiring (this is the only tool handled here for now):
-    // activating it starts drawing, leaving it switches the editor back to the pointer.
-    if (next === EditorToolId.FREEHAND) {
-      sendFreehandTool(freehandColor, freehandWidth);
-    } else if (selectedTool === EditorToolId.FREEHAND) {
-      messages.send({
-        type: 'setTool',
-        tool: { type: EditorToolId.POINTER, parameters: undefined },
-      });
+  // Re-send the freehand tool with updated parameters while it is active.
+  const handleFreehandColor = (color: string) => {
+    setFreehandColor(color);
+    if (selectedTool.type === EditorToolId.FREEHAND) {
+      const tool: EditorTool = {
+        type: EditorToolId.FREEHAND,
+        parameters: { color, width: freehandWidth },
+      };
+      setSelectedTool(tool);
+      messages.send({ type: 'selectTool', tool });
     }
   };
 
-  const handleColorChange = (color: string) => {
-    setFreehandColor(color);
-    if (selectedTool === EditorToolId.FREEHAND) sendFreehandTool(color, freehandWidth);
-  };
-
-  const handleWidthChange = (width: number) => {
+  const handleFreehandWidth = (width: number) => {
     setFreehandWidth(width);
-    if (selectedTool === EditorToolId.FREEHAND) sendFreehandTool(freehandColor, width);
+    if (selectedTool.type === EditorToolId.FREEHAND) {
+      const tool: EditorTool = {
+        type: EditorToolId.FREEHAND,
+        parameters: { color: freehandColor, width },
+      };
+      setSelectedTool(tool);
+      messages.send({ type: 'selectTool', tool });
+    }
   };
 
-  const tools: ToolItem[] = [
-    {
-      id: 'pointer',
-      label: t('webview.sidebar.tools.pointer'),
-      icon: 'cursor',
-    },
-    {
-      id: 'text',
-      label: t('webview.sidebar.tools.text'),
-      icon: 'symbol-string',
-    },
-    {
-      id: 'heading',
-      label: t('webview.sidebar.tools.heading'),
-      icon: 'text-size',
-    },
-    {
-      id: 'link',
-      label: t('webview.sidebar.tools.link'),
-      icon: 'link',
-    },
-    {
-      id: 'code',
-      label: t('webview.sidebar.tools.code'),
-      icon: 'code',
-    },
-    {
-      id: 'image',
-      label: t('webview.sidebar.tools.image'),
-      icon: 'file-media',
-    },
-    {
-      id: 'freehand',
-      label: t('webview.sidebar.tools.freehand'),
-      icon: 'pencil',
-    },
-  ];
-
-  const freehandSelected = selectedTool === EditorToolId.FREEHAND;
+  const freehandSelected = selectedTool.type === EditorToolId.FREEHAND;
 
   return (
     <>
       <SidebarShell>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3">
-          {tools.map((tool) => (
+          {tools.map(([key, tool]) => (
             <Button
-              key={tool.id}
-              title={tool.label}
-              appearance={selectedTool === tool.id ? 'primary' : 'secondary'}
+              key={key}
+              title={t(tool.labelKey)}
+              appearance={selectedTool.type === key ? 'primary' : 'secondary'}
               className="h-8 flex flex-col items-center justify-center gap-2"
-              onClick={() => handleToolClick(tool)}
+              onClick={() => handleToolClick(key)}
             >
               <span className={`codicon codicon-${tool.icon}`} />
             </Button>
@@ -119,7 +97,7 @@ export default function ToolSidebar() {
 
         {/* Freehand options — only shown while the freehand tool is active */}
         {freehandSelected && (
-          <section className="flex flex-col gap-2">
+          <section className="mt-6 flex flex-col gap-2">
             <span className="text-xs font-semibold uppercase tracking-wide opacity-70">
               {t('webview.sidebar.freehand.title')}
             </span>
@@ -130,10 +108,10 @@ export default function ToolSidebar() {
                 <button
                   key={color.id}
                   title={t(`webview.sidebar.freehand.colors.${color.id}` as TranslationKey)}
-                  onClick={() => handleColorChange(color.value)}
-                  className={`h-6 w-6 rounded-full border border-[var(--vscode-widget-border)] ${
+                  onClick={() => handleFreehandColor(color.value)}
+                  className={`h-6 w-6 rounded-full border border-foreground-description ${
                     freehandColor === color.value
-                      ? 'outline outline-2 outline-offset-1 outline-[var(--vscode-focusBorder)]'
+                      ? 'outline outline-2 outline-offset-1 outline-focus-border'
                       : ''
                   }`}
                   style={{ backgroundColor: color.value }}
@@ -147,7 +125,7 @@ export default function ToolSidebar() {
                 <Button
                   key={width.id}
                   appearance={freehandWidth === width.value ? 'primary' : 'secondary'}
-                  onClick={() => handleWidthChange(width.value)}
+                  onClick={() => handleFreehandWidth(width.value)}
                 >
                   {t(`webview.sidebar.freehand.widths.${width.id}` as TranslationKey)}
                 </Button>
@@ -155,6 +133,11 @@ export default function ToolSidebar() {
             </div>
           </section>
         )}
+
+        {/* Projector settings as a separate panel below the tools */}
+        <div className="mt-6">
+          <ProjectorSettings />
+        </div>
       </SidebarShell>
     </>
   );

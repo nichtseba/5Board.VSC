@@ -4,6 +4,7 @@ export enum EditorToolId {
   POINTER = 'pointer',
   SPACER = 'spacer',
   FREEHAND = 'freehand',
+  AddElement = 'addElement',
 }
 
 export const DEFAULT_TOOL_ID: EditorToolId = EditorToolId.POINTER;
@@ -26,12 +27,17 @@ export const TOOL_DEFINITIONS = {
     labelKey: 'webview.sidebar.tools.freehand',
     icon: 'pencil',
   },
+  [EditorToolId.AddElement]: {
+    labelKey: 'webview.sidebar.tools.addElement',
+    icon: 'add',
+  },
 } satisfies Record<EditorToolId, EditorToolDefinition>;
 
 type TYPE_TOOL_PARAMETERS = {
   [EditorToolId.POINTER]: undefined;
   [EditorToolId.SPACER]: undefined;
   [EditorToolId.FREEHAND]: FreehandToolParameters;
+  [EditorToolId.AddElement]: AddElementToolParameters;
 };
 
 // Color and width the freehand tool draws with. Chosen in the sidebar.
@@ -64,28 +70,16 @@ export const DEFAULT_FREEHAND_PARAMETERS: FreehandToolParameters = {
   width: FREEHAND_WIDTHS[1].value,
 };
 
-export type EditorTool<EditorToolType extends EditorToolId = EditorToolId> = {
-  type: EditorToolType;
-  parameters: TYPE_TOOL_PARAMETERS[EditorToolType];
-};
-
-export type AddData = {
+type AddElementToolParameters = {
   type: EditorElement['type'];
   layout: Omit<EditorElement['layout'], 'xPos' | 'yPos'>;
   style: EditorElement['style'];
   data: EditorElement['data'];
 };
 
+export type EditorTool<EditorToolType extends EditorToolId = EditorToolId> = {
+  type: EditorToolType;
+  parameters: TYPE_TOOL_PARAMETERS[EditorToolType];
+};
+
 export type EditorState = { tool: EditorTool };
-
-export type ToolItem = {
-  id: string;
-  label: string;
-  icon: string;
-};
-
-export type PresetItem = {
-  id: string;
-  label: string;
-  description: string;
-};

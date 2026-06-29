@@ -11,8 +11,7 @@
       "startPresentation": "Beameransicht starten",
       "title": "Beameransicht",
       "noFileOpen": "Bitte öffne zuerst eine .5boardz Datei im Editor, bevor du die Beameransicht startest.",
-      "cursorTrackingOn": "Mauszeiger-Tracking: AN",
-      "cursorTrackingOff": "Mauszeiger-Tracking: AUS"
+      "loading": "Lade…"
     }
   },
   "webview": {
@@ -27,24 +26,12 @@
         "pointer": "Zeiger",
         "spacer": "Abstand-Tool",
         "freehand": "Freihand-Tool",
+        "addElement": "Element hinzufügen",
         "text": "Text",
         "heading": "Überschrift",
         "link": "Link",
         "code": "Code",
         "image": "Bild"
-      },
-      "projector": {
-        "cursorTracking": "Mauszeiger-Tracking",
-        "on": "An",
-        "off": "Aus",
-        "moreSettings": "Weitere Einstellungen",
-        "comingSoon": "Demnächst",
-        "dummies": {
-          "cursorColor": "Cursor-Farbe",
-          "cursorSize": "Cursor-Größe",
-          "showViewport": "Sichtfeld-Rechteck anzeigen",
-          "background": "Hintergrundfarbe"
-        }
       },
       "freehand": {
         "title": "Freihand-Optionen",
@@ -64,6 +51,28 @@
           "thin": "Dünn",
           "medium": "Mittel",
           "thick": "Dick"
+        }
+      },
+      "elementType": {
+        "heading": "Überschrift",
+        "text": "Text",
+        "code": "Code",
+        "image": "Bild",
+        "shape": "Form",
+        "arrow": "Pfeil",
+        "freehand": "Freihand"
+      },
+      "projectorSettings": {
+        "title": "Beameransicht-Einstellungen",
+        "cursorTracking": "Mauszeiger-Tracking",
+        "pointerColor": "Zeiger-Farbe",
+        "customColor": "Eigene",
+        "pointerShape": "Zeiger-Form",
+        "shapes": {
+          "dot": "Punkt",
+          "ring": "Ring",
+          "rectangle": "Rechteck",
+          "duck": "Ente"
         }
       }
     },

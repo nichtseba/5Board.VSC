@@ -1,50 +1,83 @@
+import { useRef } from 'react';
+import { EditorElement, EditorElementType, EditorToolId } from '5board.vsc-common';
 import type React from 'react';
-import { EditorElement, EditorElementType } from '5board.vsc-common';
 import { TextElement } from './elements/TextElement';
 import { HeadingElement } from './elements/HeadingElement';
+import ElementInteractionController from './elementInteraction/ElementInteractionController';
 import { CodeElement } from './elements/CodeElement';
 import { ImageElement } from './elements/ImageElement';
 import { ShapeElement } from './elements/ShapeElement';
 import { ArrowElement } from './elements/ArrowElement';
 import { FreehandElement } from './elements/FreehandElement';
+import { useEditorState } from '../../providers/EditorStateProvider';
+import { useMessageService } from '../../services/MessageService';
 
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
-  onSelect?: (id: string) => void;
   selected?: boolean;
+  onSelect?: () => void;
+  targetRef?: React.RefObject<HTMLDivElement>;
 };
 
 /**
  * Renders an editor element based on its type. The actual rendering logic for each element type is delegated to specific components (e.g., HeadingElement for heading elements).
  * Uses {@link ELEMENT_COMPONENTS} to determine which component to render for each element type.
+ *
+ * The moveable interaction behavior is centralized here so every editor element can be moved when selected.
  */
 export default function EditorElement<ElementType extends EditorElementType>({
   element,
-  onSelect,
   selected,
 }: EditorElementProps<ElementType>) {
+  const targetRef = useRef<HTMLDivElement>(null);
   const ElementComponent =
     (ELEMENT_COMPONENTS[element.type] as React.ComponentType<EditorElementProps<ElementType>>) ??
     UnknownElement;
+  const activeToolId = useEditorState()?.tool.type;
+  const messages = useMessageService();
 
-  // Most elements get a one-cell left padding for text spacing. Freehand draws
-  // absolute coordinates, so the padding would shift the stroke a cell to the right.
-  const leftPadding =
-    element.type === EditorElementType.Freehand ? '' : 'pl-[var(--editor-spacing)]';
+  const handleSelectElement = (id: string) => {
+    if (activeToolId !== EditorToolId.POINTER) return;
+
+    messages.send({
+      type: 'selectElement',
+      id,
+    });
+  };
 
   return (
-    <div
-      onClick={() => onSelect?.(element.id)}
-      className={`editor-element editor-element-hover ${selected ? 'editor-element-selected' : ''} ${leftPadding} font-bold`}
-      style={{
-        gridRowStart: element.layout.yPos + 1,
-        gridRowEnd: `span ${element.layout.height}`,
-        gridColumnStart: element.layout.xPos + 1,
-        gridColumnEnd: `span ${element.layout.width}`,
-      }}
-    >
-      <ElementComponent element={element} selected={selected} onSelect={onSelect} />
-    </div>
+    <>
+      <div
+        onClick={() => handleSelectElement(element.id)}
+        className={`
+          box-border font-bold
+          ${activeToolId === EditorToolId.POINTER ? 'cursor-pointer' : ''}
+          ${
+            activeToolId === EditorToolId.POINTER && !selected
+              ? 'hover:outline hover:outline-1 hover:outline-focus-border'
+              : ''
+          }
+          ${selected ? 'outline outline-2 outline-focus-border bg-focus-border/12' : ''}
+        `}
+        ref={targetRef}
+        style={{
+          gridRowStart: element.layout.yPos + 1,
+          gridRowEnd: `span ${element.layout.height}`,
+          gridColumnStart: element.layout.xPos + 1,
+          gridColumnEnd: `span ${element.layout.width}`,
+        }}
+      >
+        <ElementComponent
+          element={element}
+          targetRef={targetRef}
+          selected={selected}
+          onSelect={() => handleSelectElement(element.id)}
+        />
+      </div>
+      {activeToolId === EditorToolId.POINTER && (
+        <ElementInteractionController element={element} selected={selected} targetRef={targetRef} />
+      )}
+    </>
   );
 }
 

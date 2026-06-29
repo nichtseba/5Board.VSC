@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useMessageService, useOnMessage } from '../services/MessageService';
 import { useLocalization } from '../providers/LocalizationProvider';
-import { BoardDocument } from '5board.vsc-common';
+import { useBoardDocument } from '../providers/BoardDocumentProvider';
+import { DEFAULT_PROJECTOR_POINTER_STYLE, ProjectorPointerStyle } from '5board.vsc-common';
 import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
+import { FreehandPreview } from '../components/canvas/tools/FreehandPreviewOverlay';
+import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
 
 // The projector view shows the same canvas as the editor,
 // but is read-only and display-only — no interactive controls.
@@ -11,16 +14,15 @@ export default function Projector() {
   const messages = useMessageService();
   const { t } = useLocalization();
   // boardDocument is null until the extension sends the initial 'init' message.
-  const [boardDocument, setBoardDocument] = useState<BoardDocument | null>(null);
+  const boardDocument = useBoardDocument();
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
-  // Mirrors the editor's selected element so the projector highlights the same one.
-  const [selectedElementId, setSelectedElementId] = useState<string | null>(null);
+  // Cursor appearance, configured from the sidebar and pushed by the extension.
+  const [pointerStyle, setPointerStyle] = useState<ProjectorPointerStyle>(
+    DEFAULT_PROJECTOR_POINTER_STYLE,
+  );
   // Live freehand stroke the editor is currently drawing (cleared when finished).
-  const [freehandPreview, setFreehandPreview] = useState<{
-    points: { x: number; y: number }[];
-    color: string;
-    width: number;
-  } | null>(null);
+  const [freehandPreview, setFreehandPreview] = useState<FreehandPreview | null>(null);
+  // Mirrors the editor's selected element so the projector highlights the same one.
 
   // Tell the extension that this webview is ready to receive messages.
   // The extension will respond with 'init' and 'cursorTrackingChanged'.
@@ -74,18 +76,6 @@ export default function Projector() {
   }, []);
   // Listen for messages from the extension host.
   useOnMessage((msg) => {
-    if (msg.type === 'init' || msg.type === 'updateDocument') {
-      // Replace the displayed document whenever the extension sends fresh data.
-      setBoardDocument(msg.document);
-      // The finished stroke is now part of the document — drop the live preview.
-      setFreehandPreview(null);
-    }
-    if (msg.type === 'freehandPreview') {
-      setFreehandPreview({ points: msg.points, color: msg.color, width: msg.width });
-    }
-    if (msg.type === 'freehandPreviewEnd') {
-      setFreehandPreview(null);
-    }
     if (msg.type === 'cursorMove') {
       setCursor({ x: msg.x, y: msg.y });
     }
@@ -93,14 +83,20 @@ export default function Projector() {
       // Mouse left the editor canvas — remove the dot.
       setCursor(null);
     }
-    if (msg.type === 'cursorTrackingChanged') {
-      // If tracking was just disabled, clear any lingering cursor dot.
-      if (!msg.enabled) {
+    if (msg.type === 'projectorStateChanged') {
+      // If mirroring was just turned off, clear any lingering cursor dot.
+      if (!msg.active) {
         setCursor(null);
       }
     }
-    if (msg.type === 'selectElement') {
-      setSelectedElementId(msg.elementId);
+    if (msg.type === 'projectorPointerChanged') {
+      setPointerStyle(msg.style);
+    }
+    if (msg.type === 'freehandPreview') {
+      setFreehandPreview({ points: msg.points, color: msg.color, width: msg.width });
+    }
+    if (msg.type === 'freehandPreviewEnd') {
+      setFreehandPreview(null);
     }
     if (msg.type === 'scroll') {
       const canvas = document.querySelector('.editor-canvas') as HTMLElement | null;
@@ -139,17 +135,17 @@ export default function Projector() {
         so the projector always mirrors the editor's selection (not the projector
         user's own clicks).
       */}
-      <div>
+      {/*
+        Beamer view: display only. pointerEvents:'none' aka no interactive controls.
+      */}
+      <div style={{ pointerEvents: 'none' }}>
         {boardDocument ? (
-          <EditorCanvas
-            document={boardDocument}
-            cursor={cursor}
-            selectedElementId={selectedElementId}
-            freehandPreview={freehandPreview}
-          />
+          <CanvasEventsProvider>
+            <EditorCanvas cursor={cursor} pointerStyle={pointerStyle} freehandPreview={freehandPreview} />
+          </CanvasEventsProvider>
         ) : (
           // Shown while waiting for the first 'init' message from the extension.
-          <div style={{ padding: '1rem', opacity: 0.5 }}>Loading…</div>
+          <div style={{ padding: '1rem', opacity: 0.5 }}>{t('extension.projector.loading')}</div>
         )}
       </div>
     </div>

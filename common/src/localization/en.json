@@ -11,8 +11,7 @@
       "startPresentation": "Start Presentation",
       "title": "Projector",
       "noFileOpen": "Please open a .5boardz file in the editor before starting the projector view.",
-      "cursorTrackingOn": "Cursor Tracking: ON",
-      "cursorTrackingOff": "Cursor Tracking: OFF"
+      "loading": "Loading..."
     }
   },
   "webview": {
@@ -25,26 +24,23 @@
       "title": "5Board Sidebar",
       "tools": {
         "pointer": "Pointer",
+        "spacer": "Spacer Tool",
+        "freehand": "Freehand Tool",
+        "addElement": "Add Element",
         "text": "Text",
         "heading": "Heading",
         "link": "Link",
         "code": "Code",
-        "image": "Image",
-        "spacer": "Spacer Tool",
-        "freehand": "Freehand Tool"
+        "image": "Image"
       },
-      "projector": {
-        "cursorTracking": "Cursor Tracking",
-        "on": "On",
-        "off": "Off",
-        "moreSettings": "More settings",
-        "comingSoon": "Coming soon",
-        "dummies": {
-          "cursorColor": "Cursor Color",
-          "cursorSize": "Cursor Size",
-          "showViewport": "Show Viewport Rectangle",
-          "background": "Background Color"
-        }
+      "elementType": {
+        "heading": "Heading",
+        "text": "Text",
+        "code": "Code",
+        "image": "Image",
+        "shape": "Shape",
+        "arrow": "Arrow",
+        "freehand": "Freehand"
       },
       "freehand": {
         "title": "Freehand Options",
@@ -64,6 +60,19 @@
           "thin": "Thin",
           "medium": "Medium",
           "thick": "Thick"
+        }
+      },
+      "projectorSettings": {
+        "title": "Projector Settings",
+        "cursorTracking": "Cursor Tracking",
+        "pointerColor": "Pointer Color",
+        "customColor": "Custom",
+        "pointerShape": "Pointer Shape",
+        "shapes": {
+          "dot": "Dot",
+          "ring": "Ring",
+          "rectangle": "Rectangle",
+          "duck": "Duck"
         }
       }
     },
