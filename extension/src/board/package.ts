@@ -1,19 +1,24 @@
 import JSZip from 'jszip';
 import * as vscode from 'vscode';
 import {
-  ASSET_ROOT,
   Asset,
   BoardContent,
   BoardDocument,
   BoardManifest,
-  CONTENT_PATH,
-  MANIFEST_PATH,
-  SRC_ROOT,
   Source,
   create5boardzManifest,
 } from '5board.vsc-common';
 
+export const MANIFEST_PATH = 'manifest.json';
+export const CONTENT_PATH = 'content.json';
+export const SRC_ROOT = 'src';
+export const ASSET_ROOT = 'assets';
+export const EXPORTS_ROOT = 'exports';
+
 export class BoardPackage {
+  public readonly documentChange = new vscode.EventEmitter<void>();
+  public readonly onDocumentChange = this.documentChange.event;
+
   public static async read(uri: vscode.Uri): Promise<BoardPackage> {
     const packageBytes = await vscode.workspace.fs.readFile(uri);
     const zip = await JSZip.loadAsync(packageBytes);
@@ -38,6 +43,7 @@ export class BoardPackage {
     const document: BoardDocument = {
       manifest: create5boardzManifest(title),
       content: {
+        selectedElementId: null,
         elements: [],
         background: '',
         snapAngle: 0,
@@ -105,18 +111,20 @@ async function readSources(zip: JSZip): Promise<Source[]> {
 
   const promises: Promise<Source>[] = [];
 
-  sources_zip.forEach((language, _file) => {
-    const lang_zip = sources_zip.folder(language)!;
-
+  sources_zip.forEach((languagePath, _file) => {
+    const lang_zip = sources_zip.folder(languagePath)!;
+    const language = languagePath.slice(0, -1); // Remove trailing slash from folder name
     lang_zip.forEach((relativePath, file) => {
       // We need to create a promise for each file, because the async reading of the file is done in a callback and we want to wait for all files to be read before returning
       const promise = new Promise<Source>(async (resolve, reject) => {
         try {
           const code = await file.async('string');
           const source: Source = {
-            language,
+            language: language,
             name: relativePath,
             code,
+            createdAt: 0, // Todo: Store and read actual timestamps for sources
+            modifiedAt: 0, // Todo: Store and read actual timestamps for sources
           };
           resolve(source);
         } catch (error) {
@@ -145,6 +153,8 @@ async function readAssets(zip: JSZip): Promise<Asset[]> {
         const asset: Asset = {
           name: relativePath,
           mime: mimeFromFileName(relativePath),
+          createdAt: 0, // Todo: Store and read actual timestamps for assets
+          modifiedAt: 0,
           bytes,
         };
         resolve(asset);

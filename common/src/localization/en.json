@@ -18,13 +18,22 @@
       "title": "5Board Sidebar",
       "tools": {
         "pointer": "Pointer",
+        "spacer": "Spacer Tool",
+        "freehand": "Freehand Tool",
+        "addElement": "Add Element",
         "text": "Text",
         "heading": "Heading",
         "link": "Link",
         "code": "Code",
+        "image": "Image"
+      },
+      "elementType": {
+        "heading": "Heading",
+        "text": "Text",
+        "code": "Code",
         "image": "Image",
-        "spacer": "Spacer Tool",
-        "freehand": "Freehand Tool"
+        "shape": "Shape",
+        "arrow": "Arrow"
       }
     },
     "sidebar-element-settings": {

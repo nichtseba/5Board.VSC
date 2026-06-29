@@ -9,7 +9,9 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onFileSystem:5board"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "languages": [
@@ -69,6 +71,10 @@
         {
           "id": "5board-vsc.sidebar-structure-view",
           "name": "%views.sidebar.structure-title%"
+        },
+        {
+          "id": "5board-vsc.sidebar-file-view",
+          "name": "%views.sidebar.file-title%"
         }
       ]
     },

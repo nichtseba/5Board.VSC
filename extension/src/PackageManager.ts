@@ -1,3 +1,4 @@
+import path from 'path';
 import { BoardPackage } from './board/package';
 import * as vscode from 'vscode';
 /**
@@ -24,19 +25,24 @@ export class PackageManager {
   }
 
   private get(uri: vscode.Uri): BoardPackage | null {
-    const ref = this.packages.get(uri.toString());
+    const key = uriToKey(uri);
+    const ref = this.packages.get(key);
     if (!ref) {
       return null;
     }
     const pkg = ref.deref();
     if (!pkg) {
-      this.packages.delete(uri.toString());
+      this.packages.delete(key);
       return null;
     }
     return pkg;
   }
 
   private set(uri: vscode.Uri, pkg: BoardPackage): void {
-    this.packages.set(uri.toString(), new WeakRef(pkg));
+    this.packages.set(uriToKey(uri), new WeakRef(pkg));
   }
+}
+
+function uriToKey(uri: vscode.Uri): string {
+  return path.resolve(uri.fsPath);
 }

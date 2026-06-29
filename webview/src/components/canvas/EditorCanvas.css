@@ -1,10 +1,11 @@
 .editor-canvas {
-  width: calc(var(--editor-spacing) * var(--editor-columns));
+  position: relative;
+  width: calc(var(--spacing-editor) * var(--editor-columns));
   display: grid;
-  grid-template-columns: repeat(var(--editor-columns), var(--editor-spacing));
-  /* grid-template-rows: repeat(auto-fill, var(--editor-spacing)); */
-  grid-auto-rows: var(--editor-spacing);
-  background-size: var(--editor-spacing) var(--editor-spacing);
+  grid-template-columns: repeat(var(--editor-columns), var(--spacing-editor));
+  /* grid-template-rows: repeat(auto-fill, var(--spacing-editor)); */
+  grid-auto-rows: var(--spacing-editor);
+  background-size: var(--spacing-editor) var(--spacing-editor);
   background-image:
     linear-gradient(to right, var(--vscode-editorWidget-border) 1px, transparent 1px),
     linear-gradient(to bottom, var(--vscode-editorWidget-border) 1px, transparent 1px);
