@@ -9,7 +9,6 @@ import {
 import { useLocalization } from '../providers/LocalizationProvider';
 import { Button } from 'vscrui';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
-import ProjectorSettings from '../components/projector/ProjectorSettings';
 import { useMessageService } from '../services/MessageService';
 
 export default function ToolSidebar() {
@@ -53,11 +52,6 @@ export default function ToolSidebar() {
               <span className={`codicon codicon-${tool.icon}`} />
             </Button>
           ))}
-        </div>
-
-        {/* Projector settings as a separate panel below the tools */}
-        <div className="mt-6">
-          <ProjectorSettings />
         </div>
       </SidebarShell>
     </>
