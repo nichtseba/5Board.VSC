@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { init } from '../app/init';
-import ProjectorSettings from '../components/projector/ProjectorSettings';
+import ProjectorSettings from '../components/sidebar/ProjectorSettings';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
 import { useMessageService } from '../services/MessageService';
 

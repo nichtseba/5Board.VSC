@@ -114,8 +114,10 @@ export default function ProjectorSettings() {
             ))}
           </div>
           <label className="flex items-center gap-2">
+            
             <input
               type="color"
+              // seperate comp in colorSelector.tsx
               // Native picker needs a hex value; a preset token (var(--…)) can't be shown there.
               value={style.color.startsWith('#') ? style.color : '#000000'}
               onChange={(e) => update({ color: e.target.value })}
