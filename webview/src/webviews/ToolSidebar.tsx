@@ -13,7 +13,6 @@ import {
 import { useLocalization } from '../providers/LocalizationProvider';
 import { Button } from 'vscrui';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
-import ProjectorSettings from '../components/projector/ProjectorSettings';
 import { useMessageService } from '../services/MessageService';
 
 export default function ToolSidebar() {
@@ -94,7 +93,6 @@ export default function ToolSidebar() {
             </Button>
           ))}
         </div>
-
         {/* Freehand options — only shown while the freehand tool is active */}
         {freehandSelected && (
           <section className="mt-6 flex flex-col gap-2">
@@ -133,11 +131,6 @@ export default function ToolSidebar() {
             </div>
           </section>
         )}
-
-        {/* Projector settings as a separate panel below the tools */}
-        <div className="mt-6">
-          <ProjectorSettings />
-        </div>
       </SidebarShell>
     </>
   );

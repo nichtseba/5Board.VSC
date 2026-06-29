@@ -3,6 +3,7 @@ import { SidebarDocumentSync } from './SidebarDocumentSync';
 import { MessageService } from '../MessageService';
 import {
   ElementSettingsSidebarViewProvider,
+  ProjectorSettingsSidebarViewProvider,
   SidebarViewProvider,
 } from '../providers/SidebarViewProvider';
 import { StructureTreeProvider } from '../providers/StructureTreeProvider';
@@ -17,6 +18,7 @@ export class SidebarManager implements vscode.Disposable {
     private readonly messages: MessageService,
   ) {
     new SidebarViewProvider(context, messages).register();
+    new ProjectorSettingsSidebarViewProvider(context, messages).register();
     new ElementSettingsSidebarViewProvider(context, messages).register();
     new StructureTreeProvider(context).register();
     new FileTreeProvider(context).register();
