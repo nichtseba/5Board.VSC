@@ -21,13 +21,11 @@ export default function ProjectorCursorMirror({ active }: { active: boolean }) {
 
       rafRef.current = requestAnimationFrame(() => {
         rafRef.current = null;
-        console.log(`Mouse Position: (${point.x}, ${point.y})`); // dev tools
         messages.send({ type: 'cursorMove', x: point.x, y: point.y });
       });
     },
     pointerLeave: () => {
       if (!active) return;
-      console.log('Pointer left canvas — cursorLeave'); // dev tools
       messages.send({ type: 'cursorLeave' });
     },
   });

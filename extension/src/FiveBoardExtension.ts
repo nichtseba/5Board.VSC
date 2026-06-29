@@ -15,26 +15,18 @@ import { SidebarManager } from './sidebar/SidebarManager';
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
   public readonly packageManager = new PackageManager();
-
-  // Registry of all currently open editor documents, keyed by URI string.
-  // ProjectorProvider uses this to find the matching editor document so
-  // both panels can share the same MessageService instance.
   private openDocuments = new Map<string, BoardCustomDocument>();
 
-  /** Register an editor document so the projector can find it by URI. */
   public registerDocument(document: BoardCustomDocument): void {
-    // First registration wins — the editor always opens before the projector.
     if (!this.openDocuments.has(document.uri.toString())) {
       this.openDocuments.set(document.uri.toString(), document);
     }
   }
 
-  /** Remove the document for this URI (called from BoardCustomDocument.dispose). */
   public unregisterDocument(uri: vscode.Uri): void {
     this.openDocuments.delete(uri.toString());
   }
 
-  /** Look up the editor document for a given file URI. Returns undefined if not open. */
   public getDocumentForUri(uri: vscode.Uri): BoardCustomDocument | undefined {
     return this.openDocuments.get(uri.toString());
   }
@@ -71,7 +63,6 @@ export class FiveBoardExtension extends ExtensionBase {
   public activate(context: vscode.ExtensionContext): void {
     super.activate(context);
     new EditorEditorProvider(context, this.packageManager).register();
-    // Register the projector so VS Code knows how to open .5boardz files in presentation mode.
     new ProjectorProvider(context).register();
     context.subscriptions.push(new SidebarManager(context, this.messages));
     new FiveBoardFileSystemProvider(this.packageManager).register(context);
@@ -108,9 +99,6 @@ export class FiveBoardExtension extends ExtensionBase {
 
   @Command('5board-vsc.startPresentation')
   async startPresentationCommand(): Promise<void> {
-    // Use the tab API to find the URI of the currently active .5boardz editor.
-    // This is more reliable than activeEditorDocument because it does not depend on
-    // the webview having sent a 'focus' message.
     const activeTab = vscode.window.tabGroups.activeTabGroup.activeTab;
     const tabInput = activeTab?.input;
 
@@ -118,18 +106,13 @@ export class FiveBoardExtension extends ExtensionBase {
       tabInput instanceof vscode.TabInputCustom &&
       tabInput.viewType === EditorEditorProvider.VIEW_TYPE
     ) {
-      // Open the projector beside the editor.
-      // preserveFocus keeps the editor focused so the projector tab opens quietly.
       await vscode.commands.executeCommand(
         'vscode.openWith',
         tabInput.uri,
         ProjectorProvider.VIEW_TYPE,
         { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
       );
-      // Focus the projector column (always the rightmost group after openWith Beside).
       await vscode.commands.executeCommand('workbench.action.focusLastEditorGroup');
-      // Move the projector's entire column into its own VS Code window so it can
-      // be placed on a second screen / beamer independently.
       await vscode.commands.executeCommand('workbench.action.moveEditorGroupToNewWindow');
     } else {
       vscode.window.showWarningMessage(t('extension.projector.noFileOpen'));

@@ -5,7 +5,6 @@ import { BoardPackage } from '../board/package';
 import { get5boardzAssetCacheRoot } from '../board/webview';
 import { t } from '../localization';
 import { setWebviewHtml } from '../webview';
-import { DUMMY_BOARD_DOCUMENT } from '../board/dummyDocument';
 import { EXTENSION } from '../extension';
 
 /**
@@ -46,12 +45,6 @@ export class ProjectorProvider implements vscode.CustomReadonlyEditorProvider<Bo
     _token: vscode.CancellationToken,
   ): Promise<BoardCustomDocument> {
     const boardPackage = await BoardPackage.read(uri);
-
-    // TODO: Remove this block once the file format is fully implemented.
-    // Inject dummy slides so the projector is not blank during development.
-    if (boardPackage.document.content.elements.length === 0) {
-      boardPackage.document.content = DUMMY_BOARD_DOCUMENT.content;
-    }
 
     return new BoardCustomDocument(boardPackage, uri);
   }
