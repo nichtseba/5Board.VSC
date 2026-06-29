@@ -18,6 +18,7 @@ export default function EditorCanvas() {
   const editorState = useEditorState();
   const { emit } = useCanvasEventDispatcher();
 
+  const elements = document?.content.elements;
   const selectedElementId = document?.content.selectedElementId ?? null;
   const activeToolId = editorState?.tool.type;
 
@@ -42,10 +43,7 @@ export default function EditorCanvas() {
     }
   }, [activeToolId, document?.content.selectedElementId, messages]);
 
-  const headingNumbers = useMemo(
-    () => computeHeadingNumbers(document.content.elements),
-    [document.content.elements],
-  );
+  const headingNumbers = useMemo(() => computeHeadingNumbers(elements ?? []), [elements]);
 
   return (
     <>
@@ -60,7 +58,7 @@ export default function EditorCanvas() {
           onPointerCancel={(e) => emit('pointerCancel', e.nativeEvent)}
         >
           <CanvasTools />
-          {document?.content.elements.map((element) => (
+          {elements?.map((element) => (
             <EditorElement
               key={element.id}
               element={element}
