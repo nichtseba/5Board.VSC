@@ -12,7 +12,7 @@ export function ImageElement({ element, assetUrls }: EditorElementProps<EditorEl
   const imageSrc = assetUrls?.[element.data.src] ?? element.data.src;
 
   const configureSize = () => {
-    if (element.data.configuredWidth) {
+    if (element.data.configuredWidth && element.data.aspectRatio !== undefined) {
       return;
     }
 
@@ -25,6 +25,8 @@ export function ImageElement({ element, assetUrls }: EditorElementProps<EditorEl
     const width = Math.max(1, Math.round(img.naturalWidth / cellSize.width));
     const height = Math.max(1, Math.round(img.naturalHeight / cellSize.height));
 
+    const aspectRatio = img.naturalWidth / img.naturalHeight;
+
     messages.send({
       type: 'updateElementLayout',
       id: element.id,
@@ -32,6 +34,7 @@ export function ImageElement({ element, assetUrls }: EditorElementProps<EditorEl
         width,
         height,
       },
+      aspectRatio,
     });
   };
 

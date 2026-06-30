@@ -1,4 +1,4 @@
-import { EditorElementType } from '5board.vsc-common';
+import { EditorElement, EditorElementType } from '5board.vsc-common';
 import { BoardCustomDocument } from './BoardCustomDocument';
 import { addImageToDocument } from './addImageToDocument';
 
@@ -27,9 +27,12 @@ export class DocumentMessageHandlers {
           };
 
           if (element.type === EditorElementType.Image) {
-            element.data = {
-              ...element.data,
+            const imageElement = element as EditorElement<EditorElementType.Image>;
+
+            imageElement.data = {
+              ...imageElement.data,
               configuredWidth: true,
+              aspectRatio: msg.aspectRatio ?? imageElement.data.aspectRatio,
             };
           }
         });

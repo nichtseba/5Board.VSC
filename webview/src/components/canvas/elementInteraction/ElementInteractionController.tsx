@@ -81,7 +81,18 @@ export default function ElementInteractionController<ElementType extends EditorE
     const width = lastEvent.width;
     const height = lastEvent.height;
     const newWidth = Math.max(1, Math.round(width / cellSize.width));
-    const newHeight = Math.max(1, Math.round(height / cellSize.height));
+    let newHeight = Math.max(1, Math.round(height / cellSize.height));
+
+    if (element.type === EditorElementType.Image && shouldKeepRatio) {
+      const imageElement = element as EditorElement<EditorElementType.Image>;
+
+      const ratio =
+        imageElement.data.aspectRatio ??
+        (imageElement.layout.width * cellSize.width) /
+          (imageElement.layout.height * cellSize.height);
+
+      newHeight = Math.max(1, Math.round((newWidth * cellSize.width) / ratio / cellSize.height));
+    }
 
     if (newWidth !== element.layout.width || newHeight !== element.layout.height) {
       pendingPositionUpdate.current = true;
