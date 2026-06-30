@@ -12,17 +12,13 @@ import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
 export default function Projector() {
   const messages = useMessageService();
   const { t } = useLocalization();
-  // boardDocument is null until the extension sends the initial 'init' message.
   const boardDocument = useBoardDocument();
   const [cursor, setCursor] = useState<{ x: number; y: number } | null>(null);
   // Cursor appearance, configured from the sidebar and pushed by the extension.
   const [pointerStyle, setPointerStyle] = useState<ProjectorPointerStyle>(
     DEFAULT_PROJECTOR_POINTER_STYLE,
   );
-  // Mirrors the editor's selected element so the projector highlights the same one.
 
-  // Tell the extension that this webview is ready to receive messages.
-  // The extension will respond with 'init' and 'cursorTrackingChanged'.
   useEffect(() => {
     messages.send({ type: 'ready' });
   }, []);
@@ -40,11 +36,11 @@ export default function Projector() {
       messages.send({
         type: 'updateViewport',
         viewport: {
-          // Sichtbarer Bereich innerhalb des Canvas
+          // Visible arria inside the canvas
           top: Math.max(0, -canvasRect.top),
           left: Math.max(0, -canvasRect.left),
 
-          // Größe des sichtbaren Fensters
+          // Size of the wisible window
           width: window.innerWidth,
           height: window.innerHeight,
         },
@@ -71,13 +67,12 @@ export default function Projector() {
       document.body.style.overflow = '';
     };
   }, []);
-  // Listen for messages from the extension host.
+
   useOnMessage((msg) => {
     if (msg.type === 'cursorMove') {
       setCursor({ x: msg.x, y: msg.y });
     }
     if (msg.type === 'cursorHide') {
-      // Mouse left the editor canvas — remove the dot.
       setCursor(null);
     }
     if (msg.type === 'projectorStateChanged') {

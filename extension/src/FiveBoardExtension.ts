@@ -5,9 +5,15 @@ import { t } from './localization';
 import path from 'path';
 import { BoardPackage } from './board/package';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
-import { BoardDocument, DEFAULT_PROJECTOR_POINTER_STYLE, DEFAULT_TOOL_ID, EditorState, ProjectorPointerStyle } from '5board.vsc-common';
+import {
+  BoardDocument,
+  DEFAULT_PROJECTOR_POINTER_STYLE,
+  DEFAULT_TOOL_ID,
+  EditorState,
+  ProjectorPointerStyle,
+} from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
-import { ProjectorProvider } from './providers/projectorProvider';
+import { ProjectorProvider } from './providers/ProjectorProvider';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
