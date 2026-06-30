@@ -6,6 +6,12 @@
       "packageFilter": "5Boardz Package",
       "createFile": "Create 5Board file",
       "createFileFailed": "Failed to create 5Board file:"
+    },
+    "projector": {
+      "startPresentation": "Start Presentation",
+      "title": "Projector",
+      "noFileOpen": "Please open a .5boardz file in the editor before starting the projector view.",
+      "loading": "Loading..."
     }
   },
   "webview": {
@@ -34,6 +40,19 @@
         "image": "Image",
         "shape": "Shape",
         "arrow": "Arrow"
+      },
+      "projectorSettings": {
+        "title": "Projector Settings",
+        "cursorTracking": "Cursor Tracking",
+        "pointerColor": "Pointer Color",
+        "customColor": "Custom",
+        "pointerShape": "Pointer Shape",
+        "shapes": {
+          "dot": "Dot",
+          "ring": "Ring",
+          "rectangle": "Rectangle",
+          "duck": "Duck"
+        }
       }
     },
     "sidebar-element-settings": {
