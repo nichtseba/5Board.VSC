@@ -2,7 +2,6 @@ import vscode from 'vscode';
 import { BoardPackage } from './package';
 import { BoardDocument } from '5board.vsc-common';
 import { MessageService } from '../MessageService';
-import { ExecutionService } from '../runner/ExecutionService';
 import { EXTENSION } from '../extension';
 import { DocumentMessageHandlers } from './DocumentMessageHandlers';
 
@@ -12,13 +11,16 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   public readonly messageService = new MessageService();
   private readonly disposables: vscode.Disposable[] = [];
   private readonly unsubscribers: (() => void)[] = [];
-
-  private readonly executionService = new ExecutionService();
+  private projectorCount = 0;
 
   constructor(
     public boardPackage: BoardPackage,
     public uri: vscode.Uri,
   ) {
+    // Register in the global document registry so ProjectorProvider can
+    // find this document and attach the projector panel to the same MessageService.
+    EXTENSION.registerDocument(this);
+
     this.disposables.push(
       this.onDocumentChange((document) => {
         this.messageService.send({ type: 'updateDocument', document });
@@ -43,35 +45,6 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   }
 
   private registerMessageHandlers(): void {
-    this.unsubscribers.push(
-      this.messageService.on('ready', (_msg, sender) => {
-        this.messageService.send(
-          {
-            type: 'init',
-            document: this.boardPackage.document,
-            editorState: EXTENSION.editorState,
-            language: 'en',
-          },
-          sender,
-        );
-      }),
-    );
-    this.unsubscribers.push(
-      this.messageService.on('focus', ({ focus }) => {
-        console.log('focus: ', this.uri);
-        if (focus) {
-          EXTENSION.activeEditorDocument = this;
-        } else {
-          this.clearActiveEditorDocument();
-        }
-      }),
-    );
-    this.unsubscribers.push(
-      this.messageService.on('executeCodeblock', (msg) => {
-        void this.executeBlock(msg.elementId);
-      }),
-    );
-
     this.unsubscribers.push(...new DocumentMessageHandlers(this).register());
   }
 
@@ -85,7 +58,34 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     this.clearActiveEditorDocument();
   }
 
-  private clearActiveEditorDocument() {
+  /** Check if projector window is active/attached */
+  public get hasProjector(): boolean {
+    return this.projectorCount > 0;
+  }
+
+  /** Attach projector panel (init) */
+  public addProjector(): void {
+    this.projectorCount++;
+    this.broadcastProjectorState();
+  }
+
+  /** Detach projector panel (destroy) */
+  public removeProjector(): void {
+    this.projectorCount = Math.max(0, this.projectorCount - 1);
+    this.broadcastProjectorState();
+  }
+
+  /**
+   * Tell the views about the current projector state
+   * - active: pointer should be mirrored (tracking on AND a beamer open)
+   * - open: projector/beamer window is open
+   */
+  public broadcastProjectorState(): void {
+    const active = EXTENSION.cursorTrackingEnabled && this.hasProjector;
+    this.messageService.send({ type: 'projectorStateChanged', active, open: this.hasProjector });
+  }
+
+  public clearActiveEditorDocument() {
     if (EXTENSION.activeEditorDocument === this) {
       EXTENSION.activeEditorDocument = null;
     }
@@ -105,24 +105,5 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   public applyEdit(edit: (document: BoardDocument) => void): void {
     edit(this.boardPackage.document);
     this.documentChange.fire(this.boardPackage.document);
-  }
-
-  public async executeBlock(elementId: string): Promise<void> {
-    const result = await this.executionService.execute(this.boardPackage.document, elementId);
-
-    // Execution results are transient UI state — they are sent to the webviews and held
-    // in local React state there, never written back into the (persisted) document.
-    this.messageService.send({
-      type: 'codeblockResult',
-      elementId,
-      output: {
-        stdout: result.stdout,
-        // Surface execution-level errors (no runner, source missing, timeout) that have
-        // no stderr of their own, so the user sees them instead of an empty output.
-        stderr: result.stderr || result.error || '',
-        success: result.success,
-        exitCode: result.exitCode,
-      },
-    });
   }
 }

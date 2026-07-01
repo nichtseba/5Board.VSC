@@ -1,9 +1,12 @@
 {
   "customEditors.editor": "5Board Editor",
   "customEditors.legacy-converter": "5Board Legacy Converter",
-  "views.sidebar.sidebar-title": "Tools & Presets",
+  "customEditors.projector": "5Board Projector View",
+  "views.sidebar.tool-title": "Tools & Presets",
+  "views.sidebar.projector-title": "Projector Settings",
   "views.sidebar.element-settings-title": "Element Settings",
   "views.sidebar.structure-title": "Structure",
+  "views.sidebar.file-title": "File Content",
   "commands.openCustomEditor": "Open 5Board Editor",
   "commands.openBoardFile": "Open 5Board File",
   "commands.newBoardFile": "New 5Board File",

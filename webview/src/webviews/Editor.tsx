@@ -1,14 +1,23 @@
 import { useEffect, useState } from 'react';
 import { useMessageService, useOnMessage } from '../services/MessageService';
-import { BoardDocument } from '5board.vsc-common';
+//import { useLocalization } from '../providers/LocalizationProvider';
 import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
 import { SourcesProvider } from '../providers/SourcesProvider';
 import { ExecutionOutputProvider } from '../providers/ExecutionOutputProvider';
+import ProjectorViewPort from '../components/projector/ProjectorViewPort';
+import ProjectorCursorMirror from '../components/projector/ProjectorCursorMirror';
+import ProjectorScrollMirror from '../components/projector/ProjectorScrollMirror';
+import { useBoardDocument } from '../providers/BoardDocumentProvider';
+import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
 
 export default function Editor() {
   const messages = useMessageService();
-  const [document, setDocument] = useState<BoardDocument | null>(null);
+  const boardDocument = useBoardDocument();
+
+  // Whether the pointer should be mirrored to the projector (tracking on AND a beamer open).
+  const [mirrorActive, setMirrorActive] = useState(false);
+  const [projectorOpen, setProjectorOpen] = useState(false);
 
   useEffect(() => {
     messages.send({ type: 'ready' });
@@ -16,26 +25,28 @@ export default function Editor() {
   }, []);
 
   useOnMessage((msg) => {
-    if (msg.type === 'updateDocument' || msg.type === 'init') {
-      setDocument(msg.document);
+    if (msg.type === 'projectorStateChanged') {
+      setMirrorActive(msg.active);
+      setProjectorOpen(msg.open);
     }
   });
 
   return (
     <>
-      <p>
-        <a href="5board:/c:/Users/leone/Uni/5Board/5board.vsc/test.5boardz/src/java/Student.java">
-          TEST
-        </a>
-        Document: <code>{JSON.stringify(document, null, 2)}</code>
-      </p>
-      <ExecutionOutputProvider>
-        {document && (
-          <SourcesProvider value={document.sources}>
-            <EditorCanvas document={document} />
-          </SourcesProvider>
+      <div className="relative">
+        {boardDocument && (
+          <ExecutionOutputProvider>
+            <SourcesProvider value={boardDocument.sources}>
+              <CanvasEventsProvider>
+                <EditorCanvas />
+                <ProjectorCursorMirror active={mirrorActive} />
+                {projectorOpen && <ProjectorScrollMirror />}
+              </CanvasEventsProvider>
+            </SourcesProvider>
+          </ExecutionOutputProvider>
         )}
-      </ExecutionOutputProvider>
+        <ProjectorViewPort />
+      </div>
     </>
   );
 }
