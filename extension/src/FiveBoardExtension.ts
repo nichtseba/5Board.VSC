@@ -7,8 +7,10 @@ import { BoardPackage } from './board/package';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
 import {
   BoardDocument,
+  DEFAULT_ELEMENT_PROFILES,
   DEFAULT_TOOL_ID,
   EditorElement,
+  EditorElementDataMap,
   EditorElementType,
   EditorState,
 } from '5board.vsc-common';
@@ -103,83 +105,26 @@ export class FiveBoardExtension extends ExtensionBase {
       document.content.elements.push(element);
     });
   }
-  private createDefaultElement(
-    type: EditorElementType,
+
+  private createDefaultElement<T extends EditorElementType>(
+    type: T,
     position: EditorElement['layout'],
-  ): EditorElement {
-    const base = {
+  ): EditorElement<T> {
+    const profile = DEFAULT_ELEMENT_PROFILES[type];
+
+    return {
       id: crypto.randomUUID(),
       type,
-      layout: position,
+      layout: {
+        ...position,
+        width: profile.layout.width,
+        height: profile.layout.height,
+      },
       style: {
         visible: true,
       },
+      data: structuredClone(profile.data) as EditorElementDataMap[T],
     };
-
-    switch (type) {
-      case EditorElementType.Heading:
-        return {
-          ...base,
-          type,
-          data: {
-            level: 1,
-            content: 'Heading created',
-          },
-        };
-
-      case EditorElementType.Text:
-        return {
-          ...base,
-          type,
-          data: {
-            content: 'Text created',
-          },
-        };
-
-      case EditorElementType.Code:
-        return {
-          ...base,
-          type,
-          data: {
-            codeBlockId: crypto.randomUUID(),
-            content: '',
-          },
-        };
-
-      case EditorElementType.Image:
-        return {
-          ...base,
-          type,
-          data: {
-            src: '',
-            content: '',
-          },
-        };
-
-      case EditorElementType.Shape:
-        return {
-          ...base,
-          type,
-          data: {
-            shapeType: 'rectangle',
-          },
-        };
-
-      case EditorElementType.Arrow:
-        return {
-          ...base,
-          type,
-          data: {
-            points: [
-              { x: 0, y: 0 },
-              { x: 100, y: 0 },
-            ],
-          },
-        };
-
-      default:
-        throw new Error(`Unsupported element type: ${type}`);
-    }
   }
 
   public applyEditToActiveDocument(edit: (document: BoardDocument) => void): void {

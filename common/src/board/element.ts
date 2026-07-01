@@ -52,7 +52,7 @@ export type ElementStyle = {
  * All Editor Element Data Types
  */
 
-type EditorElementDataMap = {
+export type EditorElementDataMap = {
   [EditorElementType.Heading]: HeadingElementData;
   [EditorElementType.Text]: TextElementData;
   [EditorElementType.Code]: CodeElementData;
@@ -156,4 +156,44 @@ type LineShapeData = BaseShapeData & {
 type PolygonShapeData = BaseShapeData & {
   shapeType: 'polygon';
   points: Point[];
+};
+
+/**
+ * All Editor Element Defaults when creating a new element
+ */
+export const DEFAULT_ELEMENT_PROFILES = {
+  [EditorElementType.Heading]: {
+    layout: { width: 40, height: 2 },
+    data: { level: 1, content: 'Heading' },
+  },
+  [EditorElementType.Text]: {
+    layout: { width: 20, height: 10 },
+    data: { content: 'Text' },
+  },
+  [EditorElementType.Code]: {
+    layout: { width: 40, height: 10 },
+    data: { codeBlockId: '', content: '', language: 'plaintext' },
+  },
+  [EditorElementType.Image]: {
+    layout: { width: 20, height: 10 },
+    data: { src: '', content: '', altText: 'Image' },
+  },
+  [EditorElementType.Shape]: {
+    layout: { width: 8, height: 6 },
+    data: { shapeType: 'rectangle' },
+  },
+  [EditorElementType.Arrow]: {
+    layout: { width: 12, height: 4 },
+    data: {
+      points: [
+        { x: 0, y: 0 },
+        { x: 100, y: 0 },
+      ],
+    },
+  },
+} satisfies {
+  [K in EditorElementType]: {
+    layout: Omit<ElementLayout, 'xPos' | 'yPos'>;
+    data: EditorElementDataMap[K];
+  };
 };

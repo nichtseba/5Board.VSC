@@ -1,7 +1,7 @@
 import { EditorToolId } from '5board.vsc-common';
 import SpacerTool from './SpacerTool';
 import { useEditorState } from '../../../providers/EditorStateProvider';
-import AddTool from './AddTool';
+import AddTool from './addTools/AddTool';
 
 /*
  * Wrapper for all Tools & Features used in the EditorCanvas.
@@ -16,6 +16,7 @@ export function CanvasTools() {
     <>
       {activeToolId === EditorToolId.SPACER && <SpacerTool />}
       {activeToolId === EditorToolId.AddElement && <AddTool />}
+      {/* Todo: add freehand tool here */}
     </>
   );
 }
