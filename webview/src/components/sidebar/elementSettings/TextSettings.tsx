@@ -56,7 +56,7 @@ export function TextSettings({ element }: Props) {
           <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3 mt-4">
             <Button
               className="h-8 flex flex-col items-center justify-center gap-2"
-              appearance={element.data.textStyle?.marks?.bold ? 'primary' : 'secondary'}
+              appearance={element.data.tiptap?.marks?.bold ? 'primary' : 'secondary'}
               onClick={() =>
                 messages.send({ type: 'textEditorCommand', command: { type: 'toggleBold' } })
               }
@@ -65,7 +65,7 @@ export function TextSettings({ element }: Props) {
             </Button>
             <Button
               className="h-8 flex flex-col items-center justify-center gap-2"
-              appearance={element.data.textStyle?.marks?.italic ? 'primary' : 'secondary'}
+              appearance={element.data.tiptap?.marks?.italic ? 'primary' : 'secondary'}
               onClick={() =>
                 messages.send({ type: 'textEditorCommand', command: { type: 'toggleItalic' } })
               }
@@ -74,7 +74,7 @@ export function TextSettings({ element }: Props) {
             </Button>
             <Button
               className="h-8 flex flex-col items-center justify-center gap-2"
-              appearance={element.data.textStyle?.marks?.strike ? 'primary' : 'secondary'}
+              appearance={element.data.tiptap?.marks?.strike ? 'primary' : 'secondary'}
               onClick={() =>
                 messages.send({ type: 'textEditorCommand', command: { type: 'toggleStrike' } })
               }
@@ -83,7 +83,7 @@ export function TextSettings({ element }: Props) {
             </Button>
             <Button
               className="h-8 flex flex-col items-center justify-center gap-2"
-              appearance={element.data.textStyle?.marks?.underline ? 'primary' : 'secondary'}
+              appearance={element.data.tiptap?.marks?.underline ? 'primary' : 'secondary'}
               onClick={() =>
                 messages.send({ type: 'textEditorCommand', command: { type: 'toggleUnderline' } })
               }
@@ -92,7 +92,7 @@ export function TextSettings({ element }: Props) {
             </Button>
             <Button
               className="h-8 flex flex-col items-center justify-center gap-2"
-              appearance={element.data.textStyle?.marks?.code ? 'primary' : 'secondary'}
+              appearance={element.data.tiptap?.marks?.code ? 'primary' : 'secondary'}
               onClick={() =>
                 messages.send({ type: 'textEditorCommand', command: { type: 'toggleCode' } })
               }

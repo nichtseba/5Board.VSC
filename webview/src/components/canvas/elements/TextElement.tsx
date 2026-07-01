@@ -42,7 +42,7 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
           },
           data: {
             content: editor.getJSON(),
-            textStyle: {
+            tiptap: {
               marks: {
                 bold: editor.isActive('bold'),
                 code: editor.isActive('code'),
