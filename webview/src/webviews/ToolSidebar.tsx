@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { init } from '../app/init';
 import {
-  EditorElementType,
   EditorTool,
   EditorToolDefinition,
   EditorToolId,
@@ -12,6 +11,8 @@ import { Button } from 'vscrui';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
 import { useMessageService } from '../services/MessageService';
 import { useEditorState } from '../providers/EditorStateProvider';
+import { NewElements } from '../components/sidebar/newElements/NewElements';
+import { NewCustomElements } from '../components/sidebar/newElements/NewCustomElements';
 
 export default function ToolSidebar() {
   const { t } = useLocalization();
@@ -49,25 +50,8 @@ export default function ToolSidebar() {
               </Button>
             ))}
         </div>
-        <div className="mt-1 mb-2 text-xs font-medium uppercase tracking-wide text-descriptionForeground">
-          Elements
-        </div>{' '}
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3">
-          {Object.values(EditorElementType).map((type) => (
-            <Button
-              key={type}
-              onClick={() =>
-                handleToolClick({ type: EditorToolId.AddElement, parameters: { type } })
-              }
-              className="h-8 flex flex-col items-center justify-center gap-2"
-            >
-              <span>{type}</span>
-            </Button>
-          ))}
-        </div>
-        <div className="mt-1 mb-2 text-xs font-medium uppercase tracking-wide text-descriptionForeground">
-          Custom Elements
-        </div>{' '}
+        <NewElements handleToolClick={handleToolClick} />
+        <NewCustomElements handleToolClick={handleToolClick} />
       </SidebarShell>
     </>
   );
