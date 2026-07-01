@@ -62,4 +62,5 @@ type AllWebviewToExtensionMessage =
     }
   | { type: 'executeCodeblock'; elementId: string }
   | { type: 'updateBlockCode'; elementId: string; code: string }
-  | { type: 'openSource'; elementId: string };
+  | { type: 'openSource'; elementId: string }
+  | { type: 'updateCodeBlockClass'; elementId: string; className: string };

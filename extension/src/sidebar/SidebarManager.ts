@@ -9,6 +9,16 @@ import {
 import { StructureTreeProvider } from '../providers/StructureTreeProvider';
 import { EXTENSION } from '../extension';
 import { FileTreeProvider } from '../providers/FileTreeProvider';
+import {
+  EditorElementType,
+  fileNameFromClassName,
+  buildSource,
+  isDefaultClassName,
+  sanitizeClassName,
+  extractBlock,
+  COMMENT_PREFIX_BY_LANGUAGE,
+  type CodeElementData,
+} from '5board.vsc-common';
 
 export class SidebarManager implements vscode.Disposable {
   private readonly sync: SidebarDocumentSync;
@@ -87,6 +97,61 @@ export class SidebarManager implements vscode.Disposable {
         }
       });
     });
+
+    this.messages.on('updateCodeBlockClass', (msg) => {
+      this.updateCodeBlockClass(msg.elementId, msg.className);
+    });
+  }
+
+  private updateCodeBlockClass(elementId: string, rawClassName: string): void {
+    const doc = EXTENSION.activeEditorDocument;
+    if (!doc) return;
+
+    const element = doc.boardPackage.document.content.elements.find((e) => e.id === elementId);
+    if (!element || element.type !== EditorElementType.Code) return;
+
+    const oldData = element.data as CodeElementData;
+    const newClassName = rawClassName.trim()
+      ? sanitizeClassName(rawClassName.trim())
+      : sanitizeClassName(elementId);
+
+    if (newClassName === oldData.className) return;
+
+    const { language } = oldData;
+    const oldFileName = fileNameFromClassName(oldData.className, language);
+    const prefix = COMMENT_PREFIX_BY_LANGUAGE[language] ?? '//';
+
+    doc.applyEdit((document) => {
+      const sourceIndex = document.sources.findIndex(
+        (s) => s.name === oldFileName && s.language === language,
+      );
+
+      if (sourceIndex !== -1) {
+        const oldSource = document.sources[sourceIndex];
+        const code = extractBlock(oldSource.code, elementId, prefix) ?? '';
+        const mainWrap = isDefaultClassName(newClassName, elementId);
+        const newCode = buildSource({
+          elementId,
+          className: newClassName,
+          language,
+          code,
+          mainWrap,
+        });
+        const newFileName = fileNameFromClassName(newClassName, language);
+
+        document.sources[sourceIndex] = {
+          ...oldSource,
+          name: newFileName,
+          code: newCode,
+          modifiedAt: Date.now(),
+        };
+      }
+
+      const el = document.content.elements.find((e) => e.id === elementId)!;
+      (el.data as CodeElementData).className = newClassName;
+    });
+
+    void doc.saveDocument();
   }
 
   dispose(): void {

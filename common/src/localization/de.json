@@ -66,7 +66,9 @@
       "codeSettings": {
         "title": "Code",
         "languageLabel": "Sprache",
-        "classNameLabel": "Klasse"
+        "classNameLabel": "Klasse",
+        "mainWrapInfo": "In main-Methode eingebettet",
+        "noMainWrapInfo": "Eigene Klasse, keine main-Methode"
       }
     }
   }
