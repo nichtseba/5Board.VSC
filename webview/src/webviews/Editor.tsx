@@ -11,7 +11,6 @@ import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
 
 export default function Editor() {
   const messages = useMessageService();
-  //const { t } = useLocalization();
   const boardDocument = useBoardDocument();
 
   // Whether the pointer should be mirrored to the projector (tracking on AND a beamer open).

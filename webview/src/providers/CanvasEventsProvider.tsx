@@ -1,4 +1,12 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { calculateCanvasPoint } from '../components/projector/calculateCanvasPoint';
 
 /**
@@ -69,11 +77,9 @@ export function CanvasEventsProvider({ children }: { children: React.ReactNode }
     if (scrollSubscribers === 0) {
       return;
     }
-    console.log('[5board] scroll hub: window listener attached');
     const handleScroll = (event: Event) => emit('scroll', event);
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
-      console.log('[5board] scroll hub: window listener removed');
       window.removeEventListener('scroll', handleScroll);
     };
   }, [scrollSubscribers, emit]);
