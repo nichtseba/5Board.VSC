@@ -4,6 +4,17 @@ import { useLocalization } from '../../../providers/LocalizationProvider';
 import { Button, Dropdown } from 'vscrui';
 import SettingsField from '../layout/SettingsField';
 import { useMessageService } from '../../../services/MessageService';
+import {
+  BoldIcon,
+  CodeBracketIcon,
+  ItalicIcon,
+  UnderlineIcon,
+  StrikethroughIcon,
+  Bars3BottomLeftIcon,
+  Bars3Icon,
+  Bars3BottomRightIcon,
+  Bars4Icon,
+} from '@heroicons/react/24/outline';
 
 type Props = {
   element: EditorElement<EditorElementType.Text>;
@@ -61,7 +72,7 @@ export function TextSettings({ element }: Props) {
                 messages.send({ type: 'textEditorCommand', command: { type: 'toggleBold' } })
               }
             >
-              <span className={`codicon codicon-bold`} />
+              <BoldIcon className="size-5" />
             </Button>
             <Button
               className="h-8 flex flex-col items-center justify-center gap-2"
@@ -70,7 +81,7 @@ export function TextSettings({ element }: Props) {
                 messages.send({ type: 'textEditorCommand', command: { type: 'toggleItalic' } })
               }
             >
-              <span className={`codicon codicon-italic`} />
+              <ItalicIcon className="size-5" />
             </Button>
             <Button
               className="h-8 flex flex-col items-center justify-center gap-2"
@@ -79,7 +90,7 @@ export function TextSettings({ element }: Props) {
                 messages.send({ type: 'textEditorCommand', command: { type: 'toggleStrike' } })
               }
             >
-              <span className={`codicon codicon-strikethrough`} />
+              <StrikethroughIcon className="size-5" />
             </Button>
             <Button
               className="h-8 flex flex-col items-center justify-center gap-2"
@@ -88,7 +99,7 @@ export function TextSettings({ element }: Props) {
                 messages.send({ type: 'textEditorCommand', command: { type: 'toggleUnderline' } })
               }
             >
-              <span className={'underline'}>U</span>
+              <UnderlineIcon className="size-5" />
             </Button>
             <Button
               className="h-8 flex flex-col items-center justify-center gap-2"
@@ -97,7 +108,7 @@ export function TextSettings({ element }: Props) {
                 messages.send({ type: 'textEditorCommand', command: { type: 'toggleCode' } })
               }
             >
-              <span className={'codicon codicon-code'} />
+              <CodeBracketIcon className="size-5" />
             </Button>
           </div>
         </SettingsField>
@@ -118,7 +129,7 @@ export function TextSettings({ element }: Props) {
                 })
               }
             >
-              <span className={`codicon codicon-list-flat`} />
+              <Bars3BottomLeftIcon className="size-5" />
             </Button>
             <Button
               className="h-8 flex flex-col items-center justify-center gap-2"
@@ -134,7 +145,7 @@ export function TextSettings({ element }: Props) {
                 })
               }
             >
-              <span className={`codicon codicon-list-flat`} />
+              <Bars3Icon className="size-5" />
             </Button>
             <Button
               className="h-8 flex flex-col items-center justify-center gap-2"
@@ -150,7 +161,7 @@ export function TextSettings({ element }: Props) {
                 })
               }
             >
-              <span className={`codicon codicon-list-flat`} />
+              <Bars3BottomRightIcon className="size-5" />
             </Button>
             <Button
               className="h-8 flex flex-col items-center justify-center gap-2"
@@ -166,7 +177,7 @@ export function TextSettings({ element }: Props) {
                 })
               }
             >
-              <span className={'codicon codicon-list-flat'} />
+              <Bars4Icon className="size-5" />
             </Button>
           </div>
         </SettingsField>
