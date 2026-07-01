@@ -55,11 +55,6 @@
           "purple": "Purple",
           "black": "Black",
           "white": "White"
-        },
-        "widths": {
-          "thin": "Thin",
-          "medium": "Medium",
-          "thick": "Thick"
         }
       },
       "projectorSettings": {

@@ -58,16 +58,14 @@ export const FREEHAND_COLORS = [
   { id: 'white', value: '#ffffff' },
 ] as const;
 
-// Selectable freehand stroke widths (in pixels). The `id` maps to a localized name.
-export const FREEHAND_WIDTHS = [
-  { id: 'thin', value: 2 },
-  { id: 'medium', value: 4 },
-  { id: 'thick', value: 8 },
-] as const;
+// Freehand stroke width range (in pixels), chosen with a slider in the sidebar.
+export const FREEHAND_MIN_WIDTH = 1;
+export const FREEHAND_MAX_WIDTH = 20;
+export const FREEHAND_DEFAULT_WIDTH = 4;
 
 export const DEFAULT_FREEHAND_PARAMETERS: FreehandToolParameters = {
   color: FREEHAND_COLORS[0].value,
-  width: FREEHAND_WIDTHS[1].value,
+  width: FREEHAND_DEFAULT_WIDTH,
 };
 
 type AddElementToolParameters = {

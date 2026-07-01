@@ -46,11 +46,6 @@
           "purple": "Lila",
           "black": "Schwarz",
           "white": "Weiß"
-        },
-        "widths": {
-          "thin": "Dünn",
-          "medium": "Mittel",
-          "thick": "Dick"
         }
       },
       "elementType": {

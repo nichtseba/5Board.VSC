@@ -6,7 +6,8 @@ import {
   EditorToolDefinition,
   EditorToolId,
   FREEHAND_COLORS,
-  FREEHAND_WIDTHS,
+  FREEHAND_MAX_WIDTH,
+  FREEHAND_MIN_WIDTH,
   TOOL_DEFINITIONS,
   TranslationKey,
 } from '5board.vsc-common';
@@ -117,18 +118,19 @@ export default function ToolSidebar() {
               ))}
             </div>
 
-            <span className="text-xs opacity-80">{t('webview.sidebar.freehand.width')}</span>
-            <div className="flex flex-wrap gap-2">
-              {FREEHAND_WIDTHS.map((width) => (
-                <Button
-                  key={width.id}
-                  appearance={freehandWidth === width.value ? 'primary' : 'secondary'}
-                  onClick={() => handleFreehandWidth(width.value)}
-                >
-                  {t(`webview.sidebar.freehand.widths.${width.id}` as TranslationKey)}
-                </Button>
-              ))}
+            <div className="flex items-center justify-between">
+              <span className="text-xs opacity-80">{t('webview.sidebar.freehand.width')}</span>
+              <span className="text-xs tabular-nums opacity-70">{freehandWidth}px</span>
             </div>
+            <input
+              type="range"
+              min={FREEHAND_MIN_WIDTH}
+              max={FREEHAND_MAX_WIDTH}
+              step={1}
+              value={freehandWidth}
+              onChange={(e) => handleFreehandWidth(Number(e.target.value))}
+              className="w-full cursor-pointer accent-focus-border"
+            />
           </section>
         )}
       </SidebarShell>
