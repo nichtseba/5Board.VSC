@@ -1,16 +1,22 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useCanvasEvents, useCanvasPoint } from '../../providers/CanvasEventsProvider';
-import { useMessageService } from '../../services/MessageService';
+import { useMessageService, useOnMessage } from '../../services/MessageService';
 
 // Mirrors the editor's pointer position to the projector view by subscribing to the
 // canvas event hub. The projector-specific gating lives here (the consumer), not in
 // the generic useCanvasPointer hook: it only sends while tracking is enabled AND a
-// projector window is open — both pushed from the extension and held by the editor.
-export default function ProjectorCursorMirror({ active }: { active: boolean }) {
+// projector window is open — both pushed from the extension via projectorStateChanged.
+export default function ProjectorCursorMirror() {
   const messages = useMessageService();
   const calculateCanvasPoint = useCanvasPoint();
   // rafRef throttles position reporting: one message per animation frame.
   const rafRef = useRef<number | null>(null);
+
+  // Whether the pointer should be mirrored (tracking on AND a projector open).
+  const [active, setActive] = useState(false);
+  useOnMessage((msg) => {
+    if (msg.type === 'projectorStateChanged') setActive(msg.active);
+  });
 
   useCanvasEvents({
     pointerMove: (e) => {
