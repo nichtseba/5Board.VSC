@@ -3,6 +3,7 @@ import { EditorElementProps } from '../EditorElement';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
+import TextAlign from '@tiptap/extension-text-align';
 import { Button } from 'vscrui';
 import { useMessageService, useOnMessage } from '../../../services/MessageService';
 import { useGrid } from '../../../providers/GridProvider';
@@ -19,10 +20,24 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
       StarterKit.configure({
         heading: false, //heading has it's own ElementType
       }),
+      TextAlign.configure({
+        types: ['paragraph'],
+        defaultAlignment: 'left',
+      }),
     ],
     content: element.data.content,
 
     onTransaction({ editor }) {
+      const textAlign = editor.isActive({ textAlign: 'left' })
+        ? 'left'
+        : editor.isActive({ textAlign: 'center' })
+          ? 'center'
+          : editor.isActive({ textAlign: 'right' })
+            ? 'right'
+            : editor.isActive({ textAlign: 'justify' })
+              ? 'justify'
+              : undefined;
+
       //calculate if element height should grow
       const requiredRows = Math.ceil(editor.view.dom.offsetHeight / grid.cellSize.height);
       let elementHeight = element.layout.height;
@@ -50,6 +65,11 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
                 link: editor.isActive('link'),
                 strike: editor.isActive('strike'),
                 underline: editor.isActive('underline'),
+              },
+              nodes: {
+                attributes: {
+                  textAlign,
+                },
               },
             },
           },
@@ -87,9 +107,10 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
       case 'toggleCode':
         editor.chain().focus().toggleCode().run();
         break;
-      // case 'setTextAlign':
-      //   editor.commands.toggleTextAlign(msg.command.value);
-      //   break;
+
+      case 'setTextAlign':
+        editor.chain().focus().setTextAlign(msg.command.value).run();
+        break;
     }
   });
 

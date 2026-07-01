@@ -106,25 +106,65 @@ export function TextSettings({ element }: Props) {
           <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3 mt-4">
             <Button
               className="h-8 flex flex-col items-center justify-center gap-2"
-              appearance={element.data.textStyle?.textAlign === 'left' ? 'primary' : 'secondary'}
+              appearance={
+                element.data.tiptap?.nodes?.attributes?.textAlign === 'left'
+                  ? 'primary'
+                  : 'secondary'
+              }
+              onClick={() =>
+                messages.send({
+                  type: 'textEditorCommand',
+                  command: { type: 'setTextAlign', value: 'left' },
+                })
+              }
             >
               <span className={`codicon codicon-list-flat`} />
             </Button>
             <Button
               className="h-8 flex flex-col items-center justify-center gap-2"
-              appearance={element.data.textStyle?.textAlign === 'center' ? 'primary' : 'secondary'}
+              appearance={
+                element.data.tiptap?.nodes?.attributes?.textAlign === 'center'
+                  ? 'primary'
+                  : 'secondary'
+              }
+              onClick={() =>
+                messages.send({
+                  type: 'textEditorCommand',
+                  command: { type: 'setTextAlign', value: 'center' },
+                })
+              }
             >
               <span className={`codicon codicon-list-flat`} />
             </Button>
             <Button
               className="h-8 flex flex-col items-center justify-center gap-2"
-              appearance={element.data.textStyle?.textAlign === 'right' ? 'primary' : 'secondary'}
+              appearance={
+                element.data.tiptap?.nodes?.attributes?.textAlign === 'right'
+                  ? 'primary'
+                  : 'secondary'
+              }
+              onClick={() =>
+                messages.send({
+                  type: 'textEditorCommand',
+                  command: { type: 'setTextAlign', value: 'right' },
+                })
+              }
             >
               <span className={`codicon codicon-list-flat`} />
             </Button>
             <Button
               className="h-8 flex flex-col items-center justify-center gap-2"
-              appearance={element.data.textStyle?.textAlign === 'justify' ? 'primary' : 'secondary'}
+              appearance={
+                element.data.tiptap?.nodes?.attributes?.textAlign === 'justify'
+                  ? 'primary'
+                  : 'secondary'
+              }
+              onClick={() =>
+                messages.send({
+                  type: 'textEditorCommand',
+                  command: { type: 'setTextAlign', value: 'justify' },
+                })
+              }
             >
               <span className={'codicon codicon-list-flat'} />
             </Button>
