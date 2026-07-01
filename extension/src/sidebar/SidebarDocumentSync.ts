@@ -5,6 +5,7 @@ import { MessageService } from '../MessageService';
 export class SidebarDocumentSync implements vscode.Disposable {
   private activeDocumentListener?: vscode.Disposable;
   private documentListener?: vscode.Disposable;
+  private editorStateListener?: vscode.Disposable;
 
   constructor(private readonly messages: MessageService) {
     messages.on('ready', (_msg, sender) => {
@@ -12,8 +13,9 @@ export class SidebarDocumentSync implements vscode.Disposable {
       if (!activeDocument) return;
       messages.send(
         {
-          type: 'updateDocument',
+          type: 'initSidebar',
           document: activeDocument.boardPackage.document,
+          editorState: EXTENSION.editorState,
         },
         sender,
       );
@@ -37,10 +39,17 @@ export class SidebarDocumentSync implements vscode.Disposable {
         });
       });
     });
+    this.editorStateListener = EXTENSION.onEditorStateChange((state) => {
+      this.messages.send({
+        type: 'updateEditorState',
+        editorState: state,
+      });
+    });
   }
 
   dispose(): void {
     this.activeDocumentListener?.dispose();
     this.documentListener?.dispose();
+    this.editorStateListener?.dispose();
   }
 }

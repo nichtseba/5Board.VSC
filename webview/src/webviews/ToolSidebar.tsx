@@ -22,16 +22,14 @@ export default function ToolSidebar() {
   const tools = Object.entries(TOOL_DEFINITIONS) as [EditorToolId, EditorToolDefinition][];
 
   useEffect(() => {
-    if (selectedTool) messages.send({ type: 'selectTool', tool: selectedTool });
-  }, [messages]);
+    messages.send({ type: 'ready' });
+  }, []);
 
   const handleToolClick = (tool: EditorTool) => {
     if (tool.type === selectedTool?.type) return;
 
     messages.send({ type: 'selectTool', tool });
   };
-
-  useEffect(() => {}, [editorState]);
 
   return (
     <>
