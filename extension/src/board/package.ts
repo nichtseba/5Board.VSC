@@ -8,6 +8,7 @@ import {
   Source,
   create5boardzManifest,
 } from '5board.vsc-common';
+import { deriveCodeClasses } from './CodeblockService';
 
 export const MANIFEST_PATH = 'manifest.json';
 export const CONTENT_PATH = 'content.json';
@@ -29,6 +30,9 @@ export class BoardPackage {
     const sources = await readSources(zip);
     const assets = await readAssets(zip);
 
+    // Documents saved before the class registry existed derive it from their named sources.
+    content.codeClasses ??= deriveCodeClasses(content, sources);
+
     const document: BoardDocument = {
       manifest,
       content,
@@ -45,6 +49,7 @@ export class BoardPackage {
       content: {
         selectedElementId: null,
         elements: [],
+        codeClasses: [],
         background: '',
         snapAngle: 0,
         revealOrder: -1,

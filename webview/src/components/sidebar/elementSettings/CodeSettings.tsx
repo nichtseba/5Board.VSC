@@ -1,7 +1,14 @@
-import { EditorElement, EditorElementType, isDefaultClassName } from '5board.vsc-common';
-import { Dropdown, DropdownOption, TextField } from 'vscrui';
+import {
+  EditorElement,
+  EditorElementType,
+  SUPPORTED_LANGUAGES,
+  getLanguageSupport,
+  isDefaultClassName,
+} from '5board.vsc-common';
+import { Dropdown, DropdownOption } from 'vscrui';
 import SettingsField from '../layout/SettingsField';
 import SettingsPanel from '../layout/SettingsPanel';
+import { useBoardDocument } from '../../../providers/BoardDocumentProvider';
 import { useLocalization } from '../../../providers/LocalizationProvider';
 import { useMessageService } from '../../../services/MessageService';
 
@@ -9,57 +16,90 @@ type Props = {
   element: EditorElement<EditorElementType.Code>;
 };
 
-const LANGUAGE_OPTIONS = [
-  { value: 'java', label: 'Java' },
-  { value: 'python', label: 'Python' },
-  { value: 'javascript', label: 'JavaScript' },
-];
+// Dropdown value for "standalone" (no class).
+const NONE = '';
+
+function optionValue(value: string | DropdownOption | undefined): string | undefined {
+  return typeof value === 'string' ? value : value?.value;
+}
 
 export function CodeSettings({ element }: Props) {
   const { t } = useLocalization();
   const messages = useMessageService();
-  const { className } = element.data;
-  const hasMainWrap = isDefaultClassName(className, element.id);
+  const document = useBoardDocument();
+  const { className, language } = element.data;
+  const standalone = isDefaultClassName(className, element.id);
 
-  const handleClassNameChange = (value: string) => {
+  const classes = (document?.content.codeClasses ?? []).filter((c) => c.language === language);
+  const classOptions: DropdownOption[] = [
+    { value: NONE, label: t('webview.sidebar-element-settings.codeSettings.classNone') },
+    ...classes.map((c) => ({ value: c.name, label: c.name })),
+  ];
+  // Old documents may assign a class that is missing from the registry — still show it.
+  if (!standalone && !classes.some((c) => c.name === className)) {
+    classOptions.push({ value: className, label: className });
+  }
+
+  const languageOptions: DropdownOption[] = SUPPORTED_LANGUAGES.map((support) => ({
+    value: support.id,
+    label: support.displayName,
+  }));
+  if (!getLanguageSupport(language)) {
+    languageOptions.push({ value: language, label: language, disabled: true });
+  }
+
+  const selectClass = (value: string | DropdownOption | undefined) => {
+    const selected = optionValue(value);
+    if (selected === undefined || selected === (standalone ? NONE : className)) return;
     messages.send({
-      type: 'updateCodeBlockClass',
+      type: 'moveBlock',
       elementId: element.id,
-      className: value,
+      className: selected === NONE ? null : selected,
     });
   };
 
+  const selectLanguage = (value: string | DropdownOption | undefined) => {
+    const selected = optionValue(value);
+    if (!selected || selected === language || !getLanguageSupport(selected)) return;
+    messages.send({ type: 'moveBlock', elementId: element.id, language: selected });
+  };
+
   return (
-    <>
-      <SettingsPanel title={t('webview.sidebar-element-settings.codeSettings.title')} icon="code">
-        <SettingsField label={t('webview.sidebar-element-settings.codeSettings.languageLabel')}>
-          <Dropdown
-            options={LANGUAGE_OPTIONS}
-            value={element.data.language}
-            onChange={(_v: string | DropdownOption | undefined) => {
-              // TODO: language is determined by the source file — editing not yet supported
-            }}
-          />
-        </SettingsField>
-        <SettingsField label={t('webview.sidebar-element-settings.codeSettings.classNameLabel')}>
-          <TextField value={className} placeholder={className} onChange={handleClassNameChange} />
-          <span
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              marginTop: '4px',
-              fontSize: '12px',
-              opacity: 0.8,
-            }}
-          >
-            <span className={`codicon codicon-${hasMainWrap ? 'symbol-method' : 'symbol-class'}`} />
-            {hasMainWrap
-              ? t('webview.sidebar-element-settings.codeSettings.mainWrapInfo')
-              : t('webview.sidebar-element-settings.codeSettings.noMainWrapInfo')}
-          </span>
-        </SettingsField>
-      </SettingsPanel>
-    </>
+    <SettingsPanel title={t('webview.sidebar-element-settings.codeSettings.title')} icon="code">
+      <SettingsField label={t('webview.sidebar-element-settings.codeSettings.languageLabel')}>
+        <Dropdown
+          options={languageOptions}
+          value={language}
+          disabled={!standalone}
+          onChange={selectLanguage}
+        />
+        {!standalone && (
+          <InfoLine icon="info">
+            {t('webview.sidebar-element-settings.codeSettings.languageFromClass')}
+          </InfoLine>
+        )}
+      </SettingsField>
+      <SettingsField label={t('webview.sidebar-element-settings.codeSettings.classNameLabel')}>
+        <Dropdown
+          options={classOptions}
+          value={standalone ? NONE : className}
+          onChange={selectClass}
+        />
+        <InfoLine icon={standalone ? 'symbol-method' : 'symbol-class'}>
+          {standalone
+            ? t('webview.sidebar-element-settings.codeSettings.mainWrapInfo')
+            : t('webview.sidebar-element-settings.codeSettings.noMainWrapInfo')}
+        </InfoLine>
+      </SettingsField>
+    </SettingsPanel>
+  );
+}
+
+function InfoLine({ icon, children }: { icon: string; children: React.ReactNode }) {
+  return (
+    <span className="mt-1 flex items-center gap-1 text-xs opacity-80">
+      <span className={`codicon codicon-${icon}`} />
+      {children}
+    </span>
   );
 }

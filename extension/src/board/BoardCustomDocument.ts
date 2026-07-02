@@ -4,6 +4,7 @@ import { BoardDocument } from '5board.vsc-common';
 import { MessageService } from '../MessageService';
 import { EXTENSION } from '../extension';
 import { DocumentMessageHandlers } from './DocumentMessageHandlers';
+import { CodeblockMessageHandlers } from './CodeblockMessageHandlers';
 
 export class BoardCustomDocument implements vscode.CustomDocument {
   public readonly documentChange = new vscode.EventEmitter<BoardDocument>();
@@ -46,6 +47,7 @@ export class BoardCustomDocument implements vscode.CustomDocument {
 
   private registerMessageHandlers(): void {
     this.unsubscribers.push(...new DocumentMessageHandlers(this).register());
+    this.unsubscribers.push(...new CodeblockMessageHandlers(this).register());
   }
 
   dispose(): void {

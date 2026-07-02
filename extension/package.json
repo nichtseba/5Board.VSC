@@ -84,6 +84,11 @@
           "name": "%views.sidebar.element-settings-title%"
         },
         {
+          "type": "webview",
+          "id": "5board-vsc.sidebar-class-settings-view",
+          "name": "%views.sidebar.class-settings-title%"
+        },
+        {
           "id": "5board-vsc.sidebar-structure-view",
           "name": "%views.sidebar.structure-title%"
         },

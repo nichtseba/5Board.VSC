@@ -2,6 +2,7 @@ import vscode from 'vscode';
 import { SidebarDocumentSync } from './SidebarDocumentSync';
 import { MessageService } from '../MessageService';
 import {
+  ClassSettingsSidebarViewProvider,
   ElementSettingsSidebarViewProvider,
   ProjectorSettingsSidebarViewProvider,
   SidebarViewProvider,
@@ -9,16 +10,8 @@ import {
 import { StructureTreeProvider } from '../providers/StructureTreeProvider';
 import { EXTENSION } from '../extension';
 import { FileTreeProvider } from '../providers/FileTreeProvider';
-import {
-  EditorElementType,
-  fileNameFromClassName,
-  buildSource,
-  isDefaultClassName,
-  sanitizeClassName,
-  extractBlock,
-  COMMENT_PREFIX_BY_LANGUAGE,
-  type CodeElementData,
-} from '5board.vsc-common';
+import { createClass, deleteClass, moveBlock, renameClass } from '../board/CodeblockService';
+import type { BoardDocument } from '5board.vsc-common';
 
 export class SidebarManager implements vscode.Disposable {
   private readonly sync: SidebarDocumentSync;
@@ -30,6 +23,7 @@ export class SidebarManager implements vscode.Disposable {
     new SidebarViewProvider(context, messages).register();
     new ProjectorSettingsSidebarViewProvider(context, messages).register();
     new ElementSettingsSidebarViewProvider(context, messages).register();
+    new ClassSettingsSidebarViewProvider(context, messages).register();
     new StructureTreeProvider(context).register();
     new FileTreeProvider(context).register();
 
@@ -98,59 +92,34 @@ export class SidebarManager implements vscode.Disposable {
       });
     });
 
-    this.messages.on('updateCodeBlockClass', (msg) => {
-      this.updateCodeBlockClass(msg.elementId, msg.className);
+    this.messages.on('moveBlock', (msg) => {
+      this.editActiveDocument((document) => {
+        moveBlock(document, msg.elementId, { className: msg.className, language: msg.language });
+      });
+    });
+
+    this.messages.on('manageCodeClass', (msg) => {
+      this.editActiveDocument((document) => {
+        switch (msg.op) {
+          case 'create':
+            createClass(document, msg.name, msg.language);
+            break;
+          case 'rename':
+            if (msg.newName) renameClass(document, msg.name, msg.newName, msg.language);
+            break;
+          case 'delete':
+            deleteClass(document, msg.name, msg.language);
+            break;
+        }
+      });
     });
   }
 
-  private updateCodeBlockClass(elementId: string, rawClassName: string): void {
+  /** Applies a CodeblockService edit to the active editor document and persists it. */
+  private editActiveDocument(edit: (document: BoardDocument) => void): void {
     const doc = EXTENSION.activeEditorDocument;
     if (!doc) return;
-
-    const element = doc.boardPackage.document.content.elements.find((e) => e.id === elementId);
-    if (!element || element.type !== EditorElementType.Code) return;
-
-    const oldData = element.data as CodeElementData;
-    const newClassName = rawClassName.trim()
-      ? sanitizeClassName(rawClassName.trim())
-      : sanitizeClassName(elementId);
-
-    if (newClassName === oldData.className) return;
-
-    const { language } = oldData;
-    const oldFileName = fileNameFromClassName(oldData.className, language);
-    const prefix = COMMENT_PREFIX_BY_LANGUAGE[language] ?? '//';
-
-    doc.applyEdit((document) => {
-      const sourceIndex = document.sources.findIndex(
-        (s) => s.name === oldFileName && s.language === language,
-      );
-
-      if (sourceIndex !== -1) {
-        const oldSource = document.sources[sourceIndex];
-        const code = extractBlock(oldSource.code, elementId, prefix) ?? '';
-        const mainWrap = isDefaultClassName(newClassName, elementId);
-        const newCode = buildSource({
-          elementId,
-          className: newClassName,
-          language,
-          code,
-          mainWrap,
-        });
-        const newFileName = fileNameFromClassName(newClassName, language);
-
-        document.sources[sourceIndex] = {
-          ...oldSource,
-          name: newFileName,
-          code: newCode,
-          modifiedAt: Date.now(),
-        };
-      }
-
-      const el = document.content.elements.find((e) => e.id === elementId)!;
-      (el.data as CodeElementData).className = newClassName;
-    });
-
+    doc.applyEdit(edit);
     void doc.saveDocument();
   }
 

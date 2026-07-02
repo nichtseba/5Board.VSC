@@ -1,30 +1,17 @@
 /**
- * Utilities for reading and writing ID-tagged code blocks inside source files.
- *
- * Marker format:
+ * Read/write ID-tagged code blocks inside source files:
  *   {commentPrefix} <block id="<blockId>">
  *   <code>
  *   {commentPrefix} </block>
- *
- * The comment prefix is language-specific (e.g. "//" for Java/JS, "#" for Python).
  */
 
 export type CommentPrefix = '//' | '#';
-
-export const COMMENT_PREFIX_BY_LANGUAGE: Record<string, CommentPrefix> = {
-  java: '//',
-  javascript: '//',
-  python: '#',
-};
 
 const openTag = (blockId: string, prefix: CommentPrefix = '//') =>
   `${prefix} <block id="${blockId}">`;
 const closeTag = (prefix: CommentPrefix = '//') => `${prefix} </block>`;
 
-/**
- * Returns the code between the markers for the given blockId,
- * or null if the block is not present in the source.
- */
+/** Returns the code between the block's markers, or null if the block is not present. */
 export function extractBlock(
   sourceCode: string,
   blockId: string,
@@ -44,10 +31,8 @@ export function extractBlock(
 }
 
 /**
- * Normalizes raw block content for display/editing. Drops the blank edge lines left by the
- * marker lines (the newline after the open tag and the close tag's own indentation), then
- * removes the common leading indentation so the block is not shown indented by its
- * surrounding class/method nesting. Relative indentation inside the block is preserved.
+ * Drops the blank edge lines left by the markers and the common leading indentation, so the
+ * block is not shown indented by its class/method nesting. Relative indentation is preserved.
  */
 function dedentBlock(raw: string): string {
   const lines = raw.split('\n');
@@ -71,21 +56,51 @@ export function hasBlock(
 }
 
 /**
- * Appends a new block with the given blockId and code to the end of the source.
+ * Inserts a block as a class member, before the class's closing brace — the last `}` in the
+ * file, since generated sources contain a single top-level class.
  */
-export function insertBlock(
+export function insertBlockIntoClass(
   sourceCode: string,
   blockId: string,
   blockCode: string,
   prefix: CommentPrefix = '//',
 ): string {
-  const block = `\n${openTag(blockId, prefix)}\n${blockCode}\n${closeTag(prefix)}\n`;
-  return sourceCode + block;
+  const indent = 4;
+  const pad = ' '.repeat(indent);
+  const block =
+    `${pad}${openTag(blockId, prefix)}\n` +
+    `${indentCode(blockCode, indent)}\n` +
+    `${pad}${closeTag(prefix)}\n`;
+
+  const braceIndex = sourceCode.lastIndexOf('}');
+  if (braceIndex === -1) return sourceCode + block;
+  return sourceCode.slice(0, braceIndex) + block + sourceCode.slice(braceIndex);
 }
 
 /**
- * Replaces the content of an existing block in-place.
+ * Removes a block whole-line. Removing the last block leaves an empty (zombie) class —
+ * intentional, sources are never deleted by block ops.
  */
+export function removeBlock(
+  sourceCode: string,
+  blockId: string,
+  prefix: CommentPrefix = '//',
+): string {
+  const open = openTag(blockId, prefix);
+  const close = closeTag(prefix);
+
+  const openIndex = sourceCode.indexOf(open);
+  if (openIndex === -1) return sourceCode;
+  const closeIndex = sourceCode.indexOf(close, openIndex + open.length);
+  if (closeIndex === -1) return sourceCode;
+
+  const start = sourceCode.lastIndexOf('\n', openIndex) + 1;
+  const newlineAfterClose = sourceCode.indexOf('\n', closeIndex);
+  const end = newlineAfterClose === -1 ? sourceCode.length : newlineAfterClose + 1;
+
+  return sourceCode.slice(0, start) + sourceCode.slice(end);
+}
+
 export function updateBlock(
   sourceCode: string,
   blockId: string,
@@ -102,12 +117,23 @@ export function updateBlock(
   const endIndex = sourceCode.indexOf(close, contentStart);
   if (endIndex === -1) return sourceCode;
 
-  return sourceCode.slice(0, contentStart) + '\n' + newCode + '\n' + sourceCode.slice(endIndex);
+  // Re-indent the close tag like the open tag; its old indentation is part of the replaced range.
+  const markerLineStart = sourceCode.lastIndexOf('\n', startIndex) + 1;
+  const markerIndent = sourceCode.slice(markerLineStart, startIndex);
+
+  return (
+    sourceCode.slice(0, contentStart) +
+    '\n' +
+    newCode +
+    '\n' +
+    markerIndent +
+    sourceCode.slice(endIndex)
+  );
 }
 
 /**
- * Returns the minimum indentation (number of leading spaces) of the content
- * inside the given block. Used to re-indent edited code before writing it back.
+ * Minimum indentation inside the block, falling back to the marker's own indentation for
+ * empty blocks; used to re-indent edited code before writing back.
  */
 export function getBlockIndent(
   sourceCode: string,
@@ -126,7 +152,10 @@ export function getBlockIndent(
 
   const raw = sourceCode.slice(contentStart, endIndex);
   const lines = raw.split('\n').filter((line) => line.trim() !== '');
-  if (lines.length === 0) return 0;
+  if (lines.length === 0) {
+    const markerLineStart = sourceCode.lastIndexOf('\n', startIndex) + 1;
+    return startIndex - markerLineStart;
+  }
 
   const indents = lines.map((line) => line.match(/^[ \t]*/)![0].length);
   return Math.min(...indents);

@@ -8,7 +8,7 @@ const service = new ExecutionService();
 function makeDocument(overrides: Partial<BoardDocument> = {}): BoardDocument {
   return {
     manifest: { title: 'test', createdAt: 0, modifiedAt: 0, version: '1' },
-    content: { selectedElementId: null, elements: [] },
+    content: { selectedElementId: null, elements: [], codeClasses: [] },
     sources: [],
     assets: [],
     ...overrides,
@@ -42,6 +42,7 @@ describe('ExecutionService', function () {
     const doc = makeDocument({
       content: {
         selectedElementId: null,
+        codeClasses: [],
         elements: [makeCodeElement({ className: 'Student', language: 'java' })],
       },
       sources: [],
@@ -55,6 +56,7 @@ describe('ExecutionService', function () {
     const doc = makeDocument({
       content: {
         selectedElementId: null,
+        codeClasses: [],
         elements: [makeCodeElement({ className: 'script', language: 'ruby' })],
       },
       sources: [

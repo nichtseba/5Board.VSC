@@ -12,6 +12,7 @@ const VIEWS = [
   'ToolSidebar',
   'ProjectorSettingsSidebar',
   'ElementSettingsSidebar',
+  'ClassSettingsSidebar',
   'Projector',
 ];
 

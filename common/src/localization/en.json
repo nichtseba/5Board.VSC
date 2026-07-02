@@ -67,9 +67,19 @@
         "title": "Code",
         "languageLabel": "Language",
         "classNameLabel": "Class",
+        "classNone": "None (standalone, runnable)",
+        "languageFromClass": "The language follows the assigned class",
         "mainWrapInfo": "Wrapped in main method",
         "noMainWrapInfo": "Custom class, no main method"
       }
+    },
+    "sidebar-class-settings": {
+      "title": "Code Classes",
+      "noClasses": "No classes yet. Create one to group code blocks.",
+      "newClassPlaceholder": "New class name",
+      "create": "Create",
+      "rename": "Rename",
+      "delete": "Delete"
     }
   }
 }

@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert';
-import { extractBlock, hasBlock, insertBlock, updateBlock } from '5board.vsc-common';
+import { extractBlock, hasBlock, updateBlock } from '5board.vsc-common';
 
 const BLOCK_ID = 'test-uuid-123';
 
@@ -49,21 +49,6 @@ describe('codeMarkers', function () {
     });
   });
 
-  describe('insertBlock', function () {
-    it('appends block to source', function () {
-      const result = insertBlock('existing code\n', BLOCK_ID, 'new code');
-      assert.ok(result.includes(`// <block id="${BLOCK_ID}">`));
-      assert.ok(result.includes('new code'));
-      assert.ok(result.includes('// </block>'));
-      assert.ok(result.startsWith('existing code\n'));
-    });
-
-    it('inserted block can be extracted again', function () {
-      const result = insertBlock('', BLOCK_ID, 'int z = 99;');
-      assert.equal(extractBlock(result, BLOCK_ID), 'int z = 99;');
-    });
-  });
-
   describe('updateBlock', function () {
     it('replaces block content in place', function () {
       const original = makeSource('old code');
@@ -74,6 +59,12 @@ describe('codeMarkers', function () {
     it('returns source unchanged when block id not found', function () {
       const source = 'no markers here';
       assert.equal(updateBlock(source, BLOCK_ID, 'anything'), source);
+    });
+
+    it('keeps the closing tag indented like the opening tag', function () {
+      const source = `    // <block id="${BLOCK_ID}">\n    old\n    // </block>`;
+      const updated = updateBlock(source, BLOCK_ID, '    new');
+      assert.equal(updated, `    // <block id="${BLOCK_ID}">\n    new\n    // </block>`);
     });
   });
 });

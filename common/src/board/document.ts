@@ -33,12 +33,22 @@ export interface BoardManifest {
 }
 
 /**
+ * A user-created named code class; the Source holds the code. Default/id-derived classes of
+ * standalone blocks are not registered.
+ */
+export interface CodeClass {
+  name: string;
+  language: string;
+}
+
+/**
  * Represents the content section of a .5boardz document
  * Should be equivalent to the content.json within the .5boardz zip file
  */
 export interface BoardContent {
   selectedElementId: string | null;
   elements: BoardElement[];
+  codeClasses: CodeClass[];
   background?: string;
   snapAngle?: number;
   revealOrder?: number;

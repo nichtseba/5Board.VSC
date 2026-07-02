@@ -67,9 +67,19 @@
         "title": "Code",
         "languageLabel": "Sprache",
         "classNameLabel": "Klasse",
+        "classNone": "Keine (eigenständig, ausführbar)",
+        "languageFromClass": "Die Sprache folgt der zugewiesenen Klasse",
         "mainWrapInfo": "In main-Methode eingebettet",
         "noMainWrapInfo": "Eigene Klasse, keine main-Methode"
       }
+    },
+    "sidebar-class-settings": {
+      "title": "Code-Klassen",
+      "noClasses": "Noch keine Klassen. Erstelle eine, um Codeblöcke zu gruppieren.",
+      "newClassPlaceholder": "Neuer Klassenname",
+      "create": "Erstellen",
+      "rename": "Umbenennen",
+      "delete": "Löschen"
     }
   }
 }
