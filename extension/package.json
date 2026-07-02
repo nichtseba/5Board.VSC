@@ -114,8 +114,7 @@
       },
       {
         "command": "5board-vsc.goToElement",
-        "title": "%commands.goToElement%",
-        "enablement": "false"
+        "title": "%commands.goToElement%"
       }
     ],
     "menus": {

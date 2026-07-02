@@ -30,7 +30,8 @@ export default function Editor() {
     if (msg.type === 'goToElement') {
       const element = document.getElementById(msg.elementId);
       if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        messages.send({ type: 'selectElement', id: msg.elementId });
       }
     }
   });
