@@ -7,6 +7,7 @@ import { ImageSettings } from './ImageSettings';
 import { ShapeSettings } from './ShapeSettings';
 import { ArrowSettings } from './ArrowSettings';
 import { useLocalization } from '../../../providers/LocalizationProvider';
+import GenericElementSettings from './GenericElementSettings';
 
 type SettingsProps<T extends EditorElementType> = {
   element: EditorElement<T>;
@@ -17,20 +18,16 @@ export default function ElementSettings<ElementType extends EditorElementType>({
 }: {
   element: EditorElement<ElementType>;
 }) {
-  const Component = SETTINGS_COMPONENTS[element.type] as React.ComponentType<
-    SettingsProps<ElementType>
-  >;
-  const { t } = useLocalization();
+  const Component =
+    (SETTINGS_COMPONENTS[element.type] as React.ComponentType<SettingsProps<ElementType>>) ??
+    UnsupportedElementSettings;
 
-  const content = Component ? (
-    <Component element={element} />
-  ) : (
-    <div>
-      <p>{t('webview.sidebar-element-settings.unsupportedElement')}</p>
-    </div>
+  return (
+    <>
+      <GenericElementSettings element={element} />
+      <Component element={element} />
+    </>
   );
-
-  return content;
 }
 
 /**
@@ -44,5 +41,14 @@ const SETTINGS_COMPONENTS: {
   [EditorElementType.Code]: CodeSettings,
   [EditorElementType.Image]: ImageSettings,
   [EditorElementType.Shape]: ShapeSettings,
-  [EditorElementType.Arrow]: ArrowSettings
+  [EditorElementType.Arrow]: ArrowSettings,
 };
+
+function UnsupportedElementSettings() {
+  const { t } = useLocalization();
+  return (
+    <div>
+      <p>{t('webview.sidebar-element-settings.unsupportedElement')}</p>
+    </div>
+  );
+}

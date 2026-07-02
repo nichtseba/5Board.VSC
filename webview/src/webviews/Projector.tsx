@@ -6,6 +6,7 @@ import { DEFAULT_PROJECTOR_POINTER_STYLE, ProjectorPointerStyle } from '5board.v
 import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
 import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
+import { ViewTypeProvider } from '../providers/ViewTypeProvider';
 
 // The projector view shows the same canvas as the editor,
 // but is read-only and display-only — no interactive controls.
@@ -96,22 +97,23 @@ export default function Projector() {
   });
 
   return (
-    <div>
-      {/* Projector badge — display only, no interactive elements */}
-      <div
-        style={{
-          background: 'var(--vscode-badge-background)',
-          color: 'var(--vscode-badge-foreground)',
-          padding: '4px 12px',
-          fontWeight: 'bold',
-          fontSize: '0.85rem',
-          letterSpacing: '0.05em',
-          textTransform: 'uppercase',
-        }}
-      >
-        📽 {t('extension.projector.title')} — {boardDocument?.manifest.title ?? ''}
-      </div>
-      {/*
+    <ViewTypeProvider value={'projector'}>
+      <div>
+        {/* Projector badge — display only, no interactive elements */}
+        <div
+          style={{
+            background: 'var(--vscode-badge-background)',
+            color: 'var(--vscode-badge-foreground)',
+            padding: '4px 12px',
+            fontWeight: 'bold',
+            fontSize: '0.85rem',
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
+          }}
+        >
+          📽 {t('extension.projector.title')} — {boardDocument?.manifest.title ?? ''}
+        </div>
+        {/*
         Pass the live cursor position directly into EditorCanvas so the overlay
         is rendered inside the canvas div and positioned against the same grid
         that the editor uses to calculate coordinates. This guarantees the dot
@@ -121,20 +123,21 @@ export default function Projector() {
         so the projector always mirrors the editor's selection (not the projector
         user's own clicks).
       */}
-      {/*
+        {/*
         Beamer view: display only. pointerEvents:'none' aka no interactive controls.
       */}
-      <div style={{ pointerEvents: 'none' }}>
-        {boardDocument ? (
-          <CanvasEventsProvider>
-            <EditorCanvas cursor={cursor} pointerStyle={pointerStyle} />
-          </CanvasEventsProvider>
-        ) : (
-          // Shown while waiting for the first 'init' message from the extension.
-          <div style={{ padding: '1rem', opacity: 0.5 }}>{t('extension.projector.loading')}</div>
-        )}
+        <div style={{ pointerEvents: 'none' }}>
+          {boardDocument ? (
+            <CanvasEventsProvider>
+              <EditorCanvas cursor={cursor} pointerStyle={pointerStyle} />
+            </CanvasEventsProvider>
+          ) : (
+            // Shown while waiting for the first 'init' message from the extension.
+            <div style={{ padding: '1rem', opacity: 0.5 }}>{t('extension.projector.loading')}</div>
+          )}
+        </div>
       </div>
-    </div>
+    </ViewTypeProvider>
   );
 }
 

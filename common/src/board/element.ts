@@ -18,7 +18,7 @@ export type EditorElement<T extends EditorElementType = EditorElementType> = {
 
   layout: ElementLayout;
   style: ElementStyle;
-
+  display: ElementDisplay;
   data: EditorElementDataMap[T];
 };
 
@@ -46,6 +46,12 @@ export type ElementStyle = {
     style?: 'solid' | 'dashed' | 'dotted';
     radius?: number;
   };
+};
+
+export type ElementDisplay = {
+  visible: boolean;
+  speakerNote: boolean;
+  excludeFromExport: boolean;
 };
 
 /**

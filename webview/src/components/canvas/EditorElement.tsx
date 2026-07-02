@@ -10,6 +10,7 @@ import { ShapeElement } from './elements/ShapeElement';
 import { ArrowElement } from './elements/ArrowElement';
 import { useEditorState } from '../../providers/EditorStateProvider';
 import { useMessageService } from '../../services/MessageService';
+import { useViewType } from '../../providers/ViewTypeProvider';
 
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
@@ -43,6 +44,12 @@ export default function EditorElement<ElementType extends EditorElementType>({
       id,
     });
   };
+  const viewType = useViewType();
+  const hideInProjector = element.display.speakerNote || !element.display.visible;
+  const hideInExport = element.display.speakerNote || element.display.excludeFromExport;
+  if ((viewType === 'projector' && hideInProjector) || (viewType === 'export' && hideInExport)) {
+    return null;
+  }
 
   return (
     <>
