@@ -115,6 +115,10 @@
       {
         "command": "5board-vsc.newTestBoard",
         "title": "New Test Board"
+      },
+      {
+        "command": "5board-vsc.goToElement",
+        "title": "%commands.goToElement%"
       }
     ],
     "menus": {

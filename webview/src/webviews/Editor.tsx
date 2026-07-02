@@ -28,6 +28,13 @@ export default function Editor() {
       setMirrorActive(msg.active);
       setProjectorOpen(msg.open);
     }
+    if (msg.type === 'goToElement') {
+      const element = document.getElementById(msg.elementId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        messages.send({ type: 'selectElement', id: msg.elementId });
+      }
+    }
   });
 
   return (

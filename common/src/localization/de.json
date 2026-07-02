@@ -12,7 +12,8 @@
       "title": "Beameransicht",
       "noFileOpen": "Bitte öffne zuerst eine .5boardz Datei im Editor, bevor du die Beameransicht startest.",
       "loading": "Lade…"
-    }
+    },
+    "goToElement": "Gehe zu Element"
   },
   "webview": {
     "customEditor": { "Test": "Testen der Übersetzung" },
