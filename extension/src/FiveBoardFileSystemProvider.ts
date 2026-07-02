@@ -7,9 +7,9 @@ import {
   EXPORTS_ROOT,
   MANIFEST_PATH,
   SRC_ROOT,
-} from './board/package';
+} from './board/package.js';
 import { Asset } from '5board.vsc-common';
-import { PackageManager } from './PackageManager';
+import { PackageManager } from './PackageManager.js';
 import { randomUUID } from 'crypto';
 
 /**

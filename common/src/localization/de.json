@@ -42,7 +42,23 @@
       "selectedElement": "Ausgewähltes Element",
       "headingSettings": {
         "title": "Überschrift",
-        "levelLabel": "Hierarchiestufe"
+        "levelLabel": "Hierarchiestufe",
+        "numberingLabel": "Nummerierung",
+        "numberingNone": "Keine Zahlen",
+        "numberingDecimal": "Zahlen",
+        "numberingLowerAlpha": "Alphabetisch klein",
+        "numberingUpperAlpha": "Alphabetisch groß",
+        "numberingLowerRoman": "Römisch klein",
+        "numberingUpperRoman": "Römisch groß",
+        "fontFamily": "Schriftart",
+        "fontFamilyPlaceholder": "Standardschrift",
+        "fontSize": "Schriftgröße",
+        "textStyle": "Textstil",
+        "bold": "Fett",
+        "italic": "Kursiv",
+        "underline": "Unterstrichen",
+        "color": "Schriftfarbe",
+        "backgroundColor": "Hintergrundfarbe"
       }
     }
   }

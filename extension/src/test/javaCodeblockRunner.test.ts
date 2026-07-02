@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert';
-import { JavaCodeblockRunner } from '../runner/JavaCodeblockRunner';
+import { JavaCodeblockRunner } from '../runner/JavaCodeblockRunner.js';
 
 describe('JavaCodeblockRunner', function () {
   const runner = new JavaCodeblockRunner();

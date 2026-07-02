@@ -49,7 +49,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
       <div
         onClick={() => handleSelectElement(element.id)}
         className={`
-          box-border font-bold
+          box-border
           ${activeToolId === EditorToolId.POINTER ? 'cursor-pointer' : ''}
           ${
             activeToolId === EditorToolId.POINTER && !selected

@@ -42,7 +42,23 @@
       "selectedElement": "Selected Element",
       "headingSettings": {
         "title": "Heading",
-        "levelLabel": "Hierarchy level"
+        "levelLabel": "Hierarchy level",
+        "numberingLabel": "Numbering",
+        "numberingNone": "No numbers",
+        "numberingDecimal": "Numbers",
+        "numberingLowerAlpha": "Alphabetic lowercase",
+        "numberingUpperAlpha": "Alphabetic uppercase",
+        "numberingLowerRoman": "Roman lowercase",
+        "numberingUpperRoman": "Roman uppercase",
+        "fontFamily": "Font family",
+        "fontFamilyPlaceholder": "Default font",
+        "fontSize": "Font size",
+        "textStyle": "Text style",
+        "bold": "Bold",
+        "italic": "Italic",
+        "underline": "Underline",
+        "color": "Text color",
+        "backgroundColor": "Background color"
       }
     }
   }

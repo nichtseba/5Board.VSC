@@ -43,7 +43,10 @@ export default function EditorCanvas() {
     }
   }, [activeToolId, document?.content.selectedElementId, messages]);
 
-  const headingNumbers = useMemo(() => computeHeadingNumbers(elements ?? []), [elements]);
+  const headingNumbers = useMemo(
+    () => computeHeadingNumbers(elements ?? [], document?.content.headingSettings),
+    [elements, document?.content.headingSettings],
+  );
 
   return (
     <>

@@ -1,4 +1,11 @@
 import { BoardElement, EditorElementType } from './element';
+import {
+  DEFAULT_HEADING_NUMBERING_FORMAT,
+  HeadingNumberingFormat,
+  HeadingSettings,
+} from './headingSettings';
+
+export type ComputeHeadingNumberOptions = Pick<HeadingSettings, 'numberingFormat'>;
 
 /**
  * Computes hierarchical heading numbers (e.g. "1", "1.1", "1.2", "2") for all
@@ -9,13 +16,21 @@ import { BoardElement, EditorElementType } from './element';
  * (H1 = top level, H2 = sub-section, ...).
  *
  * The numbers are derived, never stored on the element. Moving, adding or changing the heading
- * updates the nubmering "automagically".
+ * updates the numbering "automagically".
  *
  *
  * @param elements All elements on the board (only headings are considered).
  * @returns A map from heading element id to its computed number string.
  */
-export function computeHeadingNumbers(elements: BoardElement[]): Map<string, string> {
+export function computeHeadingNumbers(
+  elements: BoardElement[],
+  options?: ComputeHeadingNumberOptions,
+): Map<string, string> {
+  const format = options?.numberingFormat ?? DEFAULT_HEADING_NUMBERING_FORMAT;
+  if (format === 'none') {
+    return new Map();
+  }
+
   const headings = elements
     .filter((el) => el.type === EditorElementType.Heading && el.style.visible !== false)
     .slice()
@@ -37,9 +52,70 @@ export function computeHeadingNumbers(elements: BoardElement[]): Map<string, str
       counters
         .slice(0, level)
         .filter((c) => c !== 0)
+        .map((counter) => formatCounter(counter, format))
         .join('.'),
     );
   }
 
   return numbers;
+}
+
+function formatCounter(counter: number, format: HeadingNumberingFormat): string {
+  switch (format) {
+    case 'decimal':
+      return String(counter);
+    case 'lower-alpha':
+      return formatAlpha(counter);
+    case 'upper-alpha':
+      return formatAlpha(counter).toUpperCase();
+    case 'lower-roman':
+      return formatRoman(counter).toLowerCase();
+    case 'upper-roman':
+      return formatRoman(counter);
+    case 'none':
+      return '';
+  }
+}
+
+function formatAlpha(counter: number): string {
+  let value = counter;
+  let result = '';
+
+  while (value > 0) {
+    value--;
+    result = String.fromCharCode(97 + (value % 26)) + result;
+    value = Math.floor(value / 26);
+  }
+
+  return result;
+}
+
+function formatRoman(counter: number): string {
+  const romanParts: [number, string][] = [
+    [1000, 'M'],
+    [900, 'CM'],
+    [500, 'D'],
+    [400, 'CD'],
+    [100, 'C'],
+    [90, 'XC'],
+    [50, 'L'],
+    [40, 'XL'],
+    [10, 'X'],
+    [9, 'IX'],
+    [5, 'V'],
+    [4, 'IV'],
+    [1, 'I'],
+  ];
+
+  let value = counter;
+  let result = '';
+
+  for (const [amount, symbol] of romanParts) {
+    while (value >= amount) {
+      result += symbol;
+      value -= amount;
+    }
+  }
+
+  return result;
 }
