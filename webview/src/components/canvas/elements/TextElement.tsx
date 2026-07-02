@@ -27,6 +27,12 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
     ],
     content: element.data.content,
 
+    editorProps: {
+      attributes: {
+        class: 'outline-none focus:outline-none',
+      },
+    },
+
     onTransaction({ editor }) {
       const textAlign = editor.isActive({ textAlign: 'left' })
         ? 'left'
