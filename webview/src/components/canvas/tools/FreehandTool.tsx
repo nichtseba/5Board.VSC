@@ -50,7 +50,7 @@ export default function FreehandTool() {
     if (previewRafRef.current !== null) return;
     previewRafRef.current = requestAnimationFrame(() => {
       previewRafRef.current = null;
-      messages.send({ type: 'freehandPreview', points: pts, color: params.color, width: params.width });
+      messages.send({ type: 'freehandPreview', points: pts, color: params.color, width: params.width, opacity: params.opacity });
     });
   };
 
@@ -87,7 +87,7 @@ export default function FreehandTool() {
       id: crypto.randomUUID(),
       type: EditorElementType.Freehand,
       layout: { xPos, yPos, width, height },
-      style: { visible: true },
+      style: { visible: true, opacity: params.opacity },
       data: { strokes: [{ points: normalized, color: params.color, width: params.width }] },
     };
     messages.send({ type: 'addElement', element });
@@ -137,9 +137,9 @@ export default function FreehandTool() {
           setPoints(null);
         },
       }),
-      [messages, calculateCanvasPoint, params.color, params.width, cellSize.width, metrics.width, metrics.height],
+      [messages, calculateCanvasPoint, params.color, params.width, params.opacity, cellSize.width, metrics.width, metrics.height],
     ),
   );
 
-  return <FreehandPreviewOverlay preview={points ? { points, color: params.color, width: params.width } : null} />;
+  return <FreehandPreviewOverlay preview={points ? { points, color: params.color, width: params.width, opacity: params.opacity } : null} />;
 }

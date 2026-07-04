@@ -7,6 +7,7 @@ export type FreehandPreview = {
   points: { x: number; y: number }[];
   color: string;
   width: number;
+  opacity: number;
 };
 
 // The points are normalized to the canvas, so we scale them into a fixed viewBox and
@@ -30,6 +31,7 @@ export default function FreehandPreviewOverlay({ preview }: { preview: FreehandP
         fill="none"
         stroke={preview.color}
         strokeWidth={preview.width}
+        strokeOpacity={preview.opacity}
         strokeLinecap="round"
         strokeLinejoin="round"
         vectorEffect="non-scaling-stroke"

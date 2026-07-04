@@ -14,6 +14,8 @@ import {
 import { useLocalization } from '../providers/LocalizationProvider';
 import { Button } from 'vscrui';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
+import SliderInput from '../components/sidebar/components/SliderInput';
+import { ColorPicker } from '../components/sidebar/components/ColorPicker';
 import { useMessageService } from '../services/MessageService';
 
 export default function ToolSidebar() {
@@ -27,6 +29,7 @@ export default function ToolSidebar() {
   // Freehand drawing options, sent with the tool via 'selectTool'.
   const [freehandColor, setFreehandColor] = useState(DEFAULT_FREEHAND_PARAMETERS.color);
   const [freehandWidth, setFreehandWidth] = useState(DEFAULT_FREEHAND_PARAMETERS.width);
+  const [freehandOpacity, setFreehandOpacity] = useState(DEFAULT_FREEHAND_PARAMETERS.opacity);
   const tools = Object.entries(TOOL_DEFINITIONS) as [EditorToolId, EditorToolDefinition][];
 
   useEffect(() => {
@@ -37,7 +40,7 @@ export default function ToolSidebar() {
   // Builds the tool payload, attaching freehand parameters for the freehand tool.
   const toolFor = (toolId: EditorToolId): EditorTool =>
     toolId === EditorToolId.FREEHAND
-      ? { type: EditorToolId.FREEHAND, parameters: { color: freehandColor, width: freehandWidth } }
+      ? { type: EditorToolId.FREEHAND, parameters: { color: freehandColor, width: freehandWidth, opacity: freehandOpacity } }
       : { type: toolId, parameters: undefined };
 
   const selectTool = (toolId: EditorToolId) => {
@@ -57,7 +60,7 @@ export default function ToolSidebar() {
     if (selectedTool.type === EditorToolId.FREEHAND) {
       const tool: EditorTool = {
         type: EditorToolId.FREEHAND,
-        parameters: { color, width: freehandWidth },
+        parameters: { color, width: freehandWidth, opacity: freehandOpacity },
       };
       setSelectedTool(tool);
       messages.send({ type: 'selectTool', tool });
@@ -69,7 +72,19 @@ export default function ToolSidebar() {
     if (selectedTool.type === EditorToolId.FREEHAND) {
       const tool: EditorTool = {
         type: EditorToolId.FREEHAND,
-        parameters: { color: freehandColor, width },
+        parameters: { color: freehandColor, width, opacity: freehandOpacity },
+      };
+      setSelectedTool(tool);
+      messages.send({ type: 'selectTool', tool });
+    }
+  };
+
+  const handleFreehandOpacity = (opacity: number) => {
+    setFreehandOpacity(opacity);
+    if (selectedTool.type === EditorToolId.FREEHAND) {
+      const tool: EditorTool = {
+        type: EditorToolId.FREEHAND,
+        parameters: { color: freehandColor, width: freehandWidth, opacity },
       };
       setSelectedTool(tool);
       messages.send({ type: 'selectTool', tool });
@@ -118,18 +133,32 @@ export default function ToolSidebar() {
               ))}
             </div>
 
-            <div className="flex items-center justify-between">
-              <span className="text-xs opacity-80">{t('webview.sidebar.freehand.width')}</span>
-              <span className="text-xs tabular-nums opacity-70">{freehandWidth}px</span>
-            </div>
-            <input
-              type="range"
+            {/* Custom colour beyond the presets */}
+            <ColorPicker
+              color={freehandColor}
+              onChange={handleFreehandColor}
+              label={t('webview.sidebar.freehand.customColor')}
+            />
+
+            <SliderInput
+              label={t('webview.sidebar.freehand.width')}
+              value={freehandWidth}
               min={FREEHAND_MIN_WIDTH}
               max={FREEHAND_MAX_WIDTH}
               step={1}
-              value={freehandWidth}
-              onChange={(e) => handleFreehandWidth(Number(e.target.value))}
-              className="w-full cursor-pointer accent-focus-border"
+              unit="px"
+              onChange={handleFreehandWidth}
+            />
+
+            {/* Opacity slider in percent (0–100%). Stored as opacity (0..1). */}
+            <SliderInput
+              label={t('webview.sidebar.freehand.opacity')}
+              value={Math.round(freehandOpacity * 100)}
+              min={0}
+              max={100}
+              step={5}
+              unit="%"
+              onChange={(value) => handleFreehandOpacity(value / 100)}
             />
           </section>
         )}

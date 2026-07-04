@@ -45,7 +45,9 @@
       "freehand": {
         "title": "Freehand Options",
         "color": "Color",
+        "customColor": "Custom color",
         "width": "Thickness",
+        "opacity": "Opacity",
         "colors": {
           "red": "Red",
           "orange": "Orange",

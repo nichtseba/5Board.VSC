@@ -22,6 +22,7 @@ export function FreehandElement({ element }: EditorElementProps<EditorElementTyp
       className="pointer-events-none block h-full w-full overflow-visible"
       viewBox={`0 0 ${VIEWBOX} ${VIEWBOX}`}
       preserveAspectRatio="none"
+      style={{ opacity: element.style.opacity ?? 1 }}
     >
       {strokes.map((stroke, index) => (
         <path

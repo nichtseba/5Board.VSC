@@ -36,7 +36,9 @@
       "freehand": {
         "title": "Freihand-Optionen",
         "color": "Farbe",
+        "customColor": "Eigene Farbe",
         "width": "Dicke",
+        "opacity": "Deckkraft",
         "colors": {
           "red": "Rot",
           "orange": "Orange",

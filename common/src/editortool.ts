@@ -40,10 +40,11 @@ type TYPE_TOOL_PARAMETERS = {
   [EditorToolId.AddElement]: AddElementToolParameters;
 };
 
-// Color and width the freehand tool draws with. Chosen in the sidebar.
+// Color, width and opacity the freehand tool draws with. Chosen in the sidebar.
 export type FreehandToolParameters = {
   color: string;
   width: number;
+  opacity: number; // 0..1, applied as the element's opacity
 };
 
 // Selectable freehand colors. The `id` maps to a localized name for the tooltip.
@@ -66,6 +67,7 @@ export const FREEHAND_DEFAULT_WIDTH = 4;
 export const DEFAULT_FREEHAND_PARAMETERS: FreehandToolParameters = {
   color: FREEHAND_COLORS[0].value,
   width: FREEHAND_DEFAULT_WIDTH,
+  opacity: 1,
 };
 
 type AddElementToolParameters = {

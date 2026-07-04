@@ -90,6 +90,7 @@ export class DocumentMessageHandlers {
           points: msg.points,
           color: msg.color,
           width: msg.width,
+          opacity: msg.opacity,
         });
       }),
       this.document.messageService.on('freehandPreviewEnd', () => {
