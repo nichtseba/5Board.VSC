@@ -1,9 +1,11 @@
 import { EditorElement, EditorElementType } from '5board.vsc-common';
+import { useLocalization } from '../../../providers/LocalizationProvider';
 
 type Props = {
   element: EditorElement<EditorElementType.Freehand>;
 };
 
 export function FreehandSettings({ element }: Props) {
-  return <div>Add settings for {element.id}</div>;
+  const { t } = useLocalization();
+  return <div>{t('webview.sidebar.freehand.addSettings') + (element.type as string + ' ' + element.id)}</div>;
 }

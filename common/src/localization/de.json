@@ -46,7 +46,8 @@
           "purple": "Lila",
           "black": "Schwarz",
           "white": "Weiß"
-        }
+        },
+        "addSettings": "Einstellungen hinzufügen für "
       },
       "elementType": {
         "heading": "Überschrift",

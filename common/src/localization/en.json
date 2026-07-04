@@ -55,7 +55,8 @@
           "purple": "Purple",
           "black": "Black",
           "white": "White"
-        }
+        },
+        "addSettings": "Add Settings for "
       },
       "projectorSettings": {
         "title": "Projector Settings",
