@@ -81,6 +81,9 @@
       "headingSettings": {
         "title": "Heading",
         "levelLabel": "Hierarchy level"
+      },
+      "freehandSettings": {
+        "title": "Freehand"
       }
     }
   }
