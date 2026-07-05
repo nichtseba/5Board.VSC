@@ -1,4 +1,4 @@
-import { EditorElement, TranslationKey } from './main';
+import { EditorElement, LineStyle, TranslationKey } from './main';
 
 export enum EditorToolId {
   POINTER = 'pointer',
@@ -40,12 +40,27 @@ type TYPE_TOOL_PARAMETERS = {
   [EditorToolId.AddElement]: AddElementToolParameters;
 };
 
-// Color, width and opacity the freehand tool draws with. Chosen in the sidebar.
+// Color, width, opacity and line style the freehand tool draws with. Chosen in the sidebar.
 export type FreehandToolParameters = {
   color: string;
   width: number;
   opacity: number; // 0..1, applied as the element's opacity
+  lineStyle: LineStyle;
+  dashScale: number; // dash/gap size (multiple of width) for the 'custom' line style
 };
+
+// Selectable freehand line styles. The `id` maps to a localized name.
+export const FREEHAND_LINE_STYLES = [
+  { id: 'solid' },
+  { id: 'dashed' },
+  { id: 'dotted' },
+  { id: 'custom' },
+] as const satisfies { id: LineStyle }[];
+
+// Dash/gap range (multiple of width) for the 'custom' line style slider.
+export const FREEHAND_MIN_DASH = 1;
+export const FREEHAND_MAX_DASH = 10;
+export const FREEHAND_DEFAULT_DASH = 3;
 
 // Selectable freehand colors. The `id` maps to a localized name for the tooltip.
 export const FREEHAND_COLORS = [
@@ -68,6 +83,8 @@ export const DEFAULT_FREEHAND_PARAMETERS: FreehandToolParameters = {
   color: FREEHAND_COLORS[0].value,
   width: FREEHAND_DEFAULT_WIDTH,
   opacity: 1,
+  lineStyle: 'solid',
+  dashScale: FREEHAND_DEFAULT_DASH,
 };
 
 type AddElementToolParameters = {

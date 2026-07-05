@@ -50,7 +50,15 @@ export default function FreehandTool() {
     if (previewRafRef.current !== null) return;
     previewRafRef.current = requestAnimationFrame(() => {
       previewRafRef.current = null;
-      messages.send({ type: 'freehandPreview', points: pts, color: params.color, width: params.width, opacity: params.opacity });
+      messages.send({
+        type: 'freehandPreview',
+        points: pts,
+        color: params.color,
+        width: params.width,
+        opacity: params.opacity,
+        lineStyle: params.lineStyle,
+        dashScale: params.dashScale,
+      });
     });
   };
 
@@ -88,7 +96,17 @@ export default function FreehandTool() {
       type: EditorElementType.Freehand,
       layout: { xPos, yPos, width, height },
       style: { visible: true, opacity: params.opacity },
-      data: { strokes: [{ points: normalized, color: params.color, width: params.width }] },
+      data: {
+        strokes: [
+          {
+            points: normalized,
+            color: params.color,
+            width: params.width,
+            lineStyle: params.lineStyle,
+            dashScale: params.dashScale,
+          },
+        ],
+      },
     };
     messages.send({ type: 'addElement', element });
   };
@@ -137,9 +155,24 @@ export default function FreehandTool() {
           setPoints(null);
         },
       }),
-      [messages, calculateCanvasPoint, params.color, params.width, params.opacity, cellSize.width, metrics.width, metrics.height],
+      [messages, calculateCanvasPoint, params.color, params.width, params.opacity, params.lineStyle, params.dashScale, cellSize.width, metrics.width, metrics.height],
     ),
   );
 
-  return <FreehandPreviewOverlay preview={points ? { points, color: params.color, width: params.width, opacity: params.opacity } : null} />;
+  return (
+    <FreehandPreviewOverlay
+      preview={
+        points
+          ? {
+              points,
+              color: params.color,
+              width: params.width,
+              opacity: params.opacity,
+              lineStyle: params.lineStyle,
+              dashScale: params.dashScale,
+            }
+          : null
+      }
+    />
+  );
 }

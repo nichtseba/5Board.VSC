@@ -88,7 +88,7 @@ export default function Projector() {
       setPointerStyle(msg.style);
     }
     if (msg.type === 'freehandPreview') {
-      setFreehandPreview({ points: msg.points, color: msg.color, width: msg.width, opacity: msg.opacity });
+      setFreehandPreview({ points: msg.points, color: msg.color, width: msg.width, opacity: msg.opacity, lineStyle: msg.lineStyle, dashScale: msg.dashScale });
     }
     if (msg.type === 'freehandPreviewEnd') {
       setFreehandPreview(null);

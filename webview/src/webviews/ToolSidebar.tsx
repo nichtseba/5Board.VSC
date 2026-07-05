@@ -6,8 +6,12 @@ import {
   EditorToolDefinition,
   EditorToolId,
   FREEHAND_COLORS,
+  FREEHAND_LINE_STYLES,
+  FREEHAND_MAX_DASH,
   FREEHAND_MAX_WIDTH,
+  FREEHAND_MIN_DASH,
   FREEHAND_MIN_WIDTH,
+  FreehandToolParameters,
   TOOL_DEFINITIONS,
   TranslationKey,
 } from '5board.vsc-common';
@@ -16,6 +20,7 @@ import { Button } from 'vscrui';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
 import SliderInput from '../components/sidebar/components/SliderInput';
 import { ColorPicker } from '../components/sidebar/components/ColorPicker';
+import LineStyleSelect from '../components/sidebar/components/LineStyleSelect';
 import { useMessageService } from '../services/MessageService';
 
 export default function ToolSidebar() {
@@ -27,9 +32,8 @@ export default function ToolSidebar() {
     parameters: undefined,
   });
   // Freehand drawing options, sent with the tool via 'selectTool'.
-  const [freehandColor, setFreehandColor] = useState(DEFAULT_FREEHAND_PARAMETERS.color);
-  const [freehandWidth, setFreehandWidth] = useState(DEFAULT_FREEHAND_PARAMETERS.width);
-  const [freehandOpacity, setFreehandOpacity] = useState(DEFAULT_FREEHAND_PARAMETERS.opacity);
+  const [freehandParams, setFreehandParams] =
+    useState<FreehandToolParameters>(DEFAULT_FREEHAND_PARAMETERS);
   const tools = Object.entries(TOOL_DEFINITIONS) as [EditorToolId, EditorToolDefinition][];
 
   useEffect(() => {
@@ -40,7 +44,7 @@ export default function ToolSidebar() {
   // Builds the tool payload, attaching freehand parameters for the freehand tool.
   const toolFor = (toolId: EditorToolId): EditorTool =>
     toolId === EditorToolId.FREEHAND
-      ? { type: EditorToolId.FREEHAND, parameters: { color: freehandColor, width: freehandWidth, opacity: freehandOpacity } }
+      ? { type: EditorToolId.FREEHAND, parameters: freehandParams }
       : { type: toolId, parameters: undefined };
 
   const selectTool = (toolId: EditorToolId) => {
@@ -54,38 +58,12 @@ export default function ToolSidebar() {
     selectTool(toolId);
   };
 
-  // Re-send the freehand tool with updated parameters while it is active.
-  const handleFreehandColor = (color: string) => {
-    setFreehandColor(color);
+  // Patch freehand params and, while the tool is active, re-send it live.
+  const updateFreehand = (patch: Partial<FreehandToolParameters>) => {
+    const parameters = { ...freehandParams, ...patch };
+    setFreehandParams(parameters);
     if (selectedTool.type === EditorToolId.FREEHAND) {
-      const tool: EditorTool = {
-        type: EditorToolId.FREEHAND,
-        parameters: { color, width: freehandWidth, opacity: freehandOpacity },
-      };
-      setSelectedTool(tool);
-      messages.send({ type: 'selectTool', tool });
-    }
-  };
-
-  const handleFreehandWidth = (width: number) => {
-    setFreehandWidth(width);
-    if (selectedTool.type === EditorToolId.FREEHAND) {
-      const tool: EditorTool = {
-        type: EditorToolId.FREEHAND,
-        parameters: { color: freehandColor, width, opacity: freehandOpacity },
-      };
-      setSelectedTool(tool);
-      messages.send({ type: 'selectTool', tool });
-    }
-  };
-
-  const handleFreehandOpacity = (opacity: number) => {
-    setFreehandOpacity(opacity);
-    if (selectedTool.type === EditorToolId.FREEHAND) {
-      const tool: EditorTool = {
-        type: EditorToolId.FREEHAND,
-        parameters: { color: freehandColor, width: freehandWidth, opacity },
-      };
+      const tool: EditorTool = { type: EditorToolId.FREEHAND, parameters };
       setSelectedTool(tool);
       messages.send({ type: 'selectTool', tool });
     }
@@ -122,9 +100,9 @@ export default function ToolSidebar() {
                 <button
                   key={color.id}
                   title={t(`webview.sidebar.freehand.colors.${color.id}` as TranslationKey)}
-                  onClick={() => handleFreehandColor(color.value)}
+                  onClick={() => updateFreehand({ color: color.value })}
                   className={`h-6 w-6 rounded-full border border-foreground-description ${
-                    freehandColor === color.value
+                    freehandParams.color === color.value
                       ? 'outline outline-2 outline-offset-1 outline-focus-border'
                       : ''
                   }`}
@@ -135,31 +113,53 @@ export default function ToolSidebar() {
 
             {/* Custom colour beyond the presets */}
             <ColorPicker
-              color={freehandColor}
-              onChange={handleFreehandColor}
+              color={freehandParams.color}
+              onChange={(color) => updateFreehand({ color })}
               label={t('webview.sidebar.freehand.customColor')}
             />
 
             <SliderInput
               label={t('webview.sidebar.freehand.width')}
-              value={freehandWidth}
+              value={freehandParams.width}
               min={FREEHAND_MIN_WIDTH}
               max={FREEHAND_MAX_WIDTH}
               step={1}
               unit="px"
-              onChange={handleFreehandWidth}
+              onChange={(width) => updateFreehand({ width })}
             />
 
             {/* Opacity slider in percent (0–100%). Stored as opacity (0..1). */}
             <SliderInput
               label={t('webview.sidebar.freehand.opacity')}
-              value={Math.round(freehandOpacity * 100)}
+              value={Math.round(freehandParams.opacity * 100)}
               min={0}
               max={100}
               step={5}
               unit="%"
-              onChange={(value) => handleFreehandOpacity(value / 100)}
+              onChange={(value) => updateFreehand({ opacity: value / 100 })}
             />
+
+            <LineStyleSelect
+              label={t('webview.sidebar.freehand.lineStyle')}
+              value={freehandParams.lineStyle}
+              options={FREEHAND_LINE_STYLES.map((s) => ({
+                id: s.id,
+                label: t(`webview.sidebar.freehand.lineStyles.${s.id}` as TranslationKey),
+              }))}
+              onChange={(lineStyle) => updateFreehand({ lineStyle })}
+            />
+
+            {/* Dash size slider — only for the custom line style. */}
+            {freehandParams.lineStyle === 'custom' && (
+              <SliderInput
+                label={t('webview.sidebar.freehand.dashScale')}
+                value={freehandParams.dashScale}
+                min={FREEHAND_MIN_DASH}
+                max={FREEHAND_MAX_DASH}
+                step={1}
+                onChange={(dashScale) => updateFreehand({ dashScale })}
+              />
+            )}
           </section>
         )}
       </SidebarShell>

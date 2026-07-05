@@ -39,6 +39,8 @@
         "customColor": "Eigene Farbe",
         "width": "Dicke",
         "opacity": "Deckkraft",
+        "lineStyle": "Linienstil",
+        "dashScale": "Strichgröße",
         "colors": {
           "red": "Rot",
           "orange": "Orange",
@@ -48,6 +50,12 @@
           "purple": "Lila",
           "black": "Schwarz",
           "white": "Weiß"
+        },
+        "lineStyles": {
+          "solid": "Durchgezogen",
+          "dashed": "Gestrichelt",
+          "dotted": "Gepunktet",
+          "custom": "Eigene"
         },
         "addSettings": "Einstellungen hinzufügen für "
       },

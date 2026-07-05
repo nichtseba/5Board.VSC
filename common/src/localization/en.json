@@ -48,6 +48,8 @@
         "customColor": "Custom color",
         "width": "Thickness",
         "opacity": "Opacity",
+        "lineStyle": "Line style",
+        "dashScale": "Dash size",
         "colors": {
           "red": "Red",
           "orange": "Orange",
@@ -57,6 +59,12 @@
           "purple": "Purple",
           "black": "Black",
           "white": "White"
+        },
+        "lineStyles": {
+          "solid": "Solid",
+          "dashed": "Dashed",
+          "dotted": "Dotted",
+          "custom": "Custom"
         },
         "addSettings": "Add Settings for "
       },

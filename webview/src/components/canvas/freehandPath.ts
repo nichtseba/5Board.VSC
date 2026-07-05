@@ -1,3 +1,21 @@
+import { LineStyle } from '5board.vsc-common';
+
+/**
+ * SVG stroke-dasharray for a line style, scaled to the stroke width so the
+ * pattern stays proportional. Dotted relies on a round line cap to form dots.
+ * Returns undefined for solid (no dashing). Shared by the element and preview.
+ */
+export function dashArrayForLineStyle(
+  lineStyle: LineStyle | undefined,
+  width: number,
+  dashScale = 3,
+): string | undefined {
+  if (lineStyle === 'dashed') return `${width * 3} ${width * 2}`;
+  if (lineStyle === 'dotted') return `0 ${width * 2}`;
+  if (lineStyle === 'custom') return `${width * dashScale} ${width * dashScale}`;
+  return undefined;
+}
+
 /**
  * Builds a smooth SVG path from a stroke's points (in whatever coordinate space
  * the caller passes). Straight segments are replaced by quadratic curves through

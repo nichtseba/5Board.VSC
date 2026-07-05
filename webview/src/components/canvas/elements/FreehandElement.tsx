@@ -1,6 +1,6 @@
 import { EditorElementType } from '5board.vsc-common';
 import { EditorElementProps } from '../EditorElement';
-import { buildSmoothPath } from '../freehandPath';
+import { buildSmoothPath, dashArrayForLineStyle } from '../freehandPath';
 
 // Virtual canvas the normalized (0..1) points are scaled into.
 // A fixed viewBox lets the SVG stretch to any element size via CSS.
@@ -31,6 +31,7 @@ export function FreehandElement({ element }: EditorElementProps<EditorElementTyp
           fill="none"
           stroke={stroke.color ?? 'var(--vscode-editor-foreground)'}
           strokeWidth={stroke.width ?? 2}
+          strokeDasharray={dashArrayForLineStyle(stroke.lineStyle, stroke.width ?? 2, stroke.dashScale)}
           strokeLinecap="round"
           strokeLinejoin="round"
           vectorEffect="non-scaling-stroke"
