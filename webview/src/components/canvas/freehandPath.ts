@@ -49,3 +49,13 @@ export function buildSmoothPath(points: { x: number; y: number }[]): string {
 
   return d;
 }
+
+/**
+ * Builds a straight-segment SVG path (no smoothing) through the given points.
+ * Used for pen-tool polylines where corners must stay sharp.
+ */
+export function buildStraightPath(points: { x: number; y: number }[]): string {
+  if (points.length === 0) return '';
+  if (points.length === 1) return `M ${points[0].x} ${points[0].y} l 0.01 0`;
+  return points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+}

@@ -93,6 +93,7 @@ export class DocumentMessageHandlers {
           opacity: msg.opacity,
           lineStyle: msg.lineStyle,
           dashScale: msg.dashScale,
+          straight: msg.straight,
         });
       }),
       this.document.messageService.on('freehandPreviewEnd', () => {

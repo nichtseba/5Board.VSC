@@ -187,4 +187,6 @@ export type FreehandStroke = {
   lineStyle?: LineStyle;
   /** Dash/gap size (multiple of width) when lineStyle is 'custom'. */
   dashScale?: number;
+  /** Render as straight segments (no smoothing), e.g. pen-tool polylines. */
+  straight?: boolean;
 };

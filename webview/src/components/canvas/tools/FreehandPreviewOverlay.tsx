@@ -1,5 +1,5 @@
 import { LineStyle } from '5board.vsc-common';
-import { buildSmoothPath, dashArrayForLineStyle } from '../freehandPath';
+import { buildSmoothPath, buildStraightPath, dashArrayForLineStyle } from '../freehandPath';
 
 // Live, in-progress freehand stroke (normalized 0–1 to the canvas), rendered as an
 // overlay on top of the canvas. Used both locally while the editor draws and on the
@@ -11,6 +11,7 @@ export type FreehandPreview = {
   opacity: number;
   lineStyle: LineStyle;
   dashScale: number;
+  straight: boolean;
 };
 
 // The points are normalized to the canvas, so we scale them into a fixed viewBox and
@@ -30,7 +31,9 @@ export default function FreehandPreviewOverlay({ preview }: { preview: FreehandP
       preserveAspectRatio="none"
     >
       <path
-        d={buildSmoothPath(preview.points.map((p) => ({ x: p.x * VIEWBOX, y: p.y * VIEWBOX })))}
+        d={(preview.straight ? buildStraightPath : buildSmoothPath)(
+          preview.points.map((p) => ({ x: p.x * VIEWBOX, y: p.y * VIEWBOX })),
+        )}
         fill="none"
         stroke={preview.color}
         strokeWidth={preview.width}

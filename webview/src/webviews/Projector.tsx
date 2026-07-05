@@ -88,7 +88,15 @@ export default function Projector() {
       setPointerStyle(msg.style);
     }
     if (msg.type === 'freehandPreview') {
-      setFreehandPreview({ points: msg.points, color: msg.color, width: msg.width, opacity: msg.opacity, lineStyle: msg.lineStyle, dashScale: msg.dashScale });
+      setFreehandPreview({
+        points: msg.points,
+        color: msg.color,
+        width: msg.width,
+        opacity: msg.opacity,
+        lineStyle: msg.lineStyle,
+        dashScale: msg.dashScale,
+        straight: msg.straight,
+      });
     }
     if (msg.type === 'freehandPreviewEnd') {
       setFreehandPreview(null);
@@ -136,7 +144,11 @@ export default function Projector() {
       <div style={{ pointerEvents: 'none' }}>
         {boardDocument ? (
           <CanvasEventsProvider>
-            <EditorCanvas cursor={cursor} pointerStyle={pointerStyle} freehandPreview={freehandPreview} />
+            <EditorCanvas
+              cursor={cursor}
+              pointerStyle={pointerStyle}
+              freehandPreview={freehandPreview}
+            />
           </CanvasEventsProvider>
         ) : (
           // Shown while waiting for the first 'init' message from the extension.
