@@ -3,6 +3,7 @@ import { EditorElementProps } from '../EditorElement';
 import { useEditor, EditorContent } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
+import { TextStyleKit } from '@tiptap/extension-text-style';
 import TextAlign from '@tiptap/extension-text-align';
 import { useMessageService, useOnMessage } from '../../../services/MessageService';
 import { useGrid } from '../../../providers/GridProvider';
@@ -30,6 +31,7 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
         types: ['paragraph'],
         defaultAlignment: 'left',
       }),
+      TextStyleKit,
     ],
     content: element.data.content,
 
@@ -77,6 +79,7 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
                 link: editor.isActive('link'),
                 strike: editor.isActive('strike'),
                 underline: editor.isActive('underline'),
+                textStyle: { fontFamily: editor.getAttributes('textStyle').fontFamily },
               },
               nodes: {
                 attributes: {
@@ -122,6 +125,10 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
 
       case 'setTextAlign':
         editor.chain().focus().setTextAlign(msg.command.value).run();
+        break;
+
+      case 'setFontFamily':
+        editor.chain().focus().setFontFamily(msg.command.font).run();
         break;
     }
   });

@@ -4,4 +4,5 @@ export type TextEditorCommand =
   | { type: 'toggleStrike' }
   | { type: 'toggleUnderline' }
   | { type: 'toggleCode' }
-  | { type: 'setTextAlign'; value: 'left' | 'center' | 'right' | 'justify' };
+  | { type: 'setTextAlign'; value: 'left' | 'center' | 'right' | 'justify' }
+  | { type: 'setFontFamily'; font: string };

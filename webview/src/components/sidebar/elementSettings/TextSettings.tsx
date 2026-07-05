@@ -2,6 +2,7 @@ import { EditorElement, EditorElementType } from '5board.vsc-common';
 import SettingsPanel from '../layout/SettingsPanel';
 import { useLocalization } from '../../../providers/LocalizationProvider';
 import { Dropdown } from 'vscrui';
+import { FontFamilyDropdown } from './components/FontFamilyDropdown';
 import SettingsField from '../layout/SettingsField';
 import {
   AlignCenterButton,
@@ -14,12 +15,14 @@ import {
   StrikeButton,
   UnderlineButton,
 } from './components/TextSettingsButton';
+import { useMessageService } from '../../../services/MessageService';
 
 type Props = {
   element: EditorElement<EditorElementType.Text>;
 };
 export function TextSettings({ element }: Props) {
   const { t } = useLocalization();
+  const messages = useMessageService();
   return (
     <>
       <SettingsPanel
@@ -27,13 +30,17 @@ export function TextSettings({ element }: Props) {
         icon="symbol-string"
       >
         <SettingsField>
-          <Dropdown
-            options={[
-              { value: 'Arial', label: 'Arial' },
-              { value: 'Schriftart2', label: 'Schriftart2' },
-              { value: 'Schriftart3', label: 'Schriftart3' },
-            ]}
-            value="Arial"
+          <FontFamilyDropdown
+            value={element.data.tiptap?.marks?.textStyle?.fontFamily ?? 'inter'}
+            onChange={(font) => {
+              messages.send({
+                type: 'textEditorCommand',
+                command: {
+                  type: 'setFontFamily',
+                  font,
+                },
+              });
+            }}
           />
           <Dropdown
             options={[
