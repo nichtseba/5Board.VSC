@@ -4,9 +4,15 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
-import { Button } from 'vscrui';
 import { useMessageService, useOnMessage } from '../../../services/MessageService';
 import { useGrid } from '../../../providers/GridProvider';
+import {
+  BoldButton,
+  CodeButton,
+  ItalicButton,
+  StrikeButton,
+  UnderlineButton,
+} from '../../sidebar/elementSettings/components/TextSettingsButton';
 
 /**
  * Renders a text element.
@@ -124,41 +130,11 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
     <>
       <EditorContent editor={editor} />
       <BubbleMenu editor={editor}>
-        <Button
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className="h-8 flex flex-col items-center justify-center gap-2"
-          appearance={editor.isActive('bold') ? 'primary' : 'secondary'}
-        >
-          <span className={`codicon codicon-bold`} />
-        </Button>
-        <Button
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className="h-8 flex flex-col items-center justify-center gap-2"
-          appearance={editor.isActive('italic') ? 'primary' : 'secondary'}
-        >
-          <span className={`codicon codicon-italic`} />
-        </Button>
-        <Button
-          onClick={() => editor.chain().focus().toggleStrike().run()}
-          className="h-8 flex flex-col items-center justify-center gap-2"
-          appearance={editor.isActive('strike') ? 'primary' : 'secondary'}
-        >
-          <span className={`codicon codicon-strikethrough`} />
-        </Button>
-        <Button
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
-          className="h-8 flex flex-col items-center justify-center gap-2"
-          appearance={editor.isActive('underline') ? 'primary' : 'secondary'}
-        >
-          <span className={'codicon underline'}>U</span>
-        </Button>
-        <Button
-          className="h-8 flex flex-col items-center justify-center gap-2"
-          appearance={editor.isActive('code') ? 'primary' : 'secondary'}
-          onClick={() => editor.chain().focus().toggleCode().run()}
-        >
-          <span className={'codicon codicon-code'} />
-        </Button>
+        <BoldButton element={element} />
+        <ItalicButton element={element} />
+        <StrikeButton element={element} />
+        <UnderlineButton element={element} />
+        <CodeButton element={element} />
       </BubbleMenu>
     </>
   );

@@ -1,3 +1,4 @@
+import { EXTENSION } from '../extension';
 import { BoardCustomDocument } from './BoardCustomDocument';
 import deepEquals from 'deep-equal';
 
@@ -50,6 +51,12 @@ export class DocumentMessageHandlers {
           }
           return changed;
         });
+      }),
+      this.document.messageService.on('textEditorCommand', (msg) => {
+        if (!EXTENSION.activeEditorDocument) {
+          return;
+        }
+        EXTENSION.activeEditorDocument.messageService.send(msg);
       }),
       this.document.messageService.on('updateElement', (msg) => {
         this.document.applyEdit((document) => {
