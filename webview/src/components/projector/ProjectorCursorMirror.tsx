@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useCanvasEvents, useCanvasPoint } from '../../providers/CanvasEventsProvider';
 import { useMessageService, useOnMessage } from '../../services/MessageService';
 
@@ -11,6 +11,8 @@ export default function ProjectorCursorMirror() {
   const calculateCanvasPoint = useCanvasPoint();
   // rafRef throttles position reporting: one message per animation frame.
   const rafRef = useRef<number | null>(null);
+  // Last pointer event, re-used to update the position on scroll (no pointer move).
+  const lastEventRef = useRef<PointerEvent | null>(null);
 
   // Whether the pointer should be mirrored (tracking on AND a projector open).
   const [active, setActive] = useState(false);
@@ -18,23 +20,40 @@ export default function ProjectorCursorMirror() {
     if (msg.type === 'projectorStateChanged') setActive(msg.active);
   });
 
-  useCanvasEvents({
-    pointerMove: (e) => {
+  const sendCursor = useCallback(
+    (e: PointerEvent) => {
       if (!active || rafRef.current !== null) return;
-
       const point = calculateCanvasPoint(e);
       if (!point) return;
-
       rafRef.current = requestAnimationFrame(() => {
         rafRef.current = null;
         messages.send({ type: 'cursorMove', x: point.x, y: point.y });
       });
     },
-    pointerLeave: () => {
-      if (!active) return;
-      messages.send({ type: 'cursorLeave' });
-    },
-  });
+    [active, calculateCanvasPoint, messages],
+  );
+
+  // Memoized so the hub subscribes once (a new object each render would re-subscribe
+  // the scroll listener every render, like ProjectorScrollMirror avoids).
+  const handlers = useMemo(
+    () => ({
+      pointerMove: (e: PointerEvent) => {
+        lastEventRef.current = e;
+        sendCursor(e);
+      },
+      // Scrolling moves the canvas under a stationary pointer: recompute from the
+      // last event (its rect is now updated) so the mirrored cursor follows.
+      scroll: () => {
+        if (lastEventRef.current) sendCursor(lastEventRef.current);
+      },
+      pointerLeave: () => {
+        if (active) messages.send({ type: 'cursorLeave' });
+      },
+    }),
+    [active, messages, sendCursor],
+  );
+
+  useCanvasEvents(handlers);
 
   return null;
 }
