@@ -3,11 +3,13 @@ import { SidebarDocumentSync } from './SidebarDocumentSync';
 import { MessageService } from '../MessageService';
 import {
   ElementSettingsSidebarViewProvider,
+  ProjectorSettingsSidebarViewProvider,
   SidebarViewProvider,
 } from '../providers/SidebarViewProvider';
 import { StructureTreeProvider } from '../providers/StructureTreeProvider';
 import { EXTENSION } from '../extension';
 import deepEquals from 'deep-equal';
+import { FileTreeProvider } from '../providers/FileTreeProvider';
 
 export class SidebarManager implements vscode.Disposable {
   private readonly sync: SidebarDocumentSync;
@@ -17,8 +19,10 @@ export class SidebarManager implements vscode.Disposable {
     private readonly messages: MessageService,
   ) {
     new SidebarViewProvider(context, messages).register();
+    new ProjectorSettingsSidebarViewProvider(context, messages).register();
     new ElementSettingsSidebarViewProvider(context, messages).register();
     new StructureTreeProvider(context).register();
+    new FileTreeProvider(context).register();
 
     this.sync = new SidebarDocumentSync(messages);
 
@@ -31,12 +35,50 @@ export class SidebarManager implements vscode.Disposable {
         tool: msg.tool,
       };
     });
+
     this.messages.on('textEditorCommand', (msg) => {
       if (!EXTENSION.activeEditorDocument) {
         return;
       }
       EXTENSION.activeEditorDocument.messageService.send(msg);
     });
+
+    // Sync the current projector settings to a newly opened sidebar.
+    this.messages.on('ready', (_msg, sender) => {
+      this.messages.send(
+        { type: 'cursorTrackingChanged', enabled: EXTENSION.cursorTrackingEnabled },
+        sender,
+      );
+      this.messages.send(
+        { type: 'projectorPointerChanged', style: EXTENSION.projectorPointerStyle },
+        sender,
+      );
+    });
+
+    // Toggle the global cursor tracking setting from the sidebar and notify every view.
+    this.messages.on('toggleCursorTracking', () => {
+      EXTENSION.cursorTrackingEnabled = !EXTENSION.cursorTrackingEnabled;
+      const msg = {
+        type: 'cursorTrackingChanged' as const,
+        enabled: EXTENSION.cursorTrackingEnabled,
+      };
+      this.messages.send(msg); // sidebars (reflect the checkbox)
+      // Editor + projector only care whether mirroring is now active.
+      EXTENSION.activeEditorDocument?.broadcastProjectorState();
+    });
+
+    // Update the mirrored cursor appearance and notify every view.
+    this.messages.on('updateProjectorPointer', (msg) => {
+      EXTENSION.projectorPointerStyle = msg.style;
+      const changed = {
+        type: 'projectorPointerChanged' as const,
+        style: EXTENSION.projectorPointerStyle,
+      };
+      this.messages.send(changed); // sidebars (reflect the controls)
+      // Reach the projector via the active editor document's MessageService.
+      EXTENSION.activeEditorDocument?.messageService.send(changed);
+    });
+
     // Todo: move to document handling
     this.messages.on('updateElement', (msg) => {
       if (!EXTENSION.activeEditorDocument) {

@@ -44,5 +44,5 @@ const SETTINGS_COMPONENTS: {
   [EditorElementType.Code]: CodeSettings,
   [EditorElementType.Image]: ImageSettings,
   [EditorElementType.Shape]: ShapeSettings,
-  [EditorElementType.Arrow]: ArrowSettings,
+  [EditorElementType.Arrow]: ArrowSettings
 };

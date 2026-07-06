@@ -11,11 +11,16 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   public readonly messageService = new MessageService();
   private readonly disposables: vscode.Disposable[] = [];
   private readonly unsubscribers: (() => void)[] = [];
+  private projectorCount = 0;
 
   constructor(
     public boardPackage: BoardPackage,
     public uri: vscode.Uri,
   ) {
+    // Register in the global document registry so ProjectorProvider can
+    // find this document and attach the projector panel to the same MessageService.
+    EXTENSION.registerDocument(this);
+
     this.disposables.push(
       this.onDocumentChange((document) => {
         this.messageService.send({ type: 'updateDocument', document });
@@ -34,29 +39,6 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   }
 
   private registerMessageHandlers(): void {
-    this.unsubscribers.push(
-      this.messageService.on('ready', (_msg, sender) => {
-        this.messageService.send(
-          {
-            type: 'init',
-            document: this.boardPackage.document,
-            editorState: EXTENSION.editorState,
-            language: 'en',
-          },
-          sender,
-        );
-      }),
-    );
-    this.unsubscribers.push(
-      this.messageService.on('focus', ({ focus }) => {
-        console.log('focus: ', this.uri);
-        if (focus) {
-          EXTENSION.activeEditorDocument = this;
-        } else {
-          this.clearActiveEditorDocument();
-        }
-      }),
-    );
     this.unsubscribers.push(...new DocumentMessageHandlers(this).register());
   }
 
@@ -70,7 +52,34 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     this.clearActiveEditorDocument();
   }
 
-  private clearActiveEditorDocument() {
+  /** Check if projector window is active/attached */
+  public get hasProjector(): boolean {
+    return this.projectorCount > 0;
+  }
+
+  /** Attach projector panel (init) */
+  public addProjector(): void {
+    this.projectorCount++;
+    this.broadcastProjectorState();
+  }
+
+  /** Detach projector panel (destroy) */
+  public removeProjector(): void {
+    this.projectorCount = Math.max(0, this.projectorCount - 1);
+    this.broadcastProjectorState();
+  }
+
+  /**
+   * Tell the views about the current projector state
+   * - active: pointer should be mirrored (tracking on AND a beamer open)
+   * - open: projector/beamer window is open
+   */
+  public broadcastProjectorState(): void {
+    const active = EXTENSION.cursorTrackingEnabled && this.hasProjector;
+    this.messageService.send({ type: 'projectorStateChanged', active, open: this.hasProjector });
+  }
+
+  public clearActiveEditorDocument() {
     if (EXTENSION.activeEditorDocument === this) {
       EXTENSION.activeEditorDocument = null;
     }

@@ -176,6 +176,15 @@ export class FiveBoardFileSystemProvider implements vscode.FileSystemProvider {
     if (info.path === EXPORTS_ROOT) {
       throw new Error('Exported files are not implemented yet');
     }
+    if (info.path === '') {
+      return [
+        [MANIFEST_PATH, vscode.FileType.File],
+        [CONTENT_PATH, vscode.FileType.File],
+        [ASSET_ROOT, vscode.FileType.Directory],
+        [SRC_ROOT, vscode.FileType.Directory],
+        [EXPORTS_ROOT, vscode.FileType.Directory],
+      ];
+    }
     throw new Error('Unreachable code: Invalid directory path');
   }
 
@@ -494,12 +503,16 @@ function pathInfo(uri: vscode.Uri): PathInfo | null {
     const type = ({ [MANIFEST_PATH]: 'manifest', [CONTENT_PATH]: 'content' } as const)[path]!;
     return { path, type, writeable: false };
   }
-  if ([ASSET_ROOT, SRC_ROOT, EXPORTS_ROOT].includes(path)) {
-    return { path, type: 'directory', writeable: path !== EXPORTS_ROOT };
+  if ([ASSET_ROOT, SRC_ROOT, EXPORTS_ROOT, ''].includes(path)) {
+    return { path, type: 'directory', writeable: [ASSET_ROOT, SRC_ROOT].includes(path) };
   }
   if (path.startsWith(SRC_ROOT + '/')) {
     const srcPath = path.substring(SRC_ROOT.length + 1);
-    const parts = srcPath.split('/');
+    let parts = srcPath.split('/');
+    if (parts.length === 2 && parts[1].length === 0) {
+      // Trailing slash
+      parts = [parts[0]];
+    }
     if (parts.length > 2) {
       return null;
     }
