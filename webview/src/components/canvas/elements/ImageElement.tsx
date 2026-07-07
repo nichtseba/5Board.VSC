@@ -11,6 +11,16 @@ export function ImageElement({ element, assetUrls }: EditorElementProps<EditorEl
 
   const imageSrc = assetUrls?.[element.data.src] ?? element.data.src;
 
+  const elementAspectRatio =
+    (element.layout.width * cellSize.width) / (element.layout.height * cellSize.height);
+
+  const aspectRatioDifference =
+    element.data.aspectRatio === undefined
+      ? 0
+      : Math.abs(elementAspectRatio - element.data.aspectRatio) / element.data.aspectRatio;
+
+  const objectFitClass = aspectRatioDifference > 0.1 ? 'object-contain' : 'object-fill';
+
   const configureSize = () => {
     if (element.data.configuredWidth && element.data.aspectRatio !== undefined) {
       return;
@@ -45,7 +55,11 @@ export function ImageElement({ element, assetUrls }: EditorElementProps<EditorEl
       draggable={false}
       alt={element.data.altText ?? element.data.title ?? ''}
       title={element.data.title}
-      className={element.data.configuredWidth === false ? 'overflow-hidden' : 'w-full h-full'}
+      className={
+        element.data.configuredWidth === false
+          ? 'overflow-hidden'
+          : `w-full h-full ${objectFitClass}`
+      }
       onLoad={configureSize}
     />
   );

@@ -107,7 +107,6 @@ export type ImageElementData = {
 
   configuredWidth?: boolean;
   aspectRatio?: number;
-  keepAspectRatio?: boolean;
   cropData?: CropData;
 };
 export type CropData = {

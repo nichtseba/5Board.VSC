@@ -34,7 +34,6 @@ export function addImageToDocument(
       title: assetName,
       altText: assetName,
       configuredWidth: false,
-      keepAspectRatio: true,
     },
   });
 }

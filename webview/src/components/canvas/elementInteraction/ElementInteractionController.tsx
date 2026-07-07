@@ -24,10 +24,11 @@ export default function ElementInteractionController<ElementType extends EditorE
 
   const pendingPositionUpdate = useRef(false);
 
-  const shouldKeepRatio =
-    element.type === EditorElementType.Image
-      ? ((element as EditorElement<EditorElementType.Image>).data.keepAspectRatio ?? true)
-      : profile.keepRatio;
+  const getCurrentElementRatio = () =>
+    (element.layout.width * cellSize.width) / (element.layout.height * cellSize.height);
+
+  const isImageCornerResize = (direction: number[]) =>
+    element.type === EditorElementType.Image && direction[0] !== 0 && direction[1] !== 0;
 
   useLayoutEffect(() => {
     if (pendingPositionUpdate.current && targetRef.current) {
@@ -78,21 +79,17 @@ export default function ElementInteractionController<ElementType extends EditorE
 
   const handleResizeEnd = ({ target, lastEvent }: OnResizeEnd) => {
     if (!lastEvent || !target) return;
+
     const width = lastEvent.width;
-    const height = lastEvent.height;
-    const newWidth = Math.max(1, Math.round(width / cellSize.width));
-    let newHeight = Math.max(1, Math.round(height / cellSize.height));
+    let height = lastEvent.height;
 
-    if (element.type === EditorElementType.Image && shouldKeepRatio) {
-      const imageElement = element as EditorElement<EditorElementType.Image>;
-
-      const ratio =
-        imageElement.data.aspectRatio ??
-        (imageElement.layout.width * cellSize.width) /
-          (imageElement.layout.height * cellSize.height);
-
-      newHeight = Math.max(1, Math.round((newWidth * cellSize.width) / ratio / cellSize.height));
+    if (isImageCornerResize(lastEvent.direction)) {
+      const ratio = getCurrentElementRatio();
+      height = width / ratio;
     }
+
+    const newWidth = Math.max(1, Math.round(width / cellSize.width));
+    const newHeight = Math.max(1, Math.round(height / cellSize.height));
 
     if (newWidth !== element.layout.width || newHeight !== element.layout.height) {
       pendingPositionUpdate.current = true;
@@ -118,7 +115,6 @@ export default function ElementInteractionController<ElementType extends EditorE
       target={targetRef}
       draggable={profile.draggable}
       resizable={profile.resizable}
-      keepRatio={shouldKeepRatio}
       snappable={true}
       snapGridWidth={cellSize.width}
       snapGridHeight={cellSize.height}
@@ -141,9 +137,17 @@ export default function ElementInteractionController<ElementType extends EditorE
         }
       }}
       onDragEnd={handleDragEnd}
-      onResize={({ target, width, height }) => {
-        target.style.width = `${width}px`;
-        target.style.height = `${height}px`;
+      onResize={({ target, width, height, direction }) => {
+        const nextWidth = width;
+        let nextHeight = height;
+
+        if (isImageCornerResize(direction)) {
+          const ratio = getCurrentElementRatio();
+          nextHeight = nextWidth / ratio;
+        }
+
+        target.style.width = `${nextWidth}px`;
+        target.style.height = `${nextHeight}px`;
       }}
       onResizeEnd={handleResizeEnd}
     />
