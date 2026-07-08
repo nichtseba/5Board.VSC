@@ -1,17 +1,9 @@
-/**
- * Read/write ID-tagged code blocks inside source files:
- *   {commentPrefix} <block id="<blockId>">
- *   <code>
- *   {commentPrefix} </block>
- */
-
 export type CommentPrefix = '//' | '#';
 
 const openTag = (blockId: string, prefix: CommentPrefix = '//') =>
   `${prefix} <block id="${blockId}">`;
 const closeTag = (prefix: CommentPrefix = '//') => `${prefix} </block>`;
 
-/** Returns the code between the block's markers, or null if the block is not present. */
 export function extractBlock(
   sourceCode: string,
   blockId: string,
@@ -30,10 +22,6 @@ export function extractBlock(
   return dedentBlock(sourceCode.slice(contentStart, endIndex));
 }
 
-/**
- * Drops the blank edge lines left by the markers and the common leading indentation, so the
- * block is not shown indented by its class/method nesting. Relative indentation is preserved.
- */
 function dedentBlock(raw: string): string {
   const lines = raw.split('\n');
   while (lines.length > 0 && lines[0].trim() === '') lines.shift();
@@ -55,10 +43,6 @@ export function hasBlock(
   return sourceCode.includes(openTag(blockId, prefix));
 }
 
-/**
- * Inserts a block as a class member, before the class's closing brace — the last `}` in the
- * file, since generated sources contain a single top-level class.
- */
 export function insertBlockIntoClass(
   sourceCode: string,
   blockId: string,
@@ -72,15 +56,12 @@ export function insertBlockIntoClass(
     `${indentCode(blockCode, indent)}\n` +
     `${pad}${closeTag(prefix)}\n`;
 
+  // Generated sources hold exactly one top-level class, so the last `}` is its closing brace.
   const braceIndex = sourceCode.lastIndexOf('}');
   if (braceIndex === -1) return sourceCode + block;
   return sourceCode.slice(0, braceIndex) + block + sourceCode.slice(braceIndex);
 }
 
-/**
- * Removes a block whole-line. Removing the last block leaves an empty (zombie) class —
- * intentional, sources are never deleted by block ops.
- */
 export function removeBlock(
   sourceCode: string,
   blockId: string,
@@ -117,7 +98,7 @@ export function updateBlock(
   const endIndex = sourceCode.indexOf(close, contentStart);
   if (endIndex === -1) return sourceCode;
 
-  // Re-indent the close tag like the open tag; its old indentation is part of the replaced range.
+  // The replaced range swallows the close tag's leading whitespace, so restore its indentation.
   const markerLineStart = sourceCode.lastIndexOf('\n', startIndex) + 1;
   const markerIndent = sourceCode.slice(markerLineStart, startIndex);
 
@@ -131,10 +112,6 @@ export function updateBlock(
   );
 }
 
-/**
- * Minimum indentation inside the block, falling back to the marker's own indentation for
- * empty blocks; used to re-indent edited code before writing back.
- */
 export function getBlockIndent(
   sourceCode: string,
   blockId: string,
@@ -152,6 +129,7 @@ export function getBlockIndent(
 
   const raw = sourceCode.slice(contentStart, endIndex);
   const lines = raw.split('\n').filter((line) => line.trim() !== '');
+  // An empty block has no content to measure, so match the marker's own indentation.
   if (lines.length === 0) {
     const markerLineStart = sourceCode.lastIndexOf('\n', startIndex) + 1;
     return startIndex - markerLineStart;

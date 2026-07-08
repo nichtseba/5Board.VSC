@@ -8,7 +8,6 @@ import { useBoardDocument } from '../providers/BoardDocumentProvider';
 import { useLocalization } from '../providers/LocalizationProvider';
 import { useMessageService } from '../services/MessageService';
 
-// Manages the document's named code classes; assigning blocks happens in CodeSettings.
 export default function ClassSettingsSidebar() {
   const messages = useMessageService();
   const { t } = useLocalization();

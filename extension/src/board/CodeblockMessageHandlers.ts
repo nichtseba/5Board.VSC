@@ -5,7 +5,6 @@ import { ExecutionService } from '../runner/ExecutionService';
 import { SRC_ROOT } from './package';
 import { updateBlockCode } from './CodeblockService';
 
-/** Editor-origin codeblock messages; sidebar-origin ones are handled in SidebarManager. */
 export class CodeblockMessageHandlers {
   private readonly executionService = new ExecutionService();
 
@@ -36,7 +35,6 @@ export class CodeblockMessageHandlers {
 
     const { className, language } = element.data as CodeElementData;
     const fileName = fileNameFromClassName(className, language);
-    // The open-file button only renders once the source exists in the virtual file system.
     const uri = this.document.uri.with({
       scheme: '5board',
       path: `${this.document.uri.path}/${SRC_ROOT}/${language}/${fileName}`,
@@ -50,13 +48,12 @@ export class CodeblockMessageHandlers {
       elementId,
     );
 
-    // Execution results are transient UI state, never written into the persisted document.
     this.document.messageService.send({
       type: 'codeblockResult',
       elementId,
       output: {
         stdout: result.stdout,
-        // Fall back to execution-level errors (no runner, missing source) so they are visible.
+        // Surface execution-level failures (missing toolchain, no source) that have no stderr.
         stderr: result.stderr || result.error || '',
         success: result.success,
         exitCode: result.exitCode,

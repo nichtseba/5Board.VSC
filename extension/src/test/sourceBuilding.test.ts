@@ -155,7 +155,6 @@ describe('insertBlockIntoClass', function () {
 
     assert.equal(extractBlock(source, 'a', '//'), 'private String name;');
     assert.equal(extractBlock(source, 'b', '//'), 'private int age;');
-    // Inserted before the single closing brace, so the class stays well-formed.
     assert.ok(source.trimEnd().endsWith('}'));
     assert.equal((source.match(/public class/g) ?? []).length, 1);
   });

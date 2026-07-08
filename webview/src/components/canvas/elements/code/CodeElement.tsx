@@ -91,7 +91,6 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
 
   return (
     <div className="border border-editor-widget-border rounded-sm overflow-hidden bg-editor-background relative">
-      {/* Header */}
       <div className="flex items-center gap-2 px-3 py-1.5 border-b border-editor-widget-border bg-editorGroupHeader-tabsBackground">
         <span className="font-sans text-base text-tab-activeForeground flex items-center gap-1.5 select-none">
           <span className="codicon codicon-code text-symbolIcon-classForeground" />
@@ -126,7 +125,6 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
         </div>
       </div>
 
-      {/* Monaco Editor */}
       <div ref={wrapperRef} style={{ height: MIN_HEIGHT }}>
         <MonacoEditor
           height="100%"
@@ -152,7 +150,6 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
         />
       </div>
 
-      {/* Output */}
       {output && <OutputPanel output={output} />}
     </div>
   );

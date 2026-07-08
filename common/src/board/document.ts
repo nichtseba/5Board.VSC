@@ -32,10 +32,6 @@ export interface BoardManifest {
   version: string;
 }
 
-/**
- * A user-created named code class; the Source holds the code. Default/id-derived classes of
- * standalone blocks are not registered.
- */
 export interface CodeClass {
   name: string;
   language: string;

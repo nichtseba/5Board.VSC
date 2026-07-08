@@ -36,14 +36,13 @@ export class JavaCodeblockRunner implements CodeblockRunner {
     const tempDir = await mkdtemp(join(tmpdir(), '5board-'));
     const outDir = join(tempDir, 'out');
     try {
-      // Packages are not supported yet — all Java sources are written flat into tempDir, which
-      // doubles as the sourcepath root so javac can resolve the target's dependencies on demand.
+      // Write every source flat into tempDir; it doubles as the sourcepath root below.
       const javaSources = request.sources.filter((s) => s.language === 'java');
       await writeProjectSources(javaSources, tempDir);
       await mkdir(outDir, { recursive: true });
 
-      // Only the target file is handed to javac; classes it references are compiled automatically
-      // from the sourcepath, so unrelated (possibly broken) sources don't block execution.
+      // Compile only the target: javac pulls the classes it references from the sourcepath on
+      // demand, so unrelated (possibly broken) sources don't block execution.
       const compile = await runCommand(
         'javac',
         ['-d', outDir, '-sourcepath', tempDir, request.fileName],
@@ -75,9 +74,6 @@ export class JavaCodeblockRunner implements CodeblockRunner {
   }
 }
 
-/**
- * "Main.java" → "Main". Packages are not supported yet.
- */
 function fileNameToClassName(fileName: string): string {
   return fileName.replace(/\.java$/, '');
 }

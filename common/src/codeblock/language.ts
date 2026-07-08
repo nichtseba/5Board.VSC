@@ -2,8 +2,6 @@ import { indentCode, type CommentPrefix } from './markers.js';
 
 export type CodeblockLanguage = 'java' | 'python' | 'javascript';
 
-// These tables cover every language that can appear in existing documents; full
-// LanguageSupport exists only for languages that can be scaffolded and run.
 export const COMMENT_PREFIX_BY_LANGUAGE: Record<string, CommentPrefix> = {
   java: '//',
   javascript: '//',
@@ -16,24 +14,18 @@ export const FILE_EXTENSION_BY_LANGUAGE: Record<string, string> = {
   javascript: 'js',
 };
 
-/** Language-specific source scaffolding; `buildSource` delegates the class/`main` syntax here. */
 export interface LanguageSupport {
   id: string;
   displayName: string;
   fileExtension: string;
   commentPrefix: CommentPrefix;
   sanitizeClassName(id: string): string;
-  /** The class declaration line, e.g. "public class Foo {". */
   classDeclaration(className: string): string;
-  /** Standalone runnable class: one marked block wrapped in `main`. */
   wrapRunnable(className: string, markedBlock: string): string;
-  /** Named class holding N member blocks; not run directly. */
   wrapClassBody(className: string, markedBlocks: string): string;
-  /** e.g. "Foo.java" → "Foo". */
   runTarget?(fileName: string): string;
 }
 
-/** Turns a raw element id into a valid Java class name. */
 export function sanitizeClassName(id: string): string {
   let name = id.replace(/[^a-zA-Z0-9_$]/g, '');
   if (name.length === 0) name = 'Block';

@@ -16,7 +16,6 @@ type Props = {
   element: EditorElement<EditorElementType.Code>;
 };
 
-// Dropdown value for "standalone" (no class).
 const NONE = '';
 
 function optionValue(value: string | DropdownOption | undefined): string | undefined {
@@ -35,7 +34,7 @@ export function CodeSettings({ element }: Props) {
     { value: NONE, label: t('webview.sidebar-element-settings.codeSettings.classNone') },
     ...classes.map((c) => ({ value: c.name, label: c.name })),
   ];
-  // Old documents may assign a class that is missing from the registry — still show it.
+  // Keep showing a class that an old document assigned but that never made it into the registry.
   if (!standalone && !classes.some((c) => c.name === className)) {
     classOptions.push({ value: className, label: className });
   }

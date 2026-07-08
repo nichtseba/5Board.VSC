@@ -97,7 +97,6 @@ describe('CodeblockService', function () {
       const student = sourceCode(doc, 'Student.java');
       assert.equal(extractBlock(student, 'el1'), 'private String name;');
       assert.ok(!student.includes('public static void main'));
-      // The old default source stays behind as an empty zombie.
       assert.equal(hasBlock(sourceCode(doc, 'El1.java'), 'el1'), false);
     });
 
@@ -128,7 +127,6 @@ describe('CodeblockService', function () {
       const code = sourceCode(doc, 'El1.java');
       assert.ok(code.includes('public static void main'));
       assert.equal(extractBlock(code, 'el1'), 'int x = 1;');
-      // The named class stays behind as a zombie without the block.
       assert.equal(hasBlock(sourceCode(doc, 'Student.java'), 'el1'), false);
     });
 

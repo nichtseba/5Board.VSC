@@ -20,8 +20,6 @@ export class ExecutionService {
     const data = (element as EditorElement<EditorElementType.Code>).data as CodeElementData;
     const { className, language } = data;
 
-    // Resolve the runner first: only then is the language known to be supported and its
-    // file extension well-defined, so deriving the file name below is safe.
     const runner = getRunner(language as CodeblockLanguage);
     if (!runner) {
       return this.error(`No runner available for language: ${language}`);
@@ -34,9 +32,6 @@ export class ExecutionService {
       return this.error(`Source file "${fileName}" not found in document.`);
     }
 
-    // Verify the required toolchain (e.g. java/javac) right before running, so a missing tool
-    // yields a clear message instead of a raw spawn error buried in stderr. Kept after request
-    // validation so invalid requests fail the same way regardless of the local toolchain.
     const tools = await runner.checkTools();
     if (!tools.available) {
       const missing = tools.missingTools?.join(', ');

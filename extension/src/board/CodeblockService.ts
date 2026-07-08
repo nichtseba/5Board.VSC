@@ -19,18 +19,11 @@ import {
   updateBlock,
 } from '5board.vsc-common';
 
-/**
- * All block↔source logic. Pure functions mutating a BoardDocument (no vscode imports, directly
- * testable) — message handlers wrap calls in `applyEdit` + `saveDocument`.
- */
-
 export interface BlockTarget {
-  /** `null`/empty = standalone (id-derived default class), omitted = keep. */
   className?: string | null;
   language?: string;
 }
 
-/** Moves a block to another class/language source, carrying its code along. */
 export function moveBlock(document: BoardDocument, elementId: string, target: BlockTarget): void {
   const element = findCodeElement(document, elementId);
   if (!element) return;
@@ -40,6 +33,7 @@ export function moveBlock(document: BoardDocument, elementId: string, target: Bl
   const support = getLanguageSupport(newLanguage);
   if (!support) return;
 
+  // Omitted className keeps the current class; null/empty means standalone (id-derived default).
   const requestedName = target.className === undefined ? data.className : (target.className ?? '');
   const newClassName = requestedName.trim()
     ? support.sanitizeClassName(requestedName.trim())
@@ -54,7 +48,6 @@ export function moveBlock(document: BoardDocument, elementId: string, target: Bl
   data.language = newLanguage;
 }
 
-/** Writes edited block code back into its source, creating the source on first edit. */
 export function updateBlockCode(document: BoardDocument, elementId: string, code: string): void {
   const element = findCodeElement(document, elementId);
   if (!element) return;
@@ -71,12 +64,8 @@ export function updateBlockCode(document: BoardDocument, elementId: string, code
   }
 }
 
-//#region "Class registry"
-
-/**
- * Back-compat for documents saved before the registry existed: every source not addressed as
- * some block's default class is a named class.
- */
+// Back-compat for documents predating the registry: a source is a named class unless it is some
+// block's id-derived default (standalone) source.
 export function deriveCodeClasses(content: BoardContent, sources: Source[]): CodeClass[] {
   const codeElements = content.elements.filter((e) => e.type === EditorElementType.Code);
   return sources
@@ -87,7 +76,6 @@ export function deriveCodeClasses(content: BoardContent, sources: Source[]): Cod
     .map((source) => ({ name: classNameFromFileName(source.name), language: source.language }));
 }
 
-/** Registers a named class and eagerly creates its empty source, so it is visible and openable. */
 export function createClass(document: BoardDocument, name: string, language: string): void {
   const support = getLanguageSupport(language);
   if (!support || !name.trim()) return;
@@ -106,10 +94,6 @@ export function createClass(document: BoardDocument, name: string, language: str
   }
 }
 
-/**
- * Renames the registry entry, the source (file name + class declaration), and every member
- * element. Class-name references inside block code are the user's to update.
- */
 export function renameClass(
   document: BoardDocument,
   oldName: string,
@@ -125,8 +109,7 @@ export function renameClass(
   const className = support.sanitizeClassName(newName.trim());
   if (className === oldName) return;
   if (!isClassNameAvailable(document, className, language)) return;
-  // Renaming the source file onto an existing one (e.g. an unregistered zombie) would leave
-  // two sources with the same file name.
+  // A source already at the target file name (e.g. a zombie) would collide on rename.
   if (findSource(document, className, language)) return;
 
   const source = findSource(document, oldName, language);
@@ -150,10 +133,6 @@ export function renameClass(
   entry.name = className;
 }
 
-/**
- * Unregisters a class. Member blocks return to their default classes (runnable again); the
- * class source stays as a zombie.
- */
 export function deleteClass(document: BoardDocument, name: string, language: string): void {
   const index = document.content.codeClasses.findIndex(
     (c) => c.name === name && c.language === language,
@@ -177,13 +156,11 @@ function findClass(document: BoardDocument, name: string, language: string): Cod
 
 function isClassNameAvailable(document: BoardDocument, name: string, language: string): boolean {
   if (findClass(document, name, language)) return false;
-  // A default class name would hijack a block's runnable main-wrapped source.
+  // A name matching a block's default class would hijack that block's runnable source.
   return !document.content.elements.some(
     (element) => element.type === EditorElementType.Code && isDefaultClassName(name, element.id),
   );
 }
-
-//#endregion "Class registry"
 
 function findCodeElement(document: BoardDocument, elementId: string): EditorElement | undefined {
   const element = document.content.elements.find((e) => e.id === elementId);
@@ -212,7 +189,6 @@ function pushSource(document: BoardDocument, name: string, language: string, cod
   document.sources.push({ name, language, code, createdAt: now, modifiedAt: now });
 }
 
-/** Removes the block from its source (leaving a zombie) and returns its code. */
 function detachBlock(
   document: BoardDocument,
   elementId: string,
@@ -228,10 +204,6 @@ function detachBlock(
   return code;
 }
 
-/**
- * Default classes are single-block and main-wrapped, so they are rebuilt from scratch —
- * overwriting any zombie keeps the block runnable. Named classes get the block appended.
- */
 function attachBlock(
   document: BoardDocument,
   elementId: string,
@@ -242,6 +214,8 @@ function attachBlock(
   const source = findSource(document, className, language);
   const mainWrap = isDefaultClassName(className, elementId);
 
+  // A named class gets the block appended; a default class is a single-block, main-wrapped source,
+  // so it is rebuilt from scratch — overwriting any zombie of that name keeps the block runnable.
   if (source && !mainWrap) {
     source.code = insertBlockIntoClass(source.code, elementId, code, commentPrefix(language));
     source.modifiedAt = Date.now();
