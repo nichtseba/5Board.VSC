@@ -1,14 +1,10 @@
 import { useRef } from 'react';
-import type * as monaco from 'monaco-editor';
+import * as monaco from 'monaco-editor';
 
 const LINE_HEIGHT = 19;
 export const MIN_HEIGHT = 5 * LINE_HEIGHT;
 
-/**
- * Grows the editor wrapper to fit the Monaco content height (never below MIN_HEIGHT), so the
- * code block expands with its content instead of showing an inner scrollbar.
- */
-export function useEditorAutoHeight() {
+export function useEditorAutoHeight(onRun?: () => void) {
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   function handleMount(editor: monaco.editor.IStandaloneCodeEditor) {
@@ -21,6 +17,13 @@ export function useEditorAutoHeight() {
     };
     updateHeight();
     editor.onDidContentSizeChange(updateHeight);
+
+    editor.addAction({
+      id: '5board.executeCodeblock',
+      label: 'Run Code Block',
+      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyE],
+      run: () => onRun?.(),
+    });
   }
 
   return { wrapperRef, handleMount };

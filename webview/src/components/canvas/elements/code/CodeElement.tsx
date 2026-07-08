@@ -6,6 +6,7 @@ import {
   extractBlock,
   COMMENT_PREFIX_BY_LANGUAGE,
   fileNameFromClassName,
+  isDefaultClassName,
 } from '5board.vsc-common';
 import type { EditorElementProps } from '../../EditorElement';
 import { useMessageService } from '../../../../services/MessageService';
@@ -14,6 +15,7 @@ import { useExecutionOutput } from '../../../../providers/ExecutionOutputProvide
 import { OutputPanel } from './OutputPanel';
 import { useMonacoTheme } from './useMonacoTheme';
 import { useEditorAutoHeight, MIN_HEIGHT } from './useEditorAutoHeight';
+import { Icons } from '../../../Icons';
 
 loader.config({ monaco });
 
@@ -32,7 +34,6 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
 
   const [code, setCode] = useState(blockCode ?? '');
   const monacoTheme = useMonacoTheme();
-  const { wrapperRef, handleMount } = useEditorAutoHeight();
 
   const codeRef = useRef(code);
   codeRef.current = code;
@@ -53,6 +54,13 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
       pendingCodeRef.current = null;
     }
   }, [messages, element.id]);
+
+  const runRef = useRef(() => {});
+  runRef.current = () => {
+    flushPendingUpdate();
+    messages.send({ type: 'executeCodeblock', elementId: element.id });
+  };
+  const { wrapperRef, handleMount } = useEditorAutoHeight(() => runRef.current());
 
   const sendDebouncedUpdate = useCallback(
     (newCode: string) => {
@@ -91,39 +99,15 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
 
   return (
     <div className="border border-editor-widget-border rounded-sm overflow-hidden bg-editor-background relative">
-      <div className="flex items-center gap-2 px-3 py-1.5 border-b border-editor-widget-border bg-editorGroupHeader-tabsBackground">
-        <span className="font-sans text-base text-tab-activeForeground flex items-center gap-1.5 select-none">
-          <span className="codicon codicon-code text-symbolIcon-classForeground" />
-          {language}
-          {className && (
-            <>
-              <span className="text-editor-widget-border">·</span>
-              <span className="codicon codicon-symbol-class text-symbolIcon-classForeground" />
-              {className}
-            </>
-          )}
-        </span>
-
-        <div className="ml-auto flex items-center gap-1.5">
-          <button
-            title="Open source file"
-            onClick={() => messages.send({ type: 'openSource', elementId: element.id })}
-            className="flex items-center px-1.5 py-1 bg-transparent text-tab-activeForeground font-sans text-base rounded-xs border-none cursor-pointer hover:bg-list-hover-background"
-          >
-            <span className="codicon codicon-go-to-file" />
-          </button>
-          <button
-            onClick={() => {
-              flushPendingUpdate();
-              messages.send({ type: 'executeCodeblock', elementId: element.id });
-            }}
-            className="flex items-center gap-1.5 px-2.5 py-1 bg-button-background text-button-foreground font-sans text-base rounded-xs border-none cursor-pointer hover:bg-button-hover-background"
-          >
-            <span className="codicon codicon-run" />
-            Run
-          </button>
+      {/* Header — only shown when assigned to a named class */}
+      {!isDefaultClassName(className, element.id) && (
+        <div className="flex items-center gap-2 px-2 py-0.5 border-b border-editor-widget-border bg-editorGroupHeader-tabsBackground">
+          <span className="font-sans text-sm font-normal text-tab-activeForeground flex items-center gap-1 select-none">
+            <Icons name="symbol-class" className="text-symbolIcon-classForeground" />
+            {className}
+          </span>
         </div>
-      </div>
+      )}
 
       <div ref={wrapperRef} style={{ height: MIN_HEIGHT }}>
         <MonacoEditor
@@ -150,7 +134,15 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
         />
       </div>
 
-      {output && <OutputPanel output={output} />}
+      {/* Actionbar + Output */}
+      <OutputPanel
+        output={output}
+        onOpenSource={() => messages.send({ type: 'openSource', elementId: element.id })}
+        onRun={() => {
+          flushPendingUpdate();
+          messages.send({ type: 'executeCodeblock', elementId: element.id });
+        }}
+      />
     </div>
   );
 }

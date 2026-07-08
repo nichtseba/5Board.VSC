@@ -1,3 +1,4 @@
+import * as vscode from 'vscode';
 import { EXTENSION } from '../extension';
 import { BoardCustomDocument } from './BoardCustomDocument';
 
@@ -73,6 +74,9 @@ export class DocumentMessageHandlers {
             }
           }
         });
+      }),
+      this.document.messageService.on('copyToClipboard', (msg) => {
+        void vscode.env.clipboard.writeText(msg.text);
       }),
       //#endregion "EditorTools"
 
