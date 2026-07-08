@@ -75,6 +75,14 @@
         "pointerColor": "Zeiger-Farbe",
         "customColor": "Eigene",
         "pointerShape": "Zeiger-Form",
+        "colors": {
+          "red": "Rot",
+          "orange": "Orange",
+          "yellow": "Gelb",
+          "green": "Grün",
+          "blue": "Blau",
+          "purple": "Lila"
+        },
         "shapes": {
           "dot": "Punkt",
           "ring": "Ring",

@@ -74,6 +74,14 @@
         "pointerColor": "Pointer Color",
         "customColor": "Custom",
         "pointerShape": "Pointer Shape",
+        "colors": {
+          "red": "Red",
+          "orange": "Orange",
+          "yellow": "Yellow",
+          "green": "Green",
+          "blue": "Blue",
+          "purple": "Purple"
+        },
         "shapes": {
           "dot": "Dot",
           "ring": "Ring",

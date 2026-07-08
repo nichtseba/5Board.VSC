@@ -1,10 +1,10 @@
 import { ColorPicker } from './ColorPicker';
-import { ColorPresets } from './ColorPresets';
+import { ColorPreset, ColorPresets } from './ColorPresets';
 
 type ColorSelectorProps = {
   color: string;
   onChange: (color: string) => void;
-  presets?: readonly string[];
+  presets?: readonly ColorPreset[];
   label?: string;
   customColorLabel?: string;
 };
