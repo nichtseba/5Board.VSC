@@ -14,6 +14,8 @@ export function addImageToDocument(
   document.assets.push({
     name: assetName,
     bytes,
+    createdAt: Date.now(),
+    modifiedAt: Date.now(),
   });
 
   document.content.elements.push({

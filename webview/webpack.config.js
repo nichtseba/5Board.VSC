@@ -6,7 +6,13 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 // Multiple entry points for different webviews. Each entry point will generate a separate HTML file and JavaScript bundle.
-const VIEWS = ['Editor', 'ToolSidebar', 'ElementSettingsSidebar'];
+const VIEWS = [
+  'Editor',
+  'ToolSidebar',
+  'ProjectorSettingsSidebar',
+  'ElementSettingsSidebar',
+  'Projector',
+];
 
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/

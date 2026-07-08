@@ -1,12 +1,21 @@
 import { useEffect, useState } from 'react';
 import { useMessageService, useOnMessage } from '../services/MessageService';
-import { BoardDocument } from '5board.vsc-common';
+//import { useLocalization } from '../providers/LocalizationProvider';
 import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
+import ProjectorViewPort from '../components/projector/ProjectorViewPort';
+import ProjectorCursorMirror from '../components/projector/ProjectorCursorMirror';
+import ProjectorScrollMirror from '../components/projector/ProjectorScrollMirror';
+import { useBoardDocument } from '../providers/BoardDocumentProvider';
+import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
 
 export default function Editor() {
   const messages = useMessageService();
-  const [document, setDocument] = useState<BoardDocument | null>(null);
+  const boardDocument = useBoardDocument();
+
+  // Whether the pointer should be mirrored to the projector (tracking on AND a beamer open).
+  const [mirrorActive, setMirrorActive] = useState(false);
+  const [projectorOpen, setProjectorOpen] = useState(false);
 
   useEffect(() => {
     messages.send({ type: 'ready' });
@@ -14,17 +23,31 @@ export default function Editor() {
   }, []);
 
   useOnMessage((msg) => {
-    if (msg.type === 'updateDocument' || msg.type === 'init') {
-      setDocument(msg.document);
+    if (msg.type === 'projectorStateChanged') {
+      setMirrorActive(msg.active);
+      setProjectorOpen(msg.open);
+    }
+    if (msg.type === 'goToElement') {
+      const element = document.getElementById(msg.elementId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        messages.send({ type: 'selectElement', id: msg.elementId });
+      }
     }
   });
 
   return (
     <>
-      {/* <p>
-        Document: <code>{JSON.stringify(document, null, 2)}</code>
-      </p> */}
-      {document && <EditorCanvas document={document} />}
+      <div className="relative">
+        {boardDocument && (
+          <CanvasEventsProvider>
+            <EditorCanvas />
+            <ProjectorCursorMirror active={mirrorActive} />
+            {projectorOpen && <ProjectorScrollMirror />}
+          </CanvasEventsProvider>
+        )}
+        <ProjectorViewPort />
+      </div>
     </>
   );
 }
