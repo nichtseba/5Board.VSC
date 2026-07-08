@@ -41,7 +41,8 @@ type AllExtensionToWebviewMessage =
       type: 'viewportUpdate';
       viewport: { top: number; left: number; height: number; width: number };
     }
-  | { type: 'updateEditorState'; editorState: EditorState };
+  | { type: 'updateEditorState'; editorState: EditorState }
+  | { type: 'goToElement'; elementId: string };
 
 /**
  * Messages from the webviews to the extension

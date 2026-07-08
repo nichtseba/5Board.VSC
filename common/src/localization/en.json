@@ -80,7 +80,8 @@
           "rectangle": "Rectangle",
           "duck": "Duck"
         }
-      }
+      },
+      "goToElement": "Go to Element"
     },
     "sidebar-element-settings": {
       "noElementSelected": "No element selected",

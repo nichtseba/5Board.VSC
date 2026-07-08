@@ -48,6 +48,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
   return (
     <>
       <div
+        id={element.id}
         onClick={() => handleSelectElement(element.id)}
         className={`
           box-border font-bold

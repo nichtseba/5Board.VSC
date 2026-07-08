@@ -132,4 +132,12 @@ export class FiveBoardExtension extends ExtensionBase {
     this.activeEditorDocument.applyEdit(edit);
     this.activeDocumentChange.fire(this.activeEditorDocument);
   }
+
+  @Command('5board-vsc.goToElement')
+  public goToElement(elementId: string): void {
+    if (!this.activeEditorDocument) {
+      return;
+    }
+    this.activeEditorDocument.messageService.send({ type: 'goToElement', elementId }, undefined);
+  }
 }

@@ -10,5 +10,6 @@
   "commands.openCustomEditor": "5Board Editor öffnen",
   "commands.openBoardFile": "5Board Datei öffnen",
   "commands.newBoardFile": "Neue 5Board Datei",
-  "commands.startPresentation": "Präsentation starten"
+  "commands.startPresentation": "Präsentation starten",
+  "commands.goToElement": "Gehe zu Element"
 }

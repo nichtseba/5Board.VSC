@@ -111,6 +111,10 @@
         "command": "5board-vsc.startPresentation",
         "title": "%commands.startPresentation%",
         "icon": "$(play)"
+      },
+      {
+        "command": "5board-vsc.goToElement",
+        "title": "%commands.goToElement%"
       }
     ],
     "menus": {
