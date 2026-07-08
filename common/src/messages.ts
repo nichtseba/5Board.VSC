@@ -63,6 +63,7 @@ type AllWebviewToExtensionMessage =
   | { type: 'executeCodeblock'; elementId: string }
   | { type: 'updateBlockCode'; elementId: string; code: string }
   | { type: 'openSource'; elementId: string }
+  | { type: 'copyToClipboard'; text: string }
   | { type: 'moveBlock'; elementId: string; className?: string | null; language?: string }
   | {
       type: 'manageCodeClass';
