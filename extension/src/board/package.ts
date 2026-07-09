@@ -66,8 +66,8 @@ export class BoardPackage {
       layout: {
         xPos: 0,
         yPos: 0,
-        width: 400,
-        height: 100,
+        width: 40,
+        height: 2,
       },
       style: {
         visible: true,
@@ -82,7 +82,27 @@ export class BoardPackage {
         excludeFromExport: false,
       },
     } satisfies EditorElement<EditorElementType.Heading>);
-
+    boardPackage.document.content.elements.push({
+      id: 'test-text',
+      type: EditorElementType.Text,
+      layout: {
+        xPos: 0,
+        yPos: 0,
+        width: 40,
+        height: 2,
+      },
+      style: {
+        visible: true,
+      },
+      data: {
+        content: 'Test Text',
+      },
+      display: {
+        visible: true,
+        speakerNote: false,
+        excludeFromExport: false,
+      },
+    } satisfies EditorElement<EditorElementType.Text>);
     return boardPackage;
   }
 

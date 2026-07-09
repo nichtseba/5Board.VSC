@@ -1,7 +1,7 @@
 import { EditorElement, ElementDisplay } from '5board.vsc-common';
 import SettingsField from '../layout/SettingsField';
 import { useLocalization } from '../../../providers/LocalizationProvider';
-import { Checkbox } from 'vscrui';
+import { Checkbox, TextField } from 'vscrui';
 import { useMessageService } from '../../../services/MessageService';
 import { useCallback } from 'react';
 export default function GenericElementSettings({ element }: { element: EditorElement }) {
@@ -13,6 +13,16 @@ export default function GenericElementSettings({ element }: { element: EditorEle
         type: 'updateElement',
         id: element.id,
         changes: { display: { ...element.display, ...changes } },
+      });
+    },
+    [element.id, messages],
+  );
+  const updateElementName = useCallback(
+    (name: string) => {
+      messages.send({
+        type: 'updateElement',
+        id: element.id,
+        changes: { name },
       });
     },
     [element.id, messages],
@@ -38,6 +48,7 @@ export default function GenericElementSettings({ element }: { element: EditorEle
           checked={element.display.excludeFromExport}
           onChange={(checked) => updateElementDisplay({ excludeFromExport: checked })}
         />
+        <TextField onChange={(value) => updateElementName(value)}></TextField>
       </SettingsField>
     </>
   );

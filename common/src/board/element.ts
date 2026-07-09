@@ -14,6 +14,7 @@ export enum EditorElementType {
  */
 export type EditorElement<T extends EditorElementType = EditorElementType> = {
   id: string;
+  name?: string;
   type: T;
 
   layout: ElementLayout;
