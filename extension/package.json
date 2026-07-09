@@ -123,6 +123,14 @@
         "icon": "$(run)"
       }
     ],
+    "keybindings": [
+      {
+        "command": "5board-vsc.executeCodeblock",
+        "key": "ctrl+e",
+        "mac": "cmd+e",
+        "when": "activeCustomEditorId == '5board-vsc.editor'"
+      }
+    ],
     "menus": {
       "explorer/context": [
         {

@@ -10,7 +10,14 @@ import {
 import { StructureTreeProvider } from '../providers/StructureTreeProvider';
 import { EXTENSION } from '../extension';
 import { FileTreeProvider } from '../providers/FileTreeProvider';
-import { createClass, deleteClass, moveBlock, renameClass } from '../board/CodeblockService';
+import {
+  changeClassLanguage,
+  createClass,
+  deleteClass,
+  moveBlock,
+  renameClass,
+} from '../board/CodeblockSourceService';
+import { t } from '../localization';
 import type { BoardDocument } from '5board.vsc-common';
 
 export class SidebarManager implements vscode.Disposable {
@@ -107,15 +114,24 @@ export class SidebarManager implements vscode.Disposable {
           case 'rename':
             if (msg.newName) renameClass(document, msg.name, msg.newName, msg.language);
             break;
+          case 'changeLanguage':
+            if (msg.newLanguage) {
+              changeClassLanguage(document, msg.name, msg.language, msg.newLanguage);
+            }
+            break;
           case 'delete':
-            deleteClass(document, msg.name, msg.language);
+            // Native notification: manageCodeClass is fire-and-forget, so the sidebar
+            // webview has no reply channel for a rejection popup.
+            if (deleteClass(document, msg.name, msg.language) === 'rejected-not-empty') {
+              vscode.window.showWarningMessage(t('extension.codeblock.deleteClassNotEmpty'));
+            }
             break;
         }
       });
     });
   }
 
-  /** Applies a CodeblockService edit to the active editor document and persists it. */
+  /** Applies a CodeblockSourceService edit to the active editor document and persists it. */
   private editActiveDocument(edit: (document: BoardDocument) => void): void {
     const doc = EXTENSION.activeEditorDocument;
     if (!doc) return;

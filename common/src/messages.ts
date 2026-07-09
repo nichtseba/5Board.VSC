@@ -67,8 +67,9 @@ type AllWebviewToExtensionMessage =
   | { type: 'moveBlock'; elementId: string; className?: string | null; language?: string }
   | {
       type: 'manageCodeClass';
-      op: 'create' | 'rename' | 'delete';
+      op: 'create' | 'rename' | 'changeLanguage' | 'delete';
       name: string;
       language: string;
       newName?: string;
+      newLanguage?: string;
     };

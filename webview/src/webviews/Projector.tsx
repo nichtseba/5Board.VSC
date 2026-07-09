@@ -6,6 +6,7 @@ import { DEFAULT_PROJECTOR_POINTER_STYLE, ProjectorPointerStyle } from '5board.v
 import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
 import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
+import { SourcesProvider } from '../providers/SourcesProvider';
 
 // The projector view shows the same canvas as the editor,
 // but is read-only and display-only — no interactive controls.
@@ -126,9 +127,13 @@ export default function Projector() {
       */}
       <div style={{ pointerEvents: 'none' }}>
         {boardDocument ? (
-          <CanvasEventsProvider>
-            <EditorCanvas cursor={cursor} pointerStyle={pointerStyle} />
-          </CanvasEventsProvider>
+          // Same SourcesProvider as the editor — without it every CodeElement
+          // shows "Source not found".
+          <SourcesProvider value={boardDocument.sources}>
+            <CanvasEventsProvider>
+              <EditorCanvas cursor={cursor} pointerStyle={pointerStyle} />
+            </CanvasEventsProvider>
+          </SourcesProvider>
         ) : (
           // Shown while waiting for the first 'init' message from the extension.
           <div style={{ padding: '1rem', opacity: 0.5 }}>{t('extension.projector.loading')}</div>

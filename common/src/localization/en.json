@@ -12,6 +12,11 @@
       "title": "Projector",
       "noFileOpen": "Please open a .5boardz file in the editor before starting the projector view.",
       "loading": "Loading..."
+    },
+    "codeblock": {
+      "noActiveDocument": "No active 5Board document.",
+      "noCodeblockSelected": "Select a code block to execute it.",
+      "deleteClassNotEmpty": "The class still contains code blocks. Remove them from the class before deleting it."
     }
   },
   "webview": {
@@ -70,7 +75,10 @@
         "classNone": "None (standalone, runnable)",
         "languageFromClass": "The language follows the assigned class",
         "mainWrapInfo": "Wrapped in main method",
-        "noMainWrapInfo": "Custom class, no main method"
+        "noMainWrapInfo": "Custom class, no main method",
+        "backgroundLabel": "Background color",
+        "borderLabel": "Border color",
+        "resetColors": "Reset to theme colors"
       }
     },
     "sidebar-class-settings": {
@@ -78,7 +86,9 @@
       "noClasses": "No classes yet. Create one to group code blocks.",
       "newClassPlaceholder": "New class name",
       "create": "Create",
-      "rename": "Rename",
+      "edit": "Edit",
+      "apply": "Apply",
+      "cancel": "Cancel",
       "delete": "Delete"
     }
   }

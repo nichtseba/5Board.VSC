@@ -9,6 +9,7 @@ import {
   BoardDocument,
   DEFAULT_PROJECTOR_POINTER_STYLE,
   DEFAULT_TOOL_ID,
+  EditorElementType,
   EditorState,
   ProjectorPointerStyle,
 } from '5board.vsc-common';
@@ -129,18 +130,18 @@ export class FiveBoardExtension extends ExtensionBase {
   async executeCodeblockCommand(elementId?: string): Promise<void> {
     const document = this.activeEditorDocument;
     if (!document) {
-      vscode.window.showWarningMessage('No active 5Board document.');
+      vscode.window.showWarningMessage(t('extension.codeblock.noActiveDocument'));
       return;
     }
-    // elementId is passed when triggered via message; without it the command
-    // requires active-element tracking (future issue).
-    if (!elementId) {
-      vscode.window.showWarningMessage('No code block selected.');
+    // Without an explicit elementId (programmatic invocation), run the selected element.
+    const content = document.boardPackage.document.content;
+    const id = elementId ?? content.selectedElementId;
+    const element = content.elements.find((e) => e.id === id);
+    if (!element || element.type !== EditorElementType.Code) {
+      vscode.window.showWarningMessage(t('extension.codeblock.noCodeblockSelected'));
       return;
     }
-    // TODO: wire up to execution once the command is fully implemented.
-    // executeBlock now lives in DocumentMessageHandlers; this command is still a stub.
-    vscode.window.showWarningMessage('Executing code blocks via command is not yet supported.');
+    await document.codeblock.executeBlock(element.id);
   }
 
   public applyEditToActiveDocument(edit: (document: BoardDocument) => void): void {

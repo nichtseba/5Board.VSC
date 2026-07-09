@@ -5,7 +5,9 @@ import {
   getLanguageSupport,
   isDefaultClassName,
 } from '5board.vsc-common';
-import { Dropdown, DropdownOption } from 'vscrui';
+import type { ElementStyle } from '5board.vsc-common';
+import { Button, Dropdown, DropdownOption } from 'vscrui';
+import ColorSelector from '../components/ColorSelector';
 import SettingsField from '../layout/SettingsField';
 import SettingsPanel from '../layout/SettingsPanel';
 import { useBoardDocument } from '../../../providers/BoardDocumentProvider';
@@ -63,6 +65,17 @@ export function CodeSettings({ element }: Props) {
     messages.send({ type: 'moveBlock', elementId: element.id, language: selected });
   };
 
+  // updateElement merges shallowly, so always send the whole style object.
+  const updateStyle = (patch: Partial<ElementStyle>) => {
+    messages.send({
+      type: 'updateElement',
+      id: element.id,
+      changes: { style: { ...element.style, ...patch } },
+    });
+  };
+  const hasColorOverride =
+    element.style.backgroundColor !== undefined || element.style.border?.color !== undefined;
+
   return (
     <SettingsPanel title={t('webview.sidebar-element-settings.codeSettings.title')} icon="code">
       <SettingsField label={t('webview.sidebar-element-settings.codeSettings.languageLabel')}>
@@ -90,6 +103,31 @@ export function CodeSettings({ element }: Props) {
             : t('webview.sidebar-element-settings.codeSettings.noMainWrapInfo')}
         </InfoLine>
       </SettingsField>
+      <SettingsField label={t('webview.sidebar-element-settings.codeSettings.backgroundLabel')}>
+        <ColorSelector
+          color={element.style.backgroundColor ?? ''}
+          onChange={(color) => updateStyle({ backgroundColor: color })}
+        />
+      </SettingsField>
+      <SettingsField label={t('webview.sidebar-element-settings.codeSettings.borderLabel')}>
+        <ColorSelector
+          color={element.style.border?.color ?? ''}
+          onChange={(color) => updateStyle({ border: { ...element.style.border, color } })}
+        />
+      </SettingsField>
+      {hasColorOverride && (
+        <Button
+          appearance="secondary"
+          onClick={() =>
+            updateStyle({
+              backgroundColor: undefined,
+              border: element.style.border && { ...element.style.border, color: undefined },
+            })
+          }
+        >
+          {t('webview.sidebar-element-settings.codeSettings.resetColors')}
+        </Button>
+      )}
     </SettingsPanel>
   );
 }

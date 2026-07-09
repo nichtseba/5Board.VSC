@@ -9,13 +9,14 @@ import {
 } from '5board.vsc-common';
 import type { EditorElement } from '5board.vsc-common';
 import {
+  changeClassLanguage,
   createClass,
   deleteClass,
   deriveCodeClasses,
   moveBlock,
   renameClass,
   updateBlockCode,
-} from '../board/CodeblockService';
+} from '../board/CodeblockSourceService';
 
 function makeCodeElement(id: string, data: Partial<CodeElementData> = {}): EditorElement {
   return {
@@ -49,7 +50,7 @@ function sourceCode(doc: BoardDocument, name: string): string {
   return source.code;
 }
 
-describe('CodeblockService', function () {
+describe('CodeblockSourceService', function () {
   describe('updateBlockCode', function () {
     it('creates a main-wrapped source on first edit of a standalone block', function () {
       const doc = makeDocument([makeCodeElement('el1')]);
@@ -192,20 +193,63 @@ describe('CodeblockService', function () {
       assert.equal(doc.sources.filter((s) => s.name === 'Person.java').length, 1);
     });
 
-    it('deleteClass re-homes member blocks to their default classes and keeps a zombie', function () {
+    it('deleteClass refuses while the class still has member blocks', function () {
       const doc = makeDocument([makeCodeElement('el1')]);
       createClass(doc, 'Student', 'java');
       updateBlockCode(doc, 'el1', 'int x = 1;');
       moveBlock(doc, 'el1', { className: 'Student' });
 
-      deleteClass(doc, 'Student', 'java');
+      const result = deleteClass(doc, 'Student', 'java');
 
+      assert.equal(result, 'rejected-not-empty');
+      assert.deepEqual(doc.content.codeClasses, [{ name: 'Student', language: 'java' }]);
+      assert.equal(data(doc, 'el1').className, 'Student');
+      assert.equal(hasBlock(sourceCode(doc, 'Student.java'), 'el1'), true);
+    });
+
+    it('deleteClass removes an empty class and keeps its source as a zombie', function () {
+      const doc = makeDocument([makeCodeElement('el1')]);
+      createClass(doc, 'Student', 'java');
+      updateBlockCode(doc, 'el1', 'int x = 1;');
+      moveBlock(doc, 'el1', { className: 'Student' });
+      moveBlock(doc, 'el1', { className: null }); // class is empty again
+
+      const result = deleteClass(doc, 'Student', 'java');
+
+      assert.equal(result, 'deleted');
       assert.equal(doc.content.codeClasses.length, 0);
-      assert.equal(data(doc, 'el1').className, 'El1');
-      const code = sourceCode(doc, 'El1.java');
-      assert.ok(code.includes('public static void main'));
-      assert.equal(extractBlock(code, 'el1'), 'int x = 1;');
-      assert.equal(hasBlock(sourceCode(doc, 'Student.java'), 'el1'), false);
+      assert.ok(doc.sources.some((s) => s.name === 'Student.java')); // zombie stays
+    });
+
+    it('deleteClass reports an unknown class', function () {
+      const doc = makeDocument([]);
+
+      assert.equal(deleteClass(doc, 'Student', 'java'), 'not-found');
+    });
+
+    // The happy path (moving members across languages) needs a second entry in
+    // SUPPORTED_LANGUAGES and can only be covered once one exists; the guards are testable now.
+    it('changeClassLanguage ignores unsupported target languages', function () {
+      const doc = makeDocument([makeCodeElement('el1')]);
+      createClass(doc, 'Student', 'java');
+      updateBlockCode(doc, 'el1', 'private int age;');
+      moveBlock(doc, 'el1', { className: 'Student' });
+
+      changeClassLanguage(doc, 'Student', 'java', 'ruby');
+
+      assert.deepEqual(doc.content.codeClasses, [{ name: 'Student', language: 'java' }]);
+      assert.equal(data(doc, 'el1').language, 'java');
+      assert.equal(hasBlock(sourceCode(doc, 'Student.java'), 'el1'), true);
+    });
+
+    it('changeClassLanguage is a no-op for the current language', function () {
+      const doc = makeDocument([]);
+      createClass(doc, 'Student', 'java');
+
+      changeClassLanguage(doc, 'Student', 'java', 'java');
+
+      assert.deepEqual(doc.content.codeClasses, [{ name: 'Student', language: 'java' }]);
+      assert.equal(doc.sources.length, 1);
     });
   });
 

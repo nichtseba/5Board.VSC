@@ -3,9 +3,13 @@ import { EditorElementType, fileNameFromClassName, type CodeElementData } from '
 import { BoardCustomDocument } from './BoardCustomDocument';
 import { ExecutionService } from '../runner/ExecutionService';
 import { SRC_ROOT } from './package';
-import { updateBlockCode } from './CodeblockService';
+import { updateBlockCode } from './CodeblockSourceService';
 
-export class CodeblockMessageHandlers {
+/**
+ * Per-document I/O boundary for codeblocks: wires inbound webview messages and the
+ * `5board-vsc.executeCodeblock` command to the services and broadcasts results.
+ */
+export class CodeblockController {
   private readonly executionService = new ExecutionService();
 
   constructor(private readonly document: BoardCustomDocument) {}

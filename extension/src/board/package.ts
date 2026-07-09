@@ -8,7 +8,7 @@ import {
   Source,
   create5boardzManifest,
 } from '5board.vsc-common';
-import { deriveCodeClasses } from './CodeblockService';
+import { deriveCodeClasses } from './CodeblockSourceService';
 
 export const MANIFEST_PATH = 'manifest.json';
 export const CONTENT_PATH = 'content.json';

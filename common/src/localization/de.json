@@ -12,6 +12,11 @@
       "title": "Beameransicht",
       "noFileOpen": "Bitte öffne zuerst eine .5boardz Datei im Editor, bevor du die Beameransicht startest.",
       "loading": "Lade…"
+    },
+    "codeblock": {
+      "noActiveDocument": "Kein aktives 5Board-Dokument.",
+      "noCodeblockSelected": "Wähle einen Codeblock aus, um ihn auszuführen.",
+      "deleteClassNotEmpty": "Die Klasse enthält noch Codeblöcke. Entferne sie zuerst aus der Klasse, bevor du sie löschst."
     }
   },
   "webview": {
@@ -70,7 +75,10 @@
         "classNone": "Keine (eigenständig, ausführbar)",
         "languageFromClass": "Die Sprache folgt der zugewiesenen Klasse",
         "mainWrapInfo": "In main-Methode eingebettet",
-        "noMainWrapInfo": "Eigene Klasse, keine main-Methode"
+        "noMainWrapInfo": "Eigene Klasse, keine main-Methode",
+        "backgroundLabel": "Hintergrundfarbe",
+        "borderLabel": "Rahmenfarbe",
+        "resetColors": "Auf Theme-Farben zurücksetzen"
       }
     },
     "sidebar-class-settings": {
@@ -78,7 +86,9 @@
       "noClasses": "Noch keine Klassen. Erstelle eine, um Codeblöcke zu gruppieren.",
       "newClassPlaceholder": "Neuer Klassenname",
       "create": "Erstellen",
-      "rename": "Umbenennen",
+      "edit": "Bearbeiten",
+      "apply": "Übernehmen",
+      "cancel": "Abbrechen",
       "delete": "Löschen"
     }
   }

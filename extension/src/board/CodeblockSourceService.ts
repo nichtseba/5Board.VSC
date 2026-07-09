@@ -133,21 +133,62 @@ export function renameClass(
   entry.name = className;
 }
 
-export function deleteClass(document: BoardDocument, name: string, language: string): void {
+/**
+ * Re-homes a class (and all its member blocks) into another language. Unlike `renameClass`
+ * (an in-place patch), this is genuine re-homing: each member block is detached with the old
+ * language's comment prefix/wrapping and attached with the new one via `moveBlock`. The
+ * old-language source stays behind as a zombie. Translating the block code itself is the
+ * user's responsibility.
+ */
+export function changeClassLanguage(
+  document: BoardDocument,
+  name: string,
+  language: string,
+  newLanguage: string,
+): void {
+  const support = getLanguageSupport(newLanguage);
+  if (!support || newLanguage === language) return;
+
+  const entry = findClass(document, name, language);
+  if (!entry) return;
+  if (!isClassNameAvailable(document, name, newLanguage)) return;
+  // A source already at the target file name (e.g. a zombie) would collide.
+  if (findSource(document, name, newLanguage)) return;
+
+  entry.language = newLanguage;
+
+  // Eagerly create the class source in the new language (same as createClass), so the class
+  // is immediately visible/openable even with zero members.
+  pushSource(
+    document,
+    fileNameFromClassName(name, newLanguage),
+    newLanguage,
+    support.wrapClassBody(name, ''),
+  );
+
+  for (const element of findMemberElements(document, name, language)) {
+    moveBlock(document, element.id, { language: newLanguage });
+  }
+}
+
+export type DeleteClassResult = 'deleted' | 'rejected-not-empty' | 'not-found';
+
+// Only an empty class can be deleted; the elements (not the source's markers) are the source of
+// truth for membership. The class's source stays behind as a zombie.
+export function deleteClass(
+  document: BoardDocument,
+  name: string,
+  language: string,
+): DeleteClassResult {
   const index = document.content.codeClasses.findIndex(
     (c) => c.name === name && c.language === language,
   );
-  if (index === -1) return;
+  if (index === -1) return 'not-found';
 
-  for (const element of document.content.elements) {
-    if (element.type !== EditorElementType.Code) continue;
-    const data = element.data as CodeElementData;
-    if (data.className === name && data.language === language) {
-      moveBlock(document, element.id, { className: null });
-    }
-  }
+  if (findMemberElements(document, name, language).length > 0) return 'rejected-not-empty';
 
   document.content.codeClasses.splice(index, 1);
+  return 'deleted';
 }
 
 function findClass(document: BoardDocument, name: string, language: string): CodeClass | undefined {
@@ -160,6 +201,19 @@ function isClassNameAvailable(document: BoardDocument, name: string, language: s
   return !document.content.elements.some(
     (element) => element.type === EditorElementType.Code && isDefaultClassName(name, element.id),
   );
+}
+
+/** All code elements whose (className, language) address the given class. */
+function findMemberElements(
+  document: BoardDocument,
+  className: string,
+  language: string,
+): EditorElement[] {
+  return document.content.elements.filter((element) => {
+    if (element.type !== EditorElementType.Code) return false;
+    const data = element.data as CodeElementData;
+    return data.className === className && data.language === language;
+  });
 }
 
 function findCodeElement(document: BoardDocument, elementId: string): EditorElement | undefined {

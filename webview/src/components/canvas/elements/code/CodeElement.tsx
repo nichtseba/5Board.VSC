@@ -19,7 +19,9 @@ import { Icons } from '../../../Icons';
 
 loader.config({ monaco });
 
-const DEBOUNCE_MS = 300;
+// Kept short: the executeCodeblock command runs the last-synced code, so a long debounce
+// widens the window in which a keyboard-triggered run executes stale code.
+const DEBOUNCE_MS = 200;
 
 export function CodeElement({ element }: EditorElementProps<EditorElementType.Code>) {
   const messages = useMessageService();
@@ -55,12 +57,7 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
     }
   }, [messages, element.id]);
 
-  const runRef = useRef(() => {});
-  runRef.current = () => {
-    flushPendingUpdate();
-    messages.send({ type: 'executeCodeblock', elementId: element.id });
-  };
-  const { wrapperRef, handleMount } = useEditorAutoHeight(() => runRef.current());
+  const { wrapperRef, handleMount } = useEditorAutoHeight();
 
   const sendDebouncedUpdate = useCallback(
     (newCode: string) => {
@@ -89,16 +86,29 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
     }
   }, [blockCode]);
 
+  // Manual per-block overrides from the settings sidebar; undefined falls back to the
+  // theme defaults set via the CSS classes below.
+  const surfaceStyle = {
+    backgroundColor: element.style.backgroundColor,
+    borderColor: element.style.border?.color,
+  };
+
   if (!source) {
     return (
-      <div className="border border-editor-widget-border rounded-sm p-3 bg-editor-background text-errorForeground">
+      <div
+        className="border border-focus-border rounded-sm p-3 bg-editor-widget-background text-errorForeground"
+        style={surfaceStyle}
+      >
         Source not found: {fileName}
       </div>
     );
   }
 
   return (
-    <div className="border border-editor-widget-border rounded-sm overflow-hidden bg-editor-background relative">
+    <div
+      className="border border-focus-border rounded-sm overflow-hidden bg-editor-widget-background relative"
+      style={surfaceStyle}
+    >
       {/* Header — only shown when assigned to a named class */}
       {!isDefaultClassName(className, element.id) && (
         <div className="flex items-center gap-2 px-2 py-0.5 border-b border-editor-widget-border bg-editorGroupHeader-tabsBackground">
@@ -116,7 +126,13 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
           value={code}
           language={language}
           theme={monacoTheme}
-          onMount={handleMount}
+          onMount={(editor) => {
+            handleMount(editor);
+            // The executeCodeblock command can't flush this webview's debounce buffer, but
+            // opening the Command Palette (or clicking elsewhere) blurs Monaco — flushing here
+            // means those paths always execute fresh code.
+            editor.onDidBlurEditorText(flushPendingUpdate);
+          }}
           onChange={(v) => {
             const newCode = v ?? '';
             setCode(newCode);

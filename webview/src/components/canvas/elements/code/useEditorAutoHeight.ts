@@ -1,10 +1,10 @@
 import { useRef } from 'react';
-import * as monaco from 'monaco-editor';
+import type * as monaco from 'monaco-editor';
 
 const LINE_HEIGHT = 19;
 export const MIN_HEIGHT = 5 * LINE_HEIGHT;
 
-export function useEditorAutoHeight(onRun?: () => void) {
+export function useEditorAutoHeight() {
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   function handleMount(editor: monaco.editor.IStandaloneCodeEditor) {
@@ -17,13 +17,6 @@ export function useEditorAutoHeight(onRun?: () => void) {
     };
     updateHeight();
     editor.onDidContentSizeChange(updateHeight);
-
-    editor.addAction({
-      id: '5board.executeCodeblock',
-      label: 'Run Code Block',
-      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyE],
-      run: () => onRun?.(),
-    });
   }
 
   return { wrapperRef, handleMount };

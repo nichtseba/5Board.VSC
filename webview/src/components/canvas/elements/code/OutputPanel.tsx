@@ -89,9 +89,9 @@ export function OutputPanel({ output, onRun, onOpenSource }: OutputPanelProps) {
         </div>
       </div>
 
-      {/* Output content */}
+      {/* Output content — no own background, inherits the block surface (theme default or per-block override) */}
       {hasOutput && outputVisible && (
-        <pre className="m-0 px-3 py-2 font-mono text-editor leading-relaxed overflow-x-auto bg-editor-background text-terminal-foreground">
+        <pre className="m-0 px-3 py-2 font-mono text-editor leading-relaxed overflow-x-auto text-terminal-foreground">
           {!output.success && output.stderr ? (
             <span className="text-terminal-ansiRed">{output.stderr}</span>
           ) : (
