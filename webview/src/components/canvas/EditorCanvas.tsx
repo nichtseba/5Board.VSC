@@ -1,7 +1,5 @@
-import { EditorToolId, computeHeadingNumbers } from '5board.vsc-common';
-import { useMemo, useEffect, useRef } from 'react';
-import { useEffect, useRef } from 'react';
-import { EditorToolId, ProjectorPointerStyle } from '5board.vsc-common';
+import { EditorToolId, ProjectorPointerStyle, computeHeadingNumbers } from '5board.vsc-common';
+import { useEffect, useMemo, useRef } from 'react';
 import EditorElement from './EditorElement';
 import { HeadingNumberingProvider } from './HeadingNumberingContext';
 import ProjectorMouse, { ProjectorCursor } from '../projector/ProjectorMouse';
@@ -21,7 +19,7 @@ export type EditorCanvasProps = {
 };
 
 export default function EditorCanvas({ cursor, pointerStyle }: EditorCanvasProps) {
-  // All pointer handl lives in one hook
+  // All pointer handling lives in one hook.
   const pointerHandlers = useCanvasPointer();
 
   const document = useBoardDocument();
@@ -57,31 +55,7 @@ export default function EditorCanvas({ cursor, pointerStyle }: EditorCanvasProps
   );
 
   return (
-    <>
-      {`Selected element ID: ${selectedElementId}`}
-      <HeadingNumberingProvider value={headingNumbers}>
-        <div
-          ref={canvasRef}
-          className={`editor-canvas bg-editor-background ${activeToolId === EditorToolId.SPACER ? 'cursor-row-resize' : ''}`}
-          onPointerDown={(e) => emit('pointerDown', e.nativeEvent)} // Todo: do not hand over dom elements directly
-          onPointerMove={(e) => emit('pointerMove', e.nativeEvent)}
-          onPointerUp={(e) => emit('pointerUp', e.nativeEvent)}
-          onPointerCancel={(e) => emit('pointerCancel', e.nativeEvent)}
-        >
-          <CanvasTools />
-          {elements?.map((element) => (
-            <EditorElement
-              key={element.id}
-              element={element}
-              selected={element.id === selectedElementId}
-            />
-          ))}
-        </div>
-      </HeadingNumberingProvider>
-      {/*
-        position: relative is required so the absolute cursor overlay stays
-        clipped inside the canvas boundaries and does not bleed outside.
-      */}
+    <HeadingNumberingProvider value={headingNumbers}>
       <div
         ref={canvasRef}
         className={`editor-canvas bg-editor-background ${activeToolId === EditorToolId.SPACER ? 'cursor-row-resize' : ''}`}
@@ -101,6 +75,6 @@ export default function EditorCanvas({ cursor, pointerStyle }: EditorCanvasProps
         {/* Cursor overlay — only rendered in the projector via the cursor prop */}
         <ProjectorMouse cursor={cursor ?? null} style={pointerStyle} />
       </div>
-    </>
+    </HeadingNumberingProvider>
   );
 }
