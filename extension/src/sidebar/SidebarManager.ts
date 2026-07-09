@@ -121,9 +121,19 @@ export class SidebarManager implements vscode.Disposable {
       }
 
       EXTENSION.activeEditorDocument.applyEdit((document) => {
+        const headingSettings = document.content.headingSettings ?? {};
+        const numberingFormats = headingSettings.numberingFormats ?? {};
+
         document.content.headingSettings = {
-          ...document.content.headingSettings,
-          numberingFormat: msg.numberingFormat,
+          ...headingSettings,
+          numberingEnabled: msg.enabled ?? headingSettings.numberingEnabled,
+          numberingFormats:
+            msg.level && msg.numberingFormat
+              ? {
+                  ...numberingFormats,
+                  [msg.level]: msg.numberingFormat,
+                }
+              : numberingFormats,
         };
       });
     });

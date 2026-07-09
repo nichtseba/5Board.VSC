@@ -1,11 +1,16 @@
 import { BoardElement, EditorElementType } from './element';
 import {
-  DEFAULT_HEADING_NUMBERING_FORMAT,
-  HeadingNumberingFormat,
+  HeadingLevel,
+  HeadingNumberingStyle,
   HeadingSettings,
+  getHeadingNumberingEnabled,
+  getHeadingNumberingStyle,
 } from './headingSettings';
 
-export type ComputeHeadingNumberOptions = Pick<HeadingSettings, 'numberingFormat'>;
+export type ComputeHeadingNumberOptions = Pick<
+  HeadingSettings,
+  'numberingEnabled' | 'numberingFormats' | 'numberingFormat'
+>;
 
 /**
  * Computes hierarchical heading numbers (e.g. "1", "1.1", "1.2", "2") for all
@@ -26,8 +31,7 @@ export function computeHeadingNumbers(
   elements: BoardElement[],
   options?: ComputeHeadingNumberOptions,
 ): Map<string, string> {
-  const format = options?.numberingFormat ?? DEFAULT_HEADING_NUMBERING_FORMAT;
-  if (format === 'none') {
+  if (!getHeadingNumberingEnabled(options)) {
     return new Map();
   }
 
@@ -51,8 +55,14 @@ export function computeHeadingNumbers(
       heading.id,
       counters
         .slice(0, level)
-        .filter((c) => c !== 0)
-        .map((counter) => formatCounter(counter, format))
+        .map((counter, index) =>
+          counter === 0
+            ? '0'
+            : formatCounter(
+                counter,
+                getHeadingNumberingStyle(options, (index + 1) as HeadingLevel),
+              ),
+        )
         .join('.'),
     );
   }
@@ -60,7 +70,7 @@ export function computeHeadingNumbers(
   return numbers;
 }
 
-function formatCounter(counter: number, format: HeadingNumberingFormat): string {
+function formatCounter(counter: number, format: HeadingNumberingStyle): string {
   switch (format) {
     case 'decimal':
       return String(counter);
@@ -72,8 +82,6 @@ function formatCounter(counter: number, format: HeadingNumberingFormat): string 
       return formatRoman(counter).toLowerCase();
     case 'upper-roman':
       return formatRoman(counter);
-    case 'none':
-      return '';
   }
 }
 

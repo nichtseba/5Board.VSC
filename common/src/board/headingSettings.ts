@@ -9,6 +9,7 @@ export type HeadingNumberingFormat =
   | 'upper-alpha'
   | 'lower-roman'
   | 'upper-roman';
+export type HeadingNumberingStyle = Exclude<HeadingNumberingFormat, 'none'>;
 
 export type HeadingLevelSettings = {
   fontFamily?: string;
@@ -21,11 +22,15 @@ export type HeadingLevelSettings = {
 };
 
 export type HeadingSettings = {
+  numberingEnabled?: boolean;
+  numberingFormats?: Partial<Record<HeadingLevel, HeadingNumberingStyle>>;
+  /** @deprecated Use `numberingEnabled` and `numberingFormats` instead. */
   numberingFormat?: HeadingNumberingFormat;
   levels?: Partial<Record<HeadingLevel, HeadingLevelSettings>>;
 };
 
 export const DEFAULT_HEADING_NUMBERING_FORMAT: HeadingNumberingFormat = 'decimal';
+export const DEFAULT_HEADING_NUMBERING_STYLE: HeadingNumberingStyle = 'decimal';
 
 const DEFAULT_HEADING_LEVEL_SETTINGS: Record<HeadingLevel, HeadingLevelSettings> = {
   1: { fontSize: 36, fontWeight: 'bold' },
@@ -58,4 +63,25 @@ export function getHeadingNumberingFormat(
   settings: HeadingSettings | undefined,
 ): HeadingNumberingFormat {
   return settings?.numberingFormat ?? DEFAULT_HEADING_NUMBERING_FORMAT;
+}
+
+export function getHeadingNumberingEnabled(settings: HeadingSettings | undefined): boolean {
+  if (settings?.numberingEnabled !== undefined) {
+    return settings.numberingEnabled;
+  }
+
+  return settings?.numberingFormat !== 'none';
+}
+
+export function getHeadingNumberingStyle(
+  settings: HeadingSettings | undefined,
+  level: HeadingLevel,
+): HeadingNumberingStyle {
+  if (settings?.numberingFormats) {
+    return settings.numberingFormats[level] ?? DEFAULT_HEADING_NUMBERING_STYLE;
+  }
+
+  const legacyFormat = getHeadingNumberingFormat(settings);
+
+  return legacyFormat === 'none' ? DEFAULT_HEADING_NUMBERING_STYLE : legacyFormat;
 }

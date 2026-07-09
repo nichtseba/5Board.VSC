@@ -64,6 +64,7 @@
         "title": "Überschrift",
         "levelLabel": "Hierarchiestufe",
         "numberingLabel": "Nummerierung",
+        "numberingEnabled": "Nummerierung aktivieren",
         "numberingNone": "Keine Zahlen",
         "numberingDecimal": "Zahlen",
         "numberingLowerAlpha": "Alphabetisch klein",
@@ -73,11 +74,15 @@
         "fontFamily": "Schriftart",
         "fontFamilyPlaceholder": "Standardschrift",
         "fontSize": "Schriftgröße",
+        "fontSizeDecrease": "Schriftgröße um 1 kleiner machen",
+        "fontSizeIncrease": "Schriftgröße um 1 größer machen",
         "textStyle": "Textstil",
         "bold": "Fett",
         "italic": "Kursiv",
         "underline": "Unterstrichen",
         "color": "Schriftfarbe",
+        "colorTheme": "Theme",
+        "customColor": "Eigene Farbe",
         "backgroundColor": "Hintergrundfarbe"
       }
     }

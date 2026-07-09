@@ -1,9 +1,5 @@
 import { BoardDocument } from './board/document';
-import {
-  HeadingLevel,
-  HeadingLevelSettings,
-  HeadingNumberingFormat,
-} from './board/headingSettings';
+import { HeadingLevel, HeadingLevelSettings, HeadingNumberingStyle } from './board/headingSettings';
 import { Language } from './localization';
 import { EditorElement, EditorState, EditorTool, ElementLayout } from './main';
 import { ProjectorPointerStyle } from './projector';
@@ -71,5 +67,7 @@ type AllWebviewToExtensionMessage =
     }
   | {
       type: 'updateHeadingNumbering';
-      numberingFormat: HeadingNumberingFormat;
+      enabled?: boolean;
+      level?: HeadingLevel;
+      numberingFormat?: HeadingNumberingStyle;
     };

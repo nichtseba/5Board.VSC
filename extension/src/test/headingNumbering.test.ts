@@ -23,10 +23,31 @@ describe('computeHeadingNumbers', function () {
 
   it('returns no prefixes when numbering is disabled', function () {
     const numbers = computeHeadingNumbers([heading('a', 1, 20)], {
+      numberingEnabled: false,
+    });
+
+    assert.equal(numbers.size, 0);
+  });
+
+  it('keeps supporting legacy none numbering', function () {
+    const numbers = computeHeadingNumbers([heading('a', 1, 20)], {
       numberingFormat: 'none',
     });
 
     assert.equal(numbers.size, 0);
+  });
+
+  it('fills missing parent levels with zeros', function () {
+    const numbers = computeHeadingNumbers([heading('h6', 6, 20)]);
+
+    assert.equal(numbers.get('h6'), '0.0.0.0.0.1');
+  });
+
+  it('keeps zeros for skipped intermediate levels', function () {
+    const numbers = computeHeadingNumbers([heading('h1', 1, 20), heading('h3', 3, 40)]);
+
+    assert.equal(numbers.get('h1'), '1');
+    assert.equal(numbers.get('h3'), '1.0.1');
   });
 
   it('formats lowercase alphabetic numbers', function () {
@@ -66,6 +87,32 @@ describe('computeHeadingNumbers', function () {
 
     assert.equal(numbers.get('h0'), 'I');
     assert.equal(numbers.get('h3'), 'IV');
+  });
+
+  it('formats each level with its configured numbering style', function () {
+    const numbers = computeHeadingNumbers(
+      [heading('h1', 1, 20), heading('h2', 2, 40), heading('h3', 3, 60)],
+      {
+        numberingFormats: {
+          1: 'decimal',
+          2: 'upper-roman',
+          3: 'lower-alpha',
+        },
+      },
+    );
+
+    assert.equal(numbers.get('h3'), '1.I.a');
+  });
+
+  it('does not mix in legacy formats once per-level formats exist', function () {
+    const numbers = computeHeadingNumbers([heading('h1', 1, 20), heading('h3', 3, 40)], {
+      numberingFormat: 'upper-roman',
+      numberingFormats: {
+        1: 'decimal',
+      },
+    });
+
+    assert.equal(numbers.get('h3'), '1.0.1');
   });
 
   it('ignores hidden headings', function () {
