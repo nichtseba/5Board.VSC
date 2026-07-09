@@ -1,4 +1,13 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { calculateCanvasPoint } from '../components/projector/calculateCanvasPoint';
 
 /**
  * Provides a central event hub for canvas interactions.
@@ -17,6 +26,8 @@ export type CanvasEventMap = {
   pointerMove: PointerEvent;
   pointerUp: PointerEvent;
   pointerCancel: PointerEvent;
+  pointerLeave: PointerEvent;
+  scroll: Event;
 };
 
 export type CanvasEventHandlers = {
@@ -34,19 +45,44 @@ const CanvasEventContext = createContext<CanvasEventContextType | null>(null);
 
 export function CanvasEventsProvider({ children }: { children: React.ReactNode }) {
   const listenersRef = useRef(new Set<CanvasEventHandlers>());
+  const [scrollSubscribers, setScrollSubscribers] = useState(0);
 
-  const subscribe = useCallback((handlers: CanvasEventHandlers) => {
-    listenersRef.current.add(handlers);
-    return () => {
-      listenersRef.current.delete(handlers);
-    };
+  const refreshScrollSubscribers = useCallback(() => {
+    let count = 0;
+    listenersRef.current.forEach((listener) => {
+      if (listener.scroll) count++;
+    });
+    setScrollSubscribers(count);
   }, []);
+
+  const subscribe = useCallback(
+    (handlers: CanvasEventHandlers) => {
+      listenersRef.current.add(handlers);
+      refreshScrollSubscribers();
+      return () => {
+        listenersRef.current.delete(handlers);
+        refreshScrollSubscribers();
+      };
+    },
+    [refreshScrollSubscribers],
+  );
 
   const emit = useCallback(<K extends keyof CanvasEventMap>(type: K, event: CanvasEventMap[K]) => {
     listenersRef.current.forEach((listener) => {
       listener[type]?.(event);
     });
   }, []);
+
+  useEffect(() => {
+    if (scrollSubscribers === 0) {
+      return;
+    }
+    const handleScroll = (event: Event) => emit('scroll', event);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [scrollSubscribers, emit]);
 
   const value = useMemo(
     () => ({
@@ -83,4 +119,9 @@ export function useCanvasEventDispatcher() {
   return {
     emit: context.emit,
   };
+}
+
+// Hook: Convert a canvas pointer event into a normalized (0–1) canvas position
+export function useCanvasPoint() {
+  return calculateCanvasPoint;
 }

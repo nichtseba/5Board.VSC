@@ -32,6 +32,7 @@ export class EditorEditorProvider implements vscode.CustomEditorProvider<BoardCu
     _token: vscode.CancellationToken,
   ): Promise<BoardCustomDocument> {
     const pkg = await this.packageManager.getOrLoadPackage(uri, openContext);
+
     return new BoardCustomDocument(pkg, uri);
   }
 

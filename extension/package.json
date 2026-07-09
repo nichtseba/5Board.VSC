@@ -45,6 +45,16 @@
             "filenamePattern": "*.5board"
           }
         ]
+      },
+      {
+        "viewType": "5board-vsc.projector",
+        "displayName": "%customEditors.projector%",
+        "selector": [
+          {
+            "filenamePattern": "*.5boardz"
+          }
+        ],
+        "priority": "option"
       }
     ],
     "viewsContainers": {
@@ -61,7 +71,12 @@
         {
           "type": "webview",
           "id": "5board-vsc.sidebar-tool-view",
-          "name": "%views.sidebar.sidebar-title%"
+          "name": "%views.sidebar.tool-title%"
+        },
+        {
+          "type": "webview",
+          "id": "5board-vsc.sidebar-projector-view",
+          "name": "%views.sidebar.projector-title%"
         },
         {
           "type": "webview",
@@ -96,6 +111,10 @@
         "command": "5board-vsc.startPresentation",
         "title": "%commands.startPresentation%",
         "icon": "$(play)"
+      },
+      {
+        "command": "5board-vsc.goToElement",
+        "title": "%commands.goToElement%"
       }
     ],
     "menus": {
@@ -109,12 +128,12 @@
       "view/title": [
         {
           "command": "5board-vsc.newBoard",
-          "when": "view == 5boardSidebarView",
+          "when": "view == 5board-vsc.sidebar-tool-view",
           "group": "navigation"
         },
         {
           "command": "5board-vsc.startPresentation",
-          "when": "view == 5boardSidebarView",
+          "when": "view == 5board-vsc.sidebar-tool-view",
           "group": "navigation"
         }
       ]

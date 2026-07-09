@@ -6,7 +6,14 @@
       "packageFilter": "5Boardz Paket",
       "createFile": "Erstelle 5Board Datei",
       "createFileFailed": "Fehler beim Erstellen der 5Board Datei:"
-    }
+    },
+    "projector": {
+      "startPresentation": "Beameransicht starten",
+      "title": "Beameransicht",
+      "noFileOpen": "Bitte öffne zuerst eine .5boardz Datei im Editor, bevor du die Beameransicht startest.",
+      "loading": "Lade…"
+    },
+    "goToElement": "Gehe zu Element"
   },
   "webview": {
     "customEditor": { "Test": "Testen der Übersetzung" },
@@ -34,6 +41,19 @@
         "image": "Bild",
         "shape": "Form",
         "arrow": "Pfeil"
+      },
+      "projectorSettings": {
+        "title": "Beameransicht-Einstellungen",
+        "cursorTracking": "Mauszeiger-Tracking",
+        "pointerColor": "Zeiger-Farbe",
+        "customColor": "Eigene",
+        "pointerShape": "Zeiger-Form",
+        "shapes": {
+          "dot": "Punkt",
+          "ring": "Ring",
+          "rectangle": "Rechteck",
+          "duck": "Ente"
+        }
       }
     },
     "sidebar-element-settings": {
