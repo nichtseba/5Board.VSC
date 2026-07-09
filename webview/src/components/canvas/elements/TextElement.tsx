@@ -5,5 +5,5 @@ import { EditorElementProps } from '../EditorElement';
  * Renders a text element.
  */
 export function TextElement({ element }: EditorElementProps<EditorElementType.Text>) {
-  return <div>Add canvas element for {element.id}</div>;
+  return <div className="whitespace-pre-wrap">{element.data.content}</div>;
 }

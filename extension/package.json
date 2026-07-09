@@ -115,6 +115,10 @@
       {
         "command": "5board-vsc.goToElement",
         "title": "%commands.goToElement%"
+      },
+      {
+        "command": "5board-vsc.createContentTable",
+        "title": "Create Content Table"
       }
     ],
     "menus": {
