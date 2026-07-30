@@ -80,7 +80,9 @@
           "yellow": "Yellow",
           "green": "Green",
           "blue": "Blue",
-          "purple": "Purple"
+          "purple": "Purple",
+          "black": "Black",
+          "white": "White"
         },
         "shapes": {
           "dot": "Dot",

@@ -81,7 +81,9 @@
           "yellow": "Gelb",
           "green": "Grün",
           "blue": "Blau",
-          "purple": "Lila"
+          "purple": "Lila",
+          "black": "Schwarz",
+          "white": "Weiß"
         },
         "shapes": {
           "dot": "Punkt",

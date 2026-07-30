@@ -64,14 +64,14 @@ export const FREEHAND_DEFAULT_DASH = 3;
 
 // Selectable freehand colors. The `id` maps to a localized name for the tooltip.
 export const FREEHAND_COLORS = [
-  { id: 'red', value: '#e06c75' },
-  { id: 'orange', value: '#d19a66' },
-  { id: 'yellow', value: '#e5c07b' },
-  { id: 'green', value: '#98c379' },
-  { id: 'blue', value: '#61afef' },
-  { id: 'purple', value: '#c678dd' },
-  { id: 'black', value: '#000000' },
-  { id: 'white', value: '#ffffff' },
+  { id: 'red', value: 'var(--vscode-charts-red, #f14c4c)' },
+  { id: 'orange', value: 'var(--vscode-charts-orange, #d18616)' },
+  { id: 'yellow', value: 'var(--vscode-charts-yellow, #cca700)' },
+  { id: 'green', value: 'var(--vscode-charts-green, #89d185)' },
+  { id: 'blue', value: 'var(--vscode-charts-blue, #3794ff)' },
+  { id: 'purple', value: 'var(--vscode-charts-purple, #b180d7)' },
+  { id: 'black', value: 'var(--vscode-charts-black, #000000)' },
+  { id: 'white', value: 'var(--vscode-charts-white, #ffffff)' },
 ] as const;
 
 // Freehand stroke width range (in pixels), chosen with a slider in the sidebar.

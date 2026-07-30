@@ -14,6 +14,8 @@ export const PROJECTOR_POINTER_PRESET_COLORS = [
   { id: 'green', value: 'var(--vscode-charts-green, #89d185)' },
   { id: 'blue', value: 'var(--vscode-charts-blue, #3794ff)' },
   { id: 'purple', value: 'var(--vscode-charts-purple, #b180d7)' },
+  { id: 'black', value: 'var(--vscode-charts-black, #000000)' },
+  { id: 'white', value: 'var(--vscode-charts-white, #ffffff)' },
 ] as const;
 
 export const DEFAULT_PROJECTOR_POINTER_STYLE: ProjectorPointerStyle = {
