@@ -19,7 +19,7 @@ export function ImageElement({ element, assetUrls }: EditorElementProps<EditorEl
       ? 0
       : Math.abs(elementAspectRatio - element.data.aspectRatio) / element.data.aspectRatio;
 
-  const objectFitClass = aspectRatioDifference > 0.1 ? 'object-contain' : 'object-fill';
+  const objectFitClass = aspectRatioDifference <= 0.1 ? 'object-contain' : 'object-fill';
 
   const configureSize = () => {
     if (element.data.configuredWidth && element.data.aspectRatio !== undefined) {

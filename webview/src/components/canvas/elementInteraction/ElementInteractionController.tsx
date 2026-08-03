@@ -24,8 +24,17 @@ export default function ElementInteractionController<ElementType extends EditorE
 
   const pendingPositionUpdate = useRef(false);
 
-  const getCurrentElementRatio = () =>
-    (element.layout.width * cellSize.width) / (element.layout.height * cellSize.height);
+  const getImageResizeRatio = () => {
+    if (element.type === EditorElementType.Image) {
+      const imageElement = element as EditorElement<EditorElementType.Image>;
+
+      if (imageElement.data.aspectRatio !== undefined) {
+        return imageElement.data.aspectRatio;
+      }
+    }
+
+    return (element.layout.width * cellSize.width) / (element.layout.height * cellSize.height);
+  };
 
   const isImageCornerResize = (direction: number[]) =>
     element.type === EditorElementType.Image && direction[0] !== 0 && direction[1] !== 0;
@@ -84,7 +93,7 @@ export default function ElementInteractionController<ElementType extends EditorE
     let height = lastEvent.height;
 
     if (isImageCornerResize(lastEvent.direction)) {
-      const ratio = getCurrentElementRatio();
+      const ratio = getImageResizeRatio();
       height = width / ratio;
     }
 
@@ -142,7 +151,7 @@ export default function ElementInteractionController<ElementType extends EditorE
         let nextHeight = height;
 
         if (isImageCornerResize(direction)) {
-          const ratio = getCurrentElementRatio();
+          const ratio = getImageResizeRatio();
           nextHeight = nextWidth / ratio;
         }
 
