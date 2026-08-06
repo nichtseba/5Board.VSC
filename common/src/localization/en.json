@@ -20,6 +20,21 @@
       "spacerLabel": "Spacer",
       "rows": "rows"
     },
+    "find": {
+      "searchPlaceholder": "Find",
+      "replacePlaceholder": "Replace",
+      "noResults": "No results",
+      "of": "of",
+      "matchCase": "Match Case",
+      "wholeWord": "Match Whole Word",
+      "useRegex": "Use Regular Expression",
+      "previousMatch": "Previous Match",
+      "nextMatch": "Next Match",
+      "close": "Close",
+      "toggleReplace": "Toggle Replace",
+      "replace": "Replace",
+      "replaceAll": "Replace All"
+    },
     "sidebar": {
       "title": "5Board Sidebar",
       "tools": {

@@ -53,6 +53,7 @@ type AllWebviewToExtensionMessage =
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
   | { type: 'updateElementLayout'; id: string; changes: Partial<ElementLayout> } // Update the Layout when Element was moved or resized
   | { type: 'updateElement'; id: string; changes: Partial<EditorElement> } // Update element with it's settings
+  | { type: 'replaceElementContent'; changes: { id: string; content: string }[] } // Replace text content of elements (find & replace)
   | { type: 'toggleCursorTracking' }
   | { type: 'updateProjectorPointer'; style: ProjectorPointerStyle }
   | {
