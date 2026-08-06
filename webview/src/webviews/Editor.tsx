@@ -8,6 +8,8 @@ import ProjectorCursorMirror from '../components/projector/ProjectorCursorMirror
 import ProjectorScrollMirror from '../components/projector/ProjectorScrollMirror';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
 import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
+import { FindProvider } from '../providers/FindProvider';
+import FindWidget from '../components/find/FindWidget';
 
 export default function Editor() {
   const messages = useMessageService();
@@ -37,7 +39,7 @@ export default function Editor() {
   });
 
   return (
-    <>
+    <FindProvider>
       <div className="relative">
         {boardDocument && (
           <CanvasEventsProvider>
@@ -48,7 +50,8 @@ export default function Editor() {
         )}
         <ProjectorViewPort />
       </div>
-    </>
+      <FindWidget />
+    </FindProvider>
   );
 }
 
