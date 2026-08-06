@@ -1,10 +1,28 @@
+import { useMemo } from 'react';
 import { EditorElementType } from '5board.vsc-common';
 import { EditorElementProps } from '../EditorElement';
+import { useFind } from '../../../providers/FindProvider';
+import { segmentContent } from '../../../services/findMatches';
 
 /**
  * Renders a heading element. The heading level (h1, h2, etc.) is determined by the `level` property in the element's data.
  */
 export function HeadingElement({ element }: EditorElementProps<EditorElementType.Heading>) {
+  const find = useFind();
+  const content = element.data.content;
+
+  const segments = useMemo(() => {
+    if (!find?.open) {
+      return null;
+    }
+    const ownMatches = find.matches.filter((match) => match.elementId === element.id);
+    if (ownMatches.length === 0) {
+      return null;
+    }
+    const currentMatch = find.currentIndex >= 0 ? find.matches[find.currentIndex] : null;
+    return segmentContent(content, ownMatches, currentMatch);
+  }, [find, content, element.id]);
+
   /** Utility component for rendering the appropriate heading tag based on the level */
   function HeadingTag({
     children,
@@ -31,5 +49,26 @@ export function HeadingElement({ element }: EditorElementProps<EditorElementType
     }
   }
 
-  return <HeadingTag level={element.data.level}>{element.data.content}</HeadingTag>;
+  return (
+    <HeadingTag level={element.data.level}>
+      {segments === null
+        ? content
+        : segments.map((segment, index) =>
+            segment.kind === 'plain' ? (
+              segment.text
+            ) : (
+              <mark
+                key={index}
+                className={`text-inherit ${
+                  segment.kind === 'current'
+                    ? 'bg-editor-find-match-background'
+                    : 'bg-editor-find-match-highlight-background'
+                }`}
+              >
+                {segment.text}
+              </mark>
+            ),
+          )}
+    </HeadingTag>
+  );
 }
