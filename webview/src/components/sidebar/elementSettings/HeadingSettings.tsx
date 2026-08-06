@@ -2,19 +2,21 @@ import {
   EditorElement,
   EditorElementType,
   HeadingLevelSettings,
+  HeadingNumberingFormat,
   HeadingNumberingStyle,
   PROJECTOR_POINTER_PRESET_COLORS,
   getHeadingLevelSettings,
   getHeadingNumberingEnabled,
   getHeadingNumberingStyle,
 } from '5board.vsc-common';
-import { Button, Checkbox, Dropdown, DropdownOption, TextField } from 'vscrui';
+import { Button, Dropdown, DropdownOption, TextField } from 'vscrui';
 import SettingsField from '../layout/SettingsField';
 import SettingsPanel from '../layout/SettingsPanel';
 import { useLocalization } from '../../../providers/LocalizationProvider';
 import { useMessageService } from '../../../services/MessageService';
 import { useBoardDocument } from '../../../providers/BoardDocumentProvider';
-import ColorSelector from '../components/ColorSelector';
+import { ColorPresets } from '../components/ColorPresets';
+import { ColorPicker } from '../components/ColorPicker';
 
 type Props = {
   element: EditorElement<EditorElementType.Heading>;
@@ -57,19 +59,21 @@ export function HeadingSettings({ element }: Props) {
       return;
     }
 
-    const nextFormat = (typeof value === 'string' ? value : value.value) as HeadingNumberingStyle;
+    const nextFormat = (typeof value === 'string' ? value : value.value) as HeadingNumberingFormat;
+
+    if (nextFormat === 'none') {
+      messages.send({
+        type: 'updateHeadingNumbering',
+        enabled: false,
+      });
+      return;
+    }
 
     messages.send({
       type: 'updateHeadingNumbering',
+      enabled: true,
       level: element.data.level,
-      numberingFormat: nextFormat,
-    });
-  };
-
-  const handleNumberingEnabledChange = () => {
-    messages.send({
-      type: 'updateHeadingNumbering',
-      enabled: !numberingEnabled,
+      numberingFormat: nextFormat as HeadingNumberingStyle,
     });
   };
 
@@ -89,19 +93,18 @@ export function HeadingSettings({ element }: Props) {
     }
   };
 
-  const handleFontSizeStep = (step: number) => {
-    const currentFontSize = levelSettings.fontSize ?? 1;
-    handleLevelSettingsChange({ fontSize: Math.max(1, currentFontSize + step) });
-  };
-
   return (
     <>
       <SettingsPanel
         title={t('webview.sidebar-element-settings.headingSettings.title')}
         icon="text-size"
       >
-        <SettingsField label={t('webview.sidebar-element-settings.headingSettings.levelLabel')}>
+        <SettingsField
+          label={t('webview.sidebar-element-settings.headingSettings.levelLabel')}
+          inline
+        >
           <Dropdown
+            className="w-24"
             options={[
               { value: '1', label: 'H1' },
               { value: '2', label: 'H2' },
@@ -114,11 +117,6 @@ export function HeadingSettings({ element }: Props) {
             onChange={handleLevelChange}
           />
         </SettingsField>
-        <SettingsField label={t('webview.sidebar-element-settings.headingSettings.numberingLabel')}>
-          <Checkbox checked={numberingEnabled} onChange={handleNumberingEnabledChange}>
-            {t('webview.sidebar-element-settings.headingSettings.numberingEnabled')}
-          </Checkbox>
-        </SettingsField>
         <SettingsField
           label={`${t('webview.sidebar-element-settings.headingSettings.numberingLabel')} H${
             element.data.level
@@ -126,6 +124,10 @@ export function HeadingSettings({ element }: Props) {
         >
           <Dropdown
             options={[
+              {
+                value: 'none',
+                label: t('webview.sidebar-element-settings.headingSettings.numberingNone'),
+              },
               {
                 value: 'decimal',
                 label: '1, 2, 3',
@@ -147,9 +149,8 @@ export function HeadingSettings({ element }: Props) {
                 label: 'I, II, III',
               },
             ]}
-            value={numberingFormat}
+            value={numberingEnabled ? numberingFormat : 'none'}
             onChange={handleNumberingChange}
-            disabled={!numberingEnabled}
           />
         </SettingsField>
         <SettingsField label={t('webview.sidebar-element-settings.headingSettings.fontFamily')}>
@@ -161,29 +162,22 @@ export function HeadingSettings({ element }: Props) {
             onChange={(fontFamily) => handleLevelSettingsChange({ fontFamily })}
           />
         </SettingsField>
-        <SettingsField label={t('webview.sidebar-element-settings.headingSettings.fontSize')}>
-          <div className="flex items-center gap-2">
-            <Button
-              appearance="secondary"
-              title={t('webview.sidebar-element-settings.headingSettings.fontSizeDecrease')}
-              onClick={() => handleFontSizeStep(-1)}
-            >
-              <span className="codicon codicon-remove" />
-            </Button>
-            <TextField
-              value={String(levelSettings.fontSize ?? '')}
-              onChange={handleFontSizeChange}
-            />
-            <Button
-              appearance="secondary"
-              title={t('webview.sidebar-element-settings.headingSettings.fontSizeIncrease')}
-              onClick={() => handleFontSizeStep(1)}
-            >
-              <span className="codicon codicon-add" />
-            </Button>
-          </div>
+        <SettingsField
+          label={t('webview.sidebar-element-settings.headingSettings.fontSize')}
+          inline
+        >
+          <input
+            type="number"
+            min={1}
+            value={levelSettings.fontSize ?? ''}
+            onChange={(e) => handleFontSizeChange(e.target.value)}
+            className="w-20 rounded-xs border border-dropdown-border bg-input-background px-2 py-[3px] text-input-foreground [color-scheme:light_dark] focus:border-focus-border focus:outline-none"
+          />
         </SettingsField>
-        <SettingsField label={t('webview.sidebar-element-settings.headingSettings.textStyle')}>
+        <SettingsField
+          label={t('webview.sidebar-element-settings.headingSettings.textStyle')}
+          inline
+        >
           <div className="flex gap-2">
             <Button
               appearance={levelSettings.fontWeight === 'bold' ? 'primary' : 'secondary'}
@@ -242,18 +236,17 @@ export function HeadingSettings({ element }: Props) {
 }
 
 function ColorField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
-  const { t } = useLocalization();
-
   return (
     <div className="flex flex-col gap-2">
-      <ColorSelector
+      <ColorPresets
         color={value}
         onChange={onChange}
-        themePresets={PROJECTOR_POINTER_PRESET_COLORS.map((preset) => ({ value: preset }))}
-        themeLabel={t('webview.sidebar-element-settings.headingSettings.colorTheme')}
-        customColorLabel={t('webview.sidebar-element-settings.headingSettings.customColor')}
+        presets={PROJECTOR_POINTER_PRESET_COLORS.map((preset) => ({ value: preset, theme: true }))}
       />
-      <TextField value={value} placeholder="#000000" onChange={onChange} />
+      <div className="flex items-center gap-2">
+        <ColorPicker color={value} onChange={onChange} />
+        <TextField className="flex-1" value={value} placeholder="#000000" onChange={onChange} />
+      </div>
     </div>
   );
 }
