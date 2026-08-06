@@ -65,8 +65,7 @@
         "levelLabel": "Hierarchy level"
       },
       "imageSettings": {
-        "title": "Image",
-        "keepAspectRatio": "Keep aspect ratio"
+        "title": "Image"
       }
     }
   }

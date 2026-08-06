@@ -65,8 +65,7 @@
         "levelLabel": "Hierarchiestufe"
       },
       "imageSettings": {
-        "title": "Bild",
-        "keepAspectRatio": "Seitenverhältnis beibehalten"
+        "title": "Bild"
       }
     }
   }
