@@ -12,8 +12,7 @@
       "title": "Beameransicht",
       "noFileOpen": "Bitte öffne zuerst eine .5boardz Datei im Editor, bevor du die Beameransicht startest.",
       "loading": "Lade…"
-    },
-    "goToElement": "Gehe zu Element"
+    }
   },
   "webview": {
     "customEditor": { "Test": "Testen der Übersetzung" },
@@ -54,7 +53,8 @@
           "rectangle": "Rechteck",
           "duck": "Ente"
         }
-      }
+      },
+      "goToElement": "Gehe zu Element"
     },
     "sidebar-element-settings": {
       "noElementSelected": "Kein Element ausgewählt",
