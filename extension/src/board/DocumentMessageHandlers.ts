@@ -1,3 +1,4 @@
+import { EditorElementType } from '5board.vsc-common';
 import { EXTENSION } from '../extension';
 import { BoardCustomDocument } from './BoardCustomDocument';
 
@@ -75,6 +76,28 @@ export class DocumentMessageHandlers {
         });
       }),
       //#endregion "EditorTools"
+
+      //#region "Find"
+
+      this.document.messageService.on('replaceElementContent', (msg) => {
+        this.document.applyEdit((document) => {
+          const replaceable = new Set<EditorElementType>([
+            EditorElementType.Heading,
+            EditorElementType.Text,
+            EditorElementType.Code,
+          ]);
+          for (const change of msg.changes) {
+            const element = document.content.elements.find((e) => e.id === change.id);
+
+            if (!element || !replaceable.has(element.type)) {
+              continue;
+            }
+
+            element.data = { ...element.data, content: change.content } as typeof element.data;
+          }
+        });
+      }),
+      //#endregion "Find"
 
       //#region "Projector"
 
