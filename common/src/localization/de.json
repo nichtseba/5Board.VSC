@@ -40,7 +40,8 @@
         "code": "Code",
         "image": "Bild",
         "shape": "Form",
-        "arrow": "Pfeil"
+        "arrow": "Pfeil",
+        "contentTable": "Inhaltsverzeichnis"
       },
       "projectorSettings": {
         "title": "Beameransicht-Einstellungen",

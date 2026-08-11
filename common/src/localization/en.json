@@ -39,7 +39,8 @@
         "code": "Code",
         "image": "Image",
         "shape": "Shape",
-        "arrow": "Arrow"
+        "arrow": "Arrow",
+        "contentTable": "Content Table"
       },
       "projectorSettings": {
         "title": "Projector Settings",

@@ -6,6 +6,7 @@ import { CodeSettings } from './CodeSettings';
 import { ImageSettings } from './ImageSettings';
 import { ShapeSettings } from './ShapeSettings';
 import { ArrowSettings } from './ArrowSettings';
+import { ContentTableSettings } from './ContentTableSettings';
 import { useLocalization } from '../../../providers/LocalizationProvider';
 
 type SettingsProps<T extends EditorElementType> = {
@@ -44,5 +45,6 @@ const SETTINGS_COMPONENTS: {
   [EditorElementType.Code]: CodeSettings,
   [EditorElementType.Image]: ImageSettings,
   [EditorElementType.Shape]: ShapeSettings,
-  [EditorElementType.Arrow]: ArrowSettings
+  [EditorElementType.Arrow]: ArrowSettings,
+  [EditorElementType.ContentTable]: ContentTableSettings,
 };

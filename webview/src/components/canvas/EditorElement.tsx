@@ -8,6 +8,7 @@ import { CodeElement } from './elements/CodeElement';
 import { ImageElement } from './elements/ImageElement';
 import { ShapeElement } from './elements/ShapeElement';
 import { ArrowElement } from './elements/ArrowElement';
+import { ContentTableElement } from './elements/ContentTableElement';
 import { useEditorState } from '../../providers/EditorStateProvider';
 import { useMessageService } from '../../services/MessageService';
 
@@ -91,6 +92,7 @@ const ELEMENT_COMPONENTS = {
   [EditorElementType.Image]: ImageElement,
   [EditorElementType.Shape]: ShapeElement,
   [EditorElementType.Arrow]: ArrowElement,
+  [EditorElementType.ContentTable]: ContentTableElement,
 } as const satisfies {
   [ElementType in EditorElementType]: React.ComponentType<EditorElementProps<ElementType>>;
 };

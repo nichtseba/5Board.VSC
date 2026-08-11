@@ -7,6 +7,7 @@ export enum EditorElementType {
   Image = 'image',
   Shape = 'shape',
   Arrow = 'arrow',
+  ContentTable = 'contentTable',
 }
 
 /**
@@ -59,6 +60,7 @@ type EditorElementDataMap = {
   [EditorElementType.Image]: ImageElementData;
   [EditorElementType.Shape]: ShapeElementData;
   [EditorElementType.Arrow]: ArrowElementData;
+  [EditorElementType.ContentTable]: ContentTableElementData;
 };
 
 export type HeadingElementData = {
@@ -156,4 +158,8 @@ type LineShapeData = BaseShapeData & {
 type PolygonShapeData = BaseShapeData & {
   shapeType: 'polygon';
   points: Point[];
+};
+
+type ContentTableElementData = {
+  title: string;
 };

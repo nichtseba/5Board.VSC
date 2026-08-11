@@ -1,42 +1,35 @@
-import { BoardDocument, BoardElement, EditorElement, EditorElementType } from '5board.vsc-common';
+import { BoardDocument, EditorElementType } from '5board.vsc-common';
 
 export function addTableOfContentsToDocument(document: BoardDocument): void {
-  const content = createTableOfContentsText(document.content.elements);
+  const existingContentTable = document.content.elements.find(
+    (element) => element.type === EditorElementType.ContentTable,
+  );
+
+  if (existingContentTable) {
+    document.content.selectedElementId = existingContentTable.id;
+    return;
+  }
+
+  const headingCount = document.content.elements.filter(
+    (element) => element.type === EditorElementType.Heading,
+  ).length;
+
+  const height = Math.max(6, 2 + headingCount * 2);
 
   document.content.elements.push({
     id: `toc-${Date.now()}`,
-    type: EditorElementType.Text,
+    type: EditorElementType.ContentTable,
     layout: {
       xPos: 0,
       yPos: 0,
       width: 60,
-      height: Math.max(6, content.split('\n').length * 2),
+      height,
     },
     style: {
       visible: true,
     },
     data: {
-      content,
+      title: 'Inhaltsverzeichnis',
     },
   });
-}
-
-export function createTableOfContentsText(elements: BoardElement[]): string {
-  const headings = elements
-    .filter(isHeadingElement)
-    .slice()
-    .sort((a, b) => a.layout.yPos - b.layout.yPos);
-
-  return headings
-    .map((heading) => {
-      const indent = '  '.repeat(heading.data.level - 1);
-      return `${indent}${heading.data.content}`;
-    })
-    .join('\n');
-}
-
-function isHeadingElement(
-  element: BoardElement,
-): element is EditorElement<EditorElementType.Heading> {
-  return element.type === EditorElementType.Heading;
 }
