@@ -41,7 +41,9 @@ export default function ProjectorMouse({
       style={{
         ...position,
         borderColor: style.color,
-        backgroundColor: isRing ? 'transparent' : `color-mix(in srgb, ${style.color} 75%, transparent)`,
+        backgroundColor: isRing
+          ? 'transparent'
+          : `color-mix(in srgb, ${style.color} 75%, transparent)`,
       }}
     />
   );

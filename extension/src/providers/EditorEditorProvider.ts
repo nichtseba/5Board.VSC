@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 
+import { isUpdateElementMessage } from '5board.vsc-common';
 import { setEditorWebviewHtml } from '../board/webview';
 import { BoardCustomDocument } from '../board/BoardCustomDocument';
 import { PackageManager } from '../PackageManager';
@@ -46,6 +47,15 @@ export class EditorEditorProvider implements vscode.CustomEditorProvider<BoardCu
     };
 
     document.messageService.registerPanel(webviewPanel);
+    document.onDocumentChange(() => {
+      this.didChangeCustomDocument.fire({ document });
+    });
+    // Element edits are sent over the raw webview channel
+    webviewPanel.webview.onDidReceiveMessage((msg) => {
+      if (isUpdateElementMessage(msg)) {
+        document.updateElement(msg.id, msg.changes);
+      }
+    });
     // Todo: Replace with actual document title
     webviewPanel.title = `5Board: ${vscode.workspace.asRelativePath(document.uri, false)}`;
 

@@ -1,6 +1,6 @@
 import { strict as assert } from 'assert';
 import * as vscode from 'vscode';
-import { FiveBoardFileSystemProvider } from '../FiveBoardFileSystemProvider';
+import { FiveBoardFileSystemProvider } from '../FiveBoardFileSystemProvider.js';
 
 describe('FiveBoardFileSystemProvider.watch', function () {
   function createProvider(): FiveBoardFileSystemProvider {

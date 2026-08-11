@@ -4,7 +4,7 @@ import type {
   CodeblockLanguage,
   ToolCheckResult,
 } from '5board.vsc-common';
-import { JavaCodeblockRunner } from './JavaCodeblockRunner';
+import { JavaCodeblockRunner } from './JavaCodeblockRunner.js';
 
 const runners = [new JavaCodeblockRunner()];
 
