@@ -121,6 +121,10 @@
         "command": "5board-vsc.executeCodeblock",
         "title": "%commands.executeCodeblock%",
         "icon": "$(run)"
+      },
+      {
+        "command": "5board-vsc.goToElement",
+        "title": "%commands.goToElement%"
       }
     ],
     "keybindings": [

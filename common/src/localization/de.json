@@ -17,7 +17,8 @@
       "noActiveDocument": "Kein aktives 5Board-Dokument.",
       "noCodeblockSelected": "Wähle einen Codeblock aus, um ihn auszuführen.",
       "deleteClassNotEmpty": "Die Klasse enthält noch Codeblöcke. Entferne sie zuerst aus der Klasse, bevor du sie löschst."
-    }
+    },
+    "goToElement": "Gehe zu Element"
   },
   "webview": {
     "customEditor": { "Test": "Testen der Übersetzung" },

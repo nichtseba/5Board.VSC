@@ -12,5 +12,6 @@
   "commands.openBoardFile": "5Board Datei öffnen",
   "commands.newBoardFile": "Neue 5Board Datei",
   "commands.startPresentation": "Präsentation starten",
-  "commands.executeCodeblock": "Codeblock ausführen"
+  "commands.executeCodeblock": "Codeblock ausführen",
+  "commands.goToElement": "Gehe zu Element"
 }

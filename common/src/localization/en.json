@@ -17,7 +17,8 @@
       "noActiveDocument": "No active 5Board document.",
       "noCodeblockSelected": "Select a code block to execute it.",
       "deleteClassNotEmpty": "The class still contains code blocks. Remove them from the class before deleting it."
-    }
+    },
+    "goToElement": "Go to Element"
   },
   "webview": {
     "customEditor": { "Test": "Test the translation." },
@@ -58,7 +59,8 @@
           "rectangle": "Rectangle",
           "duck": "Duck"
         }
-      }
+      },
+      "goToElement": "Go to Element"
     },
     "sidebar-element-settings": {
       "noElementSelected": "No element selected",

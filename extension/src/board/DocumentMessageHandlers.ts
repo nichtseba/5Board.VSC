@@ -95,7 +95,6 @@ export class DocumentMessageHandlers {
       // Forward scroll position from any panel to all other panels.
       // The editor only sends scroll when a projector window is open
       this.document.messageService.on('scroll', (msg) => {
-        console.log(`[5board] scroll relayed to projector: top=${msg.top}, left=${msg.left}`);
         this.document.messageService.send({ type: 'scroll', top: msg.top, left: msg.left });
       }),
 

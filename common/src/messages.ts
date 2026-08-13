@@ -30,7 +30,8 @@ type AllExtensionToWebviewMessage =
       viewport: { top: number; left: number; height: number; width: number };
     }
   | { type: 'updateEditorState'; editorState: EditorState }
-  | { type: 'codeblockResult'; elementId: string; output: CodeExecutionOutput };
+  | { type: 'codeblockResult'; elementId: string; output: CodeExecutionOutput }
+  | { type: 'goToElement'; elementId: string };
 
 /**
  * Messages from the webviews to the extension
