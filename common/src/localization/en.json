@@ -85,6 +85,9 @@
         "colorTheme": "Theme",
         "customColor": "Custom color",
         "backgroundColor": "Background color"
+      },
+      "contentTableSettings": {
+        "title": "Table of content"
       }
     }
   }

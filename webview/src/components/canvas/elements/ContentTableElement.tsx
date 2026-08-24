@@ -1,11 +1,32 @@
-import { EditorElement, EditorElementType } from '5board.vsc-common';
+import { EditorElement, EditorElementType, getHeadingLevelSettings } from '5board.vsc-common';
 import { EditorElementProps } from '../EditorElement';
 import { useBoardDocument } from '../../../providers/BoardDocumentProvider';
 import { useMessageService } from '../../../services/MessageService';
+import { useHeadingNumber } from '../HeadingNumberingContext';
+import type React from 'react';
 
-export function ContentTableElement({
-  element,
-}: EditorElementProps<EditorElementType.ContentTable>) {
+const CONTENT_TABLE_FONT_SIZE = 14;
+
+//builds CSS style for one toc entry, based on the corresponding heading
+function getContentTableEntryStyle(
+  heading: EditorElement<EditorElementType.Heading>,
+  boardDocument: ReturnType<typeof useBoardDocument>,
+): React.CSSProperties {
+  const levelSettings = getHeadingLevelSettings(
+    boardDocument?.content.headingSettings,
+    heading.data.level,
+  );
+
+  return {
+    color: levelSettings.color,
+    fontFamily: levelSettings.fontFamily,
+    fontWeight: levelSettings.fontWeight,
+    fontStyle: levelSettings.fontStyle,
+    fontSize: `${CONTENT_TABLE_FONT_SIZE}px`,
+  };
+}
+
+export function ContentTableElement({}: EditorElementProps<EditorElementType.ContentTable>) {
   const boardDocument = useBoardDocument();
   const messages = useMessageService();
 
@@ -36,24 +57,46 @@ export function ContentTableElement({
 
   return (
     <div className="flex flex-col gap-1 text-sm font-normal">
-      <div className="font-semibold">{element.data.title}</div>
       {headings.map((heading) => (
-        <button
+        <ContentTableEntry
           key={heading.id}
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation();
-            goToHeading(heading.id);
-          }}
-          className="w-fit text-left hover:underline"
-          style={{
-            marginLeft: `${(heading.data.level - 1) * 12}px`,
-          }}
-        >
-          {heading.data.content}
-        </button>
+          heading={heading}
+          boardDocument={boardDocument}
+          onClick={goToHeading}
+        />
       ))}
     </div>
+  );
+}
+
+//renders a single clickable toc entry with numbering, indentation and visual styling
+function ContentTableEntry({
+  heading,
+  boardDocument,
+  onClick,
+}: {
+  heading: EditorElement<EditorElementType.Heading>;
+  boardDocument: ReturnType<typeof useBoardDocument>;
+  onClick: (id: string) => void;
+}) {
+  const number = useHeadingNumber(heading.id);
+
+  return (
+    <button
+      type="button"
+      onClick={(event) => {
+        event.stopPropagation();
+        onClick(heading.id);
+      }}
+      className="w-fit text-left hover:underline"
+      style={{
+        ...getContentTableEntryStyle(heading, boardDocument),
+        marginLeft: `${(heading.data.level - 1) * 12}px`,
+      }}
+    >
+      {number ? `${number} ` : ''}
+      {heading.data.content}
+    </button>
   );
 }
 

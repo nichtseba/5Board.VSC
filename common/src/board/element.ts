@@ -161,5 +161,5 @@ type PolygonShapeData = BaseShapeData & {
 };
 
 type ContentTableElementData = {
-  title: string;
+  title?: string;
 };

@@ -14,7 +14,7 @@ export function addTableOfContentsToDocument(document: BoardDocument): void {
     (element) => element.type === EditorElementType.Heading,
   ).length;
 
-  const height = Math.max(6, 2 + headingCount * 2);
+  const height = Math.max(6, headingCount * 2);
 
   document.content.elements.push({
     id: `toc-${Date.now()}`,
@@ -28,8 +28,6 @@ export function addTableOfContentsToDocument(document: BoardDocument): void {
     style: {
       visible: true,
     },
-    data: {
-      title: 'Inhaltsverzeichnis',
-    },
+    data: {},
   });
 }

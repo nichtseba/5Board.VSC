@@ -85,6 +85,9 @@
         "colorTheme": "Theme",
         "customColor": "Eigene Farbe",
         "backgroundColor": "Hintergrundfarbe"
+      },
+      "contentTableSettings": {
+        "title": "Inhaltsverzeichnis"
       }
     }
   }

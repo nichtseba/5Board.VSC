@@ -1,9 +1,20 @@
 import { EditorElement, EditorElementType } from '5board.vsc-common';
+import SettingsPanel from '../layout/SettingsPanel';
+import { useLocalization } from '../../../providers/LocalizationProvider';
 
 type Props = {
   element: EditorElement<EditorElementType.ContentTable>;
 };
 
-export function ContentTableSettings({ element }: Props) {
-  return <div>Add settings for {element.id}</div>;
+export function ContentTableSettings({}: Props) {
+  const { t } = useLocalization();
+
+  return (
+    <SettingsPanel
+      title={t('webview.sidebar-element-settings.contentTableSettings.title')}
+      icon="list-unordered"
+    >
+      <></>
+    </SettingsPanel>
+  );
 }
