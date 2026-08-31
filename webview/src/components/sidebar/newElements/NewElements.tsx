@@ -1,15 +1,17 @@
 import { EditorElementType, EditorTool, EditorToolId } from '5board.vsc-common';
 import { Button } from 'vscrui';
 import SidebarSection from '../layout/SidebarSection';
+import { useLocalization } from '../../../providers/LocalizationProvider';
 
 export type newElementProps = {
   handleToolClick: (tool: EditorTool) => void;
 };
 
 export function NewElements({ handleToolClick }: newElementProps) {
+  const { t } = useLocalization();
   return (
     <>
-      <SidebarSection title="Add Element">
+      <SidebarSection title={t('webview.sidebar.addElement')}>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3">
           {Object.values(EditorElementType).map((type) => (
             <Button

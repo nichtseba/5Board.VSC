@@ -21,7 +21,9 @@
         "spacer": "Abstand-Tool",
         "freehand": "Freihand-Tool",
         "addElement": "Element hinzufügen"
-      }
+      },
+      "addElement": "Element hinzufügen",
+      "addCustomElement": "Custom Element hinzufügen"
     },
     "sidebar-element-settings": {
       "noElementSelected": "Kein Element ausgewählt",

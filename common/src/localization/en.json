@@ -21,7 +21,9 @@
         "spacer": "Spacer Tool",
         "freehand": "Freehand Tool",
         "addElement": "Add Element"
-      }
+      },
+      "addElement": "Add Element",
+      "addCustomElement": "Add Custom Element"
     },
     "sidebar-element-settings": {
       "noElementSelected": "No element selected",
