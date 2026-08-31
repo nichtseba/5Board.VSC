@@ -161,8 +161,14 @@ type PolygonShapeData = BaseShapeData & {
 /**
  * All Editor Element Defaults when creating a new element
  */
-export type AddElementPlacementMode = 'free' | 'fullRow';
-export type ElementCategory = 'basic' | 'special';
+export type AddElementPlacementMode = 'free' | 'fullRow' | 'fixed' | 'custom';
+export type ElementCategory = 'basic' | 'custom';
+
+export type AddElementDefaults<T extends EditorElementType = EditorElementType> = {
+  layout?: Partial<Omit<ElementLayout, 'xPos' | 'yPos'>>;
+  style?: Partial<ElementStyle>;
+  data?: Partial<EditorElementDataMap[T]>;
+};
 
 export type ElementTypeDefinition<T extends EditorElementType = EditorElementType> = {
   label: string;
@@ -232,19 +238,19 @@ export const ELEMENT_TYPE_DEFINITIONS = {
   },
   [EditorElementType.Image]: {
     label: 'Image',
-    category: 'special',
+    category: 'basic',
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Image],
   },
   [EditorElementType.Shape]: {
     label: 'Shape',
-    category: 'special',
+    category: 'basic',
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Shape],
   },
   [EditorElementType.Arrow]: {
     label: 'Arrow',
-    category: 'special',
+    category: 'basic',
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Arrow],
   },
@@ -262,8 +268,6 @@ export function getBasicElementTypes() {
   ) as [EditorElementType, (typeof ELEMENT_TYPE_DEFINITIONS)[EditorElementType]][];
 }
 
-export function getSpecialElementTypes() {
-  return Object.entries(ELEMENT_TYPE_DEFINITIONS).filter(
-    ([, definition]) => definition.category === 'special',
-  ) as [EditorElementType, (typeof ELEMENT_TYPE_DEFINITIONS)[EditorElementType]][];
+export function getCustomElementTypes(): [] {
+  return [];
 }

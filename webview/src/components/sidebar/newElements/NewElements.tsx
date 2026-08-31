@@ -27,7 +27,6 @@ export function NewElements({ handleToolClick }: newElementProps) {
                   parameters: {
                     type,
                     placementMode: definition.placement,
-                    custom: false,
                   },
                 })
               }

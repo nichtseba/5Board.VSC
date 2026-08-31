@@ -1,4 +1,9 @@
-import { EditorElement, TranslationKey } from './main';
+import {
+  AddElementDefaults,
+  AddElementPlacementMode,
+  EditorElementType,
+  TranslationKey,
+} from './main';
 
 export enum EditorToolId {
   POINTER = 'pointer',
@@ -42,24 +47,22 @@ type TYPE_TOOL_PARAMETERS = {
 
 type FreehandToolParameters = unknown;
 
-export type AddElementToolParameters = {
-  type: EditorElement['type'];
-  layout?: Omit<EditorElement['layout'], 'xPos' | 'yPos'>;
-  style?: EditorElement['style'];
-  data?: EditorElement['data'];
-  placementMode?: 'free' | 'fullRow';
-  custom?: boolean;
+export type AddElementToolParameters<T extends EditorElementType = EditorElementType> = {
+  type: T;
+  placementMode?: AddElementPlacementMode;
+  defaults?: AddElementDefaults<T>;
 };
 
-export function createAddElementTool(
-  type: EditorElement['type'],
+export function createAddElementTool<T extends EditorElementType>(
+  type: T,
+  overrides: Partial<AddElementToolParameters<T>> = {},
 ): EditorTool<EditorToolId.AddElement> {
   return {
     type: EditorToolId.AddElement,
     parameters: {
       type,
       placementMode: 'free',
-      custom: false,
+      ...overrides,
     },
   };
 }
