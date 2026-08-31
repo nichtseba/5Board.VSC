@@ -42,12 +42,27 @@ type TYPE_TOOL_PARAMETERS = {
 
 type FreehandToolParameters = unknown;
 
-type AddElementToolParameters = {
+export type AddElementToolParameters = {
   type: EditorElement['type'];
   layout?: Omit<EditorElement['layout'], 'xPos' | 'yPos'>;
   style?: EditorElement['style'];
   data?: EditorElement['data'];
+  placementMode?: 'free' | 'fullRow';
+  custom?: boolean;
 };
+
+export function createAddElementTool(
+  type: EditorElement['type'],
+): EditorTool<EditorToolId.AddElement> {
+  return {
+    type: EditorToolId.AddElement,
+    parameters: {
+      type,
+      placementMode: 'free',
+      custom: false,
+    },
+  };
+}
 
 export type EditorTool<EditorToolType extends EditorToolId = EditorToolId> = {
   type: EditorToolType;

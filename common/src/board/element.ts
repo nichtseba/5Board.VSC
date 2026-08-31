@@ -161,6 +161,19 @@ type PolygonShapeData = BaseShapeData & {
 /**
  * All Editor Element Defaults when creating a new element
  */
+export type AddElementPlacementMode = 'free' | 'fullRow';
+export type ElementCategory = 'basic' | 'special';
+
+export type ElementTypeDefinition<T extends EditorElementType = EditorElementType> = {
+  label: string;
+  category: ElementCategory;
+  placement: AddElementPlacementMode;
+  profile: {
+    layout: Omit<ElementLayout, 'xPos' | 'yPos'>;
+    data: EditorElementDataMap[T];
+  };
+};
+
 export const DEFAULT_ELEMENT_PROFILES = {
   [EditorElementType.Heading]: {
     layout: { width: 40, height: 2 },
@@ -197,3 +210,60 @@ export const DEFAULT_ELEMENT_PROFILES = {
     data: EditorElementDataMap[K];
   };
 };
+
+export const ELEMENT_TYPE_DEFINITIONS = {
+  [EditorElementType.Heading]: {
+    label: 'Heading',
+    category: 'basic',
+    placement: 'fullRow',
+    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Heading],
+  },
+  [EditorElementType.Text]: {
+    label: 'Text',
+    category: 'basic',
+    placement: 'free',
+    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Text],
+  },
+  [EditorElementType.Code]: {
+    label: 'Code',
+    category: 'basic',
+    placement: 'fullRow',
+    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Code],
+  },
+  [EditorElementType.Image]: {
+    label: 'Image',
+    category: 'special',
+    placement: 'free',
+    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Image],
+  },
+  [EditorElementType.Shape]: {
+    label: 'Shape',
+    category: 'special',
+    placement: 'free',
+    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Shape],
+  },
+  [EditorElementType.Arrow]: {
+    label: 'Arrow',
+    category: 'special',
+    placement: 'free',
+    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Arrow],
+  },
+} as const satisfies {
+  [K in EditorElementType]: ElementTypeDefinition<K>;
+};
+
+export function getElementTypeDefinition<T extends EditorElementType>(type: T) {
+  return ELEMENT_TYPE_DEFINITIONS[type];
+}
+
+export function getBasicElementTypes() {
+  return Object.entries(ELEMENT_TYPE_DEFINITIONS).filter(
+    ([, definition]) => definition.category === 'basic',
+  ) as [EditorElementType, (typeof ELEMENT_TYPE_DEFINITIONS)[EditorElementType]][];
+}
+
+export function getSpecialElementTypes() {
+  return Object.entries(ELEMENT_TYPE_DEFINITIONS).filter(
+    ([, definition]) => definition.category === 'special',
+  ) as [EditorElementType, (typeof ELEMENT_TYPE_DEFINITIONS)[EditorElementType]][];
+}

@@ -4,10 +4,10 @@ import { useMessageService } from '../../../../services/MessageService';
 import { useGrid } from '../../../../providers/GridProvider';
 import {
   DEFAULT_ELEMENT_PROFILES,
-  EditorElementType,
   EditorTool,
   EditorToolId,
   ElementLayout,
+  getElementTypeDefinition,
 } from '5board.vsc-common';
 import AddOverlay from './AddOverlay';
 import { useEditorState } from '../../../../providers/EditorStateProvider';
@@ -31,25 +31,43 @@ export default function AddTool() {
   const editorState = useEditorState();
 
   const elementType = (editorState.tool as EditorTool<EditorToolId.AddElement>).parameters?.type;
+  const definition = elementType ? getElementTypeDefinition(elementType) : null;
+  const elementWidth = elementType ? DEFAULT_ELEMENT_PROFILES[elementType].layout.width : 1;
+  const elementHeight = elementType ? DEFAULT_ELEMENT_PROFILES[elementType].layout.height : 1;
+  const canvas = document.querySelector('.editor-canvas') as HTMLElement | null;
+
   const initialPosition = {
     xPos: 0,
-    yPos: Math.floor((window.innerHeight / 2 - metrics.top) / cellSize.height),
+    yPos: Math.max(
+      0,
+      Math.floor(
+        (window.innerHeight / 2 - metrics.top + (canvas?.scrollTop ?? 0)) / cellSize.height,
+      ),
+    ),
   };
-  const elementWidth = DEFAULT_ELEMENT_PROFILES[elementType].layout.width;
-  const elementHeight = DEFAULT_ELEMENT_PROFILES[elementType].layout.height;
+
   const [overlayState, setOverlayState] = useState<OverlayState | null>(initialPosition);
 
   const getGridPosition = (clientX: number, clientY: number) => {
-    const xPos = Math.max(0, Math.floor((clientX - metrics.left) / cellSize.width));
-    const yPos = Math.max(0, Math.floor((clientY - metrics.top) / cellSize.height));
+    const rect = canvas?.getBoundingClientRect();
+    const relativeX = clientX - (rect?.left ?? metrics.left);
+    const relativeY = clientY - (rect?.top ?? metrics.top);
+    const scrollLeft = canvas?.scrollLeft ?? 0;
+    const scrollTop = canvas?.scrollTop ?? 0;
+
+    const xPos = Math.max(0, Math.floor((relativeX + scrollLeft) / cellSize.width));
+    const yPos = Math.max(0, Math.floor((relativeY + scrollTop) / cellSize.height));
 
     return { xPos, yPos };
   };
 
   const applyAddConstraints = (layout: ElementLayout): ElementLayout => {
-    switch (elementType) {
-      case EditorElementType.Heading:
-      case EditorElementType.Code:
+    if (!definition) {
+      return layout;
+    }
+
+    switch (definition.placement) {
+      case 'fullRow':
         return {
           ...layout,
           xPos: 0,
@@ -64,6 +82,10 @@ export default function AddTool() {
     useMemo(
       () => ({
         pointerMove: (event) => {
+          if (!elementType) {
+            return;
+          }
+
           const raw = getGridPosition(event.clientX, event.clientY);
 
           const preview = applyAddConstraints({
@@ -75,6 +97,10 @@ export default function AddTool() {
         },
 
         pointerDown: (event) => {
+          if (!elementType) {
+            return;
+          }
+
           const position = getGridPosition(event.clientX, event.clientY);
           const preview = applyAddConstraints({
             ...position,
@@ -88,11 +114,11 @@ export default function AddTool() {
           });
         },
       }),
-      [messages, metrics, cellSize],
+      [messages, metrics, cellSize, elementType, elementWidth, elementHeight, definition],
     ),
   );
 
-  if (!overlayState) {
+  if (!overlayState || !elementType) {
     return null;
   }
 
