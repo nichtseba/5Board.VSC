@@ -62,7 +62,28 @@
       "selectedElement": "Selected Element",
       "headingSettings": {
         "title": "Heading",
-        "levelLabel": "Hierarchy level"
+        "levelLabel": "Hierarchy level",
+        "numberingLabel": "Numbering",
+        "numberingEnabled": "Enable numbering",
+        "numberingNone": "No numbers",
+        "numberingDecimal": "Numbers",
+        "numberingLowerAlpha": "Alphabetic lowercase",
+        "numberingUpperAlpha": "Alphabetic uppercase",
+        "numberingLowerRoman": "Roman lowercase",
+        "numberingUpperRoman": "Roman uppercase",
+        "fontFamily": "Font family",
+        "fontFamilyPlaceholder": "Default font",
+        "fontSize": "Font size",
+        "fontSizeDecrease": "Decrease font size by 1",
+        "fontSizeIncrease": "Increase font size by 1",
+        "textStyle": "Text style",
+        "bold": "Bold",
+        "italic": "Italic",
+        "underline": "Underline",
+        "color": "Text color",
+        "colorTheme": "Theme",
+        "customColor": "Custom color",
+        "backgroundColor": "Background color"
       }
     }
   }

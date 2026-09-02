@@ -1,4 +1,5 @@
 import { BoardDocument } from './board/document';
+import { HeadingLevel, HeadingLevelSettings, HeadingNumberingStyle } from './board/headingSettings';
 import { Language } from './localization';
 import { EditorElement, EditorState, EditorTool, ElementLayout } from './main';
 import { ProjectorPointerStyle } from './projector';
@@ -58,4 +59,15 @@ type AllWebviewToExtensionMessage =
   | {
       type: 'updateViewport';
       viewport: { top: number; left: number; height: number; width: number };
+    }
+  | {
+      type: 'updateHeadingLevelSettings';
+      level: HeadingLevel;
+      changes: HeadingLevelSettings;
+    }
+  | {
+      type: 'updateHeadingNumbering';
+      enabled?: boolean;
+      level?: HeadingLevel;
+      numberingFormat?: HeadingNumberingStyle;
     };
