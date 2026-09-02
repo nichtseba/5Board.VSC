@@ -173,7 +173,6 @@
   },
   "dependencies": {
     "5board.vsc-common": "link:../common",
-    "clean": "^4.0.2",
     "jszip": "^3.10.1"
   }
 }
