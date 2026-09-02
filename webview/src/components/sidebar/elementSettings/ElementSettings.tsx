@@ -4,9 +4,10 @@ import { HeadingSettings } from './HeadingSettings';
 import { TextSettings } from './TextSettings';
 import { CodeSettings } from './CodeSettings';
 import { ImageSettings } from './ImageSettings';
-import { ShapeSettings } from './ShapeSettings';
-import { ArrowSettings } from './ArrowSettings';
+import { LineSettings } from './LineSettings';
 import { useLocalization } from '../../../providers/LocalizationProvider';
+import { RectangleSettings } from './RectangleSettings';
+import { CircleSettings } from './CircleSettings';
 
 type SettingsProps<T extends EditorElementType> = {
   element: EditorElement<T>;
@@ -43,6 +44,7 @@ const SETTINGS_COMPONENTS: {
   [EditorElementType.Text]: TextSettings,
   [EditorElementType.Code]: CodeSettings,
   [EditorElementType.Image]: ImageSettings,
-  [EditorElementType.Shape]: ShapeSettings,
-  [EditorElementType.Arrow]: ArrowSettings
+  [EditorElementType.Rectangle]: RectangleSettings,
+  [EditorElementType.Circle]: CircleSettings,
+  [EditorElementType.Line]: LineSettings,
 };

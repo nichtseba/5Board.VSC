@@ -38,8 +38,9 @@
         "text": "Text",
         "code": "Code",
         "image": "Image",
-        "shape": "Shape",
-        "arrow": "Arrow"
+        "rectangle": "Rectangle",
+        "circle": "Circle",
+        "line": "Line"
       },
       "projectorSettings": {
         "title": "Projector Settings",

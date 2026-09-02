@@ -5,8 +5,9 @@ export enum EditorElementType {
   Text = 'text',
   Code = 'code',
   Image = 'image',
-  Shape = 'shape',
-  Arrow = 'arrow',
+  Rectangle = 'rectangle',
+  Circle = 'circle',
+  Line = 'line',
 }
 
 /**
@@ -57,8 +58,9 @@ export type EditorElementDataMap = {
   [EditorElementType.Text]: TextElementData;
   [EditorElementType.Code]: CodeElementData;
   [EditorElementType.Image]: ImageElementData;
-  [EditorElementType.Shape]: ShapeElementData;
-  [EditorElementType.Arrow]: ArrowElementData;
+  [EditorElementType.Rectangle]: undefined; // No need for extra data
+  [EditorElementType.Circle]: undefined; // No need for extra data
+  [EditorElementType.Line]: LineElementData;
 };
 
 export type HeadingElementData = {
@@ -114,50 +116,13 @@ export type CropData = {
   cropHeight: number;
 };
 
-export type ArrowElementData = {
+export type LineElementData = {
   headTypeStart?: 'none' | 'arrow' | 'circle' | 'square';
   headTypeEnd?: 'none' | 'arrow' | 'circle' | 'square';
   headSize?: number;
   headFill?: boolean;
-  points: { x: number; y: number }[]; // Start and end points for the arrow
+  points: { x: number; y: number }[]; // Start and end points for the line
 };
-
-export type ShapeElementData =
-  | RectangleShapeData
-  | EllipseShapeData
-  | LineShapeData
-  | PolygonShapeData;
-
-type Point = { x: number; y: number };
-
-type BaseShapeData = {
-  fillColor?: string;
-  strokeColor?: string;
-  strokeWidth?: number;
-  shapeType: 'rectangle' | 'ellipse' | 'line' | 'polygon';
-};
-
-type RectangleShapeData = BaseShapeData & {
-  shapeType: 'rectangle';
-  radius?: number;
-};
-
-type EllipseShapeData = BaseShapeData & {
-  shapeType: 'ellipse';
-  rx: number;
-  ry: number;
-};
-
-type LineShapeData = BaseShapeData & {
-  shapeType: 'line';
-  points: [Point, Point];
-};
-
-type PolygonShapeData = BaseShapeData & {
-  shapeType: 'polygon';
-  points: Point[];
-};
-
 /**
  * All Editor Element Defaults when creating a new element
  */
@@ -197,11 +162,15 @@ export const DEFAULT_ELEMENT_PROFILES = {
     layout: { width: 20, height: 10 },
     data: { src: '', content: '', altText: 'Image' },
   },
-  [EditorElementType.Shape]: {
-    layout: { width: 8, height: 6 },
-    data: { shapeType: 'rectangle' },
+  [EditorElementType.Rectangle]: {
+    layout: { width: 20, height: 10 },
+    data: undefined,
   },
-  [EditorElementType.Arrow]: {
+  [EditorElementType.Circle]: {
+    layout: { width: 20, height: 10 },
+    data: undefined,
+  },
+  [EditorElementType.Line]: {
     layout: { width: 12, height: 4 },
     data: {
       points: [
@@ -242,17 +211,23 @@ export const ELEMENT_TYPE_DEFINITIONS = {
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Image],
   },
-  [EditorElementType.Shape]: {
-    label: 'Shape',
+  [EditorElementType.Rectangle]: {
+    label: 'Rectangle',
     category: 'basic',
     placement: 'free',
-    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Shape],
+    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Rectangle],
   },
-  [EditorElementType.Arrow]: {
-    label: 'Arrow',
+  [EditorElementType.Circle]: {
+    label: 'Circle',
     category: 'basic',
     placement: 'free',
-    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Arrow],
+    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Circle],
+  },
+  [EditorElementType.Line]: {
+    label: 'Line',
+    category: 'basic',
+    placement: 'free',
+    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Line],
   },
 } as const satisfies {
   [K in EditorElementType]: ElementTypeDefinition<K>;

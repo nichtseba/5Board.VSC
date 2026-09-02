@@ -39,8 +39,9 @@
         "text": "Text",
         "code": "Code",
         "image": "Bild",
-        "shape": "Form",
-        "arrow": "Pfeil"
+        "rectangle": "Rectangle",
+        "circle": "Circle",
+        "line": "Line"
       },
       "projectorSettings": {
         "title": "Beameransicht-Einstellungen",

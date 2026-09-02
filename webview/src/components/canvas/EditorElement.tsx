@@ -6,10 +6,11 @@ import { HeadingElement } from './elements/HeadingElement';
 import ElementInteractionController from './elementInteraction/ElementInteractionController';
 import { CodeElement } from './elements/CodeElement';
 import { ImageElement } from './elements/ImageElement';
-import { ShapeElement } from './elements/ShapeElement';
-import { ArrowElement } from './elements/ArrowElement';
+import { LineElement } from './elements/LineElement';
 import { useEditorState } from '../../providers/EditorStateProvider';
 import { useMessageService } from '../../services/MessageService';
+import { RectangleElement } from './elements/RectangleElement';
+import { CircleElement } from './elements/CircleElement';
 
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
@@ -110,8 +111,9 @@ const ELEMENT_COMPONENTS = {
   [EditorElementType.Text]: TextElement,
   [EditorElementType.Code]: CodeElement,
   [EditorElementType.Image]: ImageElement,
-  [EditorElementType.Shape]: ShapeElement,
-  [EditorElementType.Arrow]: ArrowElement,
+  [EditorElementType.Rectangle]: RectangleElement,
+  [EditorElementType.Circle]: CircleElement,
+  [EditorElementType.Line]: LineElement,
 } as const satisfies {
   [ElementType in EditorElementType]: React.ComponentType<EditorElementProps<ElementType>>;
 };
