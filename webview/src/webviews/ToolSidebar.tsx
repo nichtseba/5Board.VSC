@@ -23,8 +23,8 @@ export default function ToolSidebar() {
   const tools = Object.entries(TOOL_DEFINITIONS) as [EditorToolId, EditorToolDefinition][];
 
   useEffect(() => {
-    messages.send({ type: 'ready' });
-  }, []);
+    messages.send({ type: 'ready' }); // request current projector settings state
+  }, [messages]);
 
   const handleToolClick = (tool: EditorTool) => {
     if (tool.type === selectedTool?.type) return;

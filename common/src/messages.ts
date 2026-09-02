@@ -1,6 +1,7 @@
 import { BoardDocument } from './board/document';
 import { Language } from './localization';
 import { EditorElement, EditorElementType, EditorState, EditorTool, ElementLayout } from './main';
+import { ProjectorPointerStyle } from './projector';
 
 /**
  * Messages from the extension to webviews
@@ -17,7 +18,19 @@ type AllExtensionToWebviewMessage =
   | { type: 'updateDocument'; document: BoardDocument }
   | { type: 'init'; document: BoardDocument; editorState: EditorState; language: Language }
   | { type: 'initSidebar'; document: BoardDocument; editorState: EditorState }
-  | { type: 'updateEditorState'; editorState: EditorState };
+  | { type: 'updateEditorState'; editorState: EditorState }
+  | { type: 'cursorMove'; x: number; y: number }
+  | { type: 'cursorHide' }
+  | { type: 'cursorTrackingChanged'; enabled: boolean }
+  | { type: 'projectorStateChanged'; active: boolean; open: boolean }
+  | { type: 'projectorPointerChanged'; style: ProjectorPointerStyle }
+  | { type: 'scroll'; top: number; left: number }
+  | { type: 'selectElement'; elementId: string | null }
+  | {
+      type: 'viewportUpdate';
+      viewport: { top: number; left: number; height: number; width: number };
+    }
+  | { type: 'goToElement'; elementId: string };
 
 /**
  * Messages from the webviews to the extension
@@ -33,6 +46,9 @@ export type WebviewToExtensionMessageType = AllWebviewToExtensionMessage['type']
 type AllWebviewToExtensionMessage =
   | { type: 'ready' }
   | { type: 'focus'; focus: boolean }
+  | { type: 'cursorMove'; x: number; y: number }
+  | { type: 'cursorLeave' }
+  | { type: 'scroll'; top: number; left: number }
   | { type: 'selectElement'; id: string | null }
   | { type: 'selectTool'; tool: EditorTool }
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
@@ -43,4 +59,10 @@ type AllWebviewToExtensionMessage =
     }
   | { type: 'deleteElement'; id: string }
   | { type: 'updateElementLayout'; id: string; changes: Partial<ElementLayout> } // Update the Layout when Element was moved or resized
-  | { type: 'updateElement'; id: string; changes: Partial<EditorElement> }; // Update element with it's settings
+  | { type: 'updateElement'; id: string; changes: Partial<EditorElement> } // Update element with it's settings
+  | { type: 'toggleCursorTracking' }
+  | { type: 'updateProjectorPointer'; style: ProjectorPointerStyle }
+  | {
+      type: 'updateViewport';
+      viewport: { top: number; left: number; height: number; width: number };
+    };
