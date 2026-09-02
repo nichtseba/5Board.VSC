@@ -61,7 +61,6 @@ export class DocumentMessageHandlers {
       //#endregion "General"
 
       //#region "EditorTools"
-
       this.document.messageService.on('insertSpacerRows', (msg) => {
         this.document.applyEdit((document) => {
           for (const element of document.content.elements) {
