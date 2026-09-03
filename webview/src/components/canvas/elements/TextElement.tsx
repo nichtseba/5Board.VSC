@@ -39,6 +39,12 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
       attributes: {
         class: 'outline-none focus:outline-none',
       },
+      handleDOMEvents: {
+        keydown: (_view, event) => {
+          event.stopPropagation();
+          return false;
+        },
+      },
     },
 
     onTransaction({ editor }) {
