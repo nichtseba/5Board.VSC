@@ -1,7 +1,7 @@
 import { EditorElement, EditorElementType } from '5board.vsc-common';
 import SettingsPanel from '../layout/SettingsPanel';
 import { useLocalization } from '../../../providers/LocalizationProvider';
-import { Dropdown } from 'vscrui';
+import { Divider, Dropdown } from 'vscrui';
 import { FontFamilyDropdown } from './components/FontFamilyDropdown';
 import SettingsField from '../layout/SettingsField';
 import {
@@ -67,7 +67,7 @@ export function TextSettings({ element }: Props) {
             value="schwarz"
           />
         </SettingsField>
-        <hr className="border-editor-sticky-scroll-shadow" />
+        <Divider />
         <SettingsField>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3 mt-4">
             <BoldButton element={element} />
@@ -77,7 +77,7 @@ export function TextSettings({ element }: Props) {
             <CodeButton element={element} />
           </div>
         </SettingsField>
-        <hr className="border-editor-sticky-scroll-shadow" />
+        <Divider />
         <SettingsField>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3 mt-4">
             <AlignLeftButton element={element} />
