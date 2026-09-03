@@ -1,4 +1,8 @@
-import { EditorElement, EditorElementType } from '5board.vsc-common';
+import {
+  EditorElement,
+  EditorElementType,
+  PROJECTOR_POINTER_PRESET_COLORS,
+} from '5board.vsc-common';
 import SettingsPanel from '../layout/SettingsPanel';
 import { useLocalization } from '../../../providers/LocalizationProvider';
 import { Divider, Dropdown } from 'vscrui';
@@ -16,6 +20,7 @@ import {
   UnderlineButton,
 } from './components/TextSettingsButton';
 import { useMessageService } from '../../../services/MessageService';
+import ColorSelector from '../components/ColorSelector';
 
 type Props = {
   element: EditorElement<EditorElementType.Text>;
@@ -54,17 +59,33 @@ export function TextSettings({ element }: Props) {
             ]}
             value="11"
           />
-          <Dropdown
-            options={[
-              { value: 'schwarz', label: 'schwarz' },
-              { value: 'rot', label: 'rot' },
-              { value: 'gelb', label: 'gelb' },
-              { value: 'grün', label: 'grün' },
-              { value: 'blau', label: 'blau' },
-              { value: 'orange', label: 'orange' },
-              { value: 'lila', label: 'lila' },
-            ]}
-            value="schwarz"
+          <ColorSelector
+            color={element.data.tiptap?.marks?.textStyle?.color}
+            onChange={(color) => {
+              messages.send({
+                type: 'textEditorCommand',
+                command: {
+                  type: 'setTextColor',
+                  color,
+                },
+              });
+            }}
+            presets={PROJECTOR_POINTER_PRESET_COLORS}
+            label={t('webview.sidebar-element-settings.textSettings.textColor')}
+            customColorLabel={t('webview.sidebar.projectorSettings.customColor')}
+          />
+          <ColorSelector
+            color={element.style.backgroundColor}
+            onChange={(color) => {
+              messages.send({
+                type: 'updateElement',
+                id: element.id,
+                changes: { style: { ...element.style, backgroundColor: color } },
+              });
+            }}
+            presets={PROJECTOR_POINTER_PRESET_COLORS}
+            label={t('webview.sidebar-element-settings.textSettings.backgroundColor')}
+            customColorLabel={t('webview.sidebar.projectorSettings.customColor')}
           />
         </SettingsField>
         <Divider />

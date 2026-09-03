@@ -65,7 +65,9 @@
         "levelLabel": "Hierarchiestufe"
       },
       "textSettings": {
-        "title": "Text"
+        "title": "Text",
+        "textColor": "Textfarbe",
+        "backgroundColor": "Hintergrundfarbe"
       }
     }
   }

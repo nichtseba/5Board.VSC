@@ -85,7 +85,10 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
                 link: editor.isActive('link'),
                 strike: editor.isActive('strike'),
                 underline: editor.isActive('underline'),
-                textStyle: { fontFamily: editor.getAttributes('textStyle').fontFamily },
+                textStyle: {
+                  fontFamily: editor.getAttributes('textStyle').fontFamily,
+                  color: editor.getAttributes('textStyle').color,
+                },
               },
               nodes: {
                 attributes: {
@@ -136,6 +139,8 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
       case 'setFontFamily':
         editor.chain().focus().setFontFamily(msg.command.font).run();
         break;
+      case 'setTextColor':
+        editor.chain().focus().setColor(msg.command.color).run();
     }
   });
 

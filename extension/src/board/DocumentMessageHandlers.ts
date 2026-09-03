@@ -112,7 +112,16 @@ export class DocumentMessageHandlers {
             ...msg.changes.layout,
           };
 
-          if (deepEquals(nextData, element.data) && deepEquals(nextLayout, element.layout)) {
+          const nextStyle = {
+            ...element.style,
+            ...msg.changes.style,
+          };
+
+          if (
+            deepEquals(nextData, element.data) &&
+            deepEquals(nextLayout, element.layout) &&
+            deepEquals(nextStyle, element.style)
+          ) {
             console.log("Skipping updateElement message because the data hasn't changed");
             return false;
           }
@@ -131,6 +140,10 @@ export class DocumentMessageHandlers {
               data: {
                 ...el.data,
                 ...msg.changes.data,
+              },
+              style: {
+                ...el.style,
+                ...msg.changes.style,
               },
             };
           });
