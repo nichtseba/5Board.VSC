@@ -3,38 +3,64 @@ import { Dropdown } from 'vscrui';
 type Props = {
   value?: string;
   onChange?: (font: string) => void;
+  label?: string;
 };
 
-export function FontFamilyDropdown({ value, onChange }: Props) {
+export function FontFamilyDropdown({ value, onChange, label }: Props) {
   return (
-    <Dropdown
-      options={fonts}
-      value={value}
-      onChange={(value) => {
-        if (!value) {
-          return;
-        }
+    <>
+      {label && <span className="text-foreground-description">{label}</span>}
+      <Dropdown
+        options={fonts}
+        value={value}
+        onChange={(value) => {
+          if (!value) {
+            return;
+          }
 
-        onChange?.(typeof value === 'string' ? value : value.value);
-      }}
-    />
+          onChange?.(typeof value === 'string' ? value : value.value);
+        }}
+      />
+    </>
   );
 }
 
 const fonts = [
   {
-    value: 'inter',
-    label: 'Inter',
-    family: 'Inter',
-    hint: 'UI sans',
-    category: 'sans-serif',
+    value: 'default',
+    label: 'Default',
     default: true,
+  },
+  {
+    value: 'arial',
+    label: 'Arial',
+  },
+  {
+    value: 'courier new',
+    label: 'Courier New',
   },
   {
     value: 'georgia',
     label: 'Georgia',
-    family: 'Georgia, serif',
-    hint: 'Serif',
-    category: 'serif',
+  },
+  {
+    value: 'helvetica',
+    label: 'Helvetica',
+  },
+  {
+    value: 'inter',
+    label: 'Inter',
+  },
+  {
+    value: 'monospace',
+    label: 'Monospace',
+  },
+  {
+    value: 'times new roman',
+    label: 'Times New Roman',
+  },
+  {
+    value: 'verdana',
+    label: 'Verdana',
   },
 ];

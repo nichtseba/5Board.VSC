@@ -36,7 +36,7 @@ export function TextSettings({ element }: Props) {
       >
         <SettingsField>
           <FontFamilyDropdown
-            value={element.data.tiptap?.marks?.textStyle?.fontFamily ?? 'inter'}
+            value={element.data.tiptap?.marks?.textStyle?.fontFamily ?? 'default'}
             onChange={(font) => {
               messages.send({
                 type: 'textEditorCommand',

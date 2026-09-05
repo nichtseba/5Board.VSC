@@ -137,7 +137,12 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
         break;
 
       case 'setFontFamily':
-        editor.chain().focus().setFontFamily(msg.command.font).run();
+        if (msg.command.font === 'default') {
+          editor.chain().focus().unsetFontFamily().run();
+        } else {
+          editor.chain().focus().setFontFamily(msg.command.font).run();
+        }
+
         break;
       case 'setTextColor':
         editor.chain().focus().setColor(msg.command.color).run();
