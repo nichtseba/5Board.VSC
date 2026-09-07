@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { EditorElement, EditorElementType, EditorToolId } from '5board.vsc-common';
 import type React from 'react';
 import { TextElement } from './elements/TextElement';
@@ -14,7 +14,10 @@ import { useMessageService } from '../../services/MessageService';
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
   selected?: boolean;
+  editing?: boolean;
   onSelect?: () => void;
+  onStartEditing?: () => void;
+  onStopEditing?: () => void;
   targetRef?: React.RefObject<HTMLDivElement>;
 };
 
@@ -29,6 +32,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
   selected,
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
+  const [editing, setEditing] = useState(false);
   const ElementComponent =
     (ELEMENT_COMPONENTS[element.type] as React.ComponentType<EditorElementProps<ElementType>>) ??
     UnknownElement;
@@ -44,11 +48,30 @@ export default function EditorElement<ElementType extends EditorElementType>({
     });
   };
 
+  const handleDoubleClick = () => {
+    if (element.type !== EditorElementType.Text) {
+      return;
+    }
+
+    setEditing(true);
+  };
+
+  const handleStopEditing = () => {
+    setEditing(false);
+  };
+
+  useEffect(() => {
+    if (!selected) {
+      setEditing(false);
+    }
+  }, [selected]);
+
   return (
     <>
       <div
         id={element.id}
         onClick={() => handleSelectElement(element.id)}
+        onDoubleClick={handleDoubleClick}
         className={`
           box-border font-bold overflow-hidden
           ${activeToolId === EditorToolId.POINTER ? 'cursor-pointer' : ''}
@@ -72,11 +95,18 @@ export default function EditorElement<ElementType extends EditorElementType>({
           element={element}
           targetRef={targetRef}
           selected={selected}
+          editing={editing}
           onSelect={() => handleSelectElement(element.id)}
+          onStartEditing={() => setEditing(true)}
+          onStopEditing={handleStopEditing}
         />
       </div>
       {activeToolId === EditorToolId.POINTER && (
-        <ElementInteractionController element={element} selected={selected} targetRef={targetRef} />
+        <ElementInteractionController
+          element={element}
+          selected={selected && !editing}
+          targetRef={targetRef}
+        />
       )}
     </>
   );

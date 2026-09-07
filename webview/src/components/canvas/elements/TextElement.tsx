@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { EditorElementType } from '5board.vsc-common';
 import { EditorElementProps } from '../EditorElement';
 import { useEditor, EditorContent } from '@tiptap/react';
@@ -18,11 +19,17 @@ import {
 /**
  * Renders a text element.
  */
-export function TextElement({ element }: EditorElementProps<EditorElementType.Text>) {
+export function TextElement({
+  element,
+  editing = false,
+  onStopEditing,
+}: EditorElementProps<EditorElementType.Text>) {
   const messages = useMessageService();
   const grid = useGrid();
 
   const editor = useEditor({
+    editable: editing,
+
     extensions: [
       StarterKit.configure({
         heading: false, //heading has it's own ElementType
@@ -41,6 +48,12 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
       },
       handleDOMEvents: {
         keydown: (_view, event) => {
+          if (event.key === 'Escape' && editing) {
+            event.preventDefault();
+            onStopEditing?.();
+            return true;
+          }
+
           event.stopPropagation();
           return false;
         },
@@ -101,6 +114,19 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
       });
     },
   });
+  useEffect(() => {
+    if (!editor) {
+      return;
+    }
+
+    editor.setEditable(editing);
+
+    if (editing) {
+      requestAnimationFrame(() => {
+        editor.commands.focus('end');
+      });
+    }
+  }, [editor, editing]);
 
   useOnMessage((msg) => {
     if (msg.type !== 'textEditorCommand') {
@@ -152,13 +178,15 @@ export function TextElement({ element }: EditorElementProps<EditorElementType.Te
   return (
     <>
       <EditorContent editor={editor} />
-      <BubbleMenu editor={editor}>
-        <BoldButton element={element} />
-        <ItalicButton element={element} />
-        <StrikeButton element={element} />
-        <UnderlineButton element={element} />
-        <CodeButton element={element} />
-      </BubbleMenu>
+      {editing && (
+        <BubbleMenu editor={editor}>
+          <BoldButton element={element} />
+          <ItalicButton element={element} />
+          <StrikeButton element={element} />
+          <UnderlineButton element={element} />
+          <CodeButton element={element} />
+        </BubbleMenu>
+      )}
     </>
   );
 }
