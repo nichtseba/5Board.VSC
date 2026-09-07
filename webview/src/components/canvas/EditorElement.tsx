@@ -15,8 +15,11 @@ export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
   selected?: boolean;
   editing?: boolean;
+  editingPosition?: {
+    x: number;
+    y: number;
+  } | null;
   onSelect?: () => void;
-  onStartEditing?: () => void;
   onStopEditing?: () => void;
   targetRef?: React.RefObject<HTMLDivElement>;
 };
@@ -33,6 +36,10 @@ export default function EditorElement<ElementType extends EditorElementType>({
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
+  const [editingPosition, setEditingPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const ElementComponent =
     (ELEMENT_COMPONENTS[element.type] as React.ComponentType<EditorElementProps<ElementType>>) ??
     UnknownElement;
@@ -48,21 +55,26 @@ export default function EditorElement<ElementType extends EditorElementType>({
     });
   };
 
-  const handleDoubleClick = () => {
+  const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (element.type !== EditorElementType.Text) {
       return;
     }
-
+    setEditingPosition({
+      x: event.clientX,
+      y: event.clientY,
+    });
     setEditing(true);
   };
 
   const handleStopEditing = () => {
     setEditing(false);
+    setEditingPosition(null);
   };
 
   useEffect(() => {
     if (!selected) {
       setEditing(false);
+      setEditingPosition(null);
     }
   }, [selected]);
 
@@ -96,8 +108,8 @@ export default function EditorElement<ElementType extends EditorElementType>({
           targetRef={targetRef}
           selected={selected}
           editing={editing}
+          editingPosition={editingPosition}
           onSelect={() => handleSelectElement(element.id)}
-          onStartEditing={() => setEditing(true)}
           onStopEditing={handleStopEditing}
         />
       </div>

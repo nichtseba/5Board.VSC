@@ -22,6 +22,7 @@ import {
 export function TextElement({
   element,
   editing = false,
+  editingPosition,
   onStopEditing,
 }: EditorElementProps<EditorElementType.Text>) {
   const messages = useMessageService();
@@ -121,12 +122,24 @@ export function TextElement({
 
     editor.setEditable(editing);
 
-    if (editing) {
-      requestAnimationFrame(() => {
-        editor.commands.focus('end');
-      });
+    if (!editing || !editingPosition) {
+      return;
     }
-  }, [editor, editing]);
+
+    requestAnimationFrame(() => {
+      const position = editor.view.posAtCoords({
+        left: editingPosition.x,
+        top: editingPosition.y,
+      });
+      if (!position) {
+        editor.commands.focus();
+        return;
+      }
+
+      editor.commands.setTextSelection(position.pos);
+      editor.commands.focus();
+    });
+  }, [editor, editing, editingPosition]);
 
   useOnMessage((msg) => {
     if (msg.type !== 'textEditorCommand') {
