@@ -85,7 +85,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
         onClick={() => handleSelectElement(element.id)}
         onDoubleClick={handleDoubleClick}
         className={`
-          box-border font-bold overflow-hidden
+          box-border overflow-hidden
           ${activeToolId === EditorToolId.POINTER ? 'cursor-pointer' : ''}
           ${
             activeToolId === EditorToolId.POINTER && !selected

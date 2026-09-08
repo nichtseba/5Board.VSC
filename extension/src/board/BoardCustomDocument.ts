@@ -1,6 +1,6 @@
 import vscode from 'vscode';
 import { BoardPackage } from './package';
-import { BoardDocument } from '5board.vsc-common';
+import { BoardDocument, EditorElement } from '5board.vsc-common';
 import { MessageService } from '../MessageService';
 import { EXTENSION } from '../extension';
 import { DocumentMessageHandlers } from './DocumentMessageHandlers';
@@ -106,5 +106,16 @@ export class BoardCustomDocument implements vscode.CustomDocument {
       return true;
     }
     return false;
+  }
+
+  /** Merges changes into the data of the element with the given id and persists the edit. */
+  public updateElement(id: string, changes: Partial<EditorElement>): void {
+    this.applyEdit((document) => {
+      const element = document.content.elements.find((e) => e.id === id);
+      if (!element) return;
+      if (changes.data) {
+        element.data = { ...element.data, ...changes.data };
+      }
+    });
   }
 }
