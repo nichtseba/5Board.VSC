@@ -5,7 +5,7 @@ export type ColorPreset = {
 };
 
 type ColorPresetsProps = {
-  color: string;
+  color?: string;
   onChange: (color: string) => void;
   presets: readonly (string | ColorPreset)[];
 };

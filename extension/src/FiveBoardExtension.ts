@@ -129,9 +129,8 @@ export class FiveBoardExtension extends ExtensionBase {
     if (!this.activeEditorDocument) {
       return;
     }
-    if (this.activeEditorDocument.applyEdit(edit)) {
-      this.activeDocumentChange.fire(this.activeEditorDocument);
-    }
+    this.activeEditorDocument.applyEdit(edit);
+    this.activeDocumentChange.fire(this.activeEditorDocument);
   }
 
   @Command('5board-vsc.goToElement')
