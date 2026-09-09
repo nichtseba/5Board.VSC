@@ -7,5 +7,6 @@ export type TextEditorCommand =
   | { type: 'setTextAlign'; value: 'left' | 'center' | 'right' | 'justify' }
   | { type: 'setFontFamily'; font: string }
   | { type: 'setFontSize'; size: string }
+  | { type: 'setLineHeight'; height: string }
   | { type: 'setTextColor'; color: string }
   | { type: 'focus' };

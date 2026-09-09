@@ -102,6 +102,7 @@ export function TextElement({
                 textStyle: {
                   fontFamily: editor.getAttributes('textStyle').fontFamily,
                   fontSize: editor.getAttributes('textStyle').fontSize,
+                  lineHeight: editor.getAttributes('textStyle').lineHeight,
                   color: editor.getAttributes('textStyle').color,
                 },
               },
@@ -189,6 +190,10 @@ export function TextElement({
           .chain()
           .setFontSize(msg.command.size + 'px')
           .run();
+        break;
+
+      case 'setLineHeight':
+        editor.chain().focus().setLineHeight(msg.command.height).run();
         break;
 
       case 'setTextColor':

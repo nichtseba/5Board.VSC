@@ -5,7 +5,7 @@ import {
 } from '5board.vsc-common';
 import SettingsPanel from '../layout/SettingsPanel';
 import { useLocalization } from '../../../providers/LocalizationProvider';
-import { Divider } from 'vscrui';
+import { Divider, Dropdown } from 'vscrui';
 import { FontFamilyDropdown } from './components/FontFamilyDropdown';
 import SettingsField from '../layout/SettingsField';
 import {
@@ -38,19 +38,20 @@ export function TextSettings({ element }: Props) {
         icon="symbol-string"
       >
         <SettingsField>
-          <FontFamilyDropdown
-            value={element.data.tiptap?.marks?.textStyle?.fontFamily ?? 'default'}
-            onChange={(font) => {
-              messages.send({
-                type: 'textEditorCommand',
-                command: {
-                  type: 'setFontFamily',
-                  font,
-                },
-              });
-            }}
-          />
-          <SettingsField label={t('webview.sidebar-element-settings.textSettings.fontSize')} inline>
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <FontFamilyDropdown
+              value={element.data.tiptap?.marks?.textStyle?.fontFamily ?? 'default'}
+              onChange={(font) => {
+                messages.send({
+                  type: 'textEditorCommand',
+                  command: {
+                    type: 'setFontFamily',
+                    font,
+                  },
+                });
+              }}
+            />
+
             <FontSizeInput
               value={fontSizeValue}
               onChange={(size) => {
@@ -71,7 +72,27 @@ export function TextSettings({ element }: Props) {
                 });
               }}
             />
-          </SettingsField>
+
+            <Dropdown
+              title="Line Height"
+              options={['1.0', '1.15', '1.5', '2.0', '2.5', '3.0']}
+              className="w-max!"
+              value={element.data.tiptap?.marks?.textStyle?.lineHeight}
+              onChange={(height) => {
+                if (typeof height !== 'string') return;
+                messages.send({
+                  type: 'textEditorCommand',
+                  command: {
+                    type: 'setLineHeight',
+                    height,
+                  },
+                });
+              }}
+            />
+          </div>
+        </SettingsField>
+        <Divider />
+        <SettingsField>
           <ColorSelector
             color={element.data.tiptap?.marks?.textStyle?.color}
             onChange={(color) => {
