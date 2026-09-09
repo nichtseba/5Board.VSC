@@ -59,7 +59,8 @@
           "rectangle": "Rechteck",
           "duck": "Ente"
         }
-      }
+      },
+      "goToElement": "Gehe zu Element"
     },
     "sidebar-element-settings": {
       "noElementSelected": "Kein Element ausgewählt",
@@ -67,7 +68,28 @@
       "selectedElement": "Ausgewähltes Element",
       "headingSettings": {
         "title": "Überschrift",
-        "levelLabel": "Hierarchiestufe"
+        "levelLabel": "Hierarchiestufe",
+        "numberingLabel": "Nummerierung",
+        "numberingEnabled": "Nummerierung aktivieren",
+        "numberingNone": "Keine Zahlen",
+        "numberingDecimal": "Zahlen",
+        "numberingLowerAlpha": "Alphabetisch klein",
+        "numberingUpperAlpha": "Alphabetisch groß",
+        "numberingLowerRoman": "Römisch klein",
+        "numberingUpperRoman": "Römisch groß",
+        "fontFamily": "Schriftart",
+        "fontFamilyPlaceholder": "Standardschrift",
+        "fontSize": "Schriftgröße",
+        "fontSizeDecrease": "Schriftgröße um 1 kleiner machen",
+        "fontSizeIncrease": "Schriftgröße um 1 größer machen",
+        "textStyle": "Textstil",
+        "bold": "Fett",
+        "italic": "Kursiv",
+        "underline": "Unterstrichen",
+        "color": "Schriftfarbe",
+        "colorTheme": "Theme",
+        "customColor": "Eigene Farbe",
+        "backgroundColor": "Hintergrundfarbe"
       },
       "codeSettings": {
         "title": "Code",

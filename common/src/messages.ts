@@ -1,7 +1,12 @@
-import { BoardDocument } from './board/document';
-import { Language } from './localization';
-import { EditorElement, EditorState, EditorTool, ElementLayout } from './main';
-import { ProjectorPointerStyle } from './projector';
+import { BoardDocument } from './board/document.js';
+import {
+  HeadingLevel,
+  HeadingLevelSettings,
+  HeadingNumberingStyle,
+} from './board/headingSettings.js';
+import { Language } from './localization/index.js';
+import { EditorElement, EditorState, EditorTool, ElementLayout } from './main.js';
+import { ProjectorPointerStyle } from './projector.js';
 import { CodeExecutionOutput } from './board/element.js';
 
 /**
@@ -73,4 +78,15 @@ type AllWebviewToExtensionMessage =
       language: string;
       newName?: string;
       newLanguage?: string;
+    }
+  | {
+      type: 'updateHeadingLevelSettings';
+      level: HeadingLevel;
+      changes: HeadingLevelSettings;
+    }
+  | {
+      type: 'updateHeadingNumbering';
+      enabled?: boolean;
+      level?: HeadingLevel;
+      numberingFormat?: HeadingNumberingStyle;
     };

@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
-import { EditorToolId, ProjectorPointerStyle } from '5board.vsc-common';
+import { EditorToolId, ProjectorPointerStyle, computeHeadingNumbers } from '5board.vsc-common';
+import { useEffect, useMemo, useRef } from 'react';
 import EditorElement from './EditorElement';
+import { HeadingNumberingProvider } from './HeadingNumberingContext';
 import ProjectorMouse, { ProjectorCursor } from '../projector/ProjectorMouse';
 import './EditorCanvas.css';
 import { useEditorState } from '../../providers/EditorStateProvider';
@@ -18,12 +19,13 @@ export type EditorCanvasProps = {
 };
 
 export default function EditorCanvas({ cursor, pointerStyle }: EditorCanvasProps) {
-  // All pointer handl lives in one hook
+  // All pointer handling lives in one hook.
   const pointerHandlers = useCanvasPointer();
 
   const document = useBoardDocument();
   const editorState = useEditorState();
 
+  const elements = document?.content.elements;
   const selectedElementId = document?.content.selectedElementId ?? null;
   const activeToolId = editorState?.tool.type;
 
@@ -47,12 +49,13 @@ export default function EditorCanvas({ cursor, pointerStyle }: EditorCanvasProps
     }
   }, [activeToolId, document?.content.selectedElementId, messages]);
 
+  const headingNumbers = useMemo(
+    () => computeHeadingNumbers(elements ?? [], document?.content.headingSettings),
+    [elements, document?.content.headingSettings],
+  );
+
   return (
-    <>
-      {/*
-        position: relative is required so the absolute cursor overlay stays
-        clipped inside the canvas boundaries and does not bleed outside.
-      */}
+    <HeadingNumberingProvider value={headingNumbers}>
       <div
         ref={canvasRef}
         className={`editor-canvas bg-editor-background ${activeToolId === EditorToolId.SPACER ? 'cursor-row-resize' : ''}`}
@@ -72,6 +75,6 @@ export default function EditorCanvas({ cursor, pointerStyle }: EditorCanvasProps
         {/* Cursor overlay — only rendered in the projector via the cursor prop */}
         <ProjectorMouse cursor={cursor ?? null} style={pointerStyle} />
       </div>
-    </>
+    </HeadingNumberingProvider>
   );
 }
