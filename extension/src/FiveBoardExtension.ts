@@ -17,10 +17,12 @@ import { ProjectorProvider } from './providers/ProjectorProvider';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
+import { SettingsService } from './SettingsService';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
   public readonly packageManager = new PackageManager();
+  public readonly settingsService = new SettingsService();
   private openDocuments = new Map<string, BoardCustomDocument>();
 
   public registerDocument(document: BoardCustomDocument): void {
@@ -68,6 +70,7 @@ export class FiveBoardExtension extends ExtensionBase {
 
   public activate(context: vscode.ExtensionContext): void {
     super.activate(context);
+    context.subscriptions.push(this.settingsService);
     new EditorEditorProvider(context, this.packageManager).register();
     new ProjectorProvider(context).register();
     context.subscriptions.push(new SidebarManager(context, this.messages));

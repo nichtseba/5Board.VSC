@@ -137,6 +137,33 @@
           "group": "navigation"
         }
       ]
+    },
+    "configuration": {
+      "title": "5board",
+      "type": "object",
+      "properties": {
+        "5board-vsc.java.compilerPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "order": 10,
+          "description": "%configuration.java.compilerPath.description%"
+        },
+        "5board-vsc.java.runtimePath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "order": 20,
+          "description": "%configuration.java.runtimePath.description%"
+        },
+        "5board-vsc.presets.directoryPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "order": 30,
+          "description": "%configuration.presets.directoryPath.description%"
+        }
+      }
     }
   },
   "scripts": {

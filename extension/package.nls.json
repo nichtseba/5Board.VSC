@@ -11,5 +11,9 @@
   "commands.openBoardFile": "Open 5Board File",
   "commands.newBoardFile": "New 5Board File",
   "commands.startPresentation": "Start Presentation",
-  "commands.goToElement": "Go to Element"
+  "commands.goToElement": "Go to Element",
+  "configuration.title": "5board",
+  "configuration.java.compilerPath.description": "Path to javac binary. Leave empty to use javac from PATH.",
+  "configuration.java.runtimePath.description": "Path to java binary. Leave empty to use java from PATH.",
+  "configuration.presets.directoryPath.description": "Path to directory containing preset files."
 }

@@ -11,5 +11,8 @@
   "commands.openBoardFile": "5Board Datei öffnen",
   "commands.newBoardFile": "Neue 5Board Datei",
   "commands.startPresentation": "Präsentation starten",
-  "commands.goToElement": "Gehe zu Element"
+  "commands.goToElement": "Gehe zu Element",
+  "configuration.java.compilerPath.description": "Pfad zur ausführbaren javac-Datei. Leer lassen, um javac aus dem System-PATH zu verwenden.",
+  "configuration.java.runtimePath.description": "Pfad zur ausführbaren java-Datei. Leer lassen, um java aus dem System-PATH zu verwenden.",
+  "configuration.presets.directoryPath.description": "Pfad zum Verzeichnis der Preset-Dateien."
 }
