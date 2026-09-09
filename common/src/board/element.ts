@@ -116,7 +116,7 @@ export type Nodes = {
 
 export type TextStyle = {
   fontFamily?: string;
-  fontSize?: number;
+  fontSize?: string;
   lineHeight?: number;
   color?: string;
   backgroundColor?: string;

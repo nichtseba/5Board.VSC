@@ -101,6 +101,7 @@ export function TextElement({
                 underline: editor.isActive('underline'),
                 textStyle: {
                   fontFamily: editor.getAttributes('textStyle').fontFamily,
+                  fontSize: editor.getAttributes('textStyle').fontSize,
                   color: editor.getAttributes('textStyle').color,
                 },
               },
@@ -181,10 +182,21 @@ export function TextElement({
         } else {
           editor.chain().focus().setFontFamily(msg.command.font).run();
         }
-
         break;
+
+      case 'setFontSize':
+        editor
+          .chain()
+          .setFontSize(msg.command.size + 'px')
+          .run();
+        break;
+
       case 'setTextColor':
         editor.chain().focus().setColor(msg.command.color).run();
+        break;
+
+      case 'focus':
+        editor.chain().focus().run();
     }
   });
 

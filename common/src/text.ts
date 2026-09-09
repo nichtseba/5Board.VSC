@@ -6,4 +6,6 @@ export type TextEditorCommand =
   | { type: 'toggleCode' }
   | { type: 'setTextAlign'; value: 'left' | 'center' | 'right' | 'justify' }
   | { type: 'setFontFamily'; font: string }
-  | { type: 'setTextColor'; color: string };
+  | { type: 'setFontSize'; size: string }
+  | { type: 'setTextColor'; color: string }
+  | { type: 'focus' };

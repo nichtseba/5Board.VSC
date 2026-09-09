@@ -5,7 +5,7 @@ import {
 } from '5board.vsc-common';
 import SettingsPanel from '../layout/SettingsPanel';
 import { useLocalization } from '../../../providers/LocalizationProvider';
-import { Divider, Dropdown } from 'vscrui';
+import { Divider } from 'vscrui';
 import { FontFamilyDropdown } from './components/FontFamilyDropdown';
 import SettingsField from '../layout/SettingsField';
 import {
@@ -28,6 +28,8 @@ type Props = {
 export function TextSettings({ element }: Props) {
   const { t } = useLocalization();
   const messages = useMessageService();
+  const fontSize = element.data.tiptap?.marks?.textStyle?.fontSize;
+  const fontSizeValue = fontSize ? parseInt(fontSize, 10) : '';
   return (
     <>
       <SettingsPanel
@@ -47,18 +49,38 @@ export function TextSettings({ element }: Props) {
               });
             }}
           />
-          <Dropdown
-            options={[
-              { value: '9', label: '9' },
-              { value: '10', label: '10' },
-              { value: '11', label: '11' },
-              { value: '12', label: '12' },
-              { value: '14', label: '14' },
-              { value: '16', label: '16' },
-              { value: '20', label: '20' },
-            ]}
-            value="11"
-          />
+          <SettingsField
+            label={t('webview.sidebar-element-settings.headingSettings.fontSize')}
+            inline
+          >
+            <input
+              type="number"
+              min={1}
+              value={fontSizeValue}
+              onChange={(e) => {
+                messages.send({
+                  type: 'textEditorCommand',
+                  command: {
+                    type: 'setFontSize',
+                    size: e.target.value,
+                  },
+                });
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+
+                  messages.send({
+                    type: 'textEditorCommand',
+                    command: {
+                      type: 'focus',
+                    },
+                  });
+                }
+              }}
+              className="w-20 rounded-xs border border-dropdown-border bg-input-background px-2 py-[3px] text-input-foreground [color-scheme:light_dark] focus:border-focus-border focus:outline-none"
+            />
+          </SettingsField>
           <ColorSelector
             color={element.data.tiptap?.marks?.textStyle?.color}
             onChange={(color) => {
