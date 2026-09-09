@@ -21,6 +21,7 @@ import {
 } from './components/TextSettingsButton';
 import { useMessageService } from '../../../services/MessageService';
 import ColorSelector from '../components/ColorSelector';
+import { FontSizeInput } from './components/FontSizeInput';
 
 type Props = {
   element: EditorElement<EditorElementType.Text>;
@@ -49,36 +50,26 @@ export function TextSettings({ element }: Props) {
               });
             }}
           />
-          <SettingsField
-            label={t('webview.sidebar-element-settings.headingSettings.fontSize')}
-            inline
-          >
-            <input
-              type="number"
-              min={1}
+          <SettingsField label={t('webview.sidebar-element-settings.textSettings.fontSize')} inline>
+            <FontSizeInput
               value={fontSizeValue}
-              onChange={(e) => {
+              onChange={(size) => {
                 messages.send({
                   type: 'textEditorCommand',
                   command: {
                     type: 'setFontSize',
-                    size: e.target.value,
+                    size,
                   },
                 });
               }}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-
-                  messages.send({
-                    type: 'textEditorCommand',
-                    command: {
-                      type: 'focus',
-                    },
-                  });
-                }
+              onConfirm={() => {
+                messages.send({
+                  type: 'textEditorCommand',
+                  command: {
+                    type: 'focus',
+                  },
+                });
               }}
-              className="w-20 rounded-xs border border-dropdown-border bg-input-background px-2 py-[3px] text-input-foreground [color-scheme:light_dark] focus:border-focus-border focus:outline-none"
             />
           </SettingsField>
           <ColorSelector

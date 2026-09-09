@@ -88,7 +88,8 @@
       "textSettings": {
         "title": "Text",
         "textColor": "Textfarbe",
-        "backgroundColor": "Hintergrundfarbe"
+        "backgroundColor": "Hintergrundfarbe",
+        "fontSize": "Schriftgröße"
       }
     }
   }
