@@ -259,18 +259,27 @@ export function useFreehandDrawing(params: FreehandToolParameters): DrawingPrevi
   }, [metrics.width, metrics.height]);
 
   useCanvasEvents(
-    useMemo(
-      () => ({
+    useMemo(() => {
+      // Clamp horizontally to the canvas but let the stroke run past the bottom
+      // edge, so drawing below the grid keeps tracking (downward only).
+      const clamp = (p: Point): Point => ({
+        x: Math.min(1, Math.max(0, p.x)),
+        y: Math.max(0, p.y),
+      });
+      return {
         pointerDown: (event) => {
           const point = calculateCanvasPoint(event);
           if (!point) return;
           event.preventDefault();
-          handleDownRef.current(point, event.shiftKey);
+          // Capture the pointer so moves/up keep arriving once it leaves the canvas.
+          const canvas = (event.target as Element | null)?.closest('.editor-canvas');
+          (canvas as HTMLElement | null)?.setPointerCapture?.(event.pointerId);
+          handleDownRef.current(clamp(point), event.shiftKey);
         },
         pointerMove: (event) => {
           const point = calculateCanvasPoint(event);
           if (!point) return;
-          handleMoveRef.current(point, event.shiftKey);
+          handleMoveRef.current(clamp(point), event.shiftKey);
         },
         pointerUp: (event) => {
           handleUpRef.current(event.shiftKey);
@@ -278,9 +287,8 @@ export function useFreehandDrawing(params: FreehandToolParameters): DrawingPrevi
         pointerCancel: () => {
           cancelStrokeRef.current();
         },
-      }),
-      [calculateCanvasPoint],
-    ),
+      };
+    }, [calculateCanvasPoint]),
   );
 
   return preview;
