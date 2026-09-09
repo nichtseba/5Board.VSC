@@ -104,6 +104,7 @@ export function TextElement({
                   fontSize: editor.getAttributes('textStyle').fontSize,
                   lineHeight: editor.getAttributes('textStyle').lineHeight,
                   color: editor.getAttributes('textStyle').color,
+                  backgroundColor: editor.getAttributes('textStyle').backgroundColor,
                 },
               },
               nodes: {
@@ -198,6 +199,10 @@ export function TextElement({
 
       case 'setTextColor':
         editor.chain().focus().setColor(msg.command.color).run();
+        break;
+
+      case 'setBackgroundColor':
+        editor.chain().focus().setBackgroundColor(msg.command.color).run();
         break;
 
       case 'focus':

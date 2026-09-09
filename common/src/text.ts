@@ -9,4 +9,5 @@ export type TextEditorCommand =
   | { type: 'setFontSize'; size: string }
   | { type: 'setLineHeight'; height: string }
   | { type: 'setTextColor'; color: string }
+  | { type: 'setBackgroundColor'; color: string }
   | { type: 'focus' };

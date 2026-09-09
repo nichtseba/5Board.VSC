@@ -108,6 +108,23 @@ export function TextSettings({ element }: Props) {
             label={t('webview.sidebar-element-settings.textSettings.textColor')}
             customColorLabel={t('webview.sidebar.projectorSettings.customColor')}
           />
+
+          <ColorSelector
+            color={element.data.tiptap?.marks?.textStyle?.backgroundColor}
+            onChange={(color) => {
+              messages.send({
+                type: 'textEditorCommand',
+                command: {
+                  type: 'setBackgroundColor',
+                  color,
+                },
+              });
+            }}
+            presets={PROJECTOR_POINTER_PRESET_COLORS}
+            label={t('webview.sidebar-element-settings.textSettings.highlightColor')}
+            customColorLabel={t('webview.sidebar.projectorSettings.customColor')}
+          />
+
           <ColorSelector
             color={element.style.backgroundColor}
             onChange={(color) => {
