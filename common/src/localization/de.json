@@ -33,13 +33,40 @@
         "code": "Code",
         "image": "Bild"
       },
+      "freehand": {
+        "title": "Freihand-Optionen",
+        "color": "Farbe",
+        "customColor": "Eigene Farbe",
+        "width": "Dicke",
+        "opacity": "Deckkraft",
+        "lineStyle": "Linienstil",
+        "dashScale": "Strichgröße",
+        "colors": {
+          "red": "Rot",
+          "orange": "Orange",
+          "yellow": "Gelb",
+          "green": "Grün",
+          "blue": "Blau",
+          "purple": "Lila",
+          "black": "Schwarz",
+          "white": "Weiß"
+        },
+        "lineStyles": {
+          "solid": "Durchgezogen",
+          "dashed": "Gestrichelt",
+          "dotted": "Gepunktet",
+          "custom": "Eigene"
+        },
+        "addSettings": "Einstellungen hinzufügen für "
+      },
       "elementType": {
         "heading": "Überschrift",
         "text": "Text",
         "code": "Code",
         "image": "Bild",
         "shape": "Form",
-        "arrow": "Pfeil"
+        "arrow": "Pfeil",
+        "freehand": "Freihand"
       },
       "projectorSettings": {
         "title": "Beameransicht-Einstellungen",
@@ -47,6 +74,16 @@
         "pointerColor": "Zeiger-Farbe",
         "customColor": "Eigene",
         "pointerShape": "Zeiger-Form",
+        "colors": {
+          "red": "Rot",
+          "orange": "Orange",
+          "yellow": "Gelb",
+          "green": "Grün",
+          "blue": "Blau",
+          "purple": "Lila",
+          "black": "Schwarz",
+          "white": "Weiß"
+        },
         "shapes": {
           "dot": "Punkt",
           "ring": "Ring",
@@ -84,6 +121,9 @@
         "colorTheme": "Theme",
         "customColor": "Eigene Farbe",
         "backgroundColor": "Hintergrundfarbe"
+      },
+      "freehandSettings": {
+        "title": "Freihand"
       }
     }
   }

@@ -1,20 +1,27 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useCanvasEvents } from '../../providers/CanvasEventsProvider';
-import { useMessageService } from '../../services/MessageService';
+import { useMessageService, useOnMessage } from '../../services/MessageService';
 import { useGrid } from '../../providers/GridProvider';
 
 // Mirrors the editor's scroll position to the projector by subscribing to the
-// canvas event hub's 'scroll' event. Rendered only while a projector is open, so
-// the hub attaches its window scroll listener only then (gated at the source,
-// like ProjectorCursorMirror).
+// canvas event hub's 'scroll' event. Only sends while a projector is open — the
+// open state is pushed from the extension via projectorStateChanged and held
+// here (the consumer), like the active gating in ProjectorCursorMirror.
 export default function ProjectorScrollMirror() {
   const messages = useMessageService();
   const { metrics } = useGrid();
+
+  // Whether a projector window is open (gates the scroll mirroring).
+  const [open, setOpen] = useState(false);
+  useOnMessage((msg) => {
+    if (msg.type === 'projectorStateChanged') setOpen(msg.open);
+  });
 
   useCanvasEvents(
     useMemo(
       () => ({
         scroll: () => {
+          if (!open) return;
           messages.send({
             type: 'scroll',
             top: Math.max(0, window.scrollY - metrics.top),
@@ -22,7 +29,7 @@ export default function ProjectorScrollMirror() {
           });
         },
       }),
-      [messages, metrics.top, metrics.left],
+      [open, messages, metrics.top, metrics.left],
     ),
   );
 
