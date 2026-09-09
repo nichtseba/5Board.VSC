@@ -14,8 +14,10 @@ import {
   AlignLeftButton,
   AlignRightButton,
   BoldButton,
+  BulletListButton,
   CodeButton,
   ItalicButton,
+  OrderedListButton,
   StrikeButton,
   UnderlineButton,
 } from './components/TextSettingsButton';
@@ -147,6 +149,13 @@ export function TextSettings({ element }: Props) {
             <StrikeButton element={element} />
             <UnderlineButton element={element} />
             <CodeButton element={element} />
+          </div>
+        </SettingsField>
+        <Divider />
+        <SettingsField>
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3 mt-4">
+            <BulletListButton element={element} />
+            <OrderedListButton element={element} />
           </div>
         </SettingsField>
         <Divider />

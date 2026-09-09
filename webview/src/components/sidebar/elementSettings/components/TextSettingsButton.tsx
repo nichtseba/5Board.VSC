@@ -9,6 +9,8 @@ import {
   BoldIcon,
   CodeBracketIcon,
   ItalicIcon,
+  ListBulletIcon,
+  NumberedListIcon,
   StrikethroughIcon,
   UnderlineIcon,
 } from '@heroicons/react/24/outline';
@@ -129,6 +131,26 @@ export function AlignJustifyButton({ element }: Props) {
       active={element.data.tiptap?.nodes?.attributes?.textAlign === 'justify'}
       command={{ type: 'setTextAlign', value: 'justify' }}
       Icon={Bars4Icon}
+    />
+  );
+}
+
+export function BulletListButton({ element }: Props) {
+  return (
+    <TextSettingsButton
+      active={element.data.tiptap?.nodes?.bulletList}
+      command={{ type: 'toggleBulletList' }}
+      Icon={ListBulletIcon}
+    />
+  );
+}
+
+export function OrderedListButton({ element }: Props) {
+  return (
+    <TextSettingsButton
+      active={element.data.tiptap?.nodes?.orderedList}
+      command={{ type: 'toggleOrderedList' }}
+      Icon={NumberedListIcon}
     />
   );
 }

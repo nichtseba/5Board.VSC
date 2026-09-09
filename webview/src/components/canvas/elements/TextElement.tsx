@@ -45,7 +45,7 @@ export function TextElement({
 
     editorProps: {
       attributes: {
-        class: 'outline-none focus:outline-none',
+        class: 'outline-none focus:outline-none tiptap',
       },
       handleDOMEvents: {
         keydown: (_view, event) => {
@@ -108,6 +108,8 @@ export function TextElement({
                 },
               },
               nodes: {
+                bulletList: editor.isActive('bulletList'),
+                orderedList: editor.isActive('orderedList'),
                 attributes: {
                   textAlign,
                 },
@@ -203,6 +205,14 @@ export function TextElement({
 
       case 'setBackgroundColor':
         editor.chain().focus().setBackgroundColor(msg.command.color).run();
+        break;
+
+      case 'toggleBulletList':
+        editor.chain().focus().toggleBulletList().run();
+        break;
+
+      case 'toggleOrderedList':
+        editor.chain().focus().toggleOrderedList().run();
         break;
 
       case 'focus':

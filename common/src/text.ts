@@ -10,4 +10,6 @@ export type TextEditorCommand =
   | { type: 'setLineHeight'; height: string }
   | { type: 'setTextColor'; color: string }
   | { type: 'setBackgroundColor'; color: string }
+  | { type: 'toggleBulletList' }
+  | { type: 'toggleOrderedList' }
   | { type: 'focus' };
