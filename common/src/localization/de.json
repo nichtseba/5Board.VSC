@@ -68,6 +68,16 @@
         "title": "Überschrift",
         "levelLabel": "Hierarchiestufe"
       },
+      "rectangleSettings": {
+        "title": "Rechteck"
+      },
+      "circleSettings": {
+        "title": "Kreis"
+      },
+      "lineSettings": {
+        "title": "Linie",
+        "symbols": "Symbole"
+      },
       "delete": "Löschen"
     }
   }

@@ -36,6 +36,7 @@ export function LineElement({ element }: EditorElementProps<EditorElementType.Li
             refY="3"
             orient="auto"
             markerUnits="strokeWidth"
+            vectorEffect="non-scaling-stroke"
           >
             <path d="M0,0 L0,6 L9,3 z" fill={headFill ? color : 'none'} stroke={color} />
           </marker>
@@ -50,6 +51,7 @@ export function LineElement({ element }: EditorElementProps<EditorElementType.Li
             refY="3"
             orient="auto"
             markerUnits="strokeWidth"
+            vectorEffect="non-scaling-stroke"
           >
             <path d="M0,0 L0,6 L9,3 z" fill={headFill ? color : 'none'} stroke={color} />
           </marker>
@@ -66,6 +68,7 @@ export function LineElement({ element }: EditorElementProps<EditorElementType.Li
         strokeDasharray={strokeDasharray}
         markerStart={markerStart}
         markerEnd={markerEnd}
+        vectorEffect="non-scaling-stroke"
       />
     </svg>
   );

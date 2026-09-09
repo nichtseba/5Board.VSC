@@ -67,6 +67,16 @@
         "title": "Heading",
         "levelLabel": "Hierarchy level"
       },
+      "rectangleSettings": {
+        "title": "Rectangle"
+      },
+      "circleSettings": {
+        "title": "Circle"
+      },
+      "lineSettings": {
+        "title": "Line",
+        "symbols": "Symbols"
+      },
       "delete": "Delete"
     }
   }

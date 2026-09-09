@@ -16,6 +16,7 @@ export function RectangleElement({ element }: EditorElementProps<EditorElementTy
         stroke={border?.color}
         strokeWidth={border?.width}
         rx={border?.radius}
+        vectorEffect="non-scaling-stroke"
         strokeDasharray={
           border?.style === 'dashed' ? '5,5' : border?.style === 'dotted' ? '2,3' : undefined
         }

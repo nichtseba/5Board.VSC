@@ -123,10 +123,11 @@ export type LineElementData = {
   headFill?: boolean;
   points: { x: number; y: number }[]; // Start and end points for the line
 };
+
 /**
  * All Editor Element Defaults when creating a new element
  */
-export type AddElementPlacementMode = 'free' | 'fullRow' | 'fixed' | 'custom';
+export type AddElementPlacementMode = 'free' | 'fullRow' | 'fixed' | 'click';
 export type ElementCategory = 'basic' | 'custom';
 
 export type AddElementDefaults<T extends EditorElementType = EditorElementType> = {
@@ -148,30 +149,57 @@ export type ElementTypeDefinition<T extends EditorElementType = EditorElementTyp
 export const DEFAULT_ELEMENT_PROFILES = {
   [EditorElementType.Heading]: {
     layout: { width: 40, height: 2 },
+    style: {
+      visible: true,
+    },
     data: { level: 1, content: 'Heading' },
   },
   [EditorElementType.Text]: {
     layout: { width: 20, height: 10 },
+    style: {
+      visible: true,
+    },
     data: { content: 'Text' },
   },
   [EditorElementType.Code]: {
     layout: { width: 40, height: 10 },
+    style: {
+      visible: true,
+    },
     data: { codeBlockId: '', content: '', language: 'plaintext' },
   },
   [EditorElementType.Image]: {
     layout: { width: 20, height: 10 },
+    style: {
+      visible: true,
+    },
     data: { src: '', content: '', altText: 'Image' },
   },
   [EditorElementType.Rectangle]: {
     layout: { width: 20, height: 10 },
+    style: {
+      visible: true,
+    },
     data: undefined,
   },
   [EditorElementType.Circle]: {
     layout: { width: 20, height: 10 },
+    style: {
+      visible: true,
+    },
     data: undefined,
   },
   [EditorElementType.Line]: {
     layout: { width: 12, height: 4 },
+    style: {
+      visible: true,
+      color: '#ff0000',
+      border: {
+        color: '#240ae4',
+        width: 2,
+        style: 'solid',
+      },
+    },
     data: {
       points: [
         { x: 0, y: 0 },
@@ -182,6 +210,7 @@ export const DEFAULT_ELEMENT_PROFILES = {
 } satisfies {
   [K in EditorElementType]: {
     layout: Omit<ElementLayout, 'xPos' | 'yPos'>;
+    style: ElementStyle;
     data: EditorElementDataMap[K];
   };
 };
@@ -214,19 +243,19 @@ export const ELEMENT_TYPE_DEFINITIONS = {
   [EditorElementType.Rectangle]: {
     label: 'Rectangle',
     category: 'basic',
-    placement: 'free',
+    placement: 'click',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Rectangle],
   },
   [EditorElementType.Circle]: {
     label: 'Circle',
     category: 'basic',
-    placement: 'free',
+    placement: 'click',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Circle],
   },
   [EditorElementType.Line]: {
     label: 'Line',
     category: 'basic',
-    placement: 'free',
+    placement: 'click',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Line],
   },
 } as const satisfies {

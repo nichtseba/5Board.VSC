@@ -52,11 +52,7 @@ type AllWebviewToExtensionMessage =
   | { type: 'selectElement'; id: string | null }
   | { type: 'selectTool'; tool: EditorTool }
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
-  | {
-      type: 'addElement';
-      elementType: EditorElementType;
-      elementPosition: EditorElement['layout'];
-    }
+  | AddElementMessage
   | { type: 'deleteElement'; id: string }
   | { type: 'updateElementLayout'; id: string; changes: Partial<ElementLayout> } // Update the Layout when Element was moved or resized
   | { type: 'updateElement'; id: string; changes: Partial<EditorElement> } // Update element with it's settings
@@ -66,3 +62,12 @@ type AllWebviewToExtensionMessage =
       type: 'updateViewport';
       viewport: { top: number; left: number; height: number; width: number };
     };
+
+type AddElementMessage = {
+  [T in EditorElementType]: {
+    type: 'addElement';
+    elementType: T;
+    elementPosition: ElementLayout;
+    initialData?: Partial<EditorElement<T>>;
+  };
+}[EditorElementType];

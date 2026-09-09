@@ -137,8 +137,12 @@ export class FiveBoardExtension extends ExtensionBase {
   }
 
   @Command('5board-vsc.addNewEditorElement')
-  addNewEditorElement(type: EditorElementType, position: EditorElement['layout']): void {
-    const element = this.createDefaultElement(type, position);
+  addNewEditorElement(
+    type: EditorElementType,
+    position: EditorElement['layout'],
+    initialData?: Partial<EditorElement>,
+  ): void {
+    const element = this.createDefaultElement(type, position, initialData);
 
     this.applyEditToActiveDocument((document) => {
       document.content.elements.push(element);
@@ -148,6 +152,7 @@ export class FiveBoardExtension extends ExtensionBase {
   private createDefaultElement<T extends EditorElementType>(
     type: T,
     position: EditorElement['layout'],
+    initialData?: Partial<EditorElement>,
   ): EditorElement<T> {
     const profile = DEFAULT_ELEMENT_PROFILES[type];
 
@@ -155,14 +160,19 @@ export class FiveBoardExtension extends ExtensionBase {
       id: crypto.randomUUID(),
       type,
       layout: {
+        ...profile.layout,
         ...position,
-        width: profile.layout.width,
-        height: profile.layout.height,
+        ...(initialData?.layout ?? {}),
       },
+
       style: {
-        visible: true,
+        ...structuredClone(profile.style),
+        ...(initialData?.style ?? {}),
       },
-      data: structuredClone(profile.data) as EditorElementDataMap[T],
+      data: {
+        ...structuredClone(profile.data),
+        ...(initialData?.data ? initialData.data : {}),
+      } as EditorElementDataMap[T],
     };
   }
 
