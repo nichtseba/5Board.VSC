@@ -77,7 +77,7 @@ export function TextSettings({ element }: Props) {
               title="Line Height"
               options={['1.0', '1.15', '1.5', '2.0', '2.5', '3.0']}
               className="w-max!"
-              value={element.data.tiptap?.marks?.textStyle?.lineHeight}
+              value={element.data.tiptap?.marks?.textStyle?.lineHeight ?? '1.0'}
               onChange={(height) => {
                 if (typeof height !== 'string') return;
                 messages.send({
