@@ -63,6 +63,7 @@ type AllWebviewToExtensionMessage =
   | { type: 'cursorLeave' }
   | { type: 'scroll'; top: number; left: number }
   | { type: 'selectElement'; id: string | null }
+  | { type: 'toggleElementSelection'; id: string }
   | { type: 'selectTool'; tool: EditorTool }
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
   | { type: 'updateElementLayout'; id: string; changes: Partial<ElementLayout> } // Update the Layout when Element was moved or resized

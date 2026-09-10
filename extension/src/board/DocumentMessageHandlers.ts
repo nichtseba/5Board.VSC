@@ -41,9 +41,23 @@ export class DocumentMessageHandlers {
 
       this.document.messageService.on('selectElement', (msg) => {
         this.document.applyEdit((document) => {
-          document.content.selectedElementId = msg.id;
+          document.content.selectedElementIds = msg.id ? [msg.id] : [];
+          document.content.primarySelectedElementId = msg.id ?? null;
         });
       }),
+
+      this.document.messageService.on('toggleElementSelection', (msg) => {
+        this.document.applyEdit((document) => {
+          const exists = document.content.selectedElementIds.includes(msg.id);
+          const next = exists
+            ? document.content.selectedElementIds.filter((id) => id !== msg.id)
+            : [...document.content.selectedElementIds, msg.id];
+
+          document.content.selectedElementIds = next;
+          document.content.primarySelectedElementId = next[0] ?? null;
+        });
+      }),
+
       this.document.messageService.on('updateElementLayout', (msg) => {
         this.document.applyEdit((document) => {
           const element = document.content.elements.find((e) => e.id === msg.id);

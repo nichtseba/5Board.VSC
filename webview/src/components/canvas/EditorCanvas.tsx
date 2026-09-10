@@ -30,7 +30,7 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
   const editorState = useEditorState();
 
   const elements = document?.content.elements;
-  const selectedElementId = document?.content.selectedElementId ?? null;
+  const selectedElementIds = document?.content.selectedElementIds ?? [];
   const activeToolId = editorState?.tool.type;
 
   const messages = useMessageService();
@@ -45,13 +45,16 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
   }, [setGridElement]);
 
   useEffect(() => {
-    if (activeToolId !== EditorToolId.POINTER && document?.content.selectedElementId) {
+    if (
+      activeToolId !== EditorToolId.POINTER &&
+      (document?.content.selectedElementIds.length ?? 0) > 0
+    ) {
       messages.send({
         type: 'selectElement',
         id: null,
       });
     }
-  }, [activeToolId, document?.content.selectedElementId, messages]);
+  }, [activeToolId, document?.content.selectedElementIds, messages]);
 
   const headingNumbers = useMemo(
     () => computeHeadingNumbers(elements ?? [], document?.content.headingSettings),
@@ -72,7 +75,7 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
           <EditorElement
             key={element.id}
             element={element}
-            selected={element.id === selectedElementId}
+            selected={selectedElementIds.includes(element.id)}
           />
         ))}
 

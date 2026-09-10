@@ -15,7 +15,7 @@ import { useMessageService } from '../../services/MessageService';
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
   selected?: boolean;
-  onSelect?: () => void;
+  onSelect?: (event?: React.MouseEvent) => void;
   targetRef?: React.RefObject<HTMLDivElement>;
 };
 
@@ -36,20 +36,22 @@ export default function EditorElement<ElementType extends EditorElementType>({
   const activeToolId = useEditorState()?.tool.type;
   const messages = useMessageService();
 
-  const handleSelectElement = (id: string) => {
+  const handleSelectElement = (id: string, event?: React.MouseEvent) => {
     if (activeToolId !== EditorToolId.POINTER) return;
 
-    messages.send({
-      type: 'selectElement',
-      id,
-    });
+    if (event?.ctrlKey || event?.metaKey) {
+      messages.send({ type: 'toggleElementSelection', id });
+      return;
+    }
+
+    messages.send({ type: 'selectElement', id });
   };
 
   return (
     <>
       <div
         id={element.id}
-        onClick={() => handleSelectElement(element.id)}
+        onClick={(event) => handleSelectElement(element.id, event)}
         className={`
           box-border
           ${activeToolId === EditorToolId.POINTER ? 'cursor-pointer' : ''}
@@ -72,7 +74,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
           element={element}
           targetRef={targetRef}
           selected={selected}
-          onSelect={() => handleSelectElement(element.id)}
+          onSelect={(event) => handleSelectElement(element.id, event)}
         />
       </div>
       {activeToolId === EditorToolId.POINTER && (
