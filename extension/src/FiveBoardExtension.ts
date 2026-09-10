@@ -18,11 +18,14 @@ import { ProjectorProvider } from './providers/ProjectorProvider';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
+import { formatToolchainReport, resolveJavaToolchain } from './runner/javaToolchain';
+import { getConfiguredJavaHome } from './config';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
   public readonly packageManager = new PackageManager();
   private openDocuments = new Map<string, BoardCustomDocument>();
+  private toolchainOutput?: vscode.OutputChannel;
 
   public registerDocument(document: BoardCustomDocument): void {
     if (!this.openDocuments.has(document.uri.toString())) {
@@ -150,6 +153,21 @@ export class FiveBoardExtension extends ExtensionBase {
     }
     this.activeEditorDocument.applyEdit(edit);
     this.activeDocumentChange.fire(this.activeEditorDocument);
+  }
+
+  /**
+   * Reports which JDK the fallback chain settled on and what every stage saw. Written to an
+   * output channel rather than a notification so the text can be copied when asking for help.
+   */
+  @Command('5board-vsc.showJavaToolchain')
+  public async showJavaToolchain(): Promise<void> {
+    const configuredHome = getConfiguredJavaHome();
+    const result = await resolveJavaToolchain(configuredHome);
+
+    this.toolchainOutput ??= vscode.window.createOutputChannel('5Board — Java toolchain');
+    this.toolchainOutput.clear();
+    this.toolchainOutput.appendLine(formatToolchainReport(result, configuredHome));
+    this.toolchainOutput.show(true);
   }
 
   @Command('5board-vsc.goToElement')

@@ -8,27 +8,35 @@ import type {
   CodeblockRunner,
   Source,
   ToolCheckResult,
+  ToolchainConfig,
 } from '5board.vsc-common';
 import { runCommand } from './runnerUtils';
+import { describeToolchainFailure, resolveJavaToolchain } from './javaToolchain';
 
 export class JavaCodeblockRunner implements CodeblockRunner {
   canHandle(language: CodeblockLanguage): boolean {
     return language === 'java';
   }
 
-  async checkTools(): Promise<ToolCheckResult> {
-    const java = await runCommand('java', ['-version'], process.cwd(), 5_000);
-    const javac = await runCommand('javac', ['-version'], process.cwd(), 5_000);
+  async checkTools(config?: ToolchainConfig): Promise<ToolCheckResult> {
+    const result = await resolveJavaToolchain(config?.home);
 
-    const javaOk = !java.error && java.status === 0;
-    const javacOk = !javac.error && javac.status === 0;
-    const missingTools = [...(!javaOk ? ['java'] : []), ...(!javacOk ? ['javac'] : [])];
+    if (!result.ok) {
+      const { failure } = result;
+      return {
+        available: false,
+        missingTools: failure.kind === 'incomplete-jdk' ? failure.missing : undefined,
+        error: describeToolchainFailure(failure),
+      };
+    }
 
+    const { toolchain } = result;
     return {
-      available: javaOk && javacOk,
-      version: java.stdout || java.stderr || undefined,
-      missingTools: missingTools.length > 0 ? missingTools : undefined,
-      error: java.error ?? javac.error,
+      available: true,
+      version: `Java ${toolchain.majorVersion}`,
+      majorVersion: toolchain.majorVersion,
+      toolPaths: { java: toolchain.javaPath, javac: toolchain.javacPath },
+      home: toolchain.home,
     };
   }
 
@@ -44,7 +52,7 @@ export class JavaCodeblockRunner implements CodeblockRunner {
       // Compile only the target: javac pulls the classes it references from the sourcepath on
       // demand, so unrelated (possibly broken) sources don't block execution.
       const compile = await runCommand(
-        'javac',
+        request.toolPaths?.javac ?? 'javac',
         ['-d', outDir, '-sourcepath', tempDir, request.fileName],
         tempDir,
         30_000,
@@ -60,7 +68,12 @@ export class JavaCodeblockRunner implements CodeblockRunner {
       }
 
       const mainClass = fileNameToClassName(request.fileName);
-      const run = await runCommand('java', ['-cp', outDir, mainClass], tempDir, 30_000);
+      const run = await runCommand(
+        request.toolPaths?.java ?? 'java',
+        ['-cp', outDir, mainClass],
+        tempDir,
+        30_000,
+      );
       return {
         success: run.status === 0,
         stdout: run.stdout,

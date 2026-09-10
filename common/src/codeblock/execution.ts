@@ -5,6 +5,13 @@ export interface CodeblockExecutionRequest {
   fileName: string;
   sources: Source[];
   language: CodeblockLanguage;
+  /** Absolute paths of the resolved toolchain binaries, keyed by tool name (e.g. `java`). */
+  toolPaths?: Record<string, string>;
+}
+
+/** User-supplied toolchain location, kept language-neutral so every runner can take one. */
+export interface ToolchainConfig {
+  home?: string;
 }
 
 export interface GeneratedSourceFile {
@@ -15,6 +22,11 @@ export interface GeneratedSourceFile {
 export interface ToolCheckResult {
   available: boolean;
   version?: string;
+  majorVersion?: number;
+  /** Absolute paths of the resolved binaries, passed on to `execute`. */
+  toolPaths?: Record<string, string>;
+  /** The resolved toolchain home, for diagnostics and error messages. */
+  home?: string;
   missingTools?: string[];
   error?: string;
 }
@@ -29,6 +41,6 @@ export interface CodeblockExecutionResult {
 
 export interface CodeblockRunner {
   canHandle(language: CodeblockLanguage): boolean;
-  checkTools(): Promise<ToolCheckResult>;
+  checkTools(config?: ToolchainConfig): Promise<ToolCheckResult>;
   execute(request: CodeblockExecutionRequest): Promise<CodeblockExecutionResult>;
 }

@@ -52,12 +52,13 @@ function sourceCode(doc: BoardDocument, name: string): string {
 
 describe('CodeblockSourceService', function () {
   describe('updateBlockCode', function () {
-    it('creates a main-wrapped source on first edit of a standalone block', function () {
+    it('creates a compact runnable source on first edit of a standalone block', function () {
       const doc = makeDocument([makeCodeElement('el1')]);
       updateBlockCode(doc, 'el1', 'int x = 1;');
 
       const code = sourceCode(doc, 'El1.java');
-      assert.ok(code.includes('public static void main'));
+      assert.ok(code.includes('void main() {'));
+      assert.ok(!code.includes('class'));
       assert.equal(extractBlock(code, 'el1'), 'int x = 1;');
     });
 
@@ -80,9 +81,9 @@ describe('CodeblockSourceService', function () {
 
       const code = sourceCode(doc, 'El1.java');
       assert.equal(extractBlock(code, 'el1'), 'int x = 2;');
-      assert.ok(code.includes('        int x = 2;'));
-      assert.ok(code.includes('        // </block>'));
-      assert.equal((code.match(/public class/g) ?? []).length, 1);
+      assert.ok(code.includes('    int x = 2;'));
+      assert.ok(code.includes('    // </block>'));
+      assert.equal((code.match(/public class/g) ?? []).length, 0);
     });
   });
 
@@ -126,7 +127,7 @@ describe('CodeblockSourceService', function () {
 
       assert.equal(data(doc, 'el1').className, 'El1');
       const code = sourceCode(doc, 'El1.java');
-      assert.ok(code.includes('public static void main'));
+      assert.ok(code.includes('void main() {'));
       assert.equal(extractBlock(code, 'el1'), 'int x = 1;');
       assert.equal(hasBlock(sourceCode(doc, 'Student.java'), 'el1'), false);
     });

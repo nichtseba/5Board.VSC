@@ -21,6 +21,11 @@ export interface LanguageSupport {
   commentPrefix: CommentPrefix;
   sanitizeClassName(id: string): string;
   classDeclaration(className: string): string;
+  /**
+   * Builds a directly runnable source. Java writes a compact source file, where the class is
+   * implicit and named after the file — hence the unused class name there; other languages may
+   * still need it.
+   */
   wrapRunnable(className: string, markedBlock: string): string;
   wrapClassBody(className: string, markedBlocks: string): string;
   runTarget?(fileName: string): string;
@@ -40,15 +45,10 @@ export const JAVA_LANGUAGE_SUPPORT: LanguageSupport = {
   commentPrefix: '//',
   sanitizeClassName,
   classDeclaration: (className) => `public class ${className} {`,
-  wrapRunnable(className, markedBlock) {
-    return [
-      this.classDeclaration(className),
-      '    public static void main(String[] args) {',
-      indentCode(markedBlock, 8),
-      '    }',
-      '}',
-      '',
-    ].join('\n');
+  wrapRunnable(_className, markedBlock) {
+    // Compact source file (JEP 512, Java 25+): the implicitly declared class is named after the
+    // file, so the class name only determines the file name and must not appear in the source.
+    return ['void main() {', indentCode(markedBlock, 4), '}', ''].join('\n');
   },
   wrapClassBody(className, markedBlocks) {
     return [this.classDeclaration(className), indentCode(markedBlocks, 4), '}', ''].join('\n');

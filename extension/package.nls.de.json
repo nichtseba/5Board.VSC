@@ -13,5 +13,6 @@
   "commands.newBoardFile": "Neue 5Board Datei",
   "commands.startPresentation": "Präsentation starten",
   "commands.executeCodeblock": "Codeblock ausführen",
+  "commands.showJavaToolchain": "Java-Toolchain anzeigen",
   "commands.goToElement": "Gehe zu Element"
 }

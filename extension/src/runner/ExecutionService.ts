@@ -7,6 +7,7 @@ import {
 } from '5board.vsc-common';
 import type { EditorElement } from '5board.vsc-common';
 import type { CodeElementData } from '5board.vsc-common';
+import { getConfiguredJavaHome } from '../config';
 import { getRunner } from './index';
 
 export class ExecutionService {
@@ -32,13 +33,16 @@ export class ExecutionService {
       return this.error(`Source file "${fileName}" not found in document.`);
     }
 
-    const tools = await runner.checkTools();
+    // The chain resolves once per run: `checkTools` hands the binaries it settled on to
+    // `execute`, so nothing probes the file system twice.
+    const tools = await runner.checkTools({ home: getConfiguredJavaHome() });
     if (!tools.available) {
       const missing = tools.missingTools?.join(', ');
       return this.error(
-        missing
-          ? `Required tools not found: ${missing}. Please install them to run ${language} code blocks.`
-          : (tools.error ?? `Required tools for ${language} are not available.`),
+        tools.error ??
+          (missing
+            ? `Required tools not found: ${missing}. Please install them to run ${language} code blocks.`
+            : `Required tools for ${language} are not available.`),
       );
     }
 
@@ -46,6 +50,7 @@ export class ExecutionService {
       fileName,
       sources: document.sources,
       language: language as CodeblockLanguage,
+      toolPaths: tools.toolPaths,
     });
   }
 

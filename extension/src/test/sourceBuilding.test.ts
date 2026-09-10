@@ -105,7 +105,7 @@ describe('buildSource round-trip', function () {
     assert.equal(extracted, code);
   });
 
-  it('produces valid class structure with mainWrap', function () {
+  it('produces a compact source file with mainWrap', function () {
     const source = buildSource({
       elementId: 'el-5',
       className: 'Main',
@@ -113,8 +113,23 @@ describe('buildSource round-trip', function () {
       code: 'int x = 1;',
       mainWrap: true,
     });
-    assert.ok(source.includes('public class Main {'));
-    assert.ok(source.includes('public static void main(String[] args) {'));
+    // Compact source files (JEP 512) have no class declaration — the class is implicit and
+    // named after the file, so the class name must not leak into the source.
+    assert.ok(source.includes('void main() {'));
+    assert.ok(!source.includes('class'));
+    assert.ok(!source.includes('Main'));
+  });
+
+  it('indents a runnable block at one level', function () {
+    const source = buildSource({
+      elementId: 'el-5b',
+      className: 'Main',
+      language: 'java',
+      code: 'int x = 1;',
+      mainWrap: true,
+    });
+    assert.ok(source.includes('    // <block id="el-5b">'));
+    assert.ok(source.includes('    int x = 1;'));
   });
 
   it('produces valid class structure without mainWrap', function () {
