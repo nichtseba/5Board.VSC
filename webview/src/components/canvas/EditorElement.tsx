@@ -7,6 +7,7 @@ import ElementInteractionController from './elementInteraction/ElementInteractio
 import { CodeElement } from './elements/CodeElement';
 import { ImageElement } from './elements/ImageElement';
 import { LineElement } from './elements/LineElement';
+import { FreehandElement } from './elements/FreehandElement';
 import { useEditorState } from '../../providers/EditorStateProvider';
 import { useMessageService } from '../../services/MessageService';
 import { RectangleElement } from './elements/RectangleElement';
@@ -72,7 +73,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
         id={element.id}
         onClick={() => handleSelectElement(element.id)}
         className={`
-          box-border font-bold
+          box-border
           ${activeToolId === EditorToolId.POINTER ? 'cursor-pointer' : ''}
           ${
             activeToolId === EditorToolId.POINTER && !selected
@@ -114,6 +115,7 @@ const ELEMENT_COMPONENTS = {
   [EditorElementType.Rectangle]: RectangleElement,
   [EditorElementType.Circle]: CircleElement,
   [EditorElementType.Line]: LineElement,
+  [EditorElementType.Freehand]: FreehandElement,
 } as const satisfies {
   [ElementType in EditorElementType]: React.ComponentType<EditorElementProps<ElementType>>;
 };

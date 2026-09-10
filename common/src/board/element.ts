@@ -8,6 +8,7 @@ export enum EditorElementType {
   Rectangle = 'rectangle',
   Circle = 'circle',
   Line = 'line',
+  Freehand = 'freehand',
 }
 
 /**
@@ -44,7 +45,7 @@ export type ElementStyle = {
   border?: {
     color?: string;
     width?: number;
-    style?: 'solid' | 'dashed' | 'dotted';
+    style?: LineStyle;
     radius?: number;
   };
 };
@@ -61,6 +62,7 @@ export type EditorElementDataMap = {
   [EditorElementType.Rectangle]: undefined; // No need for extra data
   [EditorElementType.Circle]: undefined; // No need for extra data
   [EditorElementType.Line]: LineElementData;
+  [EditorElementType.Freehand]: FreehandElementData;
 };
 
 export type HeadingElementData = {
@@ -114,6 +116,36 @@ export type CropData = {
   cropY: number;
   cropWidth: number;
   cropHeight: number;
+};
+
+/* A freehand drawing is a list of strokes. Each stroke is one continuous
+ * pen movement (pen-down until pen-up) and is rendered as its own line.
+ */
+export type FreehandElementData = {
+  strokes: FreehandStroke[];
+};
+
+/** Line rendering style shared by strokes (and reusable elsewhere).
+ * 'custom' uses a numeric dash scale instead of a fixed pattern. */
+export type LineStyle = 'solid' | 'dashed' | 'dotted' | 'custom';
+type Point = { x: number; y: number };
+export type FreehandStroke = {
+  /**
+   * The sampled points of the stroke, in normalized coordinates (0..1)
+   * relative to the element's bounding box. Normalizing keeps the drawing
+   * resolution-independent so it scales correctly in the projector.
+   */
+  points: Point[];
+  /** Stroke color; falls back to the editor foreground color when omitted. */
+  color?: string;
+  /** Stroke width in screen pixels; stays constant while the element scales. */
+  width?: number;
+  /** Dash rendering of the line; defaults to solid when omitted. */
+  lineStyle?: LineStyle;
+  /** Dash/gap size (multiple of width) when lineStyle is 'custom'. */
+  dashScale?: number;
+  /** Render as straight segments (no smoothing), e.g. pen-tool polylines. */
+  straight?: boolean;
 };
 
 export type LineElementData = {
@@ -207,6 +239,14 @@ export const DEFAULT_ELEMENT_PROFILES = {
       ],
     },
   },
+  // This is just a filler here to satisfie the type. Freehand is added with a different tool
+  [EditorElementType.Freehand]: {
+    layout: { width: 10, height: 10 },
+    style: {
+      visible: true,
+    },
+    data: { strokes: [] },
+  },
 } satisfies {
   [K in EditorElementType]: {
     layout: Omit<ElementLayout, 'xPos' | 'yPos'>;
@@ -257,6 +297,13 @@ export const ELEMENT_TYPE_DEFINITIONS = {
     category: 'basic',
     placement: 'click',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Line],
+  },
+  // This is just a filler here to satisfie the type. Freehand is added with a different tool
+  [EditorElementType.Freehand]: {
+    label: 'Freehand',
+    category: 'basic',
+    placement: 'free',
+    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Freehand],
   },
 } as const satisfies {
   [K in EditorElementType]: ElementTypeDefinition<K>;

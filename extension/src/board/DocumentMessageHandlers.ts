@@ -48,7 +48,7 @@ export class DocumentMessageHandlers {
       this.document.messageService.on('addElement', (msg) => {
         EXTENSION.addNewEditorElement(msg.elementType, msg.elementPosition, msg.initialData);
         EXTENSION.editorState = {
-          tool: { type: EditorToolId.POINTER, parameters: null },
+          tool: { type: EditorToolId.POINTER, parameters: undefined },
         };
       }),
       this.document.messageService.on('deleteElement', (msg) => {
@@ -71,7 +71,6 @@ export class DocumentMessageHandlers {
       //#endregion "General"
 
       //#region "EditorTools"
-
       this.document.messageService.on('insertSpacerRows', (msg) => {
         this.document.applyEdit((document) => {
           for (const element of document.content.elements) {
@@ -83,6 +82,31 @@ export class DocumentMessageHandlers {
             }
           }
         });
+      }),
+
+      // The editor sends a freshly drawn element (e.g. a freehand stroke).
+      // Append it to the document; the change broadcasts 'updateDocument' to all panels.
+      this.document.messageService.on('addFreehandElement', (msg) => {
+        this.document.applyEdit((document) => {
+          document.content.elements.push(msg.element);
+        });
+      }),
+
+      // Mirror the in-progress freehand stroke to the projector while drawing.
+      this.document.messageService.on('freehandPreview', (msg) => {
+        this.document.messageService.send({
+          type: 'freehandPreview',
+          points: msg.points,
+          color: msg.color,
+          width: msg.width,
+          opacity: msg.opacity,
+          lineStyle: msg.lineStyle,
+          dashScale: msg.dashScale,
+          straight: msg.straight,
+        });
+      }),
+      this.document.messageService.on('freehandPreviewEnd', () => {
+        this.document.messageService.send({ type: 'freehandPreviewEnd' });
       }),
       //#endregion "EditorTools"
 
