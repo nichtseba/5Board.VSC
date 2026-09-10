@@ -57,7 +57,11 @@ export function LineSettings({ element }: Props) {
       title={t('webview.sidebar-element-settings.lineSettings.title')}
       icon="symbol-line"
     >
-      <ElementStyleSettings style={element.style} onChange={updateStyle} />
+      <ElementStyleSettings
+        style={element.style}
+        onChange={updateStyle}
+        editableProperties={['opacity', 'borderColor', 'borderWidth', 'borderStyle']}
+      />
 
       <SettingsField label={t('webview.sidebar-element-settings.lineSettings.symbols')}>
         <div className="grid grid-cols-2 gap-3">

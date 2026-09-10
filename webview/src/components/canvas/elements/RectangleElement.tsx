@@ -20,6 +20,7 @@ export function RectangleElement({ element }: EditorElementProps<EditorElementTy
         strokeDasharray={
           border?.style === 'dashed' ? '5,5' : border?.style === 'dotted' ? '2,3' : undefined
         }
+        opacity={element.style.opacity ?? 1}
       />
     </svg>
   );
