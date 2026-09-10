@@ -84,7 +84,7 @@ type AllWebviewToExtensionMessage =
   | { type: 'toggleCursorTracking' }
   | { type: 'updateProjectorPointer'; style: ProjectorPointerStyle }
   // Sent by the editor after drawing a new element (e.g. a freehand stroke).
-  | { type: 'addElement'; element: EditorElement }
+  | { type: 'addFreehandElement'; element: EditorElement }
   // Live preview of the stroke the editor is currently drawing (normalized 0–1).
   | {
       type: 'freehandPreview';

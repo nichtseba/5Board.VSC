@@ -48,7 +48,7 @@ export class DocumentMessageHandlers {
       this.document.messageService.on('addElement', (msg) => {
         EXTENSION.addNewEditorElement(msg.elementType, msg.elementPosition);
         EXTENSION.editorState = {
-          tool: { type: EditorToolId.POINTER, parameters: null },
+          tool: { type: EditorToolId.POINTER, parameters: undefined },
         };
       }),
       this.document.messageService.on('deleteElement', (msg) => {
@@ -86,7 +86,7 @@ export class DocumentMessageHandlers {
 
       // The editor sends a freshly drawn element (e.g. a freehand stroke).
       // Append it to the document; the change broadcasts 'updateDocument' to all panels.
-      this.document.messageService.on('addElement', (msg) => {
+      this.document.messageService.on('addFreehandElement', (msg) => {
         this.document.applyEdit((document) => {
           document.content.elements.push(msg.element);
         });
