@@ -136,7 +136,18 @@
       },
       "lineSettings": {
         "title": "Linie",
-        "symbols": "Symbole"
+        "symbols": "Symbole",
+        "borderColor": "Rahmenfarbe",
+        "borderWidth": "Rahmenbreite",
+        "borderStyle": "Rahmenstil",
+        "startHead": "Startsymbol",
+        "endHead": "Endsymbol",
+        "headSize": "Symbolgröße",
+        "headFill": "Symbole ausfüllen",
+        "headNone": "Keine",
+        "headArrow": "Pfeil",
+        "headCircle": "Kreis",
+        "headSquare": "Quadrat"
       },
       "delete": "Löschen"
     }
