@@ -1,6 +1,14 @@
 import { BoardDocument } from './board/document';
+import { HeadingLevel, HeadingLevelSettings, HeadingNumberingStyle } from './board/headingSettings';
 import { Language } from './localization';
-import { EditorElement, EditorElementType, EditorState, EditorTool, ElementLayout } from './main';
+import {
+  EditorElement,
+  EditorElementType,
+  EditorState,
+  EditorTool,
+  ElementLayout,
+  LineStyle,
+} from './main';
 import { ProjectorPointerStyle } from './projector';
 
 /**
@@ -26,6 +34,19 @@ type AllExtensionToWebviewMessage =
   | { type: 'projectorPointerChanged'; style: ProjectorPointerStyle }
   | { type: 'scroll'; top: number; left: number }
   | { type: 'selectElement'; elementId: string | null }
+  // Live preview of an in-progress freehand stroke, mirrored to the projector.
+  // Points are normalized (0–1) to the canvas, like the cursor position.
+  | {
+      type: 'freehandPreview';
+      points: { x: number; y: number }[];
+      color: string;
+      width: number;
+      opacity: number;
+      lineStyle: LineStyle;
+      dashScale: number;
+      straight: boolean;
+    }
+  | { type: 'freehandPreviewEnd' }
   | {
       type: 'viewportUpdate';
       viewport: { top: number; left: number; height: number; width: number };
@@ -62,7 +83,32 @@ type AllWebviewToExtensionMessage =
   | { type: 'updateElement'; id: string; changes: Partial<EditorElement> } // Update element with it's settings
   | { type: 'toggleCursorTracking' }
   | { type: 'updateProjectorPointer'; style: ProjectorPointerStyle }
+  // Sent by the editor after drawing a new element (e.g. a freehand stroke).
+  | { type: 'addElement'; element: EditorElement }
+  // Live preview of the stroke the editor is currently drawing (normalized 0–1).
+  | {
+      type: 'freehandPreview';
+      points: { x: number; y: number }[];
+      color: string;
+      width: number;
+      opacity: number;
+      lineStyle: LineStyle;
+      dashScale: number;
+      straight: boolean;
+    }
+  | { type: 'freehandPreviewEnd' }
   | {
       type: 'updateViewport';
       viewport: { top: number; left: number; height: number; width: number };
+    }
+  | {
+      type: 'updateHeadingLevelSettings';
+      level: HeadingLevel;
+      changes: HeadingLevelSettings;
+    }
+  | {
+      type: 'updateHeadingNumbering';
+      enabled?: boolean;
+      level?: HeadingLevel;
+      numberingFormat?: HeadingNumberingStyle;
     };

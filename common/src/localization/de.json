@@ -12,8 +12,7 @@
       "title": "Beameransicht",
       "noFileOpen": "Bitte öffne zuerst eine .5boardz Datei im Editor, bevor du die Beameransicht startest.",
       "loading": "Lade…"
-    },
-    "goToElement": "Gehe zu Element"
+    }
   },
   "webview": {
     "customEditor": { "Test": "Testen der Übersetzung" },
@@ -34,13 +33,40 @@
         "code": "Code",
         "image": "Bild"
       },
+      "freehand": {
+        "title": "Freihand-Optionen",
+        "color": "Farbe",
+        "customColor": "Eigene Farbe",
+        "width": "Dicke",
+        "opacity": "Deckkraft",
+        "lineStyle": "Linienstil",
+        "dashScale": "Strichgröße",
+        "colors": {
+          "red": "Rot",
+          "orange": "Orange",
+          "yellow": "Gelb",
+          "green": "Grün",
+          "blue": "Blau",
+          "purple": "Lila",
+          "black": "Schwarz",
+          "white": "Weiß"
+        },
+        "lineStyles": {
+          "solid": "Durchgezogen",
+          "dashed": "Gestrichelt",
+          "dotted": "Gepunktet",
+          "custom": "Eigene"
+        },
+        "addSettings": "Einstellungen hinzufügen für "
+      },
       "elementType": {
         "heading": "Überschrift",
         "text": "Text",
         "code": "Code",
         "image": "Bild",
         "shape": "Form",
-        "arrow": "Pfeil"
+        "arrow": "Pfeil",
+        "freehand": "Freihand"
       },
       "projectorSettings": {
         "title": "Beameransicht-Einstellungen",
@@ -48,6 +74,16 @@
         "pointerColor": "Zeiger-Farbe",
         "customColor": "Eigene",
         "pointerShape": "Zeiger-Form",
+        "colors": {
+          "red": "Rot",
+          "orange": "Orange",
+          "yellow": "Gelb",
+          "green": "Grün",
+          "blue": "Blau",
+          "purple": "Lila",
+          "black": "Schwarz",
+          "white": "Weiß"
+        },
         "shapes": {
           "dot": "Punkt",
           "ring": "Ring",
@@ -65,7 +101,31 @@
       "selectedElement": "Ausgewähltes Element",
       "headingSettings": {
         "title": "Überschrift",
-        "levelLabel": "Hierarchiestufe"
+        "levelLabel": "Hierarchiestufe",
+        "numberingLabel": "Nummerierung",
+        "numberingEnabled": "Nummerierung aktivieren",
+        "numberingNone": "Keine Zahlen",
+        "numberingDecimal": "Zahlen",
+        "numberingLowerAlpha": "Alphabetisch klein",
+        "numberingUpperAlpha": "Alphabetisch groß",
+        "numberingLowerRoman": "Römisch klein",
+        "numberingUpperRoman": "Römisch groß",
+        "fontFamily": "Schriftart",
+        "fontFamilyPlaceholder": "Standardschrift",
+        "fontSize": "Schriftgröße",
+        "fontSizeDecrease": "Schriftgröße um 1 kleiner machen",
+        "fontSizeIncrease": "Schriftgröße um 1 größer machen",
+        "textStyle": "Textstil",
+        "bold": "Fett",
+        "italic": "Kursiv",
+        "underline": "Unterstrichen",
+        "color": "Schriftfarbe",
+        "colorTheme": "Theme",
+        "customColor": "Eigene Farbe",
+        "backgroundColor": "Hintergrundfarbe"
+      },
+      "freehandSettings": {
+        "title": "Freihand"
       },
       "delete": "Löschen"
     }

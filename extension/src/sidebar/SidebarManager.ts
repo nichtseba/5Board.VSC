@@ -91,6 +91,56 @@ export class SidebarManager implements vscode.Disposable {
         }
       });
     });
+
+    this.messages.on('updateHeadingLevelSettings', (msg) => {
+      if (!EXTENSION.activeEditorDocument) {
+        return;
+      }
+
+      EXTENSION.activeEditorDocument.applyEdit((document) => {
+        const headingSettings = document.content.headingSettings ?? {};
+        const levels = headingSettings.levels ?? {};
+        const currentLevelSettings = levels[msg.level] ?? {};
+
+        document.content.headingSettings = {
+          ...headingSettings,
+          levels: {
+            ...levels,
+            [msg.level]: {
+              ...currentLevelSettings,
+              ...msg.changes,
+              textDecoration: {
+                ...currentLevelSettings.textDecoration,
+                ...msg.changes.textDecoration,
+              },
+            },
+          },
+        };
+      });
+    });
+
+    this.messages.on('updateHeadingNumbering', (msg) => {
+      if (!EXTENSION.activeEditorDocument) {
+        return;
+      }
+
+      EXTENSION.activeEditorDocument.applyEdit((document) => {
+        const headingSettings = document.content.headingSettings ?? {};
+        const numberingFormats = headingSettings.numberingFormats ?? {};
+
+        document.content.headingSettings = {
+          ...headingSettings,
+          numberingEnabled: msg.enabled ?? headingSettings.numberingEnabled,
+          numberingFormats:
+            msg.level && msg.numberingFormat
+              ? {
+                  ...numberingFormats,
+                  [msg.level]: msg.numberingFormat,
+                }
+              : numberingFormats,
+        };
+      });
+    });
   }
 
   dispose(): void {
