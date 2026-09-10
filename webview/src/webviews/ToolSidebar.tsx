@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { init } from '../app/init';
 import {
+  AddElementToolParameters,
   DEFAULT_FREEHAND_PARAMETERS,
   EditorTool,
   EditorToolDefinition,
@@ -43,19 +44,20 @@ export default function ToolSidebar() {
   }, [messages]);
 
   const handleToolClick = (tool: EditorTool) => {
-    if (tool.type === selectedTool?.type) return;
-    selectTool(tool.type);
-  };
-  // Builds the tool payload, attaching freehand parameters for the freehand tool.
-  const toolFor = (toolId: EditorToolId): EditorTool =>
-    toolId === EditorToolId.FREEHAND
-      ? { type: EditorToolId.FREEHAND, parameters: freehandParams }
-      : { type: toolId, parameters: undefined };
+    if (tool.type === selectedTool?.type) {
+      if (tool.type === EditorToolId.AddElement) {
+        if (
+          (tool.parameters as AddElementToolParameters).type ===
+          (selectedTool.parameters as AddElementToolParameters).type
+        ) {
+          return;
+        }
+      } else {
+        return;
+      }
+    }
 
-  const selectTool = (toolId: EditorToolId) => {
-    const tool = toolFor(toolId);
-    //setSelectedTool(tool);
-    console.log('TESTING TOOÖ SELECTION: ', tool, toolId);
+    if (tool.type === EditorToolId.FREEHAND) tool.parameters = freehandParams;
     messages.send({ type: 'selectTool', tool });
   };
 
