@@ -11,7 +11,9 @@
       "startPresentation": "Start Presentation",
       "title": "Projector",
       "noFileOpen": "Please open a .5boardz file in the editor before starting the projector view.",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "live": "Live",
+      "paused": "Paused"
     }
   },
   "webview": {
@@ -71,6 +73,10 @@
       "projectorSettings": {
         "title": "Projector Settings",
         "cursorTracking": "Cursor Tracking",
+        "pause": "Pause",
+        "resume": "Resume",
+        "statusLive": "Live",
+        "statusPaused": "Paused",
         "pointerColor": "Pointer Color",
         "customColor": "Custom",
         "pointerShape": "Pointer Shape",

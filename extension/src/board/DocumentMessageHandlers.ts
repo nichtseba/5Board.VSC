@@ -20,8 +20,12 @@ export class DocumentMessageHandlers {
         this.document.messageService.send(
           {
             type: 'projectorStateChanged',
-            active: EXTENSION.cursorTrackingEnabled && this.document.hasProjector,
+            active:
+              EXTENSION.cursorTrackingEnabled &&
+              this.document.hasProjector &&
+              !EXTENSION.projectorPaused,
             open: this.document.hasProjector,
+            paused: EXTENSION.projectorPaused,
           },
           sender,
         );
@@ -84,6 +88,7 @@ export class DocumentMessageHandlers {
 
       // Mirror the in-progress freehand stroke to the projector while drawing.
       this.document.messageService.on('freehandPreview', (msg) => {
+        if (EXTENSION.projectorPaused) return;
         this.document.messageService.send({
           type: 'freehandPreview',
           points: msg.points,
@@ -104,17 +109,20 @@ export class DocumentMessageHandlers {
 
       // The editor (ProjectorCursorMirror) only sends while mirroring is active, so just relay.
       this.document.messageService.on('cursorMove', (msg) => {
+        if (EXTENSION.projectorPaused) return;
         this.document.messageService.send({ type: 'cursorMove', x: msg.x, y: msg.y });
       }),
 
       // When the mouse leaves the editor canvas, hide the cursor dot in the projector.
       this.document.messageService.on('cursorLeave', () => {
+        if (EXTENSION.projectorPaused) return;
         this.document.messageService.send({ type: 'cursorHide' });
       }),
 
       // Forward scroll position from any panel to all other panels.
       // The editor only sends scroll when a projector window is open
       this.document.messageService.on('scroll', (msg) => {
+        if (EXTENSION.projectorPaused) return;
         this.document.messageService.send({ type: 'scroll', top: msg.top, left: msg.left });
       }),
 

@@ -21,6 +21,8 @@ export default function Projector() {
   );
   // Live freehand stroke the editor is currently drawing (cleared when finished).
   const [freehandPreview, setFreehandPreview] = useState<FreehandPreview | null>(null);
+  // Frozen state: mirroring is on hold
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     messages.send({ type: 'ready' });
@@ -79,9 +81,14 @@ export default function Projector() {
       setCursor(null);
     }
     if (msg.type === 'projectorStateChanged') {
+      setPaused(msg.paused);
       // If mirroring was just turned off, clear any lingering cursor dot.
       if (!msg.active) {
         setCursor(null);
+      }
+      // Drop a half-drawn stroke so it does not stick around while paused.
+      if (msg.paused) {
+        setFreehandPreview(null);
       }
     }
     if (msg.type === 'projectorPointerChanged') {
@@ -117,8 +124,12 @@ export default function Projector() {
       {/* Projector badge — display only, no interactive elements */}
       <div
         style={{
-          background: 'var(--vscode-badge-background)',
-          color: 'var(--vscode-badge-foreground)',
+          background: paused
+            ? 'var(--vscode-statusBarItem-warningBackground, #cca700)'
+            : 'var(--vscode-badge-background)',
+          color: paused
+            ? 'var(--vscode-statusBarItem-warningForeground, #000000)'
+            : 'var(--vscode-badge-foreground)',
           padding: '4px 12px',
           fontWeight: 'bold',
           fontSize: '0.85rem',
@@ -126,7 +137,8 @@ export default function Projector() {
           textTransform: 'uppercase',
         }}
       >
-        📽 {t('extension.projector.title')} — {boardDocument?.manifest.title ?? ''}
+        {t('extension.projector.title')} — {boardDocument?.manifest.title ?? ''} ·{' '}
+        {paused ? t('extension.projector.paused') : t('extension.projector.live')}
       </div>
       {/*
         Pass the live cursor position directly into EditorCanvas so the overlay

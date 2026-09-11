@@ -11,7 +11,9 @@
       "startPresentation": "Beameransicht starten",
       "title": "Beameransicht",
       "noFileOpen": "Bitte öffne zuerst eine .5boardz Datei im Editor, bevor du die Beameransicht startest.",
-      "loading": "Lade…"
+      "loading": "Lade…",
+      "live": "Live",
+      "paused": "Pausiert"
     }
   },
   "webview": {
@@ -71,6 +73,10 @@
       "projectorSettings": {
         "title": "Beameransicht-Einstellungen",
         "cursorTracking": "Mauszeiger-Tracking",
+        "pause": "Pausieren",
+        "resume": "Fortsetzen",
+        "statusLive": "Live",
+        "statusPaused": "Pausiert",
         "pointerColor": "Zeiger-Farbe",
         "customColor": "Eigene",
         "pointerShape": "Zeiger-Form",

@@ -38,6 +38,7 @@ export class FiveBoardExtension extends ExtensionBase {
   }
 
   public cursorTrackingEnabled = true;
+  public projectorPaused = false;
   public projectorPointerStyle: ProjectorPointerStyle = DEFAULT_PROJECTOR_POINTER_STYLE;
 
   private activeEditorDocument_: BoardCustomDocument | null = null;

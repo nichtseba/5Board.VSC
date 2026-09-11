@@ -21,7 +21,7 @@ type AllExtensionToWebviewMessage =
   | { type: 'cursorMove'; x: number; y: number }
   | { type: 'cursorHide' }
   | { type: 'cursorTrackingChanged'; enabled: boolean }
-  | { type: 'projectorStateChanged'; active: boolean; open: boolean }
+  | { type: 'projectorStateChanged'; active: boolean; open: boolean; paused: boolean }
   | { type: 'projectorPointerChanged'; style: ProjectorPointerStyle }
   | { type: 'scroll'; top: number; left: number }
   | { type: 'selectElement'; elementId: string | null }
@@ -68,6 +68,7 @@ type AllWebviewToExtensionMessage =
   | { type: 'updateElementLayout'; id: string; changes: Partial<ElementLayout> } // Update the Layout when Element was moved or resized
   | { type: 'updateElement'; id: string; changes: Partial<EditorElement> } // Update element with it's settings
   | { type: 'toggleCursorTracking' }
+  | { type: 'toggleProjectorPaused' }
   | { type: 'updateProjectorPointer'; style: ProjectorPointerStyle }
   // Sent by the editor after drawing a new element (e.g. a freehand stroke).
   | { type: 'addElement'; element: EditorElement }

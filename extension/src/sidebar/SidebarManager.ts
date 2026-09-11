@@ -45,6 +45,14 @@ export class SidebarManager implements vscode.Disposable {
         { type: 'projectorPointerChanged', style: EXTENSION.projectorPointerStyle },
         sender,
       );
+      this.sendProjectorState(sender);
+    });
+
+    // Pause/resume the projector: freezes all mirroring until resumed.
+    this.messages.on('toggleProjectorPaused', () => {
+      EXTENSION.projectorPaused = !EXTENSION.projectorPaused;
+      this.sendProjectorState(); // sidebars (reflect the button)
+      EXTENSION.activeEditorDocument?.broadcastProjectorState(); // editor + projector
     });
 
     // Toggle the global cursor tracking setting from the sidebar and notify every view.
@@ -137,6 +145,21 @@ export class SidebarManager implements vscode.Disposable {
         };
       });
     });
+  }
+
+  /** Mirror the projector state to the sidebars (they live on a different MessageService). */
+  private sendProjectorState(receiver?: vscode.Webview): void {
+    const open = EXTENSION.activeEditorDocument?.hasProjector ?? false;
+    const paused = EXTENSION.projectorPaused;
+    this.messages.send(
+      {
+        type: 'projectorStateChanged',
+        active: EXTENSION.cursorTrackingEnabled && open && !paused,
+        open,
+        paused,
+      },
+      receiver,
+    );
   }
 
   dispose(): void {
