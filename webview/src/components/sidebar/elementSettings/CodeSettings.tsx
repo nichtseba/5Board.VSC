@@ -128,6 +128,15 @@ export function CodeSettings({ element }: Props) {
           {t('webview.sidebar-element-settings.codeSettings.resetColors')}
         </Button>
       )}
+      {element.data.lastOutput !== undefined && (
+        <Button
+          className="mt-2"
+          appearance="secondary"
+          onClick={() => messages.send({ type: 'codeblockResetOutput', elementId: element.id })}
+        >
+          {t('webview.sidebar-element-settings.codeSettings.resetOutput')}
+        </Button>
+      )}
     </SettingsPanel>
   );
 }

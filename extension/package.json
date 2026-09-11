@@ -135,8 +135,8 @@
     "keybindings": [
       {
         "command": "5board-vsc.executeCodeblock",
-        "key": "ctrl+e",
-        "mac": "cmd+e",
+        "key": "ctrl+shift+e",
+        "mac": "cmd+shift+e",
         "when": "activeCustomEditorId == '5board-vsc.editor'"
       }
     ],

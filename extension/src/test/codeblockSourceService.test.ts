@@ -15,6 +15,7 @@ import {
   deriveCodeClasses,
   moveBlock,
   renameClass,
+  resetOutput,
   updateBlockCode,
 } from '../board/CodeblockSourceService';
 
@@ -251,6 +252,33 @@ describe('CodeblockSourceService', function () {
 
       assert.deepEqual(doc.content.codeClasses, [{ name: 'Student', language: 'java' }]);
       assert.equal(doc.sources.length, 1);
+    });
+  });
+
+  describe('resetOutput', function () {
+    it('clears a stored transcript and reports that it did', function () {
+      const doc = makeDocument([makeCodeElement('el-1')]);
+      data(doc, 'el-1').lastOutput = {
+        transcript: [{ kind: 'out', text: 'hi' }],
+        success: true,
+        exitCode: 0,
+      };
+
+      assert.equal(resetOutput(doc, 'el-1'), true);
+      assert.equal(data(doc, 'el-1').lastOutput, undefined);
+      assert.equal('lastOutput' in data(doc, 'el-1'), false);
+    });
+
+    it('reports no change when there is nothing stored', function () {
+      const doc = makeDocument([makeCodeElement('el-1')]);
+
+      assert.equal(resetOutput(doc, 'el-1'), false);
+    });
+
+    it('reports no change for an unknown element', function () {
+      const doc = makeDocument([makeCodeElement('el-1')]);
+
+      assert.equal(resetOutput(doc, 'nope'), false);
     });
   });
 

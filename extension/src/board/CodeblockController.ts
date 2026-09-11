@@ -3,7 +3,7 @@ import { EditorElementType, fileNameFromClassName, type CodeElementData } from '
 import { BoardCustomDocument } from './BoardCustomDocument';
 import { ExecutionSessionManager, type SessionEvent } from '../runner/ExecutionSessionManager';
 import { SRC_ROOT } from './package';
-import { updateBlockCode } from './CodeblockSourceService';
+import { resetOutput as clearStoredOutput, updateBlockCode } from './CodeblockSourceService';
 
 /**
  * Per-document I/O boundary for codeblocks: wires inbound webview messages and the
@@ -76,6 +76,35 @@ export class CodeblockController {
 
   public async executeBlock(elementId: string): Promise<void> {
     await this.sessions.start(this.document.boardPackage.document, elementId);
+  }
+
+  /**
+   * Clears a block's stored transcript (the "reset output" button in the element settings).
+   *
+   * Deliberately not routed through `updateElement`: that message neither persists nor tells
+   * the webviews to drop the run they are still displaying, so the output would come back on
+   * the next reload.
+   */
+  public resetOutput(elementId: string): void {
+    // A running program still owns its transcript — clearing it now would leave the console
+    // showing a fragment of a run that is still producing output.
+    if (this.sessions.isRunning(elementId)) return;
+
+    let cleared = false;
+    this.document.applyEdit((document) => {
+      cleared = clearStoredOutput(document, elementId);
+    });
+    if (!cleared) return;
+
+    void this.document.saveDocument();
+    // Editor and projector drop their live entry for the block; without this the transcript of
+    // the finished run stays on screen, because live state wins over the stored one.
+    this.document.messageService.send({
+      type: 'codeblockSync',
+      elementId,
+      transcript: [],
+      running: false,
+    });
   }
 
   private handleSessionEvent(elementId: string, event: SessionEvent): void {

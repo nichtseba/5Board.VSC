@@ -9,7 +9,7 @@ import {
   isDefaultClassName,
 } from '5board.vsc-common';
 import type { EditorElementProps } from '../../EditorElement';
-import { useMessageService } from '../../../../services/MessageService';
+import { useMessageService, useOnMessage } from '../../../../services/MessageService';
 import { useSources } from '../../../../providers/SourcesProvider';
 import {
   useExecutionOutput,
@@ -66,6 +66,14 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
   }, [messages, element.id]);
 
   const { wrapperRef, handleMount } = useEditorAutoHeight();
+  const pasteCallbackRef = useRef<((text: string) => void) | null>(null);
+
+  useOnMessage((msg) => {
+    if (msg.type === 'clipboardContent' && pasteCallbackRef.current) {
+      pasteCallbackRef.current(msg.text);
+      pasteCallbackRef.current = null;
+    }
+  });
 
   const sendDebouncedUpdate = useCallback(
     (newCode: string) => {
@@ -105,6 +113,7 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
     backgroundColor: element.style.backgroundColor,
     borderColor: element.style.border?.color,
   };
+  const hasCustomBg = element.style.backgroundColor != null;
 
   if (!source) {
     return (
@@ -132,7 +141,10 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
         </div>
       )}
 
-      <div ref={wrapperRef} style={{ height: MIN_HEIGHT }}>
+      <div ref={wrapperRef} style={{ height: MIN_HEIGHT }} data-code-id={element.id}>
+        {hasCustomBg && (
+          <style>{`[data-code-id="${element.id}"] .monaco-editor, [data-code-id="${element.id}"] .monaco-editor-background, [data-code-id="${element.id}"] .monaco-editor .margin { background-color: transparent !important; }`}</style>
+        )}
         <MonacoEditor
           height="100%"
           width="100%"
@@ -145,6 +157,18 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
             // opening the Command Palette (or clicking elsewhere) blurs Monaco — flushing here
             // means those paths always execute fresh code.
             editor.onDidBlurEditorText(flushPendingUpdate);
+
+            editor.addAction({
+              id: '5board-paste',
+              label: 'Paste',
+              keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV],
+              run: (ed) => {
+                pasteCallbackRef.current = (text) => {
+                  ed.trigger('keyboard', 'type', { text });
+                };
+                messages.send({ type: 'requestClipboard' });
+              },
+            });
           }}
           onChange={(v) => {
             const newCode = v ?? '';

@@ -51,7 +51,8 @@ type AllExtensionToWebviewMessage =
       transcript: TranscriptSegment[];
       running: boolean;
     }
-  | { type: 'goToElement'; elementId: string };
+  | { type: 'goToElement'; elementId: string }
+  | { type: 'clipboardContent'; text: string };
 
 /**
  * Messages from the webviews to the extension
@@ -85,9 +86,11 @@ type AllWebviewToExtensionMessage =
   | { type: 'codeblockInput'; elementId: string; text: string }
   | { type: 'codeblockEndInput'; elementId: string }
   | { type: 'codeblockStop'; elementId: string }
+  | { type: 'codeblockResetOutput'; elementId: string }
   | { type: 'updateBlockCode'; elementId: string; code: string }
   | { type: 'openSource'; elementId: string }
   | { type: 'copyToClipboard'; text: string }
+  | { type: 'requestClipboard' }
   | { type: 'moveBlock'; elementId: string; className?: string | null; language?: string }
   | {
       type: 'manageCodeClass';

@@ -105,6 +105,10 @@ export class SidebarManager implements vscode.Disposable {
       });
     });
 
+    this.messages.on('codeblockResetOutput', (msg) => {
+      EXTENSION.activeEditorDocument?.codeblock.resetOutput(msg.elementId);
+    });
+
     this.messages.on('manageCodeClass', (msg) => {
       this.editActiveDocument((document) => {
         switch (msg.op) {

@@ -64,6 +64,23 @@ export function updateBlockCode(document: BoardDocument, elementId: string, code
   }
 }
 
+/**
+ * Drops the stored transcript of a block (the "reset output" button).
+ *
+ * Returns whether anything was actually cleared, so the caller can skip the save and the
+ * follow-up broadcast when there was nothing to reset.
+ */
+export function resetOutput(document: BoardDocument, elementId: string): boolean {
+  const element = findCodeElement(document, elementId);
+  if (!element) return false;
+
+  const data = element.data as CodeElementData;
+  if (data.lastOutput === undefined) return false;
+
+  delete data.lastOutput;
+  return true;
+}
+
 // Back-compat for documents predating the registry: a source is a named class unless it is some
 // block's id-derived default (standalone) source.
 export function deriveCodeClasses(content: BoardContent, sources: Source[]): CodeClass[] {

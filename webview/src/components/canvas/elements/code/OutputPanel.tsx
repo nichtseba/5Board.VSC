@@ -99,7 +99,7 @@ export function OutputPanel({ elementId, state, readOnly, onRun, onOpenSource }:
   return (
     <div className="border-t border-editor-widget-border">
       {/* Actionbar */}
-      <div className="px-3 py-1 font-sans text-base bg-panel-background flex items-center gap-0.5">
+      <div className="px-3 py-1 font-sans text-base bg-panel-background flex items-center gap-2">
         <button
           onClick={() => hasOutput && setOutputVisible((v) => !v)}
           disabled={!hasOutput}
@@ -131,7 +131,7 @@ export function OutputPanel({ elementId, state, readOnly, onRun, onOpenSource }:
           <Icons name="copy" />
         </button>
 
-        <div className="ml-auto flex items-center gap-1.5">
+        <div className="ml-auto flex items-center gap-2.5">
           <button
             title="Open source file"
             onClick={onOpenSource}
