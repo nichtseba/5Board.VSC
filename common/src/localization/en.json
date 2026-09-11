@@ -39,7 +39,34 @@
         "code": "Code",
         "image": "Image",
         "shape": "Shape",
-        "arrow": "Arrow"
+        "arrow": "Arrow",
+        "freehand": "Freehand"
+      },
+      "freehand": {
+        "title": "Freehand Options",
+        "color": "Color",
+        "customColor": "Custom color",
+        "width": "Thickness",
+        "opacity": "Opacity",
+        "lineStyle": "Line style",
+        "dashScale": "Dash size",
+        "colors": {
+          "red": "Red",
+          "orange": "Orange",
+          "yellow": "Yellow",
+          "green": "Green",
+          "blue": "Blue",
+          "purple": "Purple",
+          "black": "Black",
+          "white": "White"
+        },
+        "lineStyles": {
+          "solid": "Solid",
+          "dashed": "Dashed",
+          "dotted": "Dotted",
+          "custom": "Custom"
+        },
+        "addSettings": "Add Settings for "
       },
       "projectorSettings": {
         "title": "Projector Settings",
@@ -47,6 +74,16 @@
         "pointerColor": "Pointer Color",
         "customColor": "Custom",
         "pointerShape": "Pointer Shape",
+        "colors": {
+          "red": "Red",
+          "orange": "Orange",
+          "yellow": "Yellow",
+          "green": "Green",
+          "blue": "Blue",
+          "purple": "Purple",
+          "black": "Black",
+          "white": "White"
+        },
         "shapes": {
           "dot": "Dot",
           "ring": "Ring",
@@ -62,7 +99,31 @@
       "selectedElement": "Selected Element",
       "headingSettings": {
         "title": "Heading",
-        "levelLabel": "Hierarchy level"
+        "levelLabel": "Hierarchy level",
+        "numberingLabel": "Numbering",
+        "numberingEnabled": "Enable numbering",
+        "numberingNone": "No numbers",
+        "numberingDecimal": "Numbers",
+        "numberingLowerAlpha": "Alphabetic lowercase",
+        "numberingUpperAlpha": "Alphabetic uppercase",
+        "numberingLowerRoman": "Roman lowercase",
+        "numberingUpperRoman": "Roman uppercase",
+        "fontFamily": "Font family",
+        "fontFamilyPlaceholder": "Default font",
+        "fontSize": "Font size",
+        "fontSizeDecrease": "Decrease font size by 1",
+        "fontSizeIncrease": "Increase font size by 1",
+        "textStyle": "Text style",
+        "bold": "Bold",
+        "italic": "Italic",
+        "underline": "Underline",
+        "color": "Text color",
+        "colorTheme": "Theme",
+        "customColor": "Custom color",
+        "backgroundColor": "Background color"
+      },
+      "freehandSettings": {
+        "title": "Freehand"
       }
     }
   }
