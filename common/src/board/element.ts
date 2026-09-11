@@ -164,6 +164,7 @@ type PolygonShapeData = BaseShapeData & {
 
 type ContentTableElementData = {
   title?: string;
+  fontSize?: number;
 };
 
 /**

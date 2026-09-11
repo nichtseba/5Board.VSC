@@ -5,7 +5,7 @@ import { useMessageService } from '../../../services/MessageService';
 import { useHeadingNumber } from '../HeadingNumberingContext';
 import type React from 'react';
 
-const CONTENT_TABLE_FONT_SIZE = 14;
+const DEFAULT_CONTENT_TABLE_FONT_SIZE = 14;
 
 //builds CSS style for one toc entry, based on the corresponding heading
 function getContentTableEntryStyle(
@@ -22,11 +22,13 @@ function getContentTableEntryStyle(
     fontFamily: levelSettings.fontFamily,
     fontWeight: levelSettings.fontWeight,
     fontStyle: levelSettings.fontStyle,
-    fontSize: `${CONTENT_TABLE_FONT_SIZE}px`,
+    fontSize: 'inherit',
   };
 }
 
-export function ContentTableElement({}: EditorElementProps<EditorElementType.ContentTable>) {
+export function ContentTableElement({
+  element,
+}: EditorElementProps<EditorElementType.ContentTable>) {
   const boardDocument = useBoardDocument();
   const messages = useMessageService();
 
@@ -56,7 +58,10 @@ export function ContentTableElement({}: EditorElementProps<EditorElementType.Con
       .sort((a, b) => a.layout.yPos - b.layout.yPos || a.layout.xPos - b.layout.xPos) ?? [];
 
   return (
-    <div className="flex flex-col gap-1 text-sm font-normal">
+    <div
+      className="flex flex-col gap-1 font-normal"
+      style={{ fontSize: `${element.data.fontSize ?? DEFAULT_CONTENT_TABLE_FONT_SIZE}px` }}
+    >
       {headings.map((heading) => (
         <ContentTableEntry
           key={heading.id}
@@ -91,7 +96,7 @@ function ContentTableEntry({
       className="w-fit text-left hover:underline"
       style={{
         ...getContentTableEntryStyle(heading, boardDocument),
-        marginLeft: `${(heading.data.level - 1) * 12}px`,
+        marginLeft: `${(heading.data.level - 1) * 20}px`,
       }}
     >
       {number ? `${number} ` : ''}
