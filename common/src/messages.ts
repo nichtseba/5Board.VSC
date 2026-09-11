@@ -36,7 +36,8 @@ type AllExtensionToWebviewMessage =
     }
   | { type: 'updateEditorState'; editorState: EditorState }
   | { type: 'codeblockResult'; elementId: string; output: CodeExecutionOutput }
-  | { type: 'goToElement'; elementId: string };
+  | { type: 'goToElement'; elementId: string }
+  | { type: 'clipboardContent'; text: string };
 
 /**
  * Messages from the webviews to the extension
@@ -70,6 +71,7 @@ type AllWebviewToExtensionMessage =
   | { type: 'updateBlockCode'; elementId: string; code: string }
   | { type: 'openSource'; elementId: string }
   | { type: 'copyToClipboard'; text: string }
+  | { type: 'requestClipboard' }
   | { type: 'moveBlock'; elementId: string; className?: string | null; language?: string }
   | {
       type: 'manageCodeClass';

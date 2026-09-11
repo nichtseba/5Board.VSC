@@ -2,7 +2,7 @@ import { useRef } from 'react';
 import type * as monaco from 'monaco-editor';
 
 const LINE_HEIGHT = 19;
-export const MIN_HEIGHT = 5 * LINE_HEIGHT;
+export const MIN_HEIGHT = LINE_HEIGHT;
 
 export function useEditorAutoHeight() {
   const wrapperRef = useRef<HTMLDivElement>(null);

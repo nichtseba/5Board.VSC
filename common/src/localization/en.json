@@ -101,7 +101,8 @@
         "noMainWrapInfo": "Custom class, no main method",
         "backgroundLabel": "Background color",
         "borderLabel": "Border color",
-        "resetColors": "Reset to theme colors"
+        "resetColors": "Reset to theme colors",
+        "resetOutput": "Reset output"
       }
     },
     "sidebar-class-settings": {

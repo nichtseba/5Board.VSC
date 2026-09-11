@@ -101,7 +101,8 @@
         "noMainWrapInfo": "Eigene Klasse, keine main-Methode",
         "backgroundLabel": "Hintergrundfarbe",
         "borderLabel": "Rahmenfarbe",
-        "resetColors": "Auf Theme-Farben zurücksetzen"
+        "resetColors": "Auf Theme-Farben zurücksetzen",
+        "resetOutput": "Ausgabe zurücksetzen"
       }
     },
     "sidebar-class-settings": {
