@@ -225,7 +225,7 @@ export const DEFAULT_ELEMENT_PROFILES = {
     layout: { width: 12, height: 4 },
     style: {
       visible: true,
-      color: '#ff0000',
+      opacity: 1,
       border: {
         color: '#240ae4',
         width: 2,

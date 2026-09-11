@@ -12,6 +12,7 @@ import {
   WebviewToExtensionMessage,
 } from '5board.vsc-common';
 import { useEditorState } from '../../../../providers/EditorStateProvider';
+import AddOverlay from './AddOverlay';
 import ClickOverlay from './ClickOverlay';
 
 type Point = {
@@ -242,7 +243,15 @@ export function ClickAddTool() {
    * Before the first click there is no preview geometry.
    */
   if (!startPoint) {
-    return null;
+    return (
+      <AddOverlay
+        x={currentPoint.x * cellSize.width}
+        y={currentPoint.y * cellSize.height}
+        width={cellSize.width}
+        height={cellSize.height}
+        variant="point"
+      />
+    );
   }
 
   const preview = createPreview(elementType, startPoint, currentPoint);
