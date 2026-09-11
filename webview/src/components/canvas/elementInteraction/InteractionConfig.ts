@@ -54,4 +54,10 @@ export const ELEMENT_INTERACTION_CONFIG = {
     resizable: true,
     rotatable: false,
   },
+  [EditorElementType.Freehand]: {
+    draggable: true,
+    dragDirection: 'free',
+    resizable: true,
+    rotatable: false,
+  },
 } satisfies Record<EditorElementType, ElementInteractionProfile>;

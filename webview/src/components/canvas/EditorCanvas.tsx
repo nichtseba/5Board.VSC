@@ -8,6 +8,7 @@ import { useEditorState } from '../../providers/EditorStateProvider';
 import { useMessageService } from '../../services/MessageService';
 import { useGrid } from '../../providers/GridProvider';
 import { CanvasTools } from './tools/CanvasTools';
+import FreehandPreviewOverlay, { FreehandPreview } from './tools/FreehandPreviewOverlay';
 import { useBoardDocument } from '../../providers/BoardDocumentProvider';
 import { useCanvasPointer } from './useCanvasPointer';
 
@@ -16,9 +17,12 @@ export type EditorCanvasProps = {
   // Only the projector passes this to mirror the editor's pointer position.
   cursor?: ProjectorCursor | null;
   pointerStyle?: ProjectorPointerStyle;
+  // Live freehand stroke to mirror (projector only). The editor draws its own
+  // preview locally via the FreehandTool.
+  freehandPreview?: FreehandPreview | null;
 };
 
-export default function EditorCanvas({ cursor, pointerStyle }: EditorCanvasProps) {
+export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: EditorCanvasProps) {
   // All pointer handling lives in one hook.
   const pointerHandlers = useCanvasPointer();
 
@@ -74,6 +78,9 @@ export default function EditorCanvas({ cursor, pointerStyle }: EditorCanvasProps
 
         {/* Cursor overlay — only rendered in the projector via the cursor prop */}
         <ProjectorMouse cursor={cursor ?? null} style={pointerStyle} />
+
+        {/* Live freehand stroke mirrored from the editor — projector only */}
+        <FreehandPreviewOverlay preview={freehandPreview ?? null} />
       </div>
     </HeadingNumberingProvider>
   );

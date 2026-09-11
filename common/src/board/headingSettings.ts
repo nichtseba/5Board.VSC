@@ -1,6 +1,6 @@
-import { TextDecorationStyle } from './element';
+import { HeadingElementData, TextDecorationStyle } from './element';
 
-export type HeadingLevel = 1 | 2 | 3 | 4 | 5 | 6;
+export type HeadingLevel = HeadingElementData['level'];
 
 export type HeadingNumberingFormat =
   | 'none'

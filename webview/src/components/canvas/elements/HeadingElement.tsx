@@ -1,7 +1,7 @@
 import {
   EditorElementType,
   TextDecorationStyle,
-  UpdateElementMessage,
+  WebviewToExtensionMessage,
   getHeadingLevelSettings,
 } from '5board.vsc-common';
 import type React from 'react';
@@ -57,7 +57,7 @@ export function HeadingElement({ element }: EditorElementProps<EditorElementType
     setIsEditing(false);
     const newContent = contentRef.current?.textContent ?? '';
     if (newContent !== element.data.content) {
-      const message: UpdateElementMessage = {
+      const message: WebviewToExtensionMessage<'updateElement'> = {
         type: 'updateElement',
         id: element.id,
         changes: { data: { ...element.data, content: newContent } },

@@ -40,7 +40,34 @@
         "image": "Image",
         "shape": "Shape",
         "arrow": "Arrow",
-        "contentTable": "Content Table"
+        "contentTable": "Content Table",
+        "freehand": "Freehand"
+      },
+      "freehand": {
+        "title": "Freehand Options",
+        "color": "Color",
+        "customColor": "Custom color",
+        "width": "Thickness",
+        "opacity": "Opacity",
+        "lineStyle": "Line style",
+        "dashScale": "Dash size",
+        "colors": {
+          "red": "Red",
+          "orange": "Orange",
+          "yellow": "Yellow",
+          "green": "Green",
+          "blue": "Blue",
+          "purple": "Purple",
+          "black": "Black",
+          "white": "White"
+        },
+        "lineStyles": {
+          "solid": "Solid",
+          "dashed": "Dashed",
+          "dotted": "Dotted",
+          "custom": "Custom"
+        },
+        "addSettings": "Add Settings for "
       },
       "projectorSettings": {
         "title": "Projector Settings",
@@ -48,6 +75,16 @@
         "pointerColor": "Pointer Color",
         "customColor": "Custom",
         "pointerShape": "Pointer Shape",
+        "colors": {
+          "red": "Red",
+          "orange": "Orange",
+          "yellow": "Yellow",
+          "green": "Green",
+          "blue": "Blue",
+          "purple": "Purple",
+          "black": "Black",
+          "white": "White"
+        },
         "shapes": {
           "dot": "Dot",
           "ring": "Ring",
@@ -88,6 +125,9 @@
       },
       "contentTableSettings": {
         "title": "Table of content"
+      },
+      "freehandSettings": {
+        "title": "Freehand"
       }
     }
   }

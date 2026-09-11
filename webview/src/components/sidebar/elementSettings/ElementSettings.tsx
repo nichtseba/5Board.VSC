@@ -7,6 +7,7 @@ import { ImageSettings } from './ImageSettings';
 import { ShapeSettings } from './ShapeSettings';
 import { ArrowSettings } from './ArrowSettings';
 import { ContentTableSettings } from './ContentTableSettings';
+import { FreehandSettings } from './FreehandSettings';
 import { useLocalization } from '../../../providers/LocalizationProvider';
 
 type SettingsProps<T extends EditorElementType> = {
@@ -47,4 +48,5 @@ const SETTINGS_COMPONENTS: {
   [EditorElementType.Shape]: ShapeSettings,
   [EditorElementType.Arrow]: ArrowSettings,
   [EditorElementType.ContentTable]: ContentTableSettings,
+  [EditorElementType.Freehand]: FreehandSettings,
 };

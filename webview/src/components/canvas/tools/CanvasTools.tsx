@@ -1,5 +1,6 @@
 import { EditorToolId } from '5board.vsc-common';
 import SpacerTool from './SpacerTool';
+import FreehandTool from './FreehandTool';
 import { useEditorState } from '../../../providers/EditorStateProvider';
 
 /*
@@ -11,5 +12,10 @@ export function CanvasTools() {
 
   const activeToolId = editorState?.tool.type;
 
-  return <>{activeToolId === EditorToolId.SPACER && <SpacerTool />}</>;
+  return (
+    <>
+      {activeToolId === EditorToolId.SPACER && <SpacerTool />}
+      {activeToolId === EditorToolId.FREEHAND && <FreehandTool />}
+    </>
+  );
 }

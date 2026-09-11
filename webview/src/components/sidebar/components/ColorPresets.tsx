@@ -10,9 +10,9 @@ type ColorPresetsProps = {
   presets: readonly (string | ColorPreset)[];
 };
 
-// Just the row of preset swatches
+// Just the row of preset swatches; the label is shown on hover.
 export function ColorPresets({ color, onChange, presets }: ColorPresetsProps) {
-  const colorSelected = (preset: string) => color.toLowerCase() === preset.toLowerCase();
+  const colorSelected = (value: string) => color.toLowerCase() === value.toLowerCase();
 
   return (
     <div className="flex flex-wrap items-center gap-2">

@@ -241,7 +241,10 @@ function ColorField({ value, onChange }: { value: string; onChange: (value: stri
       <ColorPresets
         color={value}
         onChange={onChange}
-        presets={PROJECTOR_POINTER_PRESET_COLORS.map((preset) => ({ value: preset, theme: true }))}
+        presets={PROJECTOR_POINTER_PRESET_COLORS.map((preset) => ({
+          value: preset.value,
+          theme: true,
+        }))}
       />
       <div className="flex items-center gap-2">
         <ColorPicker color={value} onChange={onChange} />
