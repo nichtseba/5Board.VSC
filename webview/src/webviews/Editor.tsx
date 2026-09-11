@@ -42,7 +42,7 @@ export default function Editor() {
     <>
       <div className="relative">
         {boardDocument && (
-          <ExecutionOutputProvider>
+          <ExecutionOutputProvider elements={boardDocument.content.elements}>
             <SourcesProvider value={boardDocument.sources}>
               <CanvasEventsProvider>
                 <EditorCanvas />

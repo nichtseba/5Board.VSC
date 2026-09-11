@@ -77,6 +77,11 @@ export class DocumentMessageHandlers {
       this.document.messageService.on('copyToClipboard', (msg) => {
         void vscode.env.clipboard.writeText(msg.text);
       }),
+      this.document.messageService.on('requestClipboard', (_msg, sender) => {
+        void vscode.env.clipboard.readText().then((text) => {
+          this.document.messageService.send({ type: 'clipboardContent', text }, sender);
+        });
+      }),
       //#endregion "EditorTools"
 
       //#region "Projector"

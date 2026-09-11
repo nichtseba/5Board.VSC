@@ -41,7 +41,7 @@ export function OutputPanel({ output, onRun, onOpenSource }: OutputPanelProps) {
   return (
     <div className="border-t border-editor-widget-border">
       {/* Actionbar */}
-      <div className="px-3 py-1 font-sans text-base bg-panel-background flex items-center gap-0.5">
+      <div className="px-3 py-1 font-sans text-base bg-panel-background flex items-center gap-2">
         <button
           onClick={() => hasOutput && setOutputVisible((v) => !v)}
           disabled={!hasOutput}
@@ -71,7 +71,7 @@ export function OutputPanel({ output, onRun, onOpenSource }: OutputPanelProps) {
           <Icons name="copy" />
         </button>
 
-        <div className="ml-auto flex items-center gap-1.5">
+        <div className="ml-auto flex items-center gap-2.5">
           <button
             title="Open source file"
             onClick={onOpenSource}
@@ -91,7 +91,7 @@ export function OutputPanel({ output, onRun, onOpenSource }: OutputPanelProps) {
 
       {/* Output content — no own background, inherits the block surface (theme default or per-block override) */}
       {hasOutput && outputVisible && (
-        <pre className="m-0 px-3 py-2 font-mono text-editor leading-relaxed overflow-x-auto text-terminal-foreground">
+        <pre className="m-0 px-3 py-2 font-mono text-editor leading-relaxed overflow-x-auto text-terminal-foreground bg-editor-widget-background">
           {!output.success && output.stderr ? (
             <span className="text-terminal-ansiRed">{output.stderr}</span>
           ) : (

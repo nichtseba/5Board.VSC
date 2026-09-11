@@ -1,5 +1,10 @@
 import vscode from 'vscode';
-import { EditorElementType, fileNameFromClassName, type CodeElementData } from '5board.vsc-common';
+import {
+  EditorElementType,
+  fileNameFromClassName,
+  type CodeElementData,
+  type CodeExecutionOutput,
+} from '5board.vsc-common';
 import { BoardCustomDocument } from './BoardCustomDocument';
 import { ExecutionService } from '../runner/ExecutionService';
 import { SRC_ROOT } from './package';
@@ -52,16 +57,26 @@ export class CodeblockController {
       elementId,
     );
 
+    const output: CodeExecutionOutput = {
+      stdout: result.stdout,
+      // Surface execution-level failures (missing toolchain, no source) that have no stderr.
+      stderr: result.stderr || result.error || '',
+      success: result.success,
+      exitCode: result.exitCode,
+    };
+
+    this.document.applyEdit((document) => {
+      const element = document.content.elements.find((e) => e.id === elementId);
+      if (element && element.type === EditorElementType.Code) {
+        (element.data as CodeElementData).output = output;
+      }
+    });
+    void this.document.saveDocument();
+
     this.document.messageService.send({
       type: 'codeblockResult',
       elementId,
-      output: {
-        stdout: result.stdout,
-        // Surface execution-level failures (missing toolchain, no source) that have no stderr.
-        stderr: result.stderr || result.error || '',
-        success: result.success,
-        exitCode: result.exitCode,
-      },
+      output,
     });
   }
 }

@@ -90,6 +90,7 @@ export type TextDecorationStyle = {
 export type CodeElementData = {
   className: string;
   language: string;
+  output?: CodeExecutionOutput;
 };
 
 export type CodeExecutionOutput = {
