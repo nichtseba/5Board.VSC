@@ -69,6 +69,12 @@ export default function ProjectorSettings() {
               ? t('webview.sidebar.projectorSettings.resume')
               : t('webview.sidebar.projectorSettings.pause')
           }
+          aria-label={
+            paused
+              ? t('webview.sidebar.projectorSettings.resume')
+              : t('webview.sidebar.projectorSettings.pause')
+          }
+          aria-pressed={paused}
           onClick={() => messages.send({ type: 'toggleProjectorPaused' })}
           className="flex h-6 w-6 items-center justify-center rounded border border-foreground-description leading-none"
         >

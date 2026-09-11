@@ -70,20 +70,26 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   }
 
   /**
-   * Tell the views about the current projector state
+   * Current projector state, derived from global + document state:
    * - active: pointer should be mirrored (tracking on AND a beamer open AND not paused)
    * - open: projector/beamer window is open
    * - paused: mirroring is frozen until the user resumes
+   * Shared by every place that needs to send it (this document's broadcast, a
+   * newly-opened panel's 'ready' sync, the sidebars via SidebarManager).
    */
-  public broadcastProjectorState(): void {
+  public get projectorState() {
     const paused = EXTENSION.projectorPaused;
-    const active = EXTENSION.cursorTrackingEnabled && this.hasProjector && !paused;
-    this.messageService.send({
-      type: 'projectorStateChanged',
-      active,
-      open: this.hasProjector,
+    const open = this.hasProjector;
+    return {
+      type: 'projectorStateChanged' as const,
+      active: EXTENSION.cursorTrackingEnabled && open && !paused,
+      open,
       paused,
-    });
+    };
+  }
+
+  public broadcastProjectorState(): void {
+    this.messageService.send(this.projectorState);
   }
 
   public clearActiveEditorDocument() {

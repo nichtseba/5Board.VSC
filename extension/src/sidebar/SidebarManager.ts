@@ -149,17 +149,13 @@ export class SidebarManager implements vscode.Disposable {
 
   /** Mirror the projector state to the sidebars (they live on a different MessageService). */
   private sendProjectorState(receiver?: vscode.Webview): void {
-    const open = EXTENSION.activeEditorDocument?.hasProjector ?? false;
-    const paused = EXTENSION.projectorPaused;
-    this.messages.send(
-      {
-        type: 'projectorStateChanged',
-        active: EXTENSION.cursorTrackingEnabled && open && !paused,
-        open,
-        paused,
-      },
-      receiver,
-    );
+    const state = EXTENSION.activeEditorDocument?.projectorState ?? {
+      type: 'projectorStateChanged' as const,
+      active: false,
+      open: false,
+      paused: EXTENSION.projectorPaused,
+    };
+    this.messages.send(state, receiver);
   }
 
   dispose(): void {

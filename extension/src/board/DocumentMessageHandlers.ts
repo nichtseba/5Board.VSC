@@ -17,18 +17,7 @@ export class DocumentMessageHandlers {
           sender,
         );
         // Sync whether the pointer should currently be mirrored, so the new panel starts right.
-        this.document.messageService.send(
-          {
-            type: 'projectorStateChanged',
-            active:
-              EXTENSION.cursorTrackingEnabled &&
-              this.document.hasProjector &&
-              !EXTENSION.projectorPaused,
-            open: this.document.hasProjector,
-            paused: EXTENSION.projectorPaused,
-          },
-          sender,
-        );
+        this.document.messageService.send(this.document.projectorState, sender);
         // Sync the mirrored cursor appearance so the projector renders it correctly.
         this.document.messageService.send(
           { type: 'projectorPointerChanged', style: EXTENSION.projectorPointerStyle },
