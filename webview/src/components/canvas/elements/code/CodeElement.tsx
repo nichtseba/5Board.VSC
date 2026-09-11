@@ -11,7 +11,10 @@ import {
 import type { EditorElementProps } from '../../EditorElement';
 import { useMessageService } from '../../../../services/MessageService';
 import { useSources } from '../../../../providers/SourcesProvider';
-import { useExecutionOutput } from '../../../../providers/ExecutionOutputProvider';
+import {
+  useExecutionOutput,
+  useExecutionReadOnly,
+} from '../../../../providers/ExecutionOutputProvider';
 import { OutputPanel } from './OutputPanel';
 import { useMonacoTheme } from './useMonacoTheme';
 import { useEditorAutoHeight, MIN_HEIGHT } from './useEditorAutoHeight';
@@ -26,8 +29,9 @@ const DEBOUNCE_MS = 200;
 export function CodeElement({ element }: EditorElementProps<EditorElementType.Code>) {
   const messages = useMessageService();
   const sources = useSources();
-  const output = useExecutionOutput(element.id);
-  const { language, className } = element.data;
+  const { language, className, lastOutput } = element.data;
+  const executionState = useExecutionOutput(element.id, lastOutput);
+  const readOnly = useExecutionReadOnly();
 
   const fileName = fileNameFromClassName(className, language);
   const source = sources.find((s) => s.name === fileName && s.language === language);
@@ -41,6 +45,9 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
   codeRef.current = code;
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pendingCodeRef = useRef<string | null>(null);
+  // The last version handed to the extension. Every edit comes back as a document update a
+  // moment later, and by then the user has usually typed on, so the echo is already stale.
+  const lastSentRef = useRef<string | null>(null);
 
   const flushPendingUpdate = useCallback(() => {
     if (debounceRef.current !== null) {
@@ -48,6 +55,7 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
       debounceRef.current = null;
     }
     if (pendingCodeRef.current !== null) {
+      lastSentRef.current = pendingCodeRef.current;
       messages.send({
         type: 'updateBlockCode',
         elementId: element.id,
@@ -80,10 +88,15 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
     };
   }, []);
 
+  // Only *external* edits (the source opened as a text file, a block moved between classes)
+  // may replace what is in the editor. Adopting the echo of our own edit would drop whatever
+  // was typed while it was in flight and move the caret, which is what made fast typing lose
+  // characters.
   useEffect(() => {
-    if (blockCode !== null && blockCode !== codeRef.current) {
-      setCode(blockCode);
-    }
+    if (blockCode === null) return;
+    if (blockCode === codeRef.current) return;
+    if (blockCode === lastSentRef.current) return;
+    setCode(blockCode);
   }, [blockCode]);
 
   // Manual per-block overrides from the settings sidebar; undefined falls back to the
@@ -152,7 +165,9 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
 
       {/* Actionbar + Output */}
       <OutputPanel
-        output={output}
+        elementId={element.id}
+        state={executionState}
+        readOnly={readOnly}
         onOpenSource={() => messages.send({ type: 'openSource', elementId: element.id })}
         onRun={() => {
           flushPendingUpdate();

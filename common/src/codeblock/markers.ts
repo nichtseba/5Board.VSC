@@ -22,17 +22,28 @@ export function extractBlock(
   return dedentBlock(sourceCode.slice(contentStart, endIndex));
 }
 
+/**
+ * Inverse of {@link indentCode}, and it has to stay an exact inverse: the editor writes the
+ * block out and reads it straight back, and any difference replaces the Monaco model under the
+ * user, which moves the caret.
+ *
+ * The stored form always begins with the newline that follows the open tag and ends with the
+ * close tag's own indentation, so exactly one line is dropped at each end. Dropping *every*
+ * blank line there would eat the user's own leading and trailing blank lines.
+ */
 function dedentBlock(raw: string): string {
   const lines = raw.split('\n');
-  while (lines.length > 0 && lines[0].trim() === '') lines.shift();
-  while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
+  if (lines.length > 0 && lines[0].trim() === '') lines.shift();
+  if (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
 
   const indents = lines
     .filter((line) => line.trim() !== '')
     .map((line) => line.match(/^[ \t]*/)![0].length);
   const minIndent = indents.length > 0 ? Math.min(...indents) : 0;
 
-  return lines.map((line) => line.slice(minIndent)).join('\n');
+  // Blank lines are left alone, because `indentCode` does not pad them either. Slicing them
+  // would turn a line the user indented into an empty one.
+  return lines.map((line) => (line.trim() === '' ? line : line.slice(minIndent))).join('\n');
 }
 
 export function hasBlock(

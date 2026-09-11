@@ -7,7 +7,7 @@ import {
 import { Language } from './localization/index.js';
 import { EditorElement, EditorState, EditorTool, ElementLayout } from './main.js';
 import { ProjectorPointerStyle } from './projector.js';
-import { CodeExecutionOutput } from './board/element.js';
+import { TranscriptSegment } from './board/element.js';
 
 /**
  * Messages from the extension to webviews
@@ -35,7 +35,22 @@ type AllExtensionToWebviewMessage =
       viewport: { top: number; left: number; height: number; width: number };
     }
   | { type: 'updateEditorState'; editorState: EditorState }
-  | { type: 'codeblockResult'; elementId: string; output: CodeExecutionOutput }
+  | { type: 'codeblockStarted'; elementId: string }
+  | { type: 'codeblockChunk'; elementId: string; segment: TranscriptSegment }
+  | {
+      type: 'codeblockExited';
+      elementId: string;
+      exitCode: number | null;
+      success: boolean;
+      truncated: boolean;
+    }
+  // Answers `ready` so a webview that opened (or reloaded) mid-run catches up on what it missed.
+  | {
+      type: 'codeblockSync';
+      elementId: string;
+      transcript: TranscriptSegment[];
+      running: boolean;
+    }
   | { type: 'goToElement'; elementId: string };
 
 /**
@@ -67,6 +82,9 @@ type AllWebviewToExtensionMessage =
       viewport: { top: number; left: number; height: number; width: number };
     }
   | { type: 'executeCodeblock'; elementId: string }
+  | { type: 'codeblockInput'; elementId: string; text: string }
+  | { type: 'codeblockEndInput'; elementId: string }
+  | { type: 'codeblockStop'; elementId: string }
   | { type: 'updateBlockCode'; elementId: string; code: string }
   | { type: 'openSource'; elementId: string }
   | { type: 'copyToClipboard'; text: string }

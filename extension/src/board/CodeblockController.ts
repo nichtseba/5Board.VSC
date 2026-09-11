@@ -1,7 +1,7 @@
 import vscode from 'vscode';
 import { EditorElementType, fileNameFromClassName, type CodeElementData } from '5board.vsc-common';
 import { BoardCustomDocument } from './BoardCustomDocument';
-import { ExecutionService } from '../runner/ExecutionService';
+import { ExecutionSessionManager, type SessionEvent } from '../runner/ExecutionSessionManager';
 import { SRC_ROOT } from './package';
 import { updateBlockCode } from './CodeblockSourceService';
 
@@ -10,7 +10,9 @@ import { updateBlockCode } from './CodeblockSourceService';
  * `5board-vsc.executeCodeblock` command to the services and broadcasts results.
  */
 export class CodeblockController {
-  private readonly executionService = new ExecutionService();
+  private readonly sessions = new ExecutionSessionManager((elementId, event) =>
+    this.handleSessionEvent(elementId, event),
+  );
 
   constructor(private readonly document: BoardCustomDocument) {}
 
@@ -28,6 +30,32 @@ export class CodeblockController {
       this.document.messageService.on('executeCodeblock', (msg) => {
         void this.executeBlock(msg.elementId);
       }),
+      this.document.messageService.on('codeblockInput', (msg) => {
+        this.sessions.input(msg.elementId, msg.text);
+      }),
+      this.document.messageService.on('codeblockEndInput', (msg) => {
+        this.sessions.endInput(msg.elementId);
+      }),
+      this.document.messageService.on('codeblockStop', (msg) => {
+        this.sessions.stop(msg.elementId);
+      }),
+      // A webview that opened or reloaded while a program was running has missed everything so
+      // far, so it gets the transcript of every still-running block.
+      this.document.messageService.on('ready', (_msg, sender) => {
+        for (const block of this.sessions.runningBlocks()) {
+          this.document.messageService.send(
+            {
+              type: 'codeblockSync',
+              elementId: block.elementId,
+              transcript: block.transcript,
+              running: true,
+            },
+            sender,
+          );
+        }
+      }),
+      // Runs when the document is disposed, so closing an editor never leaves a process behind.
+      () => this.sessions.stopAll(),
     ];
   }
 
@@ -47,21 +75,47 @@ export class CodeblockController {
   }
 
   public async executeBlock(elementId: string): Promise<void> {
-    const result = await this.executionService.execute(
-      this.document.boardPackage.document,
-      elementId,
-    );
+    await this.sessions.start(this.document.boardPackage.document, elementId);
+  }
 
-    this.document.messageService.send({
-      type: 'codeblockResult',
-      elementId,
-      output: {
-        stdout: result.stdout,
-        // Surface execution-level failures (missing toolchain, no source) that have no stderr.
-        stderr: result.stderr || result.error || '',
-        success: result.success,
-        exitCode: result.exitCode,
-      },
+  private handleSessionEvent(elementId: string, event: SessionEvent): void {
+    switch (event.kind) {
+      case 'started':
+        this.document.messageService.send({ type: 'codeblockStarted', elementId });
+        return;
+      case 'segment':
+        this.document.messageService.send({
+          type: 'codeblockChunk',
+          elementId,
+          segment: event.segment,
+        });
+        return;
+      case 'exited':
+        this.document.messageService.send({
+          type: 'codeblockExited',
+          elementId,
+          exitCode: event.exitCode,
+          success: event.success,
+          truncated: event.truncated,
+        });
+        // Persisted once, at the end. Every save rewrites the whole .5boardz archive, so
+        // storing the transcript while it streams is not an option.
+        this.storeOutput(elementId, {
+          transcript: event.transcript,
+          success: event.success,
+          exitCode: event.exitCode,
+          truncated: event.truncated,
+        });
+        return;
+    }
+  }
+
+  private storeOutput(elementId: string, output: CodeElementData['lastOutput']): void {
+    this.document.applyEdit((document) => {
+      const element = document.content.elements.find((e) => e.id === elementId);
+      if (!element || element.type !== EditorElementType.Code) return;
+      (element.data as CodeElementData).lastOutput = output;
     });
+    void this.document.saveDocument();
   }
 }

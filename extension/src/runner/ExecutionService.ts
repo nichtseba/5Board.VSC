@@ -1,8 +1,8 @@
 import {
   BoardDocument,
-  CodeblockExecutionResult,
   CodeblockLanguage,
   EditorElementType,
+  ExecutionStartResult,
   fileNameFromClassName,
 } from '5board.vsc-common';
 import type { EditorElement } from '5board.vsc-common';
@@ -11,7 +11,7 @@ import { getConfiguredJavaHome } from '../config';
 import { getRunner } from './index';
 
 export class ExecutionService {
-  async execute(document: BoardDocument, elementId: string): Promise<CodeblockExecutionResult> {
+  async start(document: BoardDocument, elementId: string): Promise<ExecutionStartResult> {
     const element = document.content.elements.find((e) => e.id === elementId);
 
     if (!element || element.type !== EditorElementType.Code) {
@@ -34,7 +34,7 @@ export class ExecutionService {
     }
 
     // The chain resolves once per run: `checkTools` hands the binaries it settled on to
-    // `execute`, so nothing probes the file system twice.
+    // `start`, so nothing probes the file system twice.
     const tools = await runner.checkTools({ home: getConfiguredJavaHome() });
     if (!tools.available) {
       const missing = tools.missingTools?.join(', ');
@@ -46,7 +46,7 @@ export class ExecutionService {
       );
     }
 
-    return runner.execute({
+    return runner.start({
       fileName,
       sources: document.sources,
       language: language as CodeblockLanguage,
@@ -54,7 +54,7 @@ export class ExecutionService {
     });
   }
 
-  private error(message: string): CodeblockExecutionResult {
-    return { success: false, stdout: '', stderr: '', exitCode: null, error: message };
+  private error(message: string): ExecutionStartResult {
+    return { ok: false, error: message };
   }
 }

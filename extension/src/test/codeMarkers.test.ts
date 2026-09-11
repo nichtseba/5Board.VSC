@@ -1,5 +1,5 @@
 import { strict as assert } from 'assert';
-import { extractBlock, hasBlock, updateBlock } from '5board.vsc-common';
+import { extractBlock, getBlockIndent, hasBlock, indentCode, updateBlock } from '5board.vsc-common';
 
 const BLOCK_ID = 'test-uuid-123';
 
@@ -8,6 +8,46 @@ function makeSource(code: string): string {
 }
 
 describe('codeMarkers', function () {
+  /**
+   * The editor writes a block out and reads it straight back on every keystroke. If the two
+   * are not exact inverses, the returned code differs from what is in the Monaco model, the
+   * model gets replaced and the caret jumps. Blank lines used to be where that broke.
+   */
+  describe('write/read round trip', function () {
+    const nested = `void main() {
+    // <block id="${BLOCK_ID}">
+    
+    // </block>
+}`;
+
+    function roundTrip(code: string): string | null {
+      const indent = getBlockIndent(nested, BLOCK_ID);
+      return extractBlock(updateBlock(nested, BLOCK_ID, indentCode(code, indent)), BLOCK_ID);
+    }
+
+    it('keeps leading blank lines', function () {
+      assert.equal(roundTrip('\n\nfoo();'), '\n\nfoo();');
+    });
+
+    it('keeps a trailing blank line', function () {
+      assert.equal(roundTrip('foo();\n'), 'foo();\n');
+    });
+
+    it('keeps a whitespace-only line inside a block', function () {
+      const code = 'while (x) {\n    \n}';
+      assert.equal(roundTrip(code), code);
+    });
+
+    it('keeps an empty line inside a block', function () {
+      const code = 'while (x) {\n\n}';
+      assert.equal(roundTrip(code), code);
+    });
+
+    it('still dedents real code back to column zero', function () {
+      assert.equal(roundTrip('int x = 5;'), 'int x = 5;');
+    });
+  });
+
   describe('extractBlock', function () {
     it('extracts code between markers', function () {
       const source = makeSource('int x = 5;');

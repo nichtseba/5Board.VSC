@@ -90,13 +90,33 @@ export type TextDecorationStyle = {
 export type CodeElementData = {
   className: string;
   language: string;
+  /**
+   * Transcript of the most recent run. Stored on the element so it survives a webview reload
+   * and shows up in the projector, which renders from the same document.
+   */
+  lastOutput?: CodeExecutionOutput;
+};
+
+/**
+ * One ordered piece of a run's transcript.
+ *
+ * `in` is what the user typed. Pipes do not echo, so nothing would record it otherwise and a
+ * stored transcript of an interactive program would show prompts with no answers.
+ */
+export type TranscriptSegmentKind = 'out' | 'err' | 'in';
+
+export type TranscriptSegment = {
+  kind: TranscriptSegmentKind;
+  text: string;
 };
 
 export type CodeExecutionOutput = {
-  stdout: string;
-  stderr: string;
+  /** stdout, stderr and the user's input in the order they actually happened. */
+  transcript: TranscriptSegment[];
   success: boolean;
   exitCode: number | null;
+  /** Set when the output cap stopped the process before it could finish on its own. */
+  truncated?: boolean;
 };
 
 export type ImageElementData = {

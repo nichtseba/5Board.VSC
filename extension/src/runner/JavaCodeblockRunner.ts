@@ -3,15 +3,30 @@ import { mkdir, mkdtemp, rm, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import type {
   CodeblockExecutionRequest,
-  CodeblockExecutionResult,
   CodeblockLanguage,
   CodeblockRunner,
+  CodeblockSession,
+  ExecutionEvent,
+  ExecutionStartResult,
   Source,
   ToolCheckResult,
   ToolchainConfig,
 } from '5board.vsc-common';
-import { runCommand } from './runnerUtils';
+import { runCommand, startProcess, type ProcessHandle } from './runnerUtils';
 import { describeToolchainFailure, resolveJavaToolchain } from './javaToolchain';
+
+const COMPILE_TIMEOUT_MS = 30_000;
+
+/**
+ * Forces UTF-8 on the child's streams. Piped (non-terminal) stdio makes Java fall back to the
+ * platform encoding for stdout, which mangles anything non-ASCII on Windows even though
+ * `file.encoding` is already UTF-8.
+ */
+const ENCODING_ARGS = [
+  '-Dstdout.encoding=UTF-8',
+  '-Dstderr.encoding=UTF-8',
+  '-Dstdin.encoding=UTF-8',
+];
 
 export class JavaCodeblockRunner implements CodeblockRunner {
   canHandle(language: CodeblockLanguage): boolean {
@@ -40,9 +55,10 @@ export class JavaCodeblockRunner implements CodeblockRunner {
     };
   }
 
-  async execute(request: CodeblockExecutionRequest): Promise<CodeblockExecutionResult> {
+  async start(request: CodeblockExecutionRequest): Promise<ExecutionStartResult> {
     const tempDir = await mkdtemp(join(tmpdir(), '5board-'));
     const outDir = join(tempDir, 'out');
+
     try {
       // Write every source flat into tempDir; it doubles as the sourcepath root below.
       const javaSources = request.sources.filter((s) => s.language === 'java');
@@ -50,40 +66,75 @@ export class JavaCodeblockRunner implements CodeblockRunner {
       await mkdir(outDir, { recursive: true });
 
       // Compile only the target: javac pulls the classes it references from the sourcepath on
-      // demand, so unrelated (possibly broken) sources don't block execution.
+      // demand, so unrelated (possibly broken) sources don't block execution. This stays a
+      // batch step with a timeout, because a compiler that hangs is never waiting for a user.
       const compile = await runCommand(
         request.toolPaths?.javac ?? 'javac',
         ['-d', outDir, '-sourcepath', tempDir, request.fileName],
         tempDir,
-        30_000,
+        COMPILE_TIMEOUT_MS,
       );
+
       if (compile.status !== 0) {
+        await rm(tempDir, { recursive: true, force: true });
         return {
-          success: false,
-          stdout: compile.stdout,
-          stderr: compile.stderr,
-          exitCode: compile.status ?? null,
+          ok: false,
           error: compile.error ?? 'Compilation failed.',
+          stderr: compile.stderr || compile.stdout,
         };
       }
-
-      const mainClass = fileNameToClassName(request.fileName);
-      const run = await runCommand(
-        request.toolPaths?.java ?? 'java',
-        ['-cp', outDir, mainClass],
-        tempDir,
-        30_000,
-      );
-      return {
-        success: run.status === 0,
-        stdout: run.stdout,
-        stderr: run.stderr,
-        exitCode: run.status ?? null,
-        error: run.error,
-      };
-    } finally {
+    } catch (error) {
       await rm(tempDir, { recursive: true, force: true });
+      return { ok: false, error: error instanceof Error ? error.message : String(error) };
     }
+
+    const mainClass = fileNameToClassName(request.fileName);
+    const process = startProcess(
+      request.toolPaths?.java ?? 'java',
+      [...ENCODING_ARGS, '-cp', outDir, mainClass],
+      tempDir,
+    );
+
+    // The temp directory holds the classes the process is running from, so it can only go once
+    // the process is gone. That is why it is cleaned up here and not in a `finally`.
+    process.onExit(() => {
+      void rm(tempDir, { recursive: true, force: true });
+    });
+
+    return { ok: true, session: new ProcessSession(process) };
+  }
+}
+
+/** Adapts a {@link ProcessHandle} to the language-neutral session interface. */
+class ProcessSession implements CodeblockSession {
+  private readonly listeners = new Set<(event: ExecutionEvent) => void>();
+
+  constructor(private readonly process: ProcessHandle) {
+    this.process.onData((stream, text) => this.emit({ kind: stream, text }));
+    this.process.onExit((code) =>
+      this.emit({ kind: 'exited', exitCode: code, success: code === 0 }),
+    );
+  }
+
+  write(text: string): void {
+    this.process.write(text);
+  }
+
+  endInput(): void {
+    this.process.endInput();
+  }
+
+  kill(): void {
+    this.process.kill();
+  }
+
+  onEvent(listener: (event: ExecutionEvent) => void): () => void {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  }
+
+  private emit(event: ExecutionEvent): void {
+    this.listeners.forEach((listener) => listener(event));
   }
 }
 
