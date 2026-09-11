@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
 
 export interface JavaSettings {
-  compilerPath: string;
-  runtimePath: string;
+  home: string;
 }
 
 export interface PresetSettings {
@@ -35,9 +34,7 @@ export class SettingsService implements vscode.Disposable {
 
     return {
       java: {
-        compilerPath: configuration.get<string>('java.compilerPath', ''),
-
-        runtimePath: configuration.get<string>('java.runtimePath', ''),
+        home: configuration.get<string>('java.home', ''),
       },
       presets: {
         directoryPath: configuration.get<string>('presets.directoryPath', ''),

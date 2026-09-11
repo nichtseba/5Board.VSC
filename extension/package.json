@@ -142,25 +142,18 @@
       "title": "5board",
       "type": "object",
       "properties": {
-        "5board-vsc.java.compilerPath": {
+        "5board-vsc.java.home": {
           "type": "string",
           "default": "",
           "scope": "machine",
           "order": 10,
-          "description": "%configuration.java.compilerPath.description%"
-        },
-        "5board-vsc.java.runtimePath": {
-          "type": "string",
-          "default": "",
-          "scope": "machine",
-          "order": 20,
-          "description": "%configuration.java.runtimePath.description%"
+          "description": "%configuration.java.home.description%"
         },
         "5board-vsc.presets.directoryPath": {
           "type": "string",
           "default": "",
           "scope": "machine",
-          "order": 30,
+          "order": 20,
           "description": "%configuration.presets.directoryPath.description%"
         }
       }
