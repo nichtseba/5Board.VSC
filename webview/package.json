@@ -32,6 +32,11 @@
   "dependencies": {
     "5board.vsc-common": "link:..\\common",
     "@heroicons/react": "^2.2.0",
+    "@tiptap/extension-text-align": "^3.27.1",
+    "@tiptap/extension-text-style": "^3.27.1",
+    "@tiptap/pm": "^3.26.1",
+    "@tiptap/react": "^3.26.1",
+    "@tiptap/starter-kit": "^3.26.1",
     "@vscode/codicons": "^0.0.45",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

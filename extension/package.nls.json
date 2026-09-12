@@ -12,5 +12,6 @@
   "commands.openBoardFile": "Open 5Board File",
   "commands.newBoardFile": "New 5Board File",
   "commands.startPresentation": "Start Presentation",
+  "commands.addImageFromFile": "Add Image from File",
   "commands.goToElement": "Go to Element"
 }

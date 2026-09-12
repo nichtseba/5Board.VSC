@@ -21,6 +21,7 @@ import { ProjectorProvider } from './providers/ProjectorProvider';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
+import { addImageToDocument } from './board/addImageToDocument';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
@@ -164,6 +165,35 @@ export class FiveBoardExtension extends ExtensionBase {
       },
       data: structuredClone(profile.data) as EditorElementDataMap[T],
     };
+  }
+
+  @Command('5board-vsc.addImageFromFile')
+  async addImageFromFileCommand(): Promise<void> {
+    const activeDocument = this.activeEditorDocument;
+
+    if (!activeDocument) {
+      vscode.window.showInformationMessage('No active 5board document');
+      return;
+    }
+
+    const uris = await vscode.window.showOpenDialog({
+      canSelectMany: false,
+      filters: {
+        Images: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'],
+      },
+    });
+
+    const fileUri = uris?.[0];
+
+    if (!fileUri) {
+      return;
+    }
+
+    const bytes = await vscode.workspace.fs.readFile(fileUri);
+    const assetName = path.basename(fileUri.fsPath);
+    activeDocument.applyEdit((document) => {
+      addImageToDocument(document, assetName, bytes);
+    });
   }
 
   public applyEditToActiveDocument(edit: (document: BoardDocument) => void): void {
