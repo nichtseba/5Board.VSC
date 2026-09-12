@@ -73,7 +73,12 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
     <HeadingNumberingProvider value={headingNumbers}>
       <div
         ref={canvasRef}
-        className={`editor-canvas bg-editor-background ${activeToolId === EditorToolId.SPACER ? 'cursor-row-resize' : ''}`}
+        className={`
+          editor-canvas
+           bg-editor-background 
+           ${activeToolId === EditorToolId.SPACER ? 'cursor-row-resize' : ''} 
+           ${marqueeRect ? 'select-none' : ''}
+           `}
         style={{ position: 'relative' }}
         {...pointerHandlers}
       >
