@@ -51,6 +51,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
     <>
       <div
         id={element.id}
+        data-editor-element
         onClick={(event) => handleSelectElement(element.id, event)}
         className={`
           box-border
