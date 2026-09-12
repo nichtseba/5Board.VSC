@@ -93,7 +93,8 @@ export class FiveBoardExtension extends ExtensionBase {
       }
       // Todo: Maybe this should create an unsaved file
       const title = path.basename(targetUri.fsPath, path.extname(targetUri.fsPath));
-      await BoardPackage.createEmpty(title).write(targetUri);
+      const settings = this.settingsService.getSettings();
+      await BoardPackage.createEmpty(title, settings.grid).write(targetUri);
       await vscode.commands.executeCommand(
         'vscode.openWith',
         targetUri,

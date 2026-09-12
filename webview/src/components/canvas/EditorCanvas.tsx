@@ -1,5 +1,10 @@
-import { EditorToolId, ProjectorPointerStyle, computeHeadingNumbers } from '5board.vsc-common';
-import { useEffect, useMemo, useRef } from 'react';
+import {
+  DEFAULT_GRID_SETTINGS,
+  EditorToolId,
+  ProjectorPointerStyle,
+  computeHeadingNumbers,
+} from '5board.vsc-common';
+import { useEffect, useMemo, useRef, type CSSProperties } from 'react';
 import EditorElement from './EditorElement';
 import { HeadingNumberingProvider } from './HeadingNumberingContext';
 import ProjectorMouse, { ProjectorCursor } from '../projector/ProjectorMouse';
@@ -27,6 +32,7 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
   const pointerHandlers = useCanvasPointer();
 
   const document = useBoardDocument();
+  const grid = document?.content.grid ?? DEFAULT_GRID_SETTINGS;
   const editorState = useEditorState();
 
   const elements = document?.content.elements;
@@ -63,7 +69,13 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
       <div
         ref={canvasRef}
         className={`editor-canvas bg-editor-background ${activeToolId === EditorToolId.SPACER ? 'cursor-row-resize' : ''}`}
-        style={{ position: 'relative' }}
+        style={
+          {
+            position: 'relative',
+            '--spacing-editor': `${grid.cellSize}px`,
+            '--editor-columns': String(grid.columnCount),
+          } as CSSProperties
+        }
         {...pointerHandlers}
       >
         <CanvasTools />

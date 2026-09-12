@@ -155,6 +155,22 @@
           "scope": "machine",
           "order": 20,
           "description": "%configuration.presets.directoryPath.description%"
+        },
+        "5board-vsc.grid.cellSize": {
+          "type": "integer",
+          "default": 16,
+          "minimum": 1,
+          "scope": "window",
+          "order": 30,
+          "description": "%configuration.grid.cellSize.description%"
+        },
+        "5board-vsc.grid.columnCount": {
+          "type": "integer",
+          "default": 40,
+          "minimum": 1,
+          "scope": "window",
+          "order": 40,
+          "description": "%configuration.grid.columnCount.description%"
         }
       }
     }

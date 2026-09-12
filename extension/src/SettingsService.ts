@@ -1,3 +1,4 @@
+import { DEFAULT_GRID_SETTINGS, type GridSettings } from '5board.vsc-common';
 import * as vscode from 'vscode';
 
 export interface JavaSettings {
@@ -11,6 +12,7 @@ export interface PresetSettings {
 export interface FiveBoardSettings {
   java: JavaSettings;
   presets: PresetSettings;
+  grid: GridSettings;
 }
 
 export class SettingsService implements vscode.Disposable {
@@ -23,7 +25,6 @@ export class SettingsService implements vscode.Disposable {
   public constructor() {
     this.configurationSubscription = vscode.workspace.onDidChangeConfiguration((event) => {
       if (event.affectsConfiguration('5board-vsc')) {
-        //!
         this.changeEmitter.fire(this.getSettings());
       }
     });
@@ -38,6 +39,13 @@ export class SettingsService implements vscode.Disposable {
       },
       presets: {
         directoryPath: configuration.get<string>('presets.directoryPath', ''),
+      },
+      grid: {
+        cellSize: configuration.get<number>('grid.cellSize', DEFAULT_GRID_SETTINGS.cellSize),
+        columnCount: configuration.get<number>(
+          'grid.columnCount',
+          DEFAULT_GRID_SETTINGS.columnCount,
+        ),
       },
     };
   }
