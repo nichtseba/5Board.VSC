@@ -3,8 +3,8 @@ import { FiveBoardExtension } from './FiveBoardExtension';
 
 export const EXTENSION = new FiveBoardExtension();
 
-export function activate(context: vscode.ExtensionContext) {
-  EXTENSION.activate(context);
+export async function activate(context: vscode.ExtensionContext): Promise<void> {
+  await EXTENSION.activate(context);
 }
 
 export function deactivate() {

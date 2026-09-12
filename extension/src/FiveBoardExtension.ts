@@ -57,7 +57,10 @@ export class FiveBoardExtension extends ExtensionBase {
   private activeDocumentChange = new vscode.EventEmitter<BoardCustomDocument | null>();
   public onActiveDocumentChange = this.activeDocumentChange.event;
 
-  private editorState_: EditorState = { tool: { type: DEFAULT_TOOL_ID, parameters: undefined } };
+  private editorState_: EditorState = {
+    tool: { type: DEFAULT_TOOL_ID, parameters: undefined },
+    presets: [],
+  };
   public get editorState(): EditorState {
     return this.editorState_;
   }
@@ -72,13 +75,35 @@ export class FiveBoardExtension extends ExtensionBase {
     super();
   }
 
-  public activate(context: vscode.ExtensionContext): void {
+  public async activate(context: vscode.ExtensionContext): Promise<void> {
     this.context = context;
+    this.editorState_ = {
+      tool: { type: DEFAULT_TOOL_ID, parameters: undefined },
+      presets: await this.loadPresets(),
+    };
     super.activate(context);
     new EditorEditorProvider(context, this.packageManager).register();
     new ProjectorProvider(context).register();
     context.subscriptions.push(new SidebarManager(context, this.messages));
     new FiveBoardFileSystemProvider(this.packageManager).register(context);
+  }
+
+  private async loadPresets(): Promise<EditorState['presets']> {
+    if (!this.context) {
+      return [];
+    }
+
+    const file = vscode.Uri.joinPath(this.context.globalStorageUri, '5board-vsc-presets.json');
+    try {
+      const fileContent = await vscode.workspace.fs.readFile(file);
+      const presets = JSON.parse(new TextDecoder().decode(fileContent));
+      return Array.isArray(presets) ? presets : [];
+    } catch (error) {
+      if (!(error instanceof vscode.FileSystemError) || error.code !== 'FileNotFound') {
+        vscode.window.showWarningMessage(`Failed to load presets: ${String(error)}`);
+      }
+      return [];
+    }
   }
 
   @Command('5board-vsc.newBoard')
@@ -213,6 +238,11 @@ export class FiveBoardExtension extends ExtensionBase {
 
     await vscode.workspace.fs.writeFile(file, bytes);
     vscode.window.showInformationMessage(`Preset saved successfully.`);
+
+    // Update EditorState
+    this.editorState = {
+      presets: [...(this.editorState.presets ?? []), preset],
+    };
   }
 
   @Command('5board-vsc.deleteEditorElement')

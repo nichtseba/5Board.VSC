@@ -1,5 +1,5 @@
-import { createContext, useContext, useState } from 'react';
-import { useOnMessage } from '../services/MessageService';
+import { createContext, useContext, useEffect, useState } from 'react';
+import { useMessageService, useOnMessage } from '../services/MessageService';
 import { DEFAULT_TOOL_ID, EditorState } from '5board.vsc-common';
 
 /**
@@ -16,13 +16,16 @@ const EditorStateContext = createContext<EditorState>(defaultEditorState);
 
 export function EditorStateProvider({ children }: { children: React.ReactNode }) {
   const [editorState, setEditorState] = useState<EditorState>(defaultEditorState);
-
+  const messages = useMessageService();
   useOnMessage((msg) => {
     if (msg.type === 'updateEditorState' || msg.type === 'init' || msg.type === 'initSidebar') {
-      console.log('editorstateprocider msg: ', msg);
       setEditorState(msg.editorState);
     }
   });
+
+  useEffect(() => {
+    messages.send({ type: 'ready' });
+  }, [messages]);
 
   return <EditorStateContext.Provider value={editorState}>{children}</EditorStateContext.Provider>;
 }

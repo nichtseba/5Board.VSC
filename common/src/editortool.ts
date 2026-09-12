@@ -4,6 +4,7 @@ import {
   EditorElementType,
   TranslationKey,
   LineStyle,
+  Preset,
 } from './main';
 
 export enum EditorToolId {
@@ -118,4 +119,4 @@ export type EditorTool<EditorToolType extends EditorToolId = EditorToolId> = {
   parameters: TYPE_TOOL_PARAMETERS[EditorToolType];
 };
 
-export type EditorState = { tool: EditorTool };
+export type EditorState = { tool: EditorTool; presets?: Preset[] };
