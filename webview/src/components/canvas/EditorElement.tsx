@@ -8,6 +8,7 @@ import { CodeElement } from './elements/CodeElement';
 import { ImageElement } from './elements/ImageElement';
 import { ShapeElement } from './elements/ShapeElement';
 import { ArrowElement } from './elements/ArrowElement';
+import { FreehandElement } from './elements/FreehandElement';
 import { useEditorState } from '../../providers/EditorStateProvider';
 import { useMessageService } from '../../services/MessageService';
 
@@ -22,6 +23,7 @@ export type EditorElementProps<T extends EditorElementType> = {
   onSelect?: () => void;
   onStopEditing?: () => void;
   targetRef?: React.RefObject<HTMLDivElement>;
+  assetUrls?: Record<string, string>;
 };
 
 /**
@@ -33,6 +35,7 @@ export type EditorElementProps<T extends EditorElementType> = {
 export default function EditorElement<ElementType extends EditorElementType>({
   element,
   selected,
+  assetUrls,
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
@@ -109,6 +112,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
           selected={selected}
           editing={editing}
           editingPosition={editingPosition}
+          assetUrls={assetUrls}
           onSelect={() => handleSelectElement(element.id)}
           onStopEditing={handleStopEditing}
         />
@@ -134,6 +138,7 @@ const ELEMENT_COMPONENTS = {
   [EditorElementType.Image]: ImageElement,
   [EditorElementType.Shape]: ShapeElement,
   [EditorElementType.Arrow]: ArrowElement,
+  [EditorElementType.Freehand]: FreehandElement,
 } as const satisfies {
   [ElementType in EditorElementType]: React.ComponentType<EditorElementProps<ElementType>>;
 };

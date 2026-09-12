@@ -1,6 +1,8 @@
+import { EditorElement, EditorElementType } from '5board.vsc-common';
 import { EXTENSION } from '../extension';
 import { BoardCustomDocument } from './BoardCustomDocument';
 import deepEquals from 'deep-equal';
+import { addImageToDocument } from './addImageToDocument';
 
 export class DocumentMessageHandlers {
   constructor(private readonly document: BoardCustomDocument) {}
@@ -66,6 +68,16 @@ export class DocumentMessageHandlers {
             ...element.layout,
             ...msg.changes,
           };
+
+          if (element.type === EditorElementType.Image) {
+            const imageElement = element as EditorElement<EditorElementType.Image>;
+
+            imageElement.data = {
+              ...imageElement.data,
+              configuredWidth: true,
+              aspectRatio: msg.aspectRatio ?? imageElement.data.aspectRatio,
+            };
+          }
           return true;
         });
       }),
@@ -148,6 +160,38 @@ export class DocumentMessageHandlers {
           });
           return true;
         });
+      }),
+
+      this.document.messageService.on('addImageFromBytes', (msg) => {
+        const bytes = new Uint8Array(msg.bytes);
+        this.document.applyEdit((document) => {
+          addImageToDocument(document, msg.name, bytes);
+        });
+      }),
+
+      // The editor sends a freshly drawn element (e.g. a freehand stroke).
+      // Append it to the document; the change broadcasts 'updateDocument' to all panels.
+      this.document.messageService.on('addElement', (msg) => {
+        this.document.applyEdit((document) => {
+          document.content.elements.push(msg.element);
+        });
+      }),
+
+      // Mirror the in-progress freehand stroke to the projector while drawing.
+      this.document.messageService.on('freehandPreview', (msg) => {
+        this.document.messageService.send({
+          type: 'freehandPreview',
+          points: msg.points,
+          color: msg.color,
+          width: msg.width,
+          opacity: msg.opacity,
+          lineStyle: msg.lineStyle,
+          dashScale: msg.dashScale,
+          straight: msg.straight,
+        });
+      }),
+      this.document.messageService.on('freehandPreviewEnd', () => {
+        this.document.messageService.send({ type: 'freehandPreviewEnd' });
       }),
       //#endregion "EditorTools"
 

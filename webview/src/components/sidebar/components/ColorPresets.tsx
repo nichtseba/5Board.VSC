@@ -10,7 +10,7 @@ type ColorPresetsProps = {
   presets: readonly (string | ColorPreset)[];
 };
 
-// Just the row of preset swatches
+// Just the row of preset swatches; the label is shown on hover.
 export function ColorPresets({ color, onChange, presets }: ColorPresetsProps) {
   const colorSelected = (preset: string) => color?.toLowerCase() === preset.toLowerCase();
 

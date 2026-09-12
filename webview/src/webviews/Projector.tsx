@@ -5,6 +5,7 @@ import { useBoardDocument } from '../providers/BoardDocumentProvider';
 import { DEFAULT_PROJECTOR_POINTER_STYLE, ProjectorPointerStyle } from '5board.vsc-common';
 import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
+import { FreehandPreview } from '../components/canvas/tools/FreehandPreviewOverlay';
 import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
 
 // The projector view shows the same canvas as the editor,
@@ -18,6 +19,8 @@ export default function Projector() {
   const [pointerStyle, setPointerStyle] = useState<ProjectorPointerStyle>(
     DEFAULT_PROJECTOR_POINTER_STYLE,
   );
+  // Live freehand stroke the editor is currently drawing (cleared when finished).
+  const [freehandPreview, setFreehandPreview] = useState<FreehandPreview | null>(null);
 
   useEffect(() => {
     messages.send({ type: 'ready' });
@@ -84,6 +87,20 @@ export default function Projector() {
     if (msg.type === 'projectorPointerChanged') {
       setPointerStyle(msg.style);
     }
+    if (msg.type === 'freehandPreview') {
+      setFreehandPreview({
+        points: msg.points,
+        color: msg.color,
+        width: msg.width,
+        opacity: msg.opacity,
+        lineStyle: msg.lineStyle,
+        dashScale: msg.dashScale,
+        straight: msg.straight,
+      });
+    }
+    if (msg.type === 'freehandPreviewEnd') {
+      setFreehandPreview(null);
+    }
     if (msg.type === 'scroll') {
       const canvas = document.querySelector('.editor-canvas') as HTMLElement | null;
       const canvasRect = canvas?.getBoundingClientRect();
@@ -127,7 +144,11 @@ export default function Projector() {
       <div style={{ pointerEvents: 'none' }}>
         {boardDocument ? (
           <CanvasEventsProvider>
-            <EditorCanvas cursor={cursor} pointerStyle={pointerStyle} />
+            <EditorCanvas
+              cursor={cursor}
+              pointerStyle={pointerStyle}
+              freehandPreview={freehandPreview}
+            />
           </CanvasEventsProvider>
         ) : (
           // Shown while waiting for the first 'init' message from the extension.

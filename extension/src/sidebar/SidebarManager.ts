@@ -140,6 +140,10 @@ export class SidebarManager implements vscode.Disposable {
       });
     });
 
+    this.messages.on('addImageFromFile', async () => {
+      await vscode.commands.executeCommand('5board-vsc.addImageFromFile');
+    });
+
     this.messages.on('updateHeadingLevelSettings', (msg) => {
       if (!EXTENSION.activeEditorDocument) {
         return;

@@ -9,6 +9,7 @@ export enum EditorElementType {
   Image = 'image',
   Shape = 'shape',
   Arrow = 'arrow',
+  Freehand = 'freehand',
 }
 
 /**
@@ -61,6 +62,7 @@ type EditorElementDataMap = {
   [EditorElementType.Image]: ImageElementData;
   [EditorElementType.Shape]: ShapeElementData;
   [EditorElementType.Arrow]: ArrowElementData;
+  [EditorElementType.Freehand]: FreehandElementData;
 };
 
 export type HeadingElementData = {
@@ -144,6 +146,8 @@ export type ImageElementData = {
 
   hideInExport?: boolean;
 
+  configuredWidth?: boolean;
+  aspectRatio?: number;
   cropData?: CropData;
 };
 export type CropData = {
@@ -195,4 +199,35 @@ type LineShapeData = BaseShapeData & {
 type PolygonShapeData = BaseShapeData & {
   shapeType: 'polygon';
   points: Point[];
+};
+
+/**
+ * A freehand drawing is a list of strokes. Each stroke is one continuous
+ * pen movement (pen-down until pen-up) and is rendered as its own line.
+ */
+export type FreehandElementData = {
+  strokes: FreehandStroke[];
+};
+
+/** Line rendering style shared by strokes (and reusable elsewhere).
+ * 'custom' uses a numeric dash scale instead of a fixed pattern. */
+export type LineStyle = 'solid' | 'dashed' | 'dotted' | 'custom';
+
+export type FreehandStroke = {
+  /**
+   * The sampled points of the stroke, in normalized coordinates (0..1)
+   * relative to the element's bounding box. Normalizing keeps the drawing
+   * resolution-independent so it scales correctly in the projector.
+   */
+  points: Point[];
+  /** Stroke color; falls back to the editor foreground color when omitted. */
+  color?: string;
+  /** Stroke width in screen pixels; stays constant while the element scales. */
+  width?: number;
+  /** Dash rendering of the line; defaults to solid when omitted. */
+  lineStyle?: LineStyle;
+  /** Dash/gap size (multiple of width) when lineStyle is 'custom'. */
+  dashScale?: number;
+  /** Render as straight segments (no smoothing), e.g. pen-tool polylines. */
+  straight?: boolean;
 };
