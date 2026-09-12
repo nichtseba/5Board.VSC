@@ -122,6 +122,9 @@
         "customColor": "Eigene Farbe",
         "backgroundColor": "Hintergrundfarbe"
       },
+      "imageSettings": {
+        "title": "Bild"
+      },
       "freehandSettings": {
         "title": "Freihand"
       }

@@ -1,5 +1,5 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { EditorToolId, ProjectorPointerStyle, computeHeadingNumbers } from '5board.vsc-common';
-import { useEffect, useMemo, useRef } from 'react';
 import EditorElement from './EditorElement';
 import { HeadingNumberingProvider } from './HeadingNumberingContext';
 import ProjectorMouse, { ProjectorCursor } from '../projector/ProjectorMouse';
@@ -7,6 +7,8 @@ import './EditorCanvas.css';
 import { useEditorState } from '../../providers/EditorStateProvider';
 import { useMessageService } from '../../services/MessageService';
 import { useGrid } from '../../providers/GridProvider';
+import { createAssetUrls, revokeAssetUrls } from './assetUrlsUtil';
+import { useImageImport } from './useImageImport';
 import { CanvasTools } from './tools/CanvasTools';
 import FreehandPreviewOverlay, { FreehandPreview } from './tools/FreehandPreviewOverlay';
 import { useBoardDocument } from '../../providers/BoardDocumentProvider';
@@ -35,6 +37,7 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
 
   const messages = useMessageService();
   const canvasRef = useRef<HTMLDivElement | null>(null);
+  const imageImportHandlers = useImageImport();
   const { setGridElement } = useGrid();
 
   useEffect(() => {
@@ -53,6 +56,19 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
     }
   }, [activeToolId, document?.content.selectedElementId, messages]);
 
+  const [assetUrls, setAssetUrls] = useState<Record<string, string>>({});
+  useEffect(() => {
+    if (!document) {
+      setAssetUrls({});
+      return;
+    }
+    const urls = createAssetUrls(document.assets);
+    setAssetUrls(urls);
+
+    return () => {
+      revokeAssetUrls(urls);
+    };
+  }, [document]);
   const headingNumbers = useMemo(
     () => computeHeadingNumbers(elements ?? [], document?.content.headingSettings),
     [elements, document?.content.headingSettings],
@@ -65,6 +81,7 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
         className={`editor-canvas bg-editor-background ${activeToolId === EditorToolId.SPACER ? 'cursor-row-resize' : ''}`}
         style={{ position: 'relative' }}
         {...pointerHandlers}
+        {...imageImportHandlers}
       >
         <CanvasTools />
 
@@ -73,6 +90,7 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
             key={element.id}
             element={element}
             selected={element.id === selectedElementId}
+            assetUrls={assetUrls}
           />
         ))}
 

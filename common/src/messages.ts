@@ -65,8 +65,15 @@ type AllWebviewToExtensionMessage =
   | { type: 'selectElement'; id: string | null }
   | { type: 'selectTool'; tool: EditorTool }
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
-  | { type: 'updateElementLayout'; id: string; changes: Partial<ElementLayout> } // Update the Layout when Element was moved or resized
+  | {
+      type: 'updateElementLayout';
+      id: string;
+      changes: Partial<ElementLayout>;
+      aspectRatio?: number;
+    } // Update the Layout when Element was moved or resized
   | { type: 'updateElement'; id: string; changes: Partial<EditorElement> } // Update element with it's settings
+  | { type: 'addImageFromFile' }
+  | { type: 'addImageFromBytes'; name: string; bytes: number[] }
   | { type: 'toggleCursorTracking' }
   | { type: 'updateProjectorPointer'; style: ProjectorPointerStyle }
   // Sent by the editor after drawing a new element (e.g. a freehand stroke).

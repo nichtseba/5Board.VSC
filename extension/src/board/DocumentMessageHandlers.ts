@@ -1,5 +1,7 @@
+import { EditorElement, EditorElementType } from '5board.vsc-common';
 import { EXTENSION } from '../extension';
 import { BoardCustomDocument } from './BoardCustomDocument';
+import { addImageToDocument } from './addImageToDocument';
 
 export class DocumentMessageHandlers {
   constructor(private readonly document: BoardCustomDocument) {}
@@ -56,6 +58,16 @@ export class DocumentMessageHandlers {
             ...element.layout,
             ...msg.changes,
           };
+
+          if (element.type === EditorElementType.Image) {
+            const imageElement = element as EditorElement<EditorElementType.Image>;
+
+            imageElement.data = {
+              ...imageElement.data,
+              configuredWidth: true,
+              aspectRatio: msg.aspectRatio ?? imageElement.data.aspectRatio,
+            };
+          }
         });
       }),
       //#endregion "General"
@@ -71,6 +83,13 @@ export class DocumentMessageHandlers {
               };
             }
           }
+        });
+      }),
+
+      this.document.messageService.on('addImageFromBytes', (msg) => {
+        const bytes = new Uint8Array(msg.bytes);
+        this.document.applyEdit((document) => {
+          addImageToDocument(document, msg.name, bytes);
         });
       }),
 

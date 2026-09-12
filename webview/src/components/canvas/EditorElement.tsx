@@ -17,6 +17,7 @@ export type EditorElementProps<T extends EditorElementType> = {
   selected?: boolean;
   onSelect?: () => void;
   targetRef?: React.RefObject<HTMLDivElement>;
+  assetUrls?: Record<string, string>;
 };
 
 /**
@@ -28,6 +29,7 @@ export type EditorElementProps<T extends EditorElementType> = {
 export default function EditorElement<ElementType extends EditorElementType>({
   element,
   selected,
+  assetUrls,
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
   const ElementComponent =
@@ -72,6 +74,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
           element={element}
           targetRef={targetRef}
           selected={selected}
+          assetUrls={assetUrls}
           onSelect={() => handleSelectElement(element.id)}
         />
       </div>
