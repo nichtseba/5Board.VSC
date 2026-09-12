@@ -2,7 +2,7 @@ import { ColorPicker } from './ColorPicker';
 import { ColorPreset, ColorPresets } from './ColorPresets';
 
 type ColorSelectorProps = {
-  color: string;
+  color?: string;
   onChange: (color: string) => void;
   presets?: readonly (string | ColorPreset)[];
   themePresets?: readonly ColorPreset[];

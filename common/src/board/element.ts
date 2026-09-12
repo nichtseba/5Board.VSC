@@ -1,3 +1,5 @@
+import type { JSONContent } from '@tiptap/core';
+
 export type BoardElement = EditorElement; // Todo: Replace with new Element type when we have it defined
 // Todo: Add additional element types
 export enum EditorElementType {
@@ -68,15 +70,10 @@ type EditorElementDataMap = {
 export type HeadingElementData = {
   level: 1 | 2 | 3 | 4 | 5 | 6;
   content: string;
-  textStyle?: TextStyle;
+  textStyle?: TextStyleH;
 };
 
-export type TextElementData = {
-  content: string;
-  textStyle?: TextStyle;
-};
-
-export type TextStyle = {
+export type TextStyleH = {
   fontFamily?: string;
   fontSize?: number;
   fontWeight?: 'normal' | 'bold' | 'bolder' | 'lighter' | number;
@@ -85,10 +82,52 @@ export type TextStyle = {
   textAlign?: 'left' | 'center' | 'right' | 'justify';
   lineHeight?: number;
 };
+
 export type TextDecorationStyle = {
   underline?: boolean;
   overline?: boolean;
   lineThrough?: boolean;
+};
+
+export type TextElementData = {
+  content: JSONContent;
+  tiptap?: Tiptap;
+};
+
+export type Tiptap = {
+  marks?: Marks;
+  nodes?: Nodes;
+};
+
+export type Marks = {
+  bold?: boolean;
+  code?: boolean;
+  italic?: boolean;
+  link?: boolean;
+  strike?: boolean;
+  underline?: boolean;
+  textStyle?: TextStyle;
+};
+
+export type Nodes = {
+  blockquote?: boolean;
+  bulletList?: boolean;
+  codeBlock?: boolean;
+  orderedList?: boolean;
+
+  attributes?: NodeAttributes;
+};
+
+export type TextStyle = {
+  fontFamily?: string;
+  fontSize?: string;
+  lineHeight?: string;
+  color?: string;
+  backgroundColor?: string;
+};
+
+export type NodeAttributes = {
+  textAlign?: 'left' | 'center' | 'right' | 'justify';
 };
 
 export type CodeElementData = {
@@ -109,6 +148,8 @@ export type ImageElementData = {
 
   hideInExport?: boolean;
 
+  configuredWidth?: boolean;
+  aspectRatio?: number;
   cropData?: CropData;
 };
 export type CropData = {

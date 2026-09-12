@@ -126,6 +126,16 @@
       "contentTableSettings": {
         "title": "Table of content"
       },
+      "textSettings": {
+        "title": "Text",
+        "textColor": "Text Color",
+        "highlightColor": "Highligt Color",
+        "backgroundColor": "Background Color",
+        "fontSize": "Font size"
+      },
+      "imageSettings": {
+        "title": "Image"
+      },
       "freehandSettings": {
         "title": "Freehand"
       }
