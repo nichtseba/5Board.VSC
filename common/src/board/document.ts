@@ -1,4 +1,5 @@
 import { BoardElement } from './element';
+import { HeadingSettings } from './headingSettings';
 
 /**
  * Represents a single .5boardz file in memory
@@ -42,6 +43,7 @@ export interface BoardContent {
   background?: string;
   snapAngle?: number;
   revealOrder?: number;
+  headingSettings?: HeadingSettings;
 }
 
 /**

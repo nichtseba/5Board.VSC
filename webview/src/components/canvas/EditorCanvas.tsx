@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
-import { EditorToolId, ProjectorPointerStyle } from '5board.vsc-common';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { EditorToolId, ProjectorPointerStyle, computeHeadingNumbers } from '5board.vsc-common';
 import EditorElement from './EditorElement';
+import { HeadingNumberingProvider } from './HeadingNumberingContext';
 import ProjectorMouse, { ProjectorCursor } from '../projector/ProjectorMouse';
 import './EditorCanvas.css';
 import { useEditorState } from '../../providers/EditorStateProvider';
@@ -9,6 +10,7 @@ import { useGrid } from '../../providers/GridProvider';
 import { createAssetUrls, revokeAssetUrls } from './assetUrlsUtil';
 import { useImageImport } from './useImageImport';
 import { CanvasTools } from './tools/CanvasTools';
+import FreehandPreviewOverlay, { FreehandPreview } from './tools/FreehandPreviewOverlay';
 import { useBoardDocument } from '../../providers/BoardDocumentProvider';
 import { useCanvasPointer } from './useCanvasPointer';
 
@@ -17,15 +19,19 @@ export type EditorCanvasProps = {
   // Only the projector passes this to mirror the editor's pointer position.
   cursor?: ProjectorCursor | null;
   pointerStyle?: ProjectorPointerStyle;
+  // Live freehand stroke to mirror (projector only). The editor draws its own
+  // preview locally via the FreehandTool.
+  freehandPreview?: FreehandPreview | null;
 };
 
-export default function EditorCanvas({ cursor, pointerStyle }: EditorCanvasProps) {
-  // All pointer handl lives in one hook
+export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: EditorCanvasProps) {
+  // All pointer handling lives in one hook.
   const pointerHandlers = useCanvasPointer();
 
   const document = useBoardDocument();
   const editorState = useEditorState();
 
+  const elements = document?.content.elements;
   const selectedElementId = document?.content.selectedElementId ?? null;
   const activeToolId = editorState?.tool.type;
 
@@ -63,13 +69,13 @@ export default function EditorCanvas({ cursor, pointerStyle }: EditorCanvasProps
       revokeAssetUrls(urls);
     };
   }, [document]);
+  const headingNumbers = useMemo(
+    () => computeHeadingNumbers(elements ?? [], document?.content.headingSettings),
+    [elements, document?.content.headingSettings],
+  );
 
   return (
-    <>
-      {/*
-        position: relative is required so the absolute cursor overlay stays
-        clipped inside the canvas boundaries and does not bleed outside.
-      */}
+    <HeadingNumberingProvider value={headingNumbers}>
       <div
         ref={canvasRef}
         className={`editor-canvas bg-editor-background ${activeToolId === EditorToolId.SPACER ? 'cursor-row-resize' : ''}`}
@@ -90,7 +96,10 @@ export default function EditorCanvas({ cursor, pointerStyle }: EditorCanvasProps
 
         {/* Cursor overlay — only rendered in the projector via the cursor prop */}
         <ProjectorMouse cursor={cursor ?? null} style={pointerStyle} />
+
+        {/* Live freehand stroke mirrored from the editor — projector only */}
+        <FreehandPreviewOverlay preview={freehandPreview ?? null} />
       </div>
-    </>
+    </HeadingNumberingProvider>
   );
 }
