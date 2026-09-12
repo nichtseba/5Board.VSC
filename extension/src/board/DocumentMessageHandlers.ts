@@ -1,6 +1,7 @@
 import { EditorElement, EditorElementType } from '5board.vsc-common';
 import { EXTENSION } from '../extension';
 import { BoardCustomDocument } from './BoardCustomDocument';
+import deepEquals from 'deep-equal';
 import { addImageToDocument } from './addImageToDocument';
 
 export class DocumentMessageHandlers {
@@ -43,7 +44,11 @@ export class DocumentMessageHandlers {
 
       this.document.messageService.on('selectElement', (msg) => {
         this.document.applyEdit((document) => {
+          if (msg.id === document.content.selectedElementId) {
+            return false;
+          }
           document.content.selectedElementId = msg.id;
+          return true;
         });
       }),
       this.document.messageService.on('updateElementLayout', (msg) => {
@@ -51,9 +56,14 @@ export class DocumentMessageHandlers {
           const element = document.content.elements.find((e) => e.id === msg.id);
 
           if (!element) {
-            return;
+            throw new Error(
+              `Tried to update layout of element with id ${msg.id}, but it does not exist in the document`,
+            );
           }
-
+          if (deepEquals(msg.changes, element.layout)) {
+            //Skipping updateElementLayout message because the layout hasn't changed
+            return false;
+          }
           element.layout = {
             ...element.layout,
             ...msg.changes,
@@ -68,6 +78,7 @@ export class DocumentMessageHandlers {
               aspectRatio: msg.aspectRatio ?? imageElement.data.aspectRatio,
             };
           }
+          return true;
         });
       }),
       //#endregion "General"
@@ -75,14 +86,79 @@ export class DocumentMessageHandlers {
       //#region "EditorTools"
       this.document.messageService.on('insertSpacerRows', (msg) => {
         this.document.applyEdit((document) => {
+          let changed = false;
           for (const element of document.content.elements) {
             if (element.layout.yPos >= msg.startRow) {
               element.layout = {
                 ...element.layout,
                 yPos: element.layout.yPos + msg.rowCount,
               };
+              changed = true;
             }
           }
+          return changed;
+        });
+      }),
+      this.document.messageService.on('textEditorCommand', (msg) => {
+        if (!EXTENSION.activeEditorDocument) {
+          return;
+        }
+        EXTENSION.activeEditorDocument.messageService.send(msg);
+      }),
+      this.document.messageService.on('updateElement', (msg) => {
+        this.document.applyEdit((document) => {
+          const element = document.content.elements.find((e) => e.id === msg.id);
+          if (!element) {
+            throw new Error(
+              `Tried to update element with id ${msg.id}, but it does not exist in the document`,
+            );
+          }
+          const nextData = {
+            ...element.data,
+            ...msg.changes.data,
+          };
+
+          const nextLayout = {
+            ...element.layout,
+            ...msg.changes.layout,
+          };
+
+          const nextStyle = {
+            ...element.style,
+            ...msg.changes.style,
+          };
+
+          if (
+            deepEquals(nextData, element.data) &&
+            deepEquals(nextLayout, element.layout) &&
+            deepEquals(nextStyle, element.style)
+          ) {
+            //Skipping updateElement message because the data hasn't changed
+            return false;
+          }
+
+          document.content.elements = document.content.elements.map((el) => {
+            if (el.id !== msg.id) {
+              return el;
+            }
+
+            return {
+              ...el,
+              layout: {
+                ...el.layout,
+                ...msg.changes.layout,
+              },
+              data: {
+                ...el.data,
+                ...msg.changes.data,
+              },
+              style: {
+                ...el.style,
+                ...msg.changes.style,
+              },
+            };
+          });
+          return true;
         });
       }),
 

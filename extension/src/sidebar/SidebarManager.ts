@@ -8,6 +8,7 @@ import {
 } from '../providers/SidebarViewProvider';
 import { StructureTreeProvider } from '../providers/StructureTreeProvider';
 import { EXTENSION } from '../extension';
+import deepEquals from 'deep-equal';
 import { FileTreeProvider } from '../providers/FileTreeProvider';
 
 export class SidebarManager implements vscode.Disposable {
@@ -33,6 +34,13 @@ export class SidebarManager implements vscode.Disposable {
       EXTENSION.editorState = {
         tool: msg.tool,
       };
+    });
+
+    this.messages.on('textEditorCommand', (msg) => {
+      if (!EXTENSION.activeEditorDocument) {
+        return;
+      }
+      EXTENSION.activeEditorDocument.messageService.send(msg);
     });
 
     // Sync the current projector settings to a newly opened sidebar.
@@ -77,14 +85,58 @@ export class SidebarManager implements vscode.Disposable {
         return;
       }
       EXTENSION.activeEditorDocument.applyEdit((document) => {
-        const index = document.content.elements.findIndex((e) => e.id === msg.id);
-
-        if (index !== -1) {
-          document.content.elements[index] = {
-            ...document.content.elements[index],
-            ...msg.changes,
-          };
+        const element = document.content.elements.find((e) => e.id === msg.id);
+        if (!element) {
+          throw new Error(
+            `Tried to update element with id ${msg.id}, but it does not exist in the document`,
+          );
         }
+        const nextData = {
+          ...element.data,
+          ...msg.changes.data,
+        };
+
+        const nextLayout = {
+          ...element.layout,
+          ...msg.changes.layout,
+        };
+
+        const nextStyle = {
+          ...element.style,
+          ...msg.changes.style,
+        };
+
+        if (
+          deepEquals(nextData, element.data) &&
+          deepEquals(nextLayout, element.layout) &&
+          deepEquals(nextStyle, element.style)
+        ) {
+          //Skipping updateElement message because the data hasn't changed
+          return false;
+        }
+
+        document.content.elements = document.content.elements.map((el) => {
+          if (el.id !== msg.id) {
+            return el;
+          }
+
+          return {
+            ...el,
+            layout: {
+              ...el.layout,
+              ...msg.changes.layout,
+            },
+            data: {
+              ...el.data,
+              ...msg.changes.data,
+            },
+            style: {
+              ...el.style,
+              ...msg.changes.style,
+            },
+          };
+        });
+        return true;
       });
     });
 
