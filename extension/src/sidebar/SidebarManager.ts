@@ -111,7 +111,7 @@ export class SidebarManager implements vscode.Disposable {
           deepEquals(nextLayout, element.layout) &&
           deepEquals(nextStyle, element.style)
         ) {
-          console.log("Skipping updateElement message because the data hasn't changed");
+          //Skipping updateElement message because the data hasn't changed
           return false;
         }
 

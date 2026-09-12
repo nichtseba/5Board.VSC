@@ -61,7 +61,7 @@ export class DocumentMessageHandlers {
             );
           }
           if (deepEquals(msg.changes, element.layout)) {
-            console.log("Skipping updateElementLayout message because the layout hasn't changed");
+            //Skipping updateElementLayout message because the layout hasn't changed
             return false;
           }
           element.layout = {
@@ -133,7 +133,7 @@ export class DocumentMessageHandlers {
             deepEquals(nextLayout, element.layout) &&
             deepEquals(nextStyle, element.style)
           ) {
-            console.log("Skipping updateElement message because the data hasn't changed");
+            //Skipping updateElement message because the data hasn't changed
             return false;
           }
 
