@@ -11,6 +11,8 @@ import { CanvasTools } from './tools/CanvasTools';
 import FreehandPreviewOverlay, { FreehandPreview } from './tools/FreehandPreviewOverlay';
 import { useBoardDocument } from '../../providers/BoardDocumentProvider';
 import { useCanvasPointer } from './useCanvasPointer';
+import { useMarqueeSelection } from './useMarqueeSelection';
+import { MarqueeOverlay } from './MarqueeOverlay';
 
 export type EditorCanvasProps = {
   // Normalized (0–1) cursor position to display as a live overlay.
@@ -29,7 +31,7 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
   const document = useBoardDocument();
   const editorState = useEditorState();
 
-  const elements = document?.content.elements;
+  const elements = document?.content.elements ?? [];
   const selectedElementIds = document?.content.selectedElementIds ?? [];
   const activeToolId = editorState?.tool.type;
 
@@ -50,8 +52,8 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
       (document?.content.selectedElementIds.length ?? 0) > 0
     ) {
       messages.send({
-        type: 'selectElement',
-        id: null,
+        type: 'selectElements',
+        ids: [],
       });
     }
   }, [activeToolId, document?.content.selectedElementIds, messages]);
@@ -60,6 +62,12 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
     () => computeHeadingNumbers(elements ?? [], document?.content.headingSettings),
     [elements, document?.content.headingSettings],
   );
+
+  const { marqueeRect } = useMarqueeSelection({
+    activeToolId,
+    elements,
+    messages,
+  });
 
   return (
     <HeadingNumberingProvider value={headingNumbers}>
@@ -84,6 +92,7 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
 
         {/* Live freehand stroke mirrored from the editor — projector only */}
         <FreehandPreviewOverlay preview={freehandPreview ?? null} />
+        <MarqueeOverlay rect={marqueeRect} />
       </div>
     </HeadingNumberingProvider>
   );

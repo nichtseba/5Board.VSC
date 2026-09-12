@@ -40,11 +40,11 @@ export default function EditorElement<ElementType extends EditorElementType>({
     if (activeToolId !== EditorToolId.POINTER) return;
 
     if (event?.ctrlKey || event?.metaKey) {
-      messages.send({ type: 'toggleElementSelection', id });
+      messages.send({ type: 'toggleElementSelection', ids: [id] });
       return;
     }
 
-    messages.send({ type: 'selectElement', id });
+    messages.send({ type: 'selectElements', ids: [id] });
   };
 
   return (
