@@ -50,6 +50,13 @@ export function useMarqueeSelection({
    */
   const isMarqueeActiveRef = useRef(false);
 
+  /**
+   * True when selection started on an element.
+   *
+   * This is used to distinguish moving an element from starting a new marquee selection.
+   */
+  const startedOnElementRef = useRef(false);
+
   const [marqueeRect, setMarqueeRect] = useState<MarqueeRect | null>(null);
 
   const toCanvasPoint = useCanvasPoint();
@@ -109,6 +116,7 @@ export function useMarqueeSelection({
     startRef.current = null;
     startClientRef.current = null;
     isMarqueeActiveRef.current = false;
+    startedOnElementRef.current = false;
     setMarqueeRect(null);
   };
 
@@ -116,6 +124,15 @@ export function useMarqueeSelection({
     pointerDown: (event) => {
       if (activeToolId !== EditorToolId.POINTER) return;
       if (event.button !== 0) return;
+
+      const target = event.target;
+      if (!(target instanceof HTMLElement)) return;
+
+      const element = target.closest('[data-editor-element]');
+      if (element) {
+        startedOnElementRef.current = true;
+        return;
+      }
 
       const point = toCanvasPoint(event);
 
@@ -130,7 +147,12 @@ export function useMarqueeSelection({
     },
 
     pointerMove: (event) => {
-      if (!startRef.current || !startClientRef.current || activeToolId !== EditorToolId.POINTER) {
+      if (
+        startedOnElementRef.current ||
+        !startRef.current ||
+        !startClientRef.current ||
+        activeToolId !== EditorToolId.POINTER
+      ) {
         return;
       }
 
@@ -159,15 +181,31 @@ export function useMarqueeSelection({
     },
 
     pointerUp: (event) => {
-      if (!startRef.current || activeToolId !== EditorToolId.POINTER) {
+      if (
+        !startRef.current ||
+        activeToolId !== EditorToolId.POINTER ||
+        startedOnElementRef.current
+      ) {
+        cancelMarquee();
         return;
       }
 
       const point = toCanvasPoint(event);
 
-      // clean up when pointer position cannot be determined,
-      // or the pointer never moved far enough
-      if (!point || !isMarqueeActiveRef.current) {
+      // clean up when pointer position cannot be determined
+      if (!point) {
+        cancelMarquee();
+        return;
+      }
+
+      // clean up when the pointer never moved far enough
+      // this means this was a simple click on empty canvas,
+      // therefore the selection should be cleared
+      if (!isMarqueeActiveRef.current) {
+        messages.send({
+          type: 'selectElements',
+          ids: [],
+        });
         cancelMarquee();
         return;
       }

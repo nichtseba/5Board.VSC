@@ -13,7 +13,6 @@ import { useBoardDocument } from '../../providers/BoardDocumentProvider';
 import { useCanvasPointer } from './useCanvasPointer';
 import { useMarqueeSelection } from './useMarqueeSelection';
 import { MarqueeOverlay } from './MarqueeOverlay';
-import { useCanvasSelection } from './useCanvasSelection';
 
 export type EditorCanvasProps = {
   // Normalized (0–1) cursor position to display as a live overlay.
@@ -69,8 +68,6 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
     elements,
     messages,
   });
-
-  useCanvasSelection();
 
   return (
     <HeadingNumberingProvider value={headingNumbers}>
