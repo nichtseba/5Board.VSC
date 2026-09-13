@@ -221,7 +221,7 @@ export function useMarqueeSelection({
         .filter((element) => intersectsRect(element, gridRect))
         .map((element) => element.id);
 
-      if (event?.ctrlKey || event?.metaKey) {
+      if (event?.shiftKey) {
         messages.send({ type: 'toggleElementSelection', ids: ids });
       } else {
         messages.send({

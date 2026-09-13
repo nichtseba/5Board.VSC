@@ -76,8 +76,8 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
         className={`
           editor-canvas
            bg-editor-background 
+           select-none
            ${activeToolId === EditorToolId.SPACER ? 'cursor-row-resize' : ''} 
-           ${marqueeRect ? 'select-none' : ''}
            `}
         style={{ position: 'relative' }}
         {...pointerHandlers}

@@ -39,7 +39,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
   const handleSelectElement = (id: string, event?: React.MouseEvent) => {
     if (activeToolId !== EditorToolId.POINTER) return;
 
-    if (event?.ctrlKey || event?.metaKey) {
+    if (event?.shiftKey) {
       messages.send({ type: 'toggleElementSelection', ids: [id] });
       return;
     }
