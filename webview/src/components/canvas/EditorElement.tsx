@@ -62,7 +62,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
 
   useEffect(() => {
     const listener = (event: KeyboardEvent) => {
-      if (event.key !== 'Backspace') {
+      if (event.key !== 'Delete') {
         return;
       }
 
