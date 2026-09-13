@@ -43,7 +43,8 @@ export class BoardPackage {
     const document: BoardDocument = {
       manifest: create5boardzManifest(title),
       content: {
-        selectedElementId: null,
+        selectedElementIds: [],
+        primarySelectedElementId: null,
         elements: [],
         background: '',
         snapAngle: 0,

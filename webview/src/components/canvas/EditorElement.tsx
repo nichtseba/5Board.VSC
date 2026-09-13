@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { EditorElement, EditorElementType, EditorToolId } from '5board.vsc-common';
 import type React from 'react';
 import { TextElement } from './elements/TextElement';
@@ -15,8 +15,15 @@ import { useMessageService } from '../../services/MessageService';
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
   selected?: boolean;
-  onSelect?: () => void;
+  onSelect?: (event?: React.MouseEvent) => void;
+  editing?: boolean;
+  editingPosition?: {
+    x: number;
+    y: number;
+  } | null;
+  onStopEditing?: () => void;
   targetRef?: React.RefObject<HTMLDivElement>;
+  assetUrls?: Record<string, string>;
 };
 
 /**
@@ -28,30 +35,63 @@ export type EditorElementProps<T extends EditorElementType> = {
 export default function EditorElement<ElementType extends EditorElementType>({
   element,
   selected,
+  assetUrls,
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
+  const [editing, setEditing] = useState(false);
+  const [editingPosition, setEditingPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const ElementComponent =
     (ELEMENT_COMPONENTS[element.type] as React.ComponentType<EditorElementProps<ElementType>>) ??
     UnknownElement;
   const activeToolId = useEditorState()?.tool.type;
   const messages = useMessageService();
 
-  const handleSelectElement = (id: string) => {
+  const handleSelectElement = (id: string, event?: React.MouseEvent) => {
     if (activeToolId !== EditorToolId.POINTER) return;
 
-    messages.send({
-      type: 'selectElement',
-      id,
-    });
+    if (event?.shiftKey) {
+      messages.send({ type: 'toggleElementSelection', ids: [id] });
+      return;
+    }
+
+    messages.send({ type: 'selectElements', ids: [id] });
   };
+
+  const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (element.type !== EditorElementType.Text) {
+      return;
+    }
+    setEditingPosition({
+      x: event.clientX,
+      y: event.clientY,
+    });
+    setEditing(true);
+  };
+
+  const handleStopEditing = () => {
+    setEditing(false);
+    setEditingPosition(null);
+  };
+
+  useEffect(() => {
+    if (!selected) {
+      setEditing(false);
+      setEditingPosition(null);
+    }
+  }, [selected]);
 
   return (
     <>
       <div
         id={element.id}
-        onClick={() => handleSelectElement(element.id)}
+        data-editor-element
+        onClick={(event) => handleSelectElement(element.id, event)}
+        onDoubleClick={handleDoubleClick}
         className={`
-          box-border
+          box-border overflow-hidden
           ${activeToolId === EditorToolId.POINTER ? 'cursor-pointer' : ''}
           ${
             activeToolId === EditorToolId.POINTER && !selected
@@ -62,6 +102,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
         `}
         ref={targetRef}
         style={{
+          backgroundColor: element.style.backgroundColor,
           gridRowStart: element.layout.yPos + 1,
           gridRowEnd: `span ${element.layout.height}`,
           gridColumnStart: element.layout.xPos + 1,
@@ -72,11 +113,19 @@ export default function EditorElement<ElementType extends EditorElementType>({
           element={element}
           targetRef={targetRef}
           selected={selected}
-          onSelect={() => handleSelectElement(element.id)}
+          onSelect={(event) => handleSelectElement(element.id, event)}
+          editing={editing}
+          editingPosition={editingPosition}
+          assetUrls={assetUrls}
+          onStopEditing={handleStopEditing}
         />
       </div>
       {activeToolId === EditorToolId.POINTER && (
-        <ElementInteractionController element={element} selected={selected} targetRef={targetRef} />
+        <ElementInteractionController
+          element={element}
+          selected={selected && !editing}
+          targetRef={targetRef}
+        />
       )}
     </>
   );

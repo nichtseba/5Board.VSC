@@ -24,6 +24,21 @@ export default function ElementInteractionController<ElementType extends EditorE
 
   const pendingPositionUpdate = useRef(false);
 
+  const getImageResizeRatio = () => {
+    if (element.type === EditorElementType.Image) {
+      const imageElement = element as EditorElement<EditorElementType.Image>;
+
+      if (imageElement.data.aspectRatio !== undefined) {
+        return imageElement.data.aspectRatio;
+      }
+    }
+
+    return (element.layout.width * cellSize.width) / (element.layout.height * cellSize.height);
+  };
+
+  const isImageCornerResize = (direction: number[]) =>
+    element.type === EditorElementType.Image && direction[0] !== 0 && direction[1] !== 0;
+
   useLayoutEffect(() => {
     if (pendingPositionUpdate.current && targetRef.current) {
       pendingPositionUpdate.current = false;
@@ -73,8 +88,15 @@ export default function ElementInteractionController<ElementType extends EditorE
 
   const handleResizeEnd = ({ target, lastEvent }: OnResizeEnd) => {
     if (!lastEvent || !target) return;
+
     const width = lastEvent.width;
-    const height = lastEvent.height;
+    let height = lastEvent.height;
+
+    if (isImageCornerResize(lastEvent.direction)) {
+      const ratio = getImageResizeRatio();
+      height = width / ratio;
+    }
+
     const newWidth = Math.max(1, Math.round(width / cellSize.width));
     const newHeight = Math.max(1, Math.round(height / cellSize.height));
 
@@ -124,9 +146,17 @@ export default function ElementInteractionController<ElementType extends EditorE
         }
       }}
       onDragEnd={handleDragEnd}
-      onResize={({ target, width, height }) => {
-        target.style.width = `${width}px`;
-        target.style.height = `${height}px`;
+      onResize={({ target, width, height, direction }) => {
+        const nextWidth = width;
+        let nextHeight = height;
+
+        if (isImageCornerResize(direction)) {
+          const ratio = getImageResizeRatio();
+          nextHeight = nextWidth / ratio;
+        }
+
+        target.style.width = `${nextWidth}px`;
+        target.style.height = `${nextHeight}px`;
       }}
       onResizeEnd={handleResizeEnd}
     />
