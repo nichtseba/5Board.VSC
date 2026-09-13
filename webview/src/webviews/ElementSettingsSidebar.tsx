@@ -14,22 +14,23 @@ export default function ElementSettingsSidebar() {
   const { t } = useLocalization();
   const document = useBoardDocument();
 
-  const selectedElement =
-    document?.content.elements.find((e) => e.id === document.content.selectedElementId) ?? null;
+  const primarySelectedElement =
+    document?.content.elements.find((e) => document.content.primarySelectedElementId === e.id) ??
+    null;
 
   useEffect(() => {
     messages.send({ type: 'ready' });
   }, []);
 
   let content: React.ReactNode;
-  if (!selectedElement) {
+  if (!primarySelectedElement) {
     content = (
       <div>
         <p>{t('webview.sidebar-element-settings.noElementSelected')}</p>
       </div>
     );
   } else {
-    content = <ElementSettings element={selectedElement} />;
+    content = <ElementSettings element={primarySelectedElement} />;
   }
 
   const handleDelete = (selectedElement: BoardElement) => {
@@ -42,11 +43,11 @@ export default function ElementSettingsSidebar() {
   return (
     <SidebarShell>
       {content}
-      {selectedElement && (
+      {primarySelectedElement && (
         <Button
           appearance="secondary"
           className="justify-center gap-2"
-          onClick={() => handleDelete(selectedElement)}
+          onClick={() => handleDelete(primarySelectedElement)}
         >
           <Icon name="trash" className="color-foreground-error" />
 
