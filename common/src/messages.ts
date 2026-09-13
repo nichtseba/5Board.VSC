@@ -7,7 +7,9 @@ import {
   EditorState,
   EditorTool,
   ElementLayout,
+  AddElementDefaults,
   LineStyle,
+  TextEditorCommand,
 } from './main';
 import { ProjectorPointerStyle } from './projector';
 
@@ -27,6 +29,7 @@ type AllExtensionToWebviewMessage =
   | { type: 'init'; document: BoardDocument; editorState: EditorState; language: Language }
   | { type: 'initSidebar'; document: BoardDocument; editorState: EditorState }
   | { type: 'updateEditorState'; editorState: EditorState }
+  | { type: 'textEditorCommand'; command: TextEditorCommand }
   | { type: 'cursorMove'; x: number; y: number }
   | { type: 'cursorHide' }
   | { type: 'cursorTrackingChanged'; enabled: boolean }
@@ -70,13 +73,22 @@ type AllWebviewToExtensionMessage =
   | { type: 'cursorMove'; x: number; y: number }
   | { type: 'cursorLeave' }
   | { type: 'scroll'; top: number; left: number }
-  | { type: 'selectElement'; id: string | null }
+  | { type: 'selectElements'; ids: string[] }
+  | { type: 'toggleElementSelection'; ids: string[] }
   | { type: 'selectTool'; tool: EditorTool }
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
   | AddElementMessage
   | { type: 'deleteElement'; id: string }
-  | { type: 'updateElementLayout'; id: string; changes: Partial<ElementLayout> } // Update the Layout when Element was moved or resized
+  | {
+      type: 'updateElementLayout';
+      id: string;
+      changes: Partial<ElementLayout>;
+      aspectRatio?: number;
+    } // Update the Layout when Element was moved or resized
   | { type: 'updateElement'; id: string; changes: Partial<EditorElement> } // Update element with it's settings
+  | { type: 'textEditorCommand'; command: TextEditorCommand }
+  | { type: 'addImageFromFile' }
+  | { type: 'addImageFromBytes'; name: string; bytes: number[] }
   | { type: 'toggleCursorTracking' }
   | { type: 'updateProjectorPointer'; style: ProjectorPointerStyle }
   // Sent by the editor after drawing a new element (e.g. a freehand stroke).
@@ -114,6 +126,6 @@ type AddElementMessage = {
     type: 'addElement';
     elementType: T;
     elementPosition: ElementLayout;
-    initialData?: Partial<EditorElement<T>>;
+    defaults?: AddElementDefaults;
   };
 }[EditorElementType];

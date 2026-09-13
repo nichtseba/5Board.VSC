@@ -8,6 +8,7 @@ import { Button } from 'vscrui';
 import SidebarSection from '../layout/SidebarSection';
 import { useLocalization } from '../../../providers/LocalizationProvider';
 import { useEditorState } from '../../../providers/EditorStateProvider';
+import { useMessageService } from '../../../services/MessageService';
 import { useEffect, useState } from 'react';
 
 export type newElementProps = {
@@ -17,8 +18,10 @@ export type newElementProps = {
 export function NewElements({ handleToolClick }: newElementProps) {
   const { t } = useLocalization();
   const editorState = useEditorState();
+  const messages = useMessageService();
 
   const [selectedElement, setSelectedElement] = useState<EditorElementType | undefined>();
+  const [hoveredElementLabel, setHoveredElementLabel] = useState<string>();
 
   useEffect(() => {
     if (editorState?.tool.type !== EditorToolId.AddElement) {
@@ -34,8 +37,12 @@ export function NewElements({ handleToolClick }: newElementProps) {
     elementType: EditorElementType,
     placementMode: (typeof ELEMENT_TYPE_DEFINITIONS)[EditorElementType]['placement'],
   ) => {
-    setSelectedElement(elementType);
+    if (elementType === EditorElementType.Image) {
+      messages.send({ type: 'addImageFromFile' });
+      return;
+    }
 
+    setSelectedElement(elementType);
     handleToolClick({
       type: EditorToolId.AddElement,
       parameters: {
@@ -46,8 +53,10 @@ export function NewElements({ handleToolClick }: newElementProps) {
   };
 
   return (
-    <SidebarSection title={t('webview.sidebar.addElement')}>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3">
+    <SidebarSection
+      title={`${t('webview.sidebar.addElement')}${hoveredElementLabel ? `: ${hoveredElementLabel}` : ''}`}
+    >
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(2rem,1fr))] gap-2">
         {addableElements
           .filter(([key]) => key !== EditorToolId.FREEHAND)
           .map(([type, definition]) => {
@@ -57,11 +66,14 @@ export function NewElements({ handleToolClick }: newElementProps) {
             return (
               <Button
                 key={type}
+                title={definition.label}
+                onMouseEnter={() => setHoveredElementLabel(definition.label)}
+                onMouseLeave={() => setHoveredElementLabel(undefined)}
                 onClick={() => handleElementClick(elementType, definition.placement)}
                 appearance={isSelected ? 'primary' : 'secondary'}
-                className="h-8 flex flex-col items-center justify-center gap-2"
+                className="h-8 w-8 flex items-center justify-center"
               >
-                <span>{definition.label}</span>
+                <span className={`codicon codicon-${definition.icon}`} />
               </Button>
             );
           })}

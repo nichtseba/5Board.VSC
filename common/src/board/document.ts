@@ -38,7 +38,8 @@ export interface BoardManifest {
  * Should be equivalent to the content.json within the .5boardz zip file
  */
 export interface BoardContent {
-  selectedElementId: string | null;
+  selectedElementIds: string[];
+  primarySelectedElementId: string | null;
   elements: BoardElement[];
   background?: string;
   snapAngle?: number;
@@ -52,7 +53,7 @@ export interface BoardContent {
  */
 export interface Asset {
   name: string;
-  mime: string;
+  mime?: string;
   bytes: Uint8Array;
   // timestamp of creation, should be set when the asset is first created and never modified afterwards
   createdAt: number;

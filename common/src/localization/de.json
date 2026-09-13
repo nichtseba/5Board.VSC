@@ -26,12 +26,7 @@
         "pointer": "Zeiger",
         "spacer": "Abstand-Tool",
         "freehand": "Freihand-Tool",
-        "addElement": "Element hinzufügen",
-        "text": "Text",
-        "heading": "Überschrift",
-        "link": "Link",
-        "code": "Code",
-        "image": "Bild"
+        "addElement": "Element hinzufügen"
       },
       "freehand": {
         "title": "Freihand-Optionen",
@@ -124,6 +119,16 @@
         "colorTheme": "Theme",
         "customColor": "Eigene Farbe",
         "backgroundColor": "Hintergrundfarbe"
+      },
+      "textSettings": {
+        "title": "Text",
+        "textColor": "Textfarbe",
+        "highlightColor": "Textmarker",
+        "backgroundColor": "Hintergrundfarbe",
+        "fontSize": "Schriftgröße"
+      },
+      "imageSettings": {
+        "title": "Bild"
       },
       "freehandSettings": {
         "title": "Freihand"

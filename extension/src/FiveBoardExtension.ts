@@ -8,19 +8,24 @@ import { BoardCustomDocument } from './board/BoardCustomDocument';
 import {
   BoardDocument,
   DEFAULT_ELEMENT_PROFILES,
+  AddElementDefaults,
   EditorElement,
   EditorElementDataMap,
   EditorElementType,
+  ImageElementData,
+  EditorToolId,
   DEFAULT_PROJECTOR_POINTER_STYLE,
   DEFAULT_TOOL_ID,
   EditorState,
   ProjectorPointerStyle,
+  ElementLayout,
 } from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
 import { ProjectorProvider } from './providers/ProjectorProvider';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
+import { addImageAsset } from './board/addImageToDocument';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
@@ -140,21 +145,42 @@ export class FiveBoardExtension extends ExtensionBase {
   addNewEditorElement(
     type: EditorElementType,
     position: EditorElement['layout'],
-    initialData?: Partial<EditorElement>,
+    defaults?: AddElementDefaults,
   ): void {
-    const element = this.createDefaultElement(type, position, initialData);
+    //const element = this.createDefaultElement(type, position, initialData);
 
     this.applyEditToActiveDocument((document) => {
+      const element = this.createDefaultElement(type, position, defaults, document);
       document.content.elements.push(element);
     });
   }
 
   private createDefaultElement<T extends EditorElementType>(
     type: T,
-    position: EditorElement['layout'],
-    initialData?: Partial<EditorElement>,
+    position: ElementLayout,
+    defaults: AddElementDefaults<T> | undefined,
+    document: BoardDocument,
   ): EditorElement<T> {
     const profile = DEFAULT_ELEMENT_PROFILES[type];
+    const data = {
+      ...structuredClone(profile.data),
+      ...defaults?.data,
+    } as EditorElementDataMap[T];
+
+    if (type === EditorElementType.Image && defaults?.asset) {
+      const assetName = addImageAsset(
+        document,
+        defaults.asset.name,
+        new Uint8Array(defaults.asset.bytes),
+      );
+      const imageData = data as ImageElementData;
+      Object.assign(imageData, {
+        src: assetName,
+        title: imageData.title ?? assetName,
+        altText: imageData.altText ?? assetName,
+        configuredWidth: false,
+      });
+    }
 
     return {
       id: crypto.randomUUID(),
@@ -162,17 +188,56 @@ export class FiveBoardExtension extends ExtensionBase {
       layout: {
         ...profile.layout,
         ...position,
-        ...(initialData?.layout ?? {}),
+        width: defaults?.layout?.width ?? profile.layout.width,
+        height: defaults?.layout?.height ?? profile.layout.height,
       },
 
       style: {
         ...structuredClone(profile.style),
-        ...(initialData?.style ?? {}),
+        ...defaults?.style,
       },
-      data: {
-        ...structuredClone(profile.data),
-        ...(initialData?.data ? initialData.data : {}),
-      } as EditorElementDataMap[T],
+      data,
+    };
+  }
+
+  @Command('5board-vsc.addImageFromFile')
+  async addImageFromFileCommand(): Promise<void> {
+    const activeDocument = this.activeEditorDocument;
+
+    if (!activeDocument) {
+      vscode.window.showInformationMessage('No active 5board document');
+      return;
+    }
+
+    const uris = await vscode.window.showOpenDialog({
+      canSelectMany: false,
+      filters: {
+        Images: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'],
+      },
+    });
+
+    const fileUri = uris?.[0];
+
+    if (!fileUri) {
+      return;
+    }
+
+    const bytes = await vscode.workspace.fs.readFile(fileUri);
+    const assetName = path.basename(fileUri.fsPath);
+    this.editorState = {
+      tool: {
+        type: EditorToolId.AddElement,
+        parameters: {
+          type: EditorElementType.Image,
+          placementMode: 'free',
+          defaults: {
+            asset: {
+              name: assetName,
+              bytes: Array.from(bytes),
+            },
+          },
+        },
+      },
     };
   }
 

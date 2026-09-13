@@ -1,18 +1,21 @@
+import { EditorElement as EditorElementData } from '5board.vsc-common';
+import EditorElement from '../../EditorElement';
+import { useGrid } from '../../../../providers/GridProvider';
+
 export type AddOverlayProps = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+  element: EditorElementData;
   variant?: 'rectangle' | 'point';
 };
 
-export default function AddOverlay({
-  x,
-  y,
-  width,
-  height,
-  variant = 'rectangle',
-}: AddOverlayProps) {
+export default function AddOverlay({ element, variant = 'rectangle' }: AddOverlayProps) {
+  const { cellSize } = useGrid();
+  const { left, top, width, height } = {
+    left: element.layout.xPos * cellSize.width,
+    top: element.layout.yPos * cellSize.height,
+    width: element.layout.width * cellSize.width,
+    height: element.layout.height * cellSize.height,
+  };
+
   if (variant === 'point') {
     const pointSize = Math.min(width, height, 12);
 
@@ -20,8 +23,8 @@ export default function AddOverlay({
       <div
         className="pointer-events-none absolute z-20 rounded-full bg-focus-border"
         style={{
-          left: x + (width - pointSize) / 2,
-          top: y + (height - pointSize) / 2,
+          left: left + (width - pointSize) / 2,
+          top: top + (height - pointSize) / 2,
           width: pointSize,
           height: pointSize,
         }}
@@ -35,17 +38,21 @@ export default function AddOverlay({
         pointer-events-none
         absolute
         z-20
+        box-border
+        overflow-hidden
         rounded-md
         border-2
         border-focus-border
         bg-focus-background/20
       "
       style={{
-        left: x,
-        top: y,
+        left: left,
+        top: top,
         width: width,
         height: height,
       }}
-    />
+    >
+      <EditorElement element={element} preview />
+    </div>
   );
 }

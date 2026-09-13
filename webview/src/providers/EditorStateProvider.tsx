@@ -19,7 +19,6 @@ export function EditorStateProvider({ children }: { children: React.ReactNode })
 
   useOnMessage((msg) => {
     if (msg.type === 'updateEditorState' || msg.type === 'init' || msg.type === 'initSidebar') {
-      console.log('editorstateprocider msg: ', msg);
       setEditorState(msg.editorState);
     }
   });
