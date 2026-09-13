@@ -3,6 +3,7 @@ import { useCanvasEvents } from '../../../../providers/CanvasEventsProvider';
 import { useMessageService } from '../../../../services/MessageService';
 import { useGrid } from '../../../../providers/GridProvider';
 import {
+  EditorElement,
   EditorElementDataMap,
   EditorElementType,
   EditorTool,
@@ -192,7 +193,7 @@ export function ClickAddTool() {
                 type: 'addElement',
                 elementType: EditorElementType.Line,
                 elementPosition: layout,
-                initialData: {
+                defaults: {
                   data: (preview as Preview<EditorElementType.Line>)
                     .data as EditorElementDataMap[EditorElementType.Line],
                 },
@@ -203,7 +204,7 @@ export function ClickAddTool() {
                 type: 'addElement',
                 elementType: EditorElementType.Rectangle,
                 elementPosition: layout,
-                initialData: {
+                defaults: {
                   data: undefined,
                 },
               };
@@ -213,7 +214,7 @@ export function ClickAddTool() {
                 type: 'addElement',
                 elementType: EditorElementType.Circle,
                 elementPosition: layout,
-                initialData: {
+                defaults: {
                   data: undefined,
                 },
               };
@@ -238,20 +239,25 @@ export function ClickAddTool() {
   if (!elementType || !currentPoint) {
     return null;
   }
-
+  const element = {
+    id: '__click-preview__',
+    type: elementType,
+    layout: {
+      xPos: currentPoint.x,
+      yPos: currentPoint.y,
+      width: 1,
+      height: 1,
+    },
+    style: {
+      visible: true,
+    },
+    data: undefined,
+  } as EditorElement;
   /**
    * Before the first click there is no preview geometry.
    */
   if (!startPoint) {
-    return (
-      <AddOverlay
-        x={currentPoint.x * cellSize.width}
-        y={currentPoint.y * cellSize.height}
-        width={cellSize.width}
-        height={cellSize.height}
-        variant="point"
-      />
-    );
+    return <AddOverlay element={element} variant="point" />;
   }
 
   const preview = createPreview(elementType, startPoint, currentPoint);
