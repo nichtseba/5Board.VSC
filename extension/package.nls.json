@@ -1,6 +1,7 @@
 {
   "customEditors.editor": "5Board Editor",
   "customEditors.legacy-converter": "5Board Legacy Converter",
+  "views.sidebar.sidebar-title": "Tools & Elements",
   "customEditors.projector": "5Board Projector View",
   "views.sidebar.tool-title": "Tools & Presets",
   "views.sidebar.projector-title": "Projector Settings",

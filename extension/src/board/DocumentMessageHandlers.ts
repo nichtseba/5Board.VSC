@@ -1,4 +1,4 @@
-import { EditorElement, EditorElementType } from '5board.vsc-common';
+import { EditorElement, EditorElementType, EditorToolId } from '5board.vsc-common';
 import { EXTENSION } from '../extension';
 import { BoardCustomDocument } from './BoardCustomDocument';
 import deepEquals from 'deep-equal';
@@ -55,6 +55,15 @@ export class DocumentMessageHandlers {
           document.content.selectedElementIds = next;
           document.content.primarySelectedElementId = next[0] ?? null;
         });
+      }),
+      this.document.messageService.on('addElement', (msg) => {
+        EXTENSION.addNewEditorElement(msg.elementType, msg.elementPosition, msg.defaults);
+        EXTENSION.editorState = {
+          tool: { type: EditorToolId.POINTER, parameters: undefined },
+        };
+      }),
+      this.document.messageService.on('deleteElement', (msg) => {
+        EXTENSION.deleteEditorElement(msg.id);
       }),
 
       this.document.messageService.on('selectElements', (msg) => {
@@ -184,7 +193,7 @@ export class DocumentMessageHandlers {
 
       // The editor sends a freshly drawn element (e.g. a freehand stroke).
       // Append it to the document; the change broadcasts 'updateDocument' to all panels.
-      this.document.messageService.on('addElement', (msg) => {
+      this.document.messageService.on('addFreehandElement', (msg) => {
         this.document.applyEdit((document) => {
           document.content.elements.push(msg.element);
         });

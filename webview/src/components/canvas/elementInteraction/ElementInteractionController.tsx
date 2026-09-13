@@ -124,6 +124,7 @@ export default function ElementInteractionController<ElementType extends EditorE
       target={targetRef}
       draggable={profile.draggable}
       resizable={profile.resizable}
+      keepRatio={profile.keepRatio}
       snappable={true}
       snapGridWidth={cellSize.width}
       snapGridHeight={cellSize.height}

@@ -9,14 +9,7 @@ export function addImageToDocument(
   requestedName: string,
   bytes: Uint8Array,
 ): void {
-  const assetName = createUniqueAssetName(document, requestedName);
-
-  document.assets.push({
-    name: assetName,
-    bytes,
-    createdAt: Date.now(),
-    modifiedAt: Date.now(),
-  });
+  const assetName = addImageAsset(document, requestedName, bytes);
 
   document.content.elements.push({
     id: assetName,
@@ -38,6 +31,23 @@ export function addImageToDocument(
       configuredWidth: false,
     },
   });
+}
+
+export function addImageAsset(
+  document: BoardDocument,
+  requestedName: string,
+  bytes: Uint8Array,
+): string {
+  const assetName = createUniqueAssetName(document, requestedName);
+
+  document.assets.push({
+    name: assetName,
+    bytes,
+    createdAt: Date.now(),
+    modifiedAt: Date.now(),
+  });
+
+  return assetName;
 }
 
 /*

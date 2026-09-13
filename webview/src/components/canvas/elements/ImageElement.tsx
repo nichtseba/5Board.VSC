@@ -4,7 +4,11 @@ import { useRef } from 'react';
 import { useMessageService } from '../../../services/MessageService';
 import { useGrid } from '../../../providers/GridProvider';
 
-export function ImageElement({ element, assetUrls }: EditorElementProps<EditorElementType.Image>) {
+export function ImageElement({
+  element,
+  assetUrls,
+  preview,
+}: EditorElementProps<EditorElementType.Image>) {
   const imgRef = useRef<HTMLImageElement | null>(null);
   const messages = useMessageService();
   const { cellSize } = useGrid();
@@ -56,11 +60,13 @@ export function ImageElement({ element, assetUrls }: EditorElementProps<EditorEl
       alt={element.data.altText ?? element.data.title ?? ''}
       title={element.data.title}
       className={
-        element.data.configuredWidth === false
-          ? 'overflow-hidden'
-          : `w-full h-full ${objectFitClass}`
+        preview
+          ? 'w-full h-full object-contain'
+          : element.data.configuredWidth === false
+            ? 'overflow-hidden'
+            : `w-full h-full ${objectFitClass}`
       }
-      onLoad={configureSize}
+      onLoad={preview ? undefined : configureSize}
     />
   );
 }

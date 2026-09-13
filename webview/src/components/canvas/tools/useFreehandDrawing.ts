@@ -52,7 +52,7 @@ export function useFreehandDrawing(params: FreehandToolParameters): DrawingPrevi
 
   const commit = (pts: Point[], straight: boolean) => {
     const element = buildFreehandElement(pts, params, straight, metrics, cellSize.width || 1);
-    messages.send({ type: 'addElement', element });
+    messages.send({ type: 'addFreehandElement', element });
   };
 
   const cancelPreviewRaf = () => {
