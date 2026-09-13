@@ -15,12 +15,12 @@ import { useMessageService } from '../../services/MessageService';
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
   selected?: boolean;
+  onSelect?: (event?: React.MouseEvent) => void;
   editing?: boolean;
   editingPosition?: {
     x: number;
     y: number;
   } | null;
-  onSelect?: () => void;
   onStopEditing?: () => void;
   targetRef?: React.RefObject<HTMLDivElement>;
   assetUrls?: Record<string, string>;
@@ -49,13 +49,15 @@ export default function EditorElement<ElementType extends EditorElementType>({
   const activeToolId = useEditorState()?.tool.type;
   const messages = useMessageService();
 
-  const handleSelectElement = (id: string) => {
+  const handleSelectElement = (id: string, event?: React.MouseEvent) => {
     if (activeToolId !== EditorToolId.POINTER) return;
 
-    messages.send({
-      type: 'selectElement',
-      id,
-    });
+    if (event?.shiftKey) {
+      messages.send({ type: 'toggleElementSelection', ids: [id] });
+      return;
+    }
+
+    messages.send({ type: 'selectElements', ids: [id] });
   };
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -85,7 +87,8 @@ export default function EditorElement<ElementType extends EditorElementType>({
     <>
       <div
         id={element.id}
-        onClick={() => handleSelectElement(element.id)}
+        data-editor-element
+        onClick={(event) => handleSelectElement(element.id, event)}
         onDoubleClick={handleDoubleClick}
         className={`
           box-border overflow-hidden
@@ -110,10 +113,10 @@ export default function EditorElement<ElementType extends EditorElementType>({
           element={element}
           targetRef={targetRef}
           selected={selected}
+          onSelect={(event) => handleSelectElement(element.id, event)}
           editing={editing}
           editingPosition={editingPosition}
           assetUrls={assetUrls}
-          onSelect={() => handleSelectElement(element.id)}
           onStopEditing={handleStopEditing}
         />
       </div>

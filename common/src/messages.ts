@@ -70,7 +70,8 @@ type AllWebviewToExtensionMessage =
   | { type: 'cursorMove'; x: number; y: number }
   | { type: 'cursorLeave' }
   | { type: 'scroll'; top: number; left: number }
-  | { type: 'selectElement'; id: string | null }
+  | { type: 'selectElements'; ids: string[] }
+  | { type: 'toggleElementSelection'; ids: string[] }
   | { type: 'selectTool'; tool: EditorTool }
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
   | {

@@ -42,15 +42,28 @@ export class DocumentMessageHandlers {
         }
       }),
 
-      this.document.messageService.on('selectElement', (msg) => {
+      this.document.messageService.on('toggleElementSelection', (msg) => {
         this.document.applyEdit((document) => {
-          if (msg.id === document.content.selectedElementId) {
-            return false;
+          let next = [...document.content.selectedElementIds];
+
+          for (const id of msg.ids) {
+            const exists = next.includes(id);
+
+            next = exists ? next.filter((selectedId) => selectedId !== id) : [...next, id];
           }
-          document.content.selectedElementId = msg.id;
-          return true;
+
+          document.content.selectedElementIds = next;
+          document.content.primarySelectedElementId = next[0] ?? null;
         });
       }),
+
+      this.document.messageService.on('selectElements', (msg) => {
+        this.document.applyEdit((document) => {
+          document.content.selectedElementIds = msg.ids;
+          document.content.primarySelectedElementId = msg.ids[0] ?? null;
+        });
+      }),
+
       this.document.messageService.on('updateElementLayout', (msg) => {
         this.document.applyEdit((document) => {
           const element = document.content.elements.find((e) => e.id === msg.id);
