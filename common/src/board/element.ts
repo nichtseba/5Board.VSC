@@ -260,7 +260,23 @@ export const DEFAULT_ELEMENT_PROFILES = {
   },
   [EditorElementType.Text]: {
     layout: { width: 20, height: 10 },
-    data: { content: {} },
+    data: {
+      content: {
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [
+              {
+                type: 'text',
+                text: 'Enter text here... ',
+                marks: [{ type: 'textStyle', attrs: { fontSize: 12 } }],
+              },
+            ],
+          },
+        ],
+      },
+    },
   },
   [EditorElementType.Code]: {
     layout: { width: 40, height: 10 },

@@ -122,8 +122,35 @@ export default function AddTool() {
     return null;
   }
 
+  const previewElement = {
+    id: 'add-element-preview',
+    type: elementType,
+    layout: {
+      xPos: overlayState.xPos,
+      yPos: overlayState.yPos,
+      width: elementWidth,
+      height: elementHeight,
+    },
+    style: {
+      visible: true,
+    },
+    data: {
+      ...structuredClone(DEFAULT_ELEMENT_PROFILES[elementType].data),
+      ...(elementType === 'image' && previewImageUrl
+        ? {
+            src: previewImageUrl,
+            content: '',
+            title: imageData?.name,
+            altText: imageData?.name,
+            configuredWidth: false,
+          }
+        : {}),
+    },
+  } as EditorElement;
+
   return (
     <AddOverlay
+      element={previewElement}
       x={overlayState.xPos * cellSize.width}
       y={overlayState.yPos * cellSize.height}
       width={elementWidth * cellSize.width}
