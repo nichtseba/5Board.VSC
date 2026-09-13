@@ -26,12 +26,7 @@
         "pointer": "Pointer",
         "spacer": "Spacer Tool",
         "freehand": "Freehand Tool",
-        "addElement": "Add Element",
-        "text": "Text",
-        "heading": "Heading",
-        "link": "Link",
-        "code": "Code",
-        "image": "Image"
+        "addElement": "Add Element"
       },
       "elementType": {
         "heading": "Heading",
