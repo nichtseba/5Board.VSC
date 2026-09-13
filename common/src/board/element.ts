@@ -249,6 +249,7 @@ export type AddElementDefaults<T extends EditorElementType = EditorElementType> 
 
 export type ElementTypeDefinition<T extends EditorElementType = EditorElementType> = {
   label: string;
+  icon: string;
   category: ElementCategory;
   placement: AddElementPlacementMode;
   profile: {
@@ -318,36 +319,42 @@ export const DEFAULT_ELEMENT_PROFILES = {
 export const ELEMENT_TYPE_DEFINITIONS = {
   [EditorElementType.Heading]: {
     label: 'Heading',
+    icon: 'text-size',
     category: 'basic',
     placement: 'fullRow',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Heading],
   },
   [EditorElementType.Text]: {
     label: 'Text',
+    icon: 'symbol-string',
     category: 'basic',
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Text],
   },
   [EditorElementType.Code]: {
     label: 'Code',
+    icon: 'code',
     category: 'basic',
     placement: 'fullRow',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Code],
   },
   [EditorElementType.Image]: {
     label: 'Image',
+    icon: 'file-media',
     category: 'basic',
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Image],
   },
   [EditorElementType.Shape]: {
     label: 'Shape',
+    icon: 'symbol-color',
     category: 'basic',
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Shape],
   },
   [EditorElementType.Arrow]: {
     label: 'Arrow',
+    icon: 'arrow-right',
     category: 'basic',
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Arrow],
@@ -355,6 +362,7 @@ export const ELEMENT_TYPE_DEFINITIONS = {
   // This is just a filler here to satisfie the type. Freehand is added with a different tool
   [EditorElementType.Freehand]: {
     label: 'Freehand',
+    icon: 'pencil',
     category: 'basic',
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Freehand],
