@@ -38,12 +38,6 @@ export default function AddTool() {
   const defaults = addParameters?.defaults;
   const imageAsset = defaults?.asset;
   const definition = elementType ? getElementTypeDefinition(elementType) : null;
-  const elementWidth = elementType
-    ? (defaults?.layout?.width ?? DEFAULT_ELEMENT_PROFILES[elementType].layout.width)
-    : 1;
-  const elementHeight = elementType
-    ? (defaults?.layout?.height ?? DEFAULT_ELEMENT_PROFILES[elementType].layout.height)
-    : 1;
   const canvas = document.querySelector('.editor-canvas') as HTMLElement | null;
 
   const initialPosition = {
@@ -57,6 +51,56 @@ export default function AddTool() {
   };
 
   const [overlayState, setOverlayState] = useState<OverlayState | null>(initialPosition);
+
+  const previewImageUrl = useMemo(() => {
+    if (elementType !== EditorElementType.Image || !imageAsset) {
+      return undefined;
+    }
+
+    return URL.createObjectURL(new Blob([new Uint8Array(imageAsset.bytes)]));
+  }, [elementType, imageAsset]);
+
+  const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
+
+  useEffect(() => {
+    setImageSize(null);
+
+    if (!previewImageUrl || elementType !== EditorElementType.Image) {
+      return;
+    }
+
+    const image = new Image();
+    image.onload = () => {
+      setImageSize({
+        width: Math.max(1, Math.round(image.naturalWidth / cellSize.width)),
+        height: Math.max(1, Math.round(image.naturalHeight / cellSize.height)),
+      });
+    };
+    image.src = previewImageUrl;
+
+    return () => {
+      image.onload = null;
+    };
+  }, [previewImageUrl, elementType, cellSize]);
+
+  useEffect(() => {
+    return () => {
+      if (previewImageUrl) {
+        URL.revokeObjectURL(previewImageUrl);
+      }
+    };
+  }, [previewImageUrl]);
+
+  const elementWidth = elementType
+    ? (defaults?.layout?.width ??
+      imageSize?.width ??
+      DEFAULT_ELEMENT_PROFILES[elementType].layout.width)
+    : 1;
+  const elementHeight = elementType
+    ? (defaults?.layout?.height ??
+      imageSize?.height ??
+      DEFAULT_ELEMENT_PROFILES[elementType].layout.height)
+    : 1;
 
   const getGridPosition = (clientX: number, clientY: number) => {
     const rect = canvas?.getBoundingClientRect();
@@ -121,29 +165,20 @@ export default function AddTool() {
             type: 'addElement',
             elementType,
             elementPosition: preview,
-            defaults,
+            defaults: {
+              ...defaults,
+              layout: {
+                ...defaults?.layout,
+                width: elementWidth,
+                height: elementHeight,
+              },
+            },
           });
         },
       }),
       [messages, metrics, cellSize, elementType, elementWidth, elementHeight, definition, defaults],
     ),
   );
-
-  const previewImageUrl = useMemo(() => {
-    if (elementType !== 'image' || !imageAsset) {
-      return undefined;
-    }
-
-    return URL.createObjectURL(new Blob([new Uint8Array(imageAsset.bytes)]));
-  }, [elementType, imageAsset]);
-
-  useEffect(() => {
-    return () => {
-      if (previewImageUrl) {
-        URL.revokeObjectURL(previewImageUrl);
-      }
-    };
-  }, [previewImageUrl]);
 
   if (!overlayState || !elementType) {
     return null;
@@ -181,13 +216,5 @@ export default function AddTool() {
     },
   } as EditorElement;
 
-  return (
-    <AddOverlay
-      element={previewElement}
-      x={overlayState.xPos * cellSize.width}
-      y={overlayState.yPos * cellSize.height}
-      width={elementWidth * cellSize.width}
-      height={elementHeight * cellSize.height}
-    />
-  );
+  return <AddOverlay element={previewElement} />;
 }

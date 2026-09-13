@@ -60,9 +60,11 @@ export function ImageElement({
       alt={element.data.altText ?? element.data.title ?? ''}
       title={element.data.title}
       className={
-        element.data.configuredWidth === false
-          ? 'overflow-hidden'
-          : `w-full h-full ${objectFitClass}`
+        preview
+          ? 'w-full h-full object-contain'
+          : element.data.configuredWidth === false
+            ? 'overflow-hidden'
+            : `w-full h-full ${objectFitClass}`
       }
       onLoad={preview ? undefined : configureSize}
     />

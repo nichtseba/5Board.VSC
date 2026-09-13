@@ -263,7 +263,7 @@ export const DEFAULT_ELEMENT_PROFILES = {
     data: { level: 1, content: 'Heading' },
   },
   [EditorElementType.Text]: {
-    layout: { width: 20, height: 10 },
+    layout: { width: 20, height: 3 },
     data: {
       content: {
         type: 'doc',
