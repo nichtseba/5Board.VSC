@@ -1,12 +1,15 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useCanvasEvents } from '../../../../providers/CanvasEventsProvider';
 import { useMessageService } from '../../../../services/MessageService';
 import { useGrid } from '../../../../providers/GridProvider';
 import {
   DEFAULT_ELEMENT_PROFILES,
+  EditorElement,
+  EditorElementType,
   EditorTool,
   EditorToolId,
   ElementLayout,
+  ImageElementData,
   getElementTypeDefinition,
 } from '5board.vsc-common';
 import AddOverlay from './AddOverlay';
@@ -30,10 +33,17 @@ export default function AddTool() {
   const { cellSize, metrics } = useGrid();
   const editorState = useEditorState();
 
-  const elementType = (editorState.tool as EditorTool<EditorToolId.AddElement>).parameters?.type;
+  const addParameters = (editorState.tool as EditorTool<EditorToolId.AddElement>).parameters;
+  const elementType = addParameters?.type;
+  const defaults = addParameters?.defaults;
+  const imageAsset = defaults?.asset;
   const definition = elementType ? getElementTypeDefinition(elementType) : null;
-  const elementWidth = elementType ? DEFAULT_ELEMENT_PROFILES[elementType].layout.width : 1;
-  const elementHeight = elementType ? DEFAULT_ELEMENT_PROFILES[elementType].layout.height : 1;
+  const elementWidth = elementType
+    ? (defaults?.layout?.width ?? DEFAULT_ELEMENT_PROFILES[elementType].layout.width)
+    : 1;
+  const elementHeight = elementType
+    ? (defaults?.layout?.height ?? DEFAULT_ELEMENT_PROFILES[elementType].layout.height)
+    : 1;
   const canvas = document.querySelector('.editor-canvas') as HTMLElement | null;
 
   const initialPosition = {
@@ -111,16 +121,38 @@ export default function AddTool() {
             type: 'addElement',
             elementType,
             elementPosition: preview,
+            defaults,
           });
         },
       }),
-      [messages, metrics, cellSize, elementType, elementWidth, elementHeight, definition],
+      [messages, metrics, cellSize, elementType, elementWidth, elementHeight, definition, defaults],
     ),
   );
+
+  const previewImageUrl = useMemo(() => {
+    if (elementType !== 'image' || !imageAsset) {
+      return undefined;
+    }
+
+    return URL.createObjectURL(new Blob([new Uint8Array(imageAsset.bytes)]));
+  }, [elementType, imageAsset]);
+
+  useEffect(() => {
+    return () => {
+      if (previewImageUrl) {
+        URL.revokeObjectURL(previewImageUrl);
+      }
+    };
+  }, [previewImageUrl]);
 
   if (!overlayState || !elementType) {
     return null;
   }
+
+  const imageDefaults =
+    elementType === EditorElementType.Image
+      ? (defaults?.data as Partial<ImageElementData> | undefined)
+      : undefined;
 
   const previewElement = {
     id: 'add-element-preview',
@@ -136,12 +168,13 @@ export default function AddTool() {
     },
     data: {
       ...structuredClone(DEFAULT_ELEMENT_PROFILES[elementType].data),
+      ...defaults?.data,
       ...(elementType === 'image' && previewImageUrl
         ? {
             src: previewImageUrl,
             content: '',
-            title: imageData?.name,
-            altText: imageData?.name,
+            title: imageDefaults?.title ?? imageAsset?.name,
+            altText: imageDefaults?.altText ?? imageAsset?.name,
             configuredWidth: false,
           }
         : {}),

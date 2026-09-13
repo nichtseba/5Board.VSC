@@ -52,7 +52,7 @@ export class DocumentMessageHandlers {
         });
       }),
       this.document.messageService.on('addElement', (msg) => {
-        EXTENSION.addNewEditorElement(msg.elementType, msg.elementPosition);
+        EXTENSION.addNewEditorElement(msg.elementType, msg.elementPosition, msg.defaults);
         EXTENSION.editorState = {
           tool: { type: EditorToolId.POINTER, parameters: undefined },
         };

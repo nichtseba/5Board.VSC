@@ -24,6 +24,7 @@ export type EditorElementProps<T extends EditorElementType> = {
   onStopEditing?: () => void;
   targetRef?: React.RefObject<HTMLDivElement>;
   assetUrls?: Record<string, string>;
+  preview?: boolean;
 };
 
 /**
@@ -36,6 +37,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
   element,
   selected,
   assetUrls,
+  preview,
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
@@ -134,6 +136,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
           editing={editing}
           editingPosition={editingPosition}
           assetUrls={assetUrls}
+          preview={preview}
           onSelect={() => handleSelectElement(element.id)}
           onStopEditing={handleStopEditing}
         />

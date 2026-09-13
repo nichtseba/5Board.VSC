@@ -7,6 +7,7 @@ import {
   EditorState,
   EditorTool,
   ElementLayout,
+  AddElementDefaults,
   LineStyle,
   TextEditorCommand,
 } from './main';
@@ -79,6 +80,7 @@ type AllWebviewToExtensionMessage =
       type: 'addElement';
       elementType: EditorElementType;
       elementPosition: EditorElement['layout'];
+      defaults?: AddElementDefaults;
     }
   | { type: 'deleteElement'; id: string }
   | {

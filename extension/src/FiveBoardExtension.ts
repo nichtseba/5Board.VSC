@@ -8,9 +8,12 @@ import { BoardCustomDocument } from './board/BoardCustomDocument';
 import {
   BoardDocument,
   DEFAULT_ELEMENT_PROFILES,
+  AddElementDefaults,
   EditorElement,
   EditorElementDataMap,
   EditorElementType,
+  ImageElementData,
+  EditorToolId,
   DEFAULT_PROJECTOR_POINTER_STYLE,
   DEFAULT_TOOL_ID,
   EditorState,
@@ -21,7 +24,7 @@ import { ProjectorProvider } from './providers/ProjectorProvider';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
-import { addImageToDocument } from './board/addImageToDocument';
+import { addImageAsset } from './board/addImageToDocument';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
@@ -138,10 +141,13 @@ export class FiveBoardExtension extends ExtensionBase {
   }
 
   @Command('5board-vsc.addNewEditorElement')
-  addNewEditorElement(type: EditorElementType, position: EditorElement['layout']): void {
-    const element = this.createDefaultElement(type, position);
-
+  addNewEditorElement(
+    type: EditorElementType,
+    position: EditorElement['layout'],
+    defaults?: AddElementDefaults,
+  ): void {
     this.applyEditToActiveDocument((document) => {
+      const element = this.createDefaultElement(type, position, defaults, document);
       document.content.elements.push(element);
     });
   }
@@ -149,21 +155,43 @@ export class FiveBoardExtension extends ExtensionBase {
   private createDefaultElement<T extends EditorElementType>(
     type: T,
     position: EditorElement['layout'],
+    defaults: AddElementDefaults<T> | undefined,
+    document: BoardDocument,
   ): EditorElement<T> {
     const profile = DEFAULT_ELEMENT_PROFILES[type];
+    const data = {
+      ...structuredClone(profile.data),
+      ...defaults?.data,
+    } as EditorElementDataMap[T];
+
+    if (type === EditorElementType.Image && defaults?.asset) {
+      const assetName = addImageAsset(
+        document,
+        defaults.asset.name,
+        new Uint8Array(defaults.asset.bytes),
+      );
+      const imageData = data as ImageElementData;
+      Object.assign(imageData, {
+        src: assetName,
+        title: imageData.title ?? assetName,
+        altText: imageData.altText ?? assetName,
+        configuredWidth: false,
+      });
+    }
 
     return {
       id: crypto.randomUUID(),
       type,
       layout: {
         ...position,
-        width: profile.layout.width,
-        height: profile.layout.height,
+        width: defaults?.layout?.width ?? profile.layout.width,
+        height: defaults?.layout?.height ?? profile.layout.height,
       },
       style: {
         visible: true,
+        ...defaults?.style,
       },
-      data: structuredClone(profile.data) as EditorElementDataMap[T],
+      data,
     };
   }
 
@@ -191,9 +219,21 @@ export class FiveBoardExtension extends ExtensionBase {
 
     const bytes = await vscode.workspace.fs.readFile(fileUri);
     const assetName = path.basename(fileUri.fsPath);
-    activeDocument.applyEdit((document) => {
-      addImageToDocument(document, assetName, bytes);
-    });
+    this.editorState = {
+      tool: {
+        type: EditorToolId.AddElement,
+        parameters: {
+          type: EditorElementType.Image,
+          placementMode: 'free',
+          defaults: {
+            asset: {
+              name: assetName,
+              bytes: Array.from(bytes),
+            },
+          },
+        },
+      },
+    };
   }
 
   public applyEditToActiveDocument(edit: (document: BoardDocument) => void): void {

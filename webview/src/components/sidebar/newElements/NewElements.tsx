@@ -8,6 +8,7 @@ import { Button } from 'vscrui';
 import SidebarSection from '../layout/SidebarSection';
 import { useLocalization } from '../../../providers/LocalizationProvider';
 import { useEditorState } from '../../../providers/EditorStateProvider';
+import { useMessageService } from '../../../services/MessageService';
 import { useEffect, useState } from 'react';
 
 export type newElementProps = {
@@ -17,6 +18,7 @@ export type newElementProps = {
 export function NewElements({ handleToolClick }: newElementProps) {
   const { t } = useLocalization();
   const editorState = useEditorState();
+  const messages = useMessageService();
 
   const [selectedElement, setSelectedElement] = useState<EditorElementType | undefined>();
 
@@ -34,8 +36,12 @@ export function NewElements({ handleToolClick }: newElementProps) {
     elementType: EditorElementType,
     placementMode: (typeof ELEMENT_TYPE_DEFINITIONS)[EditorElementType]['placement'],
   ) => {
-    setSelectedElement(elementType);
+    if (elementType === EditorElementType.Image) {
+      messages.send({ type: 'addImageFromFile' });
+      return;
+    }
 
+    setSelectedElement(elementType);
     handleToolClick({
       type: EditorToolId.AddElement,
       parameters: {

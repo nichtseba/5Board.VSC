@@ -241,6 +241,10 @@ export type AddElementDefaults<T extends EditorElementType = EditorElementType> 
   layout?: Partial<Omit<ElementLayout, 'xPos' | 'yPos'>>;
   style?: Partial<ElementStyle>;
   data?: Partial<EditorElementDataMap[T]>;
+  asset?: {
+    name: string;
+    bytes: number[];
+  };
 };
 
 export type ElementTypeDefinition<T extends EditorElementType = EditorElementType> = {
