@@ -1,7 +1,14 @@
 import { BoardDocument } from './board/document';
 import { HeadingLevel, HeadingLevelSettings, HeadingNumberingStyle } from './board/headingSettings';
 import { Language } from './localization';
-import { EditorElement, EditorState, EditorTool, ElementLayout, LineStyle } from './main';
+import {
+  EditorElement,
+  EditorState,
+  EditorTool,
+  ElementLayout,
+  LineStyle,
+  TextEditorCommand,
+} from './main';
 import { ProjectorPointerStyle } from './projector';
 
 /**
@@ -18,6 +25,7 @@ export type ExtensionToWebviewMessageType = AllExtensionToWebviewMessage['type']
 type AllExtensionToWebviewMessage =
   | { type: 'updateDocument'; document: BoardDocument }
   | { type: 'init'; document: BoardDocument; editorState: EditorState; language: Language }
+  | { type: 'textEditorCommand'; command: TextEditorCommand }
   | { type: 'cursorMove'; x: number; y: number }
   | { type: 'cursorHide' }
   | { type: 'cursorTrackingChanged'; enabled: boolean }
@@ -66,8 +74,16 @@ type AllWebviewToExtensionMessage =
   | { type: 'toggleElementSelection'; ids: string[] }
   | { type: 'selectTool'; tool: EditorTool }
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
-  | { type: 'updateElementLayout'; id: string; changes: Partial<ElementLayout> } // Update the Layout when Element was moved or resized
+  | {
+      type: 'updateElementLayout';
+      id: string;
+      changes: Partial<ElementLayout>;
+      aspectRatio?: number;
+    } // Update the Layout when Element was moved or resized
   | { type: 'updateElement'; id: string; changes: Partial<EditorElement> } // Update element with it's settings
+  | { type: 'textEditorCommand'; command: TextEditorCommand }
+  | { type: 'addImageFromFile' }
+  | { type: 'addImageFromBytes'; name: string; bytes: number[] }
   | { type: 'toggleCursorTracking' }
   | { type: 'updateProjectorPointer'; style: ProjectorPointerStyle }
   // Sent by the editor after drawing a new element (e.g. a freehand stroke).

@@ -32,8 +32,9 @@ export default function ToolSidebar() {
     parameters: undefined,
   });
   // Freehand drawing options, sent with the tool via 'selectTool'.
-  const [freehandParams, setFreehandParams] =
-    useState<FreehandToolParameters>(DEFAULT_FREEHAND_PARAMETERS);
+  const [freehandParams, setFreehandParams] = useState<FreehandToolParameters>(
+    DEFAULT_FREEHAND_PARAMETERS,
+  );
   const tools = Object.entries(TOOL_DEFINITIONS) as [EditorToolId, EditorToolDefinition][];
 
   useEffect(() => {
@@ -86,6 +87,14 @@ export default function ToolSidebar() {
               <span className={`codicon codicon-${tool.icon}`} />
             </Button>
           ))}
+          <Button
+            title="Image"
+            appearance="secondary"
+            className="h-8 flex flex-col items-center justify-center gap-2"
+            onClick={() => messages.send({ type: 'addImageFromFile' })}
+          >
+            <span className="codicon codicon-file-media" />
+          </Button>
         </div>
         {/* Freehand options — only shown while the freehand tool is active */}
         {freehandSelected && (

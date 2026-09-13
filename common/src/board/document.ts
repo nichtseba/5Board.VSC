@@ -53,7 +53,7 @@ export interface BoardContent {
  */
 export interface Asset {
   name: string;
-  mime: string;
+  mime?: string;
   bytes: Uint8Array;
   // timestamp of creation, should be set when the asset is first created and never modified afterwards
   createdAt: number;

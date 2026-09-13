@@ -122,6 +122,16 @@
         "customColor": "Eigene Farbe",
         "backgroundColor": "Hintergrundfarbe"
       },
+      "textSettings": {
+        "title": "Text",
+        "textColor": "Textfarbe",
+        "highlightColor": "Textmarker",
+        "backgroundColor": "Hintergrundfarbe",
+        "fontSize": "Schriftgröße"
+      },
+      "imageSettings": {
+        "title": "Bild"
+      },
       "freehandSettings": {
         "title": "Freihand"
       }
