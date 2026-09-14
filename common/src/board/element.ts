@@ -348,7 +348,7 @@ export const ELEMENT_TYPE_DEFINITIONS = {
   },
   [EditorElementType.Rectangle]: {
     label: 'Rectangle',
-    icon: 'square',
+    icon: 'primitive-square',
     category: 'basic',
     placement: 'click',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Rectangle],
@@ -362,7 +362,7 @@ export const ELEMENT_TYPE_DEFINITIONS = {
   },
   [EditorElementType.Line]: {
     label: 'Line',
-    icon: 'line',
+    icon: 'dash',
     category: 'basic',
     placement: 'click',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Line],

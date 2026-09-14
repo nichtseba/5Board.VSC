@@ -3,7 +3,6 @@ import { useCanvasEvents } from '../../../../providers/CanvasEventsProvider';
 import { useMessageService } from '../../../../services/MessageService';
 import { useGrid } from '../../../../providers/GridProvider';
 import {
-  EditorElement,
   EditorElementDataMap,
   EditorElementType,
   EditorTool,
@@ -13,7 +12,6 @@ import {
   WebviewToExtensionMessage,
 } from '5board.vsc-common';
 import { useEditorState } from '../../../../providers/EditorStateProvider';
-import AddOverlay from './AddOverlay';
 import ClickOverlay from './ClickOverlay';
 
 type Point = {
@@ -37,6 +35,7 @@ export function ClickAddTool() {
   const editorState = useEditorState();
 
   const elementType = (editorState.tool as EditorTool<EditorToolId.AddElement>).parameters?.type;
+  const defaults = (editorState.tool as EditorTool<EditorToolId.AddElement>).parameters?.defaults;
 
   const definition = elementType ? getElementTypeDefinition(elementType) : null;
 
@@ -184,6 +183,14 @@ export function ClickAddTool() {
            */
           const preview = createPreview(elementType, startPoint, point);
           const layout = applyAddConstraints(preview.layout);
+          const elementDefaults = {
+            ...defaults,
+            layout: {
+              ...defaults?.layout,
+              width: layout.width,
+              height: layout.height,
+            },
+          };
 
           let message: WebviewToExtensionMessage;
 
@@ -194,8 +201,13 @@ export function ClickAddTool() {
                 elementType: EditorElementType.Line,
                 elementPosition: layout,
                 defaults: {
-                  data: (preview as Preview<EditorElementType.Line>)
-                    .data as EditorElementDataMap[EditorElementType.Line],
+                  ...elementDefaults,
+                  data: {
+                    ...(defaults?.data as Partial<EditorElementDataMap[EditorElementType.Line]>),
+                    ...((preview as Preview<EditorElementType.Line>).data as Partial<
+                      EditorElementDataMap[EditorElementType.Line]
+                    >),
+                  } as EditorElementDataMap[EditorElementType.Line],
                 },
               };
               break;
@@ -204,9 +216,7 @@ export function ClickAddTool() {
                 type: 'addElement',
                 elementType: EditorElementType.Rectangle,
                 elementPosition: layout,
-                defaults: {
-                  data: undefined,
-                },
+                defaults: elementDefaults,
               };
               break;
             case EditorElementType.Circle:
@@ -214,9 +224,7 @@ export function ClickAddTool() {
                 type: 'addElement',
                 elementType: EditorElementType.Circle,
                 elementPosition: layout,
-                defaults: {
-                  data: undefined,
-                },
+                defaults: elementDefaults,
               };
               break;
             default:
@@ -232,32 +240,31 @@ export function ClickAddTool() {
           setCurrentPoint(null);
         },
       }),
-      [messages, metrics, cellSize, elementType, startPoint, definition],
+      [messages, metrics, cellSize, elementType, startPoint, definition, defaults],
     ),
   );
 
   if (!elementType || !currentPoint) {
     return null;
   }
-  const element = {
-    id: '__click-preview__',
-    type: elementType,
-    layout: {
-      xPos: currentPoint.x,
-      yPos: currentPoint.y,
-      width: 1,
-      height: 1,
-    },
-    style: {
-      visible: true,
-    },
-    data: undefined,
-  } as EditorElement;
   /**
    * Before the first click there is no preview geometry.
    */
   if (!startPoint) {
-    return <AddOverlay element={element} variant="point" />;
+    return (
+      <div
+        className="pointer-events-none absolute z-20 rounded-full bg-focus-border"
+        style={{
+          left:
+            currentPoint.x * cellSize.width + (cellSize.width - Math.min(cellSize.width, 12)) / 2,
+          top:
+            currentPoint.y * cellSize.height +
+            (cellSize.height - Math.min(cellSize.height, 12)) / 2,
+          width: Math.min(cellSize.width, 12),
+          height: Math.min(cellSize.height, 12),
+        }}
+      />
+    );
   }
 
   const preview = createPreview(elementType, startPoint, currentPoint);
