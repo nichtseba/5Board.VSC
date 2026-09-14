@@ -1,6 +1,6 @@
 import { EditorElementType, LineElementData } from '5board.vsc-common';
 import { EditorElementProps } from '../EditorElement';
-import { dashArrayForLineStyle } from '../freehandPath';
+import { dashArrayForLineStyle } from '../logic/freehandPath';
 
 export function LineElement({ element }: EditorElementProps<EditorElementType.Line>) {
   const { width, height } = element.layout;
