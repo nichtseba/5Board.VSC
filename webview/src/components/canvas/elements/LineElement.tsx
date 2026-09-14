@@ -34,7 +34,7 @@ export function LineElement({ element }: EditorElementProps<EditorElementType.Li
   const markerEnd = headTypeEnd !== 'none' ? `url(#${element.id}-end)` : undefined;
 
   return (
-    <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`}>
+    <svg width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} className="overflow-visible">
       <defs>
         {headTypeStart !== 'none' && (
           <LineMarker

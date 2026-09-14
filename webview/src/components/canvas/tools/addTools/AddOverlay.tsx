@@ -39,7 +39,7 @@ export default function AddOverlay({ element, variant = 'rectangle' }: AddOverla
         absolute
         z-20
         box-border
-        overflow-hidden
+        overflow-visible
         rounded-md
         border-2
         border-focus-border
