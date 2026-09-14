@@ -1,6 +1,8 @@
-import { EditorToolId } from '5board.vsc-common';
+import { EditorElement, EditorElementType, EditorToolId } from '5board.vsc-common';
 import { EXTENSION } from '../extension';
 import { BoardCustomDocument } from './BoardCustomDocument';
+import deepEquals from 'deep-equal';
+import { addImageToDocument } from './addElement/addImageToDocument';
 
 export class DocumentMessageHandlers {
   constructor(private readonly document: BoardCustomDocument) {}
@@ -40,13 +42,22 @@ export class DocumentMessageHandlers {
         }
       }),
 
-      this.document.messageService.on('selectElement', (msg) => {
+      this.document.messageService.on('toggleElementSelection', (msg) => {
         this.document.applyEdit((document) => {
-          document.content.selectedElementId = msg.id;
+          let next = [...document.content.selectedElementIds];
+
+          for (const id of msg.ids) {
+            const exists = next.includes(id);
+
+            next = exists ? next.filter((selectedId) => selectedId !== id) : [...next, id];
+          }
+
+          document.content.selectedElementIds = next;
+          document.content.primarySelectedElementId = next[0] ?? null;
         });
       }),
       this.document.messageService.on('addElement', (msg) => {
-        EXTENSION.addNewEditorElement(msg.elementType, msg.elementPosition, msg.initialData);
+        EXTENSION.addNewEditorElement(msg.elementType, msg.elementPosition, msg.defaults);
         EXTENSION.editorState = {
           tool: { type: EditorToolId.POINTER, parameters: undefined },
         };
@@ -54,18 +65,42 @@ export class DocumentMessageHandlers {
       this.document.messageService.on('deleteElement', (msg) => {
         EXTENSION.deleteEditorElement(msg.id);
       }),
+
+      this.document.messageService.on('selectElements', (msg) => {
+        this.document.applyEdit((document) => {
+          document.content.selectedElementIds = msg.ids;
+          document.content.primarySelectedElementId = msg.ids[0] ?? null;
+        });
+      }),
+
       this.document.messageService.on('updateElementLayout', (msg) => {
         this.document.applyEdit((document) => {
           const element = document.content.elements.find((e) => e.id === msg.id);
 
           if (!element) {
-            return;
+            throw new Error(
+              `Tried to update layout of element with id ${msg.id}, but it does not exist in the document`,
+            );
           }
-
+          if (deepEquals(msg.changes, element.layout)) {
+            //Skipping updateElementLayout message because the layout hasn't changed
+            return false;
+          }
           element.layout = {
             ...element.layout,
             ...msg.changes,
           };
+
+          if (element.type === EditorElementType.Image) {
+            const imageElement = element as EditorElement<EditorElementType.Image>;
+
+            imageElement.data = {
+              ...imageElement.data,
+              configuredWidth: true,
+              aspectRatio: msg.aspectRatio ?? imageElement.data.aspectRatio,
+            };
+          }
+          return true;
         });
       }),
       //#endregion "General"
@@ -73,14 +108,86 @@ export class DocumentMessageHandlers {
       //#region "EditorTools"
       this.document.messageService.on('insertSpacerRows', (msg) => {
         this.document.applyEdit((document) => {
+          let changed = false;
           for (const element of document.content.elements) {
             if (element.layout.yPos >= msg.startRow) {
               element.layout = {
                 ...element.layout,
                 yPos: element.layout.yPos + msg.rowCount,
               };
+              changed = true;
             }
           }
+          return changed;
+        });
+      }),
+      this.document.messageService.on('textEditorCommand', (msg) => {
+        if (!EXTENSION.activeEditorDocument) {
+          return;
+        }
+        EXTENSION.activeEditorDocument.messageService.send(msg);
+      }),
+      this.document.messageService.on('updateElement', (msg) => {
+        this.document.applyEdit((document) => {
+          const element = document.content.elements.find((e) => e.id === msg.id);
+          if (!element) {
+            throw new Error(
+              `Tried to update element with id ${msg.id}, but it does not exist in the document`,
+            );
+          }
+          const nextData = {
+            ...element.data,
+            ...msg.changes.data,
+          };
+
+          const nextLayout = {
+            ...element.layout,
+            ...msg.changes.layout,
+          };
+
+          const nextStyle = {
+            ...element.style,
+            ...msg.changes.style,
+          };
+
+          if (
+            deepEquals(nextData, element.data) &&
+            deepEquals(nextLayout, element.layout) &&
+            deepEquals(nextStyle, element.style)
+          ) {
+            //Skipping updateElement message because the data hasn't changed
+            return false;
+          }
+
+          document.content.elements = document.content.elements.map((el) => {
+            if (el.id !== msg.id) {
+              return el;
+            }
+
+            return {
+              ...el,
+              layout: {
+                ...el.layout,
+                ...msg.changes.layout,
+              },
+              data: {
+                ...el.data,
+                ...msg.changes.data,
+              } as typeof el.data,
+              style: {
+                ...el.style,
+                ...msg.changes.style,
+              },
+            };
+          });
+          return true;
+        });
+      }),
+
+      this.document.messageService.on('addImageFromBytes', (msg) => {
+        const bytes = new Uint8Array(msg.bytes);
+        this.document.applyEdit((document) => {
+          addImageToDocument(document, msg.name, bytes);
         });
       }),
 

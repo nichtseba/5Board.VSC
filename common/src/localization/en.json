@@ -26,12 +26,7 @@
         "pointer": "Pointer",
         "spacer": "Spacer Tool",
         "freehand": "Freehand Tool",
-        "addElement": "Add Element",
-        "text": "Text",
-        "heading": "Heading",
-        "link": "Link",
-        "code": "Code",
-        "image": "Image"
+        "addElement": "Add Element"
       },
       "elementType": {
         "heading": "Heading",
@@ -124,6 +119,16 @@
         "colorTheme": "Theme",
         "customColor": "Custom color",
         "backgroundColor": "Background color"
+      },
+      "textSettings": {
+        "title": "Text",
+        "textColor": "Text Color",
+        "highlightColor": "Highligt Color",
+        "backgroundColor": "Background Color",
+        "fontSize": "Font size"
+      },
+      "imageSettings": {
+        "title": "Image"
       },
       "freehandSettings": {
         "title": "Freehand"

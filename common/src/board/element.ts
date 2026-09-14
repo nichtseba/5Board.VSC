@@ -1,3 +1,6 @@
+import type { JSONContent } from '@tiptap/core';
+import { TranslationKey } from '../localization';
+
 export type BoardElement = EditorElement; // Todo: Replace with new Element type when we have it defined
 // Todo: Add additional element types
 export enum EditorElementType {
@@ -68,15 +71,10 @@ export type EditorElementDataMap = {
 export type HeadingElementData = {
   level: 1 | 2 | 3 | 4 | 5 | 6;
   content: string;
-  textStyle?: TextStyle;
+  textStyle?: TextStyleH;
 };
 
-export type TextElementData = {
-  content: string;
-  textStyle?: TextStyle;
-};
-
-export type TextStyle = {
+export type TextStyleH = {
   fontFamily?: string;
   fontSize?: number;
   fontWeight?: 'normal' | 'bold' | 'bolder' | 'lighter' | number;
@@ -85,10 +83,52 @@ export type TextStyle = {
   textAlign?: 'left' | 'center' | 'right' | 'justify';
   lineHeight?: number;
 };
+
 export type TextDecorationStyle = {
   underline?: boolean;
   overline?: boolean;
   lineThrough?: boolean;
+};
+
+export type TextElementData = {
+  content: JSONContent;
+  tiptap?: Tiptap;
+};
+
+export type Tiptap = {
+  marks?: Marks;
+  nodes?: Nodes;
+};
+
+export type Marks = {
+  bold?: boolean;
+  code?: boolean;
+  italic?: boolean;
+  link?: boolean;
+  strike?: boolean;
+  underline?: boolean;
+  textStyle?: TextStyle;
+};
+
+export type Nodes = {
+  blockquote?: boolean;
+  bulletList?: boolean;
+  codeBlock?: boolean;
+  orderedList?: boolean;
+
+  attributes?: NodeAttributes;
+};
+
+export type TextStyle = {
+  fontFamily?: string;
+  fontSize?: string;
+  lineHeight?: string;
+  color?: string;
+  backgroundColor?: string;
+};
+
+export type NodeAttributes = {
+  textAlign?: 'left' | 'center' | 'right' | 'justify';
 };
 
 export type CodeElementData = {
@@ -109,6 +149,8 @@ export type ImageElementData = {
 
   hideInExport?: boolean;
 
+  configuredWidth?: boolean;
+  aspectRatio?: number;
   cropData?: CropData;
 };
 export type CropData = {
@@ -166,10 +208,15 @@ export type AddElementDefaults<T extends EditorElementType = EditorElementType> 
   layout?: Partial<Omit<ElementLayout, 'xPos' | 'yPos'>>;
   style?: Partial<ElementStyle>;
   data?: Partial<EditorElementDataMap[T]>;
+  asset?: {
+    name: string;
+    bytes: number[];
+  };
 };
 
 export type ElementTypeDefinition<T extends EditorElementType = EditorElementType> = {
-  label: string;
+  label: TranslationKey;
+  icon: string;
   category: ElementCategory;
   placement: AddElementPlacementMode;
   profile: {
@@ -187,11 +234,27 @@ export const DEFAULT_ELEMENT_PROFILES = {
     data: { level: 1, content: 'Heading' },
   },
   [EditorElementType.Text]: {
-    layout: { width: 20, height: 10 },
+    layout: { width: 20, height: 3 },
     style: {
       visible: true,
     },
-    data: { content: 'Text' },
+    data: {
+      content: {
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [
+              {
+                type: 'text',
+                text: 'Enter text here... ',
+                marks: [{ type: 'textStyle', attrs: { fontSize: 12 } }],
+              },
+            ],
+          },
+        ],
+      },
+    },
   },
   [EditorElementType.Code]: {
     layout: { width: 40, height: 10 },
@@ -257,50 +320,58 @@ export const DEFAULT_ELEMENT_PROFILES = {
 
 export const ELEMENT_TYPE_DEFINITIONS = {
   [EditorElementType.Heading]: {
-    label: 'Heading',
+    label: 'webview.sidebar.elementType.heading',
+    icon: 'text-size',
     category: 'basic',
     placement: 'fullRow',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Heading],
   },
   [EditorElementType.Text]: {
-    label: 'Text',
+    label: 'webview.sidebar.elementType.text',
+    icon: 'symbol-string',
     category: 'basic',
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Text],
   },
   [EditorElementType.Code]: {
-    label: 'Code',
+    label: 'webview.sidebar.elementType.code',
+    icon: 'code',
     category: 'basic',
     placement: 'fullRow',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Code],
   },
   [EditorElementType.Image]: {
-    label: 'Image',
+    label: 'webview.sidebar.elementType.image',
+    icon: 'file-media',
     category: 'basic',
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Image],
   },
   [EditorElementType.Rectangle]: {
-    label: 'Rectangle',
+    label: 'webview.sidebar.elementType.rectangle',
+    icon: 'primitive-square',
     category: 'basic',
     placement: 'click',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Rectangle],
   },
   [EditorElementType.Circle]: {
-    label: 'Circle',
+    label: 'webview.sidebar.elementType.circle',
+    icon: 'circle',
     category: 'basic',
     placement: 'click',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Circle],
   },
   [EditorElementType.Line]: {
-    label: 'Line',
+    label: 'webview.sidebar.elementType.line',
+    icon: 'dash',
     category: 'basic',
     placement: 'click',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Line],
   },
   // This is just a filler here to satisfie the type. Freehand is added with a different tool
   [EditorElementType.Freehand]: {
-    label: 'Freehand',
+    label: 'webview.sidebar.elementType.freehand',
+    icon: 'pencil',
     category: 'basic',
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Freehand],

@@ -12,5 +12,6 @@
   "commands.openBoardFile": "5Board Datei öffnen",
   "commands.newBoardFile": "Neue 5Board Datei",
   "commands.startPresentation": "Präsentation starten",
+  "commands.addImageFromFile": "Bild aus Datei hinzufügen",
   "commands.goToElement": "Gehe zu Element"
 }

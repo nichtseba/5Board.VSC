@@ -12,7 +12,6 @@ import {
   WebviewToExtensionMessage,
 } from '5board.vsc-common';
 import { useEditorState } from '../../../../providers/EditorStateProvider';
-import AddOverlay from './AddOverlay';
 import ClickOverlay from './ClickOverlay';
 
 type Point = {
@@ -36,6 +35,7 @@ export function ClickAddTool() {
   const editorState = useEditorState();
 
   const elementType = (editorState.tool as EditorTool<EditorToolId.AddElement>).parameters?.type;
+  const defaults = (editorState.tool as EditorTool<EditorToolId.AddElement>).parameters?.defaults;
 
   const definition = elementType ? getElementTypeDefinition(elementType) : null;
 
@@ -49,11 +49,8 @@ export function ClickAddTool() {
    */
   const getGridPosition = (clientX: number, clientY: number): Point => {
     const rect = canvas?.getBoundingClientRect();
-
     const relativeX = clientX - (rect?.left ?? metrics.left);
-
     const relativeY = clientY - (rect?.top ?? metrics.top);
-
     const scrollLeft = canvas?.scrollLeft ?? 0;
     const scrollTop = canvas?.scrollTop ?? 0;
 
@@ -130,6 +127,7 @@ export function ClickAddTool() {
 
   /**
    * Applies the same placement constraints as the normal add tool.
+   * Todo: Should be removed but at the time not possible
    */
   const applyAddConstraints = (layout: ElementLayout): ElementLayout => {
     if (!definition) {
@@ -183,6 +181,14 @@ export function ClickAddTool() {
            */
           const preview = createPreview(elementType, startPoint, point);
           const layout = applyAddConstraints(preview.layout);
+          const elementDefaults = {
+            ...defaults,
+            layout: {
+              ...defaults?.layout,
+              width: layout.width,
+              height: layout.height,
+            },
+          };
 
           let message: WebviewToExtensionMessage;
 
@@ -192,9 +198,14 @@ export function ClickAddTool() {
                 type: 'addElement',
                 elementType: EditorElementType.Line,
                 elementPosition: layout,
-                initialData: {
-                  data: (preview as Preview<EditorElementType.Line>)
-                    .data as EditorElementDataMap[EditorElementType.Line],
+                defaults: {
+                  ...elementDefaults,
+                  data: {
+                    ...(defaults?.data as Partial<EditorElementDataMap[EditorElementType.Line]>),
+                    ...((preview as Preview<EditorElementType.Line>).data as Partial<
+                      EditorElementDataMap[EditorElementType.Line]
+                    >),
+                  } as EditorElementDataMap[EditorElementType.Line],
                 },
               };
               break;
@@ -203,9 +214,7 @@ export function ClickAddTool() {
                 type: 'addElement',
                 elementType: EditorElementType.Rectangle,
                 elementPosition: layout,
-                initialData: {
-                  data: undefined,
-                },
+                defaults: elementDefaults,
               };
               break;
             case EditorElementType.Circle:
@@ -213,9 +222,7 @@ export function ClickAddTool() {
                 type: 'addElement',
                 elementType: EditorElementType.Circle,
                 elementPosition: layout,
-                initialData: {
-                  data: undefined,
-                },
+                defaults: elementDefaults,
               };
               break;
             default:
@@ -231,25 +238,27 @@ export function ClickAddTool() {
           setCurrentPoint(null);
         },
       }),
-      [messages, metrics, cellSize, elementType, startPoint, definition],
+      [messages, metrics, cellSize, elementType, startPoint, definition, defaults],
     ),
   );
 
   if (!elementType || !currentPoint) {
     return null;
   }
-
   /**
    * Before the first click there is no preview geometry.
    */
   if (!startPoint) {
+    const size = Math.min(cellSize.width, 12);
     return (
-      <AddOverlay
-        x={currentPoint.x * cellSize.width}
-        y={currentPoint.y * cellSize.height}
-        width={cellSize.width}
-        height={cellSize.height}
-        variant="point"
+      <div
+        className="pointer-events-none absolute z-20 rounded-full bg-focus-border"
+        style={{
+          left: currentPoint.x * cellSize.width - size / 2,
+          top: currentPoint.y * cellSize.height - size / 2,
+          width: size,
+          height: size,
+        }}
       />
     );
   }

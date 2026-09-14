@@ -1,13 +1,16 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useCanvasEvents } from '../../../../providers/CanvasEventsProvider';
 import { useMessageService } from '../../../../services/MessageService';
 import { useGrid } from '../../../../providers/GridProvider';
 import {
   DEFAULT_ELEMENT_PROFILES,
+  EditorElement,
+  EditorElementType,
   EditorTool,
   EditorToolId,
   ElementLayout,
   getElementTypeDefinition,
+  ImageElementData,
 } from '5board.vsc-common';
 import AddOverlay from './AddOverlay';
 import { useEditorState } from '../../../../providers/EditorStateProvider';
@@ -25,11 +28,9 @@ export function DragAddTool() {
 
   const elementType = (editorState.tool as EditorTool<EditorToolId.AddElement>).parameters?.type;
   const defaults = (editorState.tool as EditorTool<EditorToolId.AddElement>).parameters?.defaults;
+
+  const imageAsset = defaults?.asset;
   const definition = elementType ? getElementTypeDefinition(elementType) : null;
-  const elementWidth =
-    defaults?.layout?.width ?? DEFAULT_ELEMENT_PROFILES[elementType!]?.layout.width ?? 1;
-  const elementHeight =
-    defaults?.layout?.height ?? DEFAULT_ELEMENT_PROFILES[elementType!]?.layout.height ?? 1;
   const canvas = document.querySelector('.editor-canvas') as HTMLElement | null;
 
   const initialPosition = {
@@ -45,6 +46,56 @@ export function DragAddTool() {
   const [overlayState, setOverlayState] = useState<{ xPos: number; yPos: number } | null>(
     initialPosition,
   );
+
+  const previewImageUrl = useMemo(() => {
+    if (elementType !== EditorElementType.Image || !imageAsset) {
+      return undefined;
+    }
+
+    return URL.createObjectURL(new Blob([new Uint8Array(imageAsset.bytes)]));
+  }, [elementType, imageAsset]);
+
+  const [imageSize, setImageSize] = useState<{ width: number; height: number } | null>(null);
+
+  useEffect(() => {
+    setImageSize(null);
+
+    if (!previewImageUrl || elementType !== EditorElementType.Image) {
+      return;
+    }
+
+    const image = new Image();
+    image.onload = () => {
+      setImageSize({
+        width: Math.max(1, Math.round(image.naturalWidth / cellSize.width)),
+        height: Math.max(1, Math.round(image.naturalHeight / cellSize.height)),
+      });
+    };
+    image.src = previewImageUrl;
+
+    return () => {
+      image.onload = null;
+    };
+  }, [previewImageUrl, elementType, cellSize]);
+
+  useEffect(() => {
+    return () => {
+      if (previewImageUrl) {
+        URL.revokeObjectURL(previewImageUrl);
+      }
+    };
+  }, [previewImageUrl]);
+
+  const elementWidth = elementType
+    ? (defaults?.layout?.width ??
+      imageSize?.width ??
+      DEFAULT_ELEMENT_PROFILES[elementType].layout.width)
+    : 1;
+  const elementHeight = elementType
+    ? (defaults?.layout?.height ??
+      imageSize?.height ??
+      DEFAULT_ELEMENT_PROFILES[elementType].layout.height)
+    : 1;
 
   const getGridPosition = (clientX: number, clientY: number) => {
     const rect = canvas?.getBoundingClientRect();
@@ -105,23 +156,19 @@ export function DragAddTool() {
             width: elementWidth,
             height: elementHeight,
           });
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const message: any = {
-            type: 'addElement' as const,
+          messages.send({
+            type: 'addElement',
             elementType,
             elementPosition: preview,
-          };
-
-          // Add initial data if defaults are provided
-          if (defaults) {
-            message.initialData = {
-              data: defaults.data,
-              layout: defaults.layout,
-            };
-          }
-
-          messages.send(message);
+            defaults: {
+              ...defaults,
+              layout: {
+                ...defaults?.layout,
+                width: elementWidth,
+                height: elementHeight,
+              },
+            },
+          });
         },
       }),
       [messages, metrics, cellSize, elementType, elementWidth, elementHeight, definition, defaults],
@@ -132,12 +179,37 @@ export function DragAddTool() {
     return null;
   }
 
-  return (
-    <AddOverlay
-      x={overlayState.xPos * cellSize.width}
-      y={overlayState.yPos * cellSize.height}
-      width={elementWidth * cellSize.width}
-      height={elementHeight * cellSize.height}
-    />
-  );
+  const imageDefaults =
+    elementType === EditorElementType.Image
+      ? (defaults?.data as Partial<ImageElementData> | undefined)
+      : undefined;
+
+  const previewElement = {
+    id: 'add-element-preview',
+    type: elementType,
+    layout: {
+      xPos: overlayState.xPos,
+      yPos: overlayState.yPos,
+      width: elementWidth,
+      height: elementHeight,
+    },
+    style: {
+      visible: true,
+    },
+    data: {
+      ...structuredClone(DEFAULT_ELEMENT_PROFILES[elementType].data),
+      ...defaults?.data,
+      ...(elementType === 'image' && previewImageUrl
+        ? {
+            src: previewImageUrl,
+            content: '',
+            title: imageDefaults?.title ?? imageAsset?.name,
+            altText: imageDefaults?.altText ?? imageAsset?.name,
+            configuredWidth: false,
+          }
+        : {}),
+    },
+  } as EditorElement;
+
+  return <AddOverlay element={previewElement} />;
 }

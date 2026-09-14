@@ -7,10 +7,10 @@ import { BoardPackage } from './board/package';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
 import {
   BoardDocument,
-  DEFAULT_ELEMENT_PROFILES,
+  AddElementDefaults,
   EditorElement,
-  EditorElementDataMap,
   EditorElementType,
+  EditorToolId,
   DEFAULT_PROJECTOR_POINTER_STYLE,
   DEFAULT_TOOL_ID,
   EditorState,
@@ -22,6 +22,7 @@ import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
 import { EXTENSION } from './extension';
+import { createDefaultElement } from './board/addElement/createDefaultElement';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
@@ -159,7 +160,10 @@ export class FiveBoardExtension extends ExtensionBase {
 
   @Command('5board-vsc.savePreset')
   async savePresetCommand(): Promise<void> {
-    if (EXTENSION.activeEditorDocument?.boardPackage.document.content.selectedElementId === null) {
+    if (
+      EXTENSION.activeEditorDocument?.boardPackage.document.content.primarySelectedElementId ===
+      null
+    ) {
       vscode.window.showWarningMessage(
         'No element selected. Please select an element to save as a preset.',
       );
@@ -199,7 +203,7 @@ export class FiveBoardExtension extends ExtensionBase {
 
     // Create Preset
     const selectedElementId =
-      EXTENSION.activeEditorDocument?.boardPackage.document.content.selectedElementId;
+      EXTENSION.activeEditorDocument?.boardPackage.document.content.primarySelectedElementId;
     const selectedElement =
       EXTENSION.activeEditorDocument?.boardPackage.document.content.elements.find(
         (e) => e.id === selectedElementId,
@@ -256,39 +260,52 @@ export class FiveBoardExtension extends ExtensionBase {
   addNewEditorElement(
     type: EditorElementType,
     position: EditorElement['layout'],
-    initialData?: Partial<EditorElement>,
+    defaults?: AddElementDefaults,
   ): void {
-    const element = this.createDefaultElement(type, position, initialData);
-
     this.applyEditToActiveDocument((document) => {
+      const element = createDefaultElement(type, position, defaults, document);
       document.content.elements.push(element);
     });
   }
 
-  private createDefaultElement<T extends EditorElementType>(
-    type: T,
-    position: EditorElement['layout'],
-    initialData?: Partial<EditorElement>,
-  ): EditorElement<T> {
-    const profile = DEFAULT_ELEMENT_PROFILES[type];
+  @Command('5board-vsc.addImageFromFile')
+  async addImageFromFileCommand(): Promise<void> {
+    const activeDocument = this.activeEditorDocument;
 
-    return {
-      id: crypto.randomUUID(),
-      type,
-      layout: {
-        ...profile.layout,
-        ...position,
-        ...(initialData?.layout ?? {}),
-      },
+    if (!activeDocument) {
+      vscode.window.showInformationMessage('No active 5board document');
+      return;
+    }
 
-      style: {
-        ...structuredClone(profile.style),
-        ...(initialData?.style ?? {}),
+    const uris = await vscode.window.showOpenDialog({
+      canSelectMany: false,
+      filters: {
+        Images: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'],
       },
-      data: {
-        ...structuredClone(profile.data),
-        ...(initialData?.data ? initialData.data : {}),
-      } as EditorElementDataMap[T],
+    });
+
+    const fileUri = uris?.[0];
+
+    if (!fileUri) {
+      return;
+    }
+
+    const bytes = await vscode.workspace.fs.readFile(fileUri);
+    const assetName = path.basename(fileUri.fsPath);
+    this.editorState = {
+      tool: {
+        type: EditorToolId.AddElement,
+        parameters: {
+          type: EditorElementType.Image,
+          placementMode: 'free',
+          defaults: {
+            asset: {
+              name: assetName,
+              bytes: Array.from(bytes),
+            },
+          },
+        },
+      },
     };
   }
 

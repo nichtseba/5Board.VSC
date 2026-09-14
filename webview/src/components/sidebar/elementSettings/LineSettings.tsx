@@ -20,6 +20,8 @@ export function LineSettings({ element }: Props) {
   const { t } = useLocalization();
 
   const data = element.data as LineElementData;
+  const hasHead =
+    (data.headTypeStart ?? 'none') !== 'none' || (data.headTypeEnd ?? 'none') !== 'none';
 
   const updateData = (updates: Partial<LineElementData>) => {
     messages.send({
@@ -80,20 +82,24 @@ export function LineSettings({ element }: Props) {
             />
           </SettingsField>
         </div>
-        <SliderInput
-          label={t('webview.sidebar-element-settings.lineSettings.headSize')}
-          value={data.headSize ?? 6}
-          min={1}
-          max={20}
-          unit="px"
-          onChange={(value) => updateData({ headSize: value })}
-        />
-        <Checkbox
-          checked={data.headFill ?? true}
-          onChange={(checked) => updateData({ headFill: checked })}
-        >
-          {t('webview.sidebar-element-settings.lineSettings.headFill')}
-        </Checkbox>
+        {hasHead && (
+          <>
+            <SliderInput
+              label={t('webview.sidebar-element-settings.lineSettings.headSize')}
+              value={data.headSize ?? 6}
+              min={1}
+              max={20}
+              unit="px"
+              onChange={(value) => updateData({ headSize: value })}
+            />
+            <Checkbox
+              checked={data.headFill ?? true}
+              onChange={(checked) => updateData({ headFill: checked })}
+            >
+              {t('webview.sidebar-element-settings.lineSettings.headFill')}
+            </Checkbox>
+          </>
+        )}
       </SettingsField>
     </SettingsPanel>
   );
