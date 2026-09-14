@@ -13,6 +13,8 @@ import { CanvasTools } from './tools/CanvasTools';
 import FreehandPreviewOverlay, { FreehandPreview } from './tools/FreehandPreviewOverlay';
 import { useBoardDocument } from '../../providers/BoardDocumentProvider';
 import { useCanvasPointer } from './useCanvasPointer';
+import { useMarqueeSelection } from './useMarqueeSelection';
+import { MarqueeOverlay } from './MarqueeOverlay';
 
 export type EditorCanvasProps = {
   // Normalized (0–1) cursor position to display as a live overlay.
@@ -31,8 +33,8 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
   const document = useBoardDocument();
   const editorState = useEditorState();
 
-  const elements = document?.content.elements;
-  const selectedElementId = document?.content.selectedElementId ?? null;
+  const elements = document?.content.elements ?? [];
+  const selectedElementIds = document?.content.selectedElementIds ?? [];
   const activeToolId = editorState?.tool.type;
 
   const messages = useMessageService();
@@ -48,13 +50,16 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
   }, [setGridElement]);
 
   useEffect(() => {
-    if (activeToolId !== EditorToolId.POINTER && document?.content.selectedElementId) {
+    if (
+      activeToolId !== EditorToolId.POINTER &&
+      (document?.content.selectedElementIds.length ?? 0) > 0
+    ) {
       messages.send({
-        type: 'selectElement',
-        id: null,
+        type: 'selectElements',
+        ids: [],
       });
     }
-  }, [activeToolId, document?.content.selectedElementId, messages]);
+  }, [activeToolId, document?.content.selectedElementIds, messages]);
 
   const [assetUrls, setAssetUrls] = useState<Record<string, string>>({});
   useEffect(() => {
@@ -74,11 +79,22 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
     [elements, document?.content.headingSettings],
   );
 
+  const { marqueeRect } = useMarqueeSelection({
+    activeToolId,
+    elements,
+    messages,
+  });
+
   return (
     <HeadingNumberingProvider value={headingNumbers}>
       <div
         ref={canvasRef}
-        className={`editor-canvas bg-editor-background ${activeToolId === EditorToolId.SPACER ? 'cursor-row-resize' : ''}`}
+        className={`
+          editor-canvas
+           bg-editor-background 
+           select-none
+           ${activeToolId === EditorToolId.SPACER ? 'cursor-row-resize' : ''} 
+           `}
         style={{ position: 'relative' }}
         {...pointerHandlers}
         {...imageImportHandlers}
@@ -89,7 +105,7 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
           <EditorElement
             key={element.id}
             element={element}
-            selected={element.id === selectedElementId}
+            selected={selectedElementIds.includes(element.id)}
             assetUrls={assetUrls}
           />
         ))}
@@ -99,6 +115,7 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
 
         {/* Live freehand stroke mirrored from the editor — projector only */}
         <FreehandPreviewOverlay preview={freehandPreview ?? null} />
+        <MarqueeOverlay rect={marqueeRect} />
       </div>
     </HeadingNumberingProvider>
   );

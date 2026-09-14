@@ -38,7 +38,8 @@ export interface BoardManifest {
  * Should be equivalent to the content.json within the .5boardz zip file
  */
 export interface BoardContent {
-  selectedElementId: string | null;
+  selectedElementIds: string[];
+  primarySelectedElementId: string | null;
   elements: BoardElement[];
   background?: string;
   snapAngle?: number;

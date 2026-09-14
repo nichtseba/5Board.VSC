@@ -6,7 +6,8 @@ export function addTableOfContentsToDocument(document: BoardDocument): void {
   );
 
   if (existingContentTable) {
-    document.content.selectedElementId = existingContentTable.id;
+    document.content.selectedElementIds = [existingContentTable.id];
+    document.content.primarySelectedElementId = existingContentTable.id;
     return;
   }
 
@@ -17,7 +18,7 @@ export function addTableOfContentsToDocument(document: BoardDocument): void {
   const height = Math.max(6, headingCount * 2);
 
   document.content.elements.push({
-    id: `toc-${Date.now()}`,
+    id: crypto.randomUUID(),
     type: EditorElementType.ContentTable,
     layout: {
       xPos: 0,

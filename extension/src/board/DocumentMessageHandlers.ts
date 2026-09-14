@@ -1,4 +1,4 @@
-import { EditorElement, EditorElementType } from '5board.vsc-common';
+import { EditorElement, EditorElementType, EditorToolId } from '5board.vsc-common';
 import { EXTENSION } from '../extension';
 import { BoardCustomDocument } from './BoardCustomDocument';
 import deepEquals from 'deep-equal';
@@ -42,15 +42,37 @@ export class DocumentMessageHandlers {
         }
       }),
 
-      this.document.messageService.on('selectElement', (msg) => {
+      this.document.messageService.on('toggleElementSelection', (msg) => {
         this.document.applyEdit((document) => {
-          if (msg.id === document.content.selectedElementId) {
-            return false;
+          let next = [...document.content.selectedElementIds];
+
+          for (const id of msg.ids) {
+            const exists = next.includes(id);
+
+            next = exists ? next.filter((selectedId) => selectedId !== id) : [...next, id];
           }
-          document.content.selectedElementId = msg.id;
-          return true;
+
+          document.content.selectedElementIds = next;
+          document.content.primarySelectedElementId = next[0] ?? null;
         });
       }),
+      this.document.messageService.on('addElement', (msg) => {
+        EXTENSION.addNewEditorElement(msg.elementType, msg.elementPosition, msg.defaults);
+        EXTENSION.editorState = {
+          tool: { type: EditorToolId.POINTER, parameters: undefined },
+        };
+      }),
+      this.document.messageService.on('deleteElement', (msg) => {
+        EXTENSION.deleteEditorElement(msg.id);
+      }),
+
+      this.document.messageService.on('selectElements', (msg) => {
+        this.document.applyEdit((document) => {
+          document.content.selectedElementIds = msg.ids;
+          document.content.primarySelectedElementId = msg.ids[0] ?? null;
+        });
+      }),
+
       this.document.messageService.on('updateElementLayout', (msg) => {
         this.document.applyEdit((document) => {
           const element = document.content.elements.find((e) => e.id === msg.id);
@@ -174,7 +196,7 @@ export class DocumentMessageHandlers {
 
       // The editor sends a freshly drawn element (e.g. a freehand stroke).
       // Append it to the document; the change broadcasts 'updateDocument' to all panels.
-      this.document.messageService.on('addElement', (msg) => {
+      this.document.messageService.on('addFreehandElement', (msg) => {
         this.document.applyEdit((document) => {
           document.content.elements.push(msg.element);
         });

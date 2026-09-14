@@ -46,8 +46,8 @@ export function ContentTableElement({
     });
 
     messages.send({
-      type: 'selectElement',
-      id,
+      type: 'selectElements',
+      ids: [id],
     });
   }
 

@@ -26,12 +26,7 @@
         "pointer": "Pointer",
         "spacer": "Spacer Tool",
         "freehand": "Freehand Tool",
-        "addElement": "Add Element",
-        "text": "Text",
-        "heading": "Heading",
-        "link": "Link",
-        "code": "Code",
-        "image": "Image"
+        "addElement": "Add Element"
       },
       "elementType": {
         "heading": "Heading",
@@ -92,7 +87,9 @@
           "duck": "Duck"
         }
       },
-      "goToElement": "Go to Element"
+      "goToElement": "Go to element",
+      "addElement": "Add Element",
+      "addCustomElement": "Add Custom Element"
     },
     "sidebar-element-settings": {
       "noElementSelected": "No element selected",
@@ -138,7 +135,8 @@
       },
       "freehandSettings": {
         "title": "Freehand"
-      }
+      },
+      "delete": "Delete"
     }
   }
 }

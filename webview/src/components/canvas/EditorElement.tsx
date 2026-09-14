@@ -16,15 +16,16 @@ import { useMessageService } from '../../services/MessageService';
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
   selected?: boolean;
+  onSelect?: (event?: React.MouseEvent) => void;
   editing?: boolean;
   editingPosition?: {
     x: number;
     y: number;
   } | null;
-  onSelect?: () => void;
   onStopEditing?: () => void;
   targetRef?: React.RefObject<HTMLDivElement>;
   assetUrls?: Record<string, string>;
+  preview?: boolean;
 };
 
 /**
@@ -37,6 +38,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
   element,
   selected,
   assetUrls,
+  preview,
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
@@ -47,17 +49,40 @@ export default function EditorElement<ElementType extends EditorElementType>({
   const ElementComponent =
     (ELEMENT_COMPONENTS[element.type] as React.ComponentType<EditorElementProps<ElementType>>) ??
     UnknownElement;
-  const activeToolId = useEditorState()?.tool.type;
   const messages = useMessageService();
+  const activeToolId = useEditorState()?.tool.type;
 
-  const handleSelectElement = (id: string) => {
+  const handleSelectElement = (id: string, event?: React.MouseEvent) => {
     if (activeToolId !== EditorToolId.POINTER) return;
 
-    messages.send({
-      type: 'selectElement',
-      id,
-    });
+    if (event?.shiftKey) {
+      messages.send({ type: 'toggleElementSelection', ids: [id] });
+      return;
+    }
+
+    messages.send({ type: 'selectElements', ids: [id] });
   };
+
+  useEffect(() => {
+    const listener = (event: KeyboardEvent) => {
+      if (event.key !== 'Delete') {
+        return;
+      }
+
+      if (!selected) {
+        return;
+      }
+
+      messages.send({
+        type: 'deleteElement',
+        id: element.id,
+      });
+    };
+
+    window.addEventListener('keydown', listener);
+
+    return () => window.removeEventListener('keydown', listener);
+  });
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (element.type !== EditorElementType.Text) {
@@ -86,7 +111,8 @@ export default function EditorElement<ElementType extends EditorElementType>({
     <>
       <div
         id={element.id}
-        onClick={() => handleSelectElement(element.id)}
+        data-editor-element
+        onClick={(event) => handleSelectElement(element.id, event)}
         onDoubleClick={handleDoubleClick}
         className={`
           box-border overflow-hidden
@@ -111,10 +137,11 @@ export default function EditorElement<ElementType extends EditorElementType>({
           element={element}
           targetRef={targetRef}
           selected={selected}
+          onSelect={(event) => handleSelectElement(element.id, event)}
           editing={editing}
           editingPosition={editingPosition}
           assetUrls={assetUrls}
-          onSelect={() => handleSelectElement(element.id)}
+          preview={preview}
           onStopEditing={handleStopEditing}
         />
       </div>
