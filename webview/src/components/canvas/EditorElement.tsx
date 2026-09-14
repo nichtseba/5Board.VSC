@@ -126,7 +126,6 @@ export default function EditorElement<ElementType extends EditorElementType>({
         `}
         ref={targetRef}
         style={{
-          backgroundColor: element.style.backgroundColor,
           gridRowStart: element.layout.yPos + 1,
           gridRowEnd: `span ${element.layout.height}`,
           gridColumnStart: element.layout.xPos + 1,
