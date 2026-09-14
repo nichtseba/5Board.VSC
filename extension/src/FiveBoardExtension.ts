@@ -7,25 +7,21 @@ import { BoardPackage } from './board/package';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
 import {
   BoardDocument,
-  DEFAULT_ELEMENT_PROFILES,
   AddElementDefaults,
   EditorElement,
-  EditorElementDataMap,
   EditorElementType,
-  ImageElementData,
   EditorToolId,
   DEFAULT_PROJECTOR_POINTER_STYLE,
   DEFAULT_TOOL_ID,
   EditorState,
   ProjectorPointerStyle,
-  ElementLayout,
 } from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
 import { ProjectorProvider } from './providers/ProjectorProvider';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
-import { addImageAsset } from './board/addImageToDocument';
+import { createDefaultElement } from './board/addElement/createDefaultElement';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
@@ -147,57 +143,10 @@ export class FiveBoardExtension extends ExtensionBase {
     position: EditorElement['layout'],
     defaults?: AddElementDefaults,
   ): void {
-    //const element = this.createDefaultElement(type, position, initialData);
-
     this.applyEditToActiveDocument((document) => {
-      const element = this.createDefaultElement(type, position, defaults, document);
+      const element = createDefaultElement(type, position, defaults, document);
       document.content.elements.push(element);
     });
-  }
-
-  private createDefaultElement<T extends EditorElementType>(
-    type: T,
-    position: ElementLayout,
-    defaults: AddElementDefaults<T> | undefined,
-    document: BoardDocument,
-  ): EditorElement<T> {
-    const profile = DEFAULT_ELEMENT_PROFILES[type];
-    const data = {
-      ...structuredClone(profile.data),
-      ...defaults?.data,
-    } as EditorElementDataMap[T];
-
-    if (type === EditorElementType.Image && defaults?.asset) {
-      const assetName = addImageAsset(
-        document,
-        defaults.asset.name,
-        new Uint8Array(defaults.asset.bytes),
-      );
-      const imageData = data as ImageElementData;
-      Object.assign(imageData, {
-        src: assetName,
-        title: imageData.title ?? assetName,
-        altText: imageData.altText ?? assetName,
-        configuredWidth: false,
-      });
-    }
-
-    return {
-      id: crypto.randomUUID(),
-      type,
-      layout: {
-        ...profile.layout,
-        ...position,
-        width: defaults?.layout?.width ?? profile.layout.width,
-        height: defaults?.layout?.height ?? profile.layout.height,
-      },
-
-      style: {
-        ...structuredClone(profile.style),
-        ...defaults?.style,
-      },
-      data,
-    };
   }
 
   @Command('5board-vsc.addImageFromFile')

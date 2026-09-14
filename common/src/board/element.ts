@@ -1,4 +1,5 @@
 import type { JSONContent } from '@tiptap/core';
+import { TranslationKey } from '../localization';
 
 export type BoardElement = EditorElement; // Todo: Replace with new Element type when we have it defined
 // Todo: Add additional element types
@@ -214,7 +215,7 @@ export type AddElementDefaults<T extends EditorElementType = EditorElementType> 
 };
 
 export type ElementTypeDefinition<T extends EditorElementType = EditorElementType> = {
-  label: string;
+  label: TranslationKey;
   icon: string;
   category: ElementCategory;
   placement: AddElementPlacementMode;
@@ -319,49 +320,49 @@ export const DEFAULT_ELEMENT_PROFILES = {
 
 export const ELEMENT_TYPE_DEFINITIONS = {
   [EditorElementType.Heading]: {
-    label: 'Heading',
+    label: 'webview.sidebar.elementType.heading',
     icon: 'text-size',
     category: 'basic',
     placement: 'fullRow',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Heading],
   },
   [EditorElementType.Text]: {
-    label: 'Text',
+    label: 'webview.sidebar.elementType.text',
     icon: 'symbol-string',
     category: 'basic',
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Text],
   },
   [EditorElementType.Code]: {
-    label: 'Code',
+    label: 'webview.sidebar.elementType.code',
     icon: 'code',
     category: 'basic',
     placement: 'fullRow',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Code],
   },
   [EditorElementType.Image]: {
-    label: 'Image',
+    label: 'webview.sidebar.elementType.image',
     icon: 'file-media',
     category: 'basic',
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Image],
   },
   [EditorElementType.Rectangle]: {
-    label: 'Rectangle',
+    label: 'webview.sidebar.elementType.rectangle',
     icon: 'primitive-square',
     category: 'basic',
     placement: 'click',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Rectangle],
   },
   [EditorElementType.Circle]: {
-    label: 'Circle',
+    label: 'webview.sidebar.elementType.circle',
     icon: 'circle',
     category: 'basic',
     placement: 'click',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Circle],
   },
   [EditorElementType.Line]: {
-    label: 'Line',
+    label: 'webview.sidebar.elementType.line',
     icon: 'dash',
     category: 'basic',
     placement: 'click',
@@ -369,7 +370,7 @@ export const ELEMENT_TYPE_DEFINITIONS = {
   },
   // This is just a filler here to satisfie the type. Freehand is added with a different tool
   [EditorElementType.Freehand]: {
-    label: 'Freehand',
+    label: 'webview.sidebar.elementType.freehand',
     icon: 'pencil',
     category: 'basic',
     placement: 'free',

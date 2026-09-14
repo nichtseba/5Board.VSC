@@ -4,10 +4,9 @@ import { useGrid } from '../../../../providers/GridProvider';
 
 export type AddOverlayProps = {
   element: EditorElementData;
-  variant?: 'rectangle' | 'point';
 };
 
-export default function AddOverlay({ element, variant = 'rectangle' }: AddOverlayProps) {
+export default function AddOverlay({ element }: AddOverlayProps) {
   const { cellSize } = useGrid();
   const { left, top, width, height } = {
     left: element.layout.xPos * cellSize.width,
@@ -15,22 +14,6 @@ export default function AddOverlay({ element, variant = 'rectangle' }: AddOverla
     width: element.layout.width * cellSize.width,
     height: element.layout.height * cellSize.height,
   };
-
-  if (variant === 'point') {
-    const pointSize = Math.min(width, height, 12);
-
-    return (
-      <div
-        className="pointer-events-none absolute z-20 rounded-full bg-focus-border"
-        style={{
-          left: left + (width - pointSize) / 2,
-          top: top + (height - pointSize) / 2,
-          width: pointSize,
-          height: pointSize,
-        }}
-      />
-    );
-  }
 
   return (
     <div

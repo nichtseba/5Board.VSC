@@ -59,9 +59,9 @@
         "text": "Text",
         "code": "Code",
         "image": "Bild",
-        "rectangle": "Rectangle",
-        "circle": "Circle",
-        "line": "Line",
+        "rectangle": "Rechteck",
+        "circle": "Kreis",
+        "line": "Linie",
         "freehand": "Freihand"
       },
       "projectorSettings": {

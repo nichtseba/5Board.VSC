@@ -2,7 +2,7 @@ import { EditorElement, EditorElementType, EditorToolId } from '5board.vsc-commo
 import { EXTENSION } from '../extension';
 import { BoardCustomDocument } from './BoardCustomDocument';
 import deepEquals from 'deep-equal';
-import { addImageToDocument } from './addImageToDocument';
+import { addImageToDocument } from './addElement/addImageToDocument';
 
 export class DocumentMessageHandlers {
   constructor(private readonly document: BoardCustomDocument) {}

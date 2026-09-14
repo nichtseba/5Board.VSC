@@ -49,11 +49,8 @@ export function ClickAddTool() {
    */
   const getGridPosition = (clientX: number, clientY: number): Point => {
     const rect = canvas?.getBoundingClientRect();
-
     const relativeX = clientX - (rect?.left ?? metrics.left);
-
     const relativeY = clientY - (rect?.top ?? metrics.top);
-
     const scrollLeft = canvas?.scrollLeft ?? 0;
     const scrollTop = canvas?.scrollTop ?? 0;
 
@@ -130,6 +127,7 @@ export function ClickAddTool() {
 
   /**
    * Applies the same placement constraints as the normal add tool.
+   * Todo: Should be removed but at the time not possible
    */
   const applyAddConstraints = (layout: ElementLayout): ElementLayout => {
     if (!definition) {
@@ -251,17 +249,15 @@ export function ClickAddTool() {
    * Before the first click there is no preview geometry.
    */
   if (!startPoint) {
+    const size = Math.min(cellSize.width, 12);
     return (
       <div
         className="pointer-events-none absolute z-20 rounded-full bg-focus-border"
         style={{
-          left:
-            currentPoint.x * cellSize.width + (cellSize.width - Math.min(cellSize.width, 12)) / 2,
-          top:
-            currentPoint.y * cellSize.height +
-            (cellSize.height - Math.min(cellSize.height, 12)) / 2,
-          width: Math.min(cellSize.width, 12),
-          height: Math.min(cellSize.height, 12),
+          left: currentPoint.x * cellSize.width - size / 2,
+          top: currentPoint.y * cellSize.height - size / 2,
+          width: size,
+          height: size,
         }}
       />
     );
