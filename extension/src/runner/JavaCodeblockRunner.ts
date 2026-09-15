@@ -9,7 +9,7 @@ import type {
   GeneratedSourceFile,
   ToolCheckResult,
 } from '5board.vsc-common';
-import { indent, runCommand } from './runnerUtils.js';
+import { indent, runCommand } from './runnerUtils';
 
 /**
  * Builds the Java source code for a given code snippet and class name.

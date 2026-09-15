@@ -1,5 +1,5 @@
 import path from 'path';
-import { BoardPackage } from './board/package.js';
+import { BoardPackage } from './board/package';
 import * as vscode from 'vscode';
 /**
  * Manages loaded BoardPackages, allowing for caching and reuse of packages across the extension.

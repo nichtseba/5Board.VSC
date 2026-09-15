@@ -46,7 +46,6 @@ export class EditorEditorProvider implements vscode.CustomEditorProvider<BoardCu
     };
 
     document.messageService.registerPanel(webviewPanel);
-    document.onDocumentChange(() => {});
 
     // Todo: Replace with actual document title
     webviewPanel.title = `5Board: ${vscode.workspace.asRelativePath(document.uri, false)}`;
