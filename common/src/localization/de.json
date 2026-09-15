@@ -105,7 +105,11 @@
         "addCustomElement": "Preset auswählen",
         "deletePreset": "Preset löschen",
         "noPresets": "Keine Presets gespeichert",
-        "hasContent": "enthält Inhalt",
+        "settings": {
+          "keepStyle": "Stil",
+          "keepXPosition": "X-Position beibehalten",
+          "content": "Inhalte"
+        },
         "openPresetFile": "Preset-Datei öffnen"
       }
     },

@@ -19,6 +19,7 @@ export function NewCustomElements({ handleToolClick }: newElementProps) {
   const editorState = useEditorState();
   const messages = useMessageService();
   const presets = editorState.presets ?? [];
+
   const selectedPresetId =
     editorState.tool.type === EditorToolId.AddElement
       ? (
@@ -34,7 +35,15 @@ export function NewCustomElements({ handleToolClick }: newElementProps) {
         <ul className="space-y-1">
           {presets.map((preset) => {
             const definition = ELEMENT_TYPE_DEFINITIONS[preset.element.type];
-            const elementType = t(definition.label);
+            const presetOptions = [
+              preset.settings.keepStyle ? t('webview.sidebar.presets.settings.keepStyle') : null,
+              preset.settings.keepXPosition
+                ? t('webview.sidebar.presets.settings.keepXPosition')
+                : null,
+              preset.settings.keepContent ? t('webview.sidebar.presets.settings.content') : null,
+            ].filter(Boolean);
+
+            const optionsText = presetOptions.length > 0 ? ` (${presetOptions.join(', ')})` : '';
 
             return (
               <li
@@ -63,10 +72,7 @@ export function NewCustomElements({ handleToolClick }: newElementProps) {
                     {preset.name}
                   </p>
                   <p className="truncate text-xs text-[var(--vscode-descriptionForeground)]">
-                    {elementType}
-                    {preset.settings.keepContent
-                      ? ` (${t('webview.sidebar.presets.hasContent')})`
-                      : ''}
+                    {optionsText}
                   </p>
                 </div>
                 <div onClick={(event) => event.stopPropagation()}>
@@ -74,8 +80,13 @@ export function NewCustomElements({ handleToolClick }: newElementProps) {
                     title={t('webview.sidebar.presets.deletePreset')}
                     aria-label={`${t('webview.sidebar.presets.deletePreset')}: ${preset.name}`}
                     appearance="secondary"
-                    className="h-7 w-7 shrink-0"
-                    onClick={() => messages.send({ type: 'deletePreset', id: preset.id })}
+                    className="flex h-7 w-7 shrink-0 items-center justify-center p-0"
+                    onClick={() =>
+                      messages.send({
+                        type: 'deletePreset',
+                        id: preset.id,
+                      })
+                    }
                   >
                     <span className="codicon codicon-trash" aria-hidden="true" />
                   </Button>

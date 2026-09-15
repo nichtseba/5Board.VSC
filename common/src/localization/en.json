@@ -105,7 +105,11 @@
         "presets": "Select Preset",
         "deletePreset": "Delete Preset",
         "noPresets": "No Presets Saved",
-        "hasContent": "contains content",
+        "settings": {
+          "keepStyle": "style",
+          "keepXPosition": "x-position",
+          "content": "content"
+        },
         "openPresetFile": "Open Preset File"
       }
     },
