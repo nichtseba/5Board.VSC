@@ -35,7 +35,9 @@ export function ClickAddTool() {
   const editorState = useEditorState();
 
   const elementType = (editorState.tool as EditorTool<EditorToolId.AddElement>).parameters?.type;
-  const defaults = (editorState.tool as EditorTool<EditorToolId.AddElement>).parameters?.defaults;
+  const addToolParameters = (editorState.tool as EditorTool<EditorToolId.AddElement>).parameters;
+  const defaults = addToolParameters?.defaults;
+  const fixedXPosition = addToolParameters?.fixedXPosition;
 
   const definition = elementType ? getElementTypeDefinition(elementType) : null;
 
@@ -134,16 +136,18 @@ export function ClickAddTool() {
       return layout;
     }
 
-    switch (definition.placement) {
-      case 'fullRow':
-        return {
-          ...layout,
-          xPos: 0,
-        };
-
-      default:
-        return layout;
+    if (fixedXPosition !== undefined) {
+      return { ...layout, xPos: fixedXPosition };
     }
+
+    if (definition.placement === 'fullRow') {
+      return {
+        ...layout,
+        xPos: 0,
+      };
+    }
+
+    return layout;
   };
 
   useCanvasEvents(
@@ -238,7 +242,7 @@ export function ClickAddTool() {
           setCurrentPoint(null);
         },
       }),
-      [messages, metrics, cellSize, elementType, startPoint, definition, defaults],
+      [messages, metrics, cellSize, elementType, startPoint, definition, defaults, fixedXPosition],
     ),
   );
 
@@ -272,6 +276,7 @@ export function ClickAddTool() {
       elementType={elementType}
       layout={layout}
       data={preview.data}
+      style={defaults?.style}
       cellSize={cellSize}
     />
   );

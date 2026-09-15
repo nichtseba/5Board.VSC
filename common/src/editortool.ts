@@ -2,10 +2,11 @@ import {
   AddElementDefaults,
   AddElementPlacementMode,
   EditorElementType,
+  DEFAULT_ELEMENT_PROFILES,
   TranslationKey,
   LineStyle,
-  Preset,
 } from './main';
+import type { Preset } from './board/presets';
 
 export enum EditorToolId {
   POINTER = 'pointer',
@@ -98,6 +99,8 @@ export type AddElementToolParameters<T extends EditorElementType = EditorElement
   type: T;
   placementMode?: AddElementPlacementMode;
   defaults?: AddElementDefaults<T>;
+  fixedXPosition?: number;
+  presetId?: string;
 };
 
 export function createAddElementTool<T extends EditorElementType>(
@@ -112,6 +115,59 @@ export function createAddElementTool<T extends EditorElementType>(
       ...overrides,
     },
   };
+}
+const DRAG_ONLY_PRESET_TYPES = new Set([
+  EditorElementType.Circle,
+  EditorElementType.Rectangle,
+  EditorElementType.Line,
+]);
+
+export function getPresetPlacementMode(preset: Preset): AddElementPlacementMode {
+  const { keepContent, keepStyle, keepXPosition } = preset.settings;
+  const type = preset.element.type;
+
+  if (keepStyle && !keepContent && !keepXPosition && DRAG_ONLY_PRESET_TYPES.has(type)) {
+    return 'free';
+  }
+
+  return getElementPlacementMode(type);
+}
+
+export function getElementPlacementMode(type: EditorElementType): AddElementPlacementMode {
+  const placementModes = {
+    [EditorElementType.Heading]: 'fullRow',
+    [EditorElementType.Text]: 'free',
+    [EditorElementType.Code]: 'fullRow',
+    [EditorElementType.Image]: 'free',
+    [EditorElementType.Rectangle]: 'click',
+    [EditorElementType.Circle]: 'click',
+    [EditorElementType.Line]: 'click',
+    [EditorElementType.Freehand]: 'free',
+  } satisfies Record<EditorElementType, AddElementPlacementMode>;
+
+  return placementModes[type];
+}
+
+export function createAddElementToolFromPreset(
+  preset: Preset,
+): EditorTool<EditorToolId.AddElement> {
+  const { element, settings } = preset;
+  const type = element.type;
+  const defaults = DEFAULT_ELEMENT_PROFILES[type];
+
+  return createAddElementTool(type, {
+    placementMode: getPresetPlacementMode(preset),
+    fixedXPosition: settings.keepXPosition ? element.layout.xPos : undefined,
+    presetId: preset.id,
+    defaults: {
+      layout: {
+        width: element.layout.width,
+        height: element.layout.height,
+      },
+      style: settings.keepStyle ? structuredClone(element.style) : structuredClone(defaults.style),
+      data: settings.keepContent ? structuredClone(element.data) : structuredClone(defaults.data),
+    } as AddElementDefaults<typeof type>,
+  });
 }
 
 export type EditorTool<EditorToolType extends EditorToolId = EditorToolId> = {

@@ -1,7 +1,7 @@
 import { EXTENSION } from '../extension';
 import * as vscode from 'vscode';
 import { t } from '../localization';
-import { EditorElement, EditorState } from '5board.vsc-common';
+import { EditorElement, EditorState, EditorElementType, Preset } from '5board.vsc-common';
 
 export async function savePresetsToFile(context: vscode.ExtensionContext): Promise<void> {
   if (
@@ -22,9 +22,9 @@ export async function savePresetsToFile(context: vscode.ExtensionContext): Promi
   }
 
   const options = [
-    { label: t('extension.presets.keepStyle'), picked: true },
-    { label: t('extension.presets.keepPosition'), picked: false },
-    { label: t('extension.presets.keepContent'), picked: false },
+    { key: 'keepStyle', label: t('extension.presets.keepStyle'), picked: true },
+    { key: 'keepXPosition', label: t('extension.presets.keepPosition'), picked: false },
+    { key: 'keepContent', label: t('extension.presets.keepContent'), picked: false },
   ];
 
   const selected = await vscode.window.showQuickPick(options, {
@@ -39,7 +39,7 @@ export async function savePresetsToFile(context: vscode.ExtensionContext): Promi
 
   const config = {
     name,
-    options: selected.map((x) => x.label),
+    options: selected.map((x) => x.key),
   };
 
   // Create Preset
@@ -53,9 +53,9 @@ export async function savePresetsToFile(context: vscode.ExtensionContext): Promi
     id: crypto.randomUUID(),
     name: config.name,
     settings: {
-      keepStyle: config.options.includes('keep style'),
-      keepXPosition: config.options.includes('keep x-Position'),
-      keepContent: config.options.includes('keep content'),
+      keepStyle: config.options.includes('keepStyle'),
+      keepXPosition: config.options.includes('keepXPosition'),
+      keepContent: config.options.includes('keepContent'),
     },
     element: selectedElement as EditorElement,
   };
@@ -97,7 +97,7 @@ export async function loadPresetsFromFile(
   try {
     const fileContent = await vscode.workspace.fs.readFile(file);
     const presets = JSON.parse(new TextDecoder().decode(fileContent));
-    return Array.isArray(presets) ? presets : [];
+    return Array.isArray(presets) ? presets.filter(isPreset) : [];
   } catch (error) {
     if (!(error instanceof vscode.FileSystemError) || error.code !== 'FileNotFound') {
       vscode.window.showWarningMessage(`Failed to load presets: ${String(error)}`);
@@ -106,6 +106,34 @@ export async function loadPresetsFromFile(
   }
 }
 
+function isPreset(value: unknown): value is Preset {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const preset = value as Partial<Preset>;
+  const element = preset.element;
+  const layout = element?.layout;
+  const settings = preset.settings;
+
+  return (
+    typeof preset.id === 'string' &&
+    typeof preset.name === 'string' &&
+    !!settings &&
+    typeof settings.keepStyle === 'boolean' &&
+    typeof settings.keepXPosition === 'boolean' &&
+    typeof settings.keepContent === 'boolean' &&
+    !!element &&
+    Object.values(EditorElementType).includes(element.type) &&
+    !!layout &&
+    Number.isFinite(layout.xPos) &&
+    Number.isFinite(layout.yPos) &&
+    Number.isFinite(layout.width) &&
+    Number.isFinite(layout.height) &&
+    !!element.style &&
+    typeof element.style.visible === 'boolean'
+  );
+}
 export async function deletePreset(id: string, context: vscode.ExtensionContext): Promise<void> {
   const presets = EXTENSION.editorState.presets ?? [];
   const nextPresets = presets.filter((preset) => preset.id !== id);

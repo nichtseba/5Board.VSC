@@ -1,4 +1,9 @@
-import { ELEMENT_TYPE_DEFINITIONS, EditorTool } from '5board.vsc-common';
+import {
+  createAddElementToolFromPreset,
+  ELEMENT_TYPE_DEFINITIONS,
+  EditorTool,
+  EditorToolId,
+} from '5board.vsc-common';
 import { Button } from 'vscrui';
 import SidebarSection from '../layout/SidebarSection';
 import { useLocalization } from '../../../providers/LocalizationProvider';
@@ -9,11 +14,19 @@ export type newElementProps = {
   handleToolClick: (tool: EditorTool) => void;
 };
 
-export function NewCustomElements(_: newElementProps) {
+export function NewCustomElements({ handleToolClick }: newElementProps) {
   const { t } = useLocalization();
   const editorState = useEditorState();
   const messages = useMessageService();
   const presets = editorState.presets ?? [];
+  const selectedPresetId =
+    editorState.tool.type === EditorToolId.AddElement
+      ? (
+          editorState.tool.parameters as EditorTool<EditorToolId.AddElement>['parameters'] & {
+            presetId?: string;
+          }
+        ).presetId
+      : undefined;
 
   return (
     <SidebarSection title={t('webview.sidebar.presets.presets')}>
@@ -26,7 +39,20 @@ export function NewCustomElements(_: newElementProps) {
             return (
               <li
                 key={preset.id}
-                className="flex min-w-0 items-center gap-2 rounded-sm px-1 py-1 hover:bg-[var(--vscode-list-hoverBackground)]"
+                className={`flex min-w-0 cursor-pointer items-center gap-2 rounded-sm px-1 py-1 hover:bg-[var(--vscode-list-hoverBackground)] ${
+                  selectedPresetId === preset.id
+                    ? 'bg-[var(--vscode-list-activeSelectionBackground)]'
+                    : ''
+                }`}
+                role="button"
+                tabIndex={0}
+                onClick={() => handleToolClick(createAddElementToolFromPreset(preset))}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    handleToolClick(createAddElementToolFromPreset(preset));
+                  }
+                }}
               >
                 <span
                   className={`codicon codicon-${definition.icon} shrink-0 text-base text-[var(--vscode-foreground)]`}
@@ -43,15 +69,17 @@ export function NewCustomElements(_: newElementProps) {
                       : ''}
                   </p>
                 </div>
-                <Button
-                  title={t('webview.sidebar.presets.deletePreset')}
-                  aria-label={`${t('webview.sidebar.presets.deletePreset')}: ${preset.name}`}
-                  appearance="secondary"
-                  className="h-7 w-7 shrink-0"
-                  onClick={() => messages.send({ type: 'deletePreset', id: preset.id })}
-                >
-                  <span className="codicon codicon-trash" aria-hidden="true" />
-                </Button>
+                <div onClick={(event) => event.stopPropagation()}>
+                  <Button
+                    title={t('webview.sidebar.presets.deletePreset')}
+                    aria-label={`${t('webview.sidebar.presets.deletePreset')}: ${preset.name}`}
+                    appearance="secondary"
+                    className="h-7 w-7 shrink-0"
+                    onClick={() => messages.send({ type: 'deletePreset', id: preset.id })}
+                  >
+                    <span className="codicon codicon-trash" aria-hidden="true" />
+                  </Button>
+                </div>
               </li>
             );
           })}
