@@ -21,8 +21,13 @@ import { ProjectorProvider } from './providers/ProjectorProvider';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
-import { EXTENSION } from './extension';
 import { createDefaultElement } from './board/addElement/createDefaultElement';
+import {
+  deletePreset,
+  loadPresetsFromFile,
+  revealPresetsFile,
+  savePresetsToFile,
+} from './presets/presetHandling';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
@@ -93,18 +98,7 @@ export class FiveBoardExtension extends ExtensionBase {
     if (!this.context) {
       return [];
     }
-
-    const file = vscode.Uri.joinPath(this.context.globalStorageUri, '5board-vsc-presets.json');
-    try {
-      const fileContent = await vscode.workspace.fs.readFile(file);
-      const presets = JSON.parse(new TextDecoder().decode(fileContent));
-      return Array.isArray(presets) ? presets : [];
-    } catch (error) {
-      if (!(error instanceof vscode.FileSystemError) || error.code !== 'FileNotFound') {
-        vscode.window.showWarningMessage(`Failed to load presets: ${String(error)}`);
-      }
-      return [];
-    }
+    return await loadPresetsFromFile(this.context);
   }
 
   @Command('5board-vsc.newBoard')
@@ -160,93 +154,23 @@ export class FiveBoardExtension extends ExtensionBase {
 
   @Command('5board-vsc.savePreset')
   async savePresetCommand(): Promise<void> {
-    if (
-      EXTENSION.activeEditorDocument?.boardPackage.document.content.primarySelectedElementId ===
-      null
-    ) {
-      vscode.window.showWarningMessage(
-        'No element selected. Please select an element to save as a preset.',
-      );
+    if (!this.context) {
       return;
     }
+    savePresetsToFile(this.context);
+  }
 
-    const name = await vscode.window.showInputBox({
-      title: 'Save element as Preset',
-      prompt: 'Enter the name',
-      placeHolder: 'My favarite element',
-    });
-
-    if (name === undefined) {
+  async deletePreset(id: string): Promise<void> {
+    if (!this.context) {
       return;
     }
-
-    const options = [
-      { label: 'keep style', picked: true },
-      { label: 'keep x-Position', picked: false },
-      { label: 'keep content', picked: false },
-    ];
-
-    const selected = await vscode.window.showQuickPick(options, {
-      title: 'Preset options',
-      placeHolder: 'Select options',
-      canPickMany: true,
-    });
-
-    if (selected === undefined) {
+    deletePreset(id, this.context);
+  }
+  async revealPresetsFile(): Promise<void> {
+    if (!this.context) {
       return;
     }
-
-    const config = {
-      name,
-      options: selected.map((x) => x.label),
-    };
-
-    // Create Preset
-    const selectedElementId =
-      EXTENSION.activeEditorDocument?.boardPackage.document.content.primarySelectedElementId;
-    const selectedElement =
-      EXTENSION.activeEditorDocument?.boardPackage.document.content.elements.find(
-        (e) => e.id === selectedElementId,
-      );
-    const preset = {
-      id: crypto.randomUUID(),
-      name: config.name,
-      settings: {
-        keepStyle: config.options.includes('keep style'),
-        keepXPosition: config.options.includes('keep x-Position'),
-        keepContent: config.options.includes('keep content'),
-      },
-      element: selectedElement as EditorElement,
-    };
-
-    // Save Preset to Json
-    const storageDir = this.context?.globalStorageUri;
-    if (!storageDir) {
-      return;
-    }
-    await vscode.workspace.fs.createDirectory(storageDir);
-
-    const file = vscode.Uri.joinPath(storageDir, '5board-vsc-presets.json');
-    let data;
-    try {
-      const fileContent = await vscode.workspace.fs.readFile(file);
-      data = JSON.parse(new TextDecoder().decode(fileContent));
-    } catch (error) {
-      if (error instanceof vscode.FileSystemError && error.code === 'FileNotFound') {
-        data = [];
-      }
-    }
-    data.push(preset);
-
-    const bytes = new TextEncoder().encode(JSON.stringify(data, null, 2));
-
-    await vscode.workspace.fs.writeFile(file, bytes);
-    vscode.window.showInformationMessage(`Preset saved successfully.`);
-
-    // Update EditorState
-    this.editorState = {
-      presets: [...(this.editorState.presets ?? []), preset],
-    };
+    revealPresetsFile(this.context);
   }
 
   @Command('5board-vsc.deleteEditorElement')

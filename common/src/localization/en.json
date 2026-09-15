@@ -12,6 +12,18 @@
       "title": "Projector",
       "noFileOpen": "Please open a .5boardz file in the editor before starting the projector view.",
       "loading": "Loading..."
+    },
+    "presets": {
+      "noElementSelected": "No element selected. Please select an element to save as a preset.",
+      "savePreset": "Save as Preset",
+      "presetName": "Preset Name",
+      "presetNamePlaceholder": "Enter a name for the preset",
+      "keepStyle": "Keep Style",
+      "keepContent": "Keep Content",
+      "keepPosition": "Keep X-Position",
+      "presetOptions": "Preset Options",
+      "selectOptions": "Select Options",
+      "presetSaved": "Preset saved successfully."
     }
   },
   "webview": {
@@ -89,7 +101,13 @@
       },
       "goToElement": "Go to element",
       "addElement": "Add Element",
-      "addCustomElement": "Add Custom Element"
+      "presets": {
+        "presets": "Select Preset",
+        "deletePreset": "Delete Preset",
+        "noPresets": "No Presets Saved",
+        "hasContent": "contains content",
+        "openPresetFile": "Open Preset File"
+      }
     },
     "sidebar-element-settings": {
       "noElementSelected": "No element selected",

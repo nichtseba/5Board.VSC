@@ -12,6 +12,18 @@
       "title": "Beameransicht",
       "noFileOpen": "Bitte öffne zuerst eine .5boardz Datei im Editor, bevor du die Beameransicht startest.",
       "loading": "Lade…"
+    },
+    "presets": {
+      "noElementSelected": "Kein Element ausgewählt. Bitte wähle ein Element aus, um es als Preset zu speichern.",
+      "savePreset": "Als Preset speichern",
+      "presetName": "Preset Name",
+      "presetNamePlaceholder": "Preset Name eingeben",
+      "keepStyle": "Style beibehalten",
+      "keepContent": "Inhalt beibehalten",
+      "keepPosition": "X-Position beibehalten",
+      "presetOptions": "Preset Optionen",
+      "selectOptions": "Optionen auswählen",
+      "presetSaved": "Preset erfolgreich gespeichert."
     }
   },
   "webview": {
@@ -89,7 +101,13 @@
       },
       "goToElement": "Gehe zu Element",
       "addElement": "Element hinzufügen",
-      "addCustomElement": "Custom Element hinzufügen"
+      "presets": {
+        "addCustomElement": "Preset auswählen",
+        "deletePreset": "Preset löschen",
+        "noPresets": "Keine Presets gespeichert",
+        "hasContent": "enthält Inhalt",
+        "openPresetFile": "Preset-Datei öffnen"
+      }
     },
     "sidebar-element-settings": {
       "noElementSelected": "Kein Element ausgewählt",

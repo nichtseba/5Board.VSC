@@ -79,6 +79,8 @@ type AllWebviewToExtensionMessage =
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
   | AddElementMessage
   | { type: 'deleteElement'; id: string }
+  | { type: 'deletePreset'; id: string }
+  | { type: 'revealPresetsFile' }
   | {
       type: 'updateElementLayout';
       id: string;
