@@ -89,7 +89,8 @@
       },
       "goToElement": "Go to element",
       "addElement": "Add Element",
-      "addCustomElement": "Add Custom Element"
+      "addCustomElement": "Add Custom Element",
+      "contentTableAlreadyExists": "A table of contents already exists."
     },
     "sidebar-element-settings": {
       "noElementSelected": "No element selected",

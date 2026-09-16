@@ -24,7 +24,6 @@ import { ProjectorProvider } from './providers/ProjectorProvider';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
-import { addTableOfContentsToDocument } from './board/addTableOfContentsToDocument';
 import { addImageAsset } from './board/addImageToDocument';
 
 export class FiveBoardExtension extends ExtensionBase {
@@ -132,19 +131,6 @@ export class FiveBoardExtension extends ExtensionBase {
     } else {
       vscode.window.showWarningMessage(t('extension.projector.noFileOpen'));
     }
-  }
-
-  @Command('5board-vsc.createContentTable')
-  createContentTableCommand(): void {
-    const activeDocument = this.activeEditorDocument;
-
-    if (!activeDocument) {
-      return;
-    }
-
-    activeDocument.applyEdit((document) => {
-      addTableOfContentsToDocument(document);
-    });
   }
 
   @Command('5board-vsc.deleteEditorElement')

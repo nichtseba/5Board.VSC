@@ -57,7 +57,15 @@ export class DocumentMessageHandlers {
         });
       }),
       this.document.messageService.on('addElement', (msg) => {
-        EXTENSION.addNewEditorElement(msg.elementType, msg.elementPosition, msg.defaults);
+        const tocAlreadyExists =
+          msg.elementType === EditorElementType.ContentTable &&
+          this.document.boardPackage.document.content.elements.some(
+            (element) => element.type === EditorElementType.ContentTable,
+          );
+
+        if (!tocAlreadyExists) {
+          EXTENSION.addNewEditorElement(msg.elementType, msg.elementPosition, msg.defaults);
+        }
         EXTENSION.editorState = {
           tool: { type: EditorToolId.POINTER, parameters: undefined },
         };

@@ -89,7 +89,8 @@
       },
       "goToElement": "Gehe zu Element",
       "addElement": "Element hinzufügen",
-      "addCustomElement": "Custom Element hinzufügen"
+      "addCustomElement": "Custom Element hinzufügen",
+      "contentTableAlreadyExists": "Es existiert bereits ein Inhaltsverzeichnis."
     },
     "sidebar-element-settings": {
       "noElementSelected": "Kein Element ausgewählt",

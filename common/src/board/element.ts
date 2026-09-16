@@ -317,7 +317,7 @@ export const DEFAULT_ELEMENT_PROFILES = {
     data: { strokes: [] },
   },
   [EditorElementType.ContentTable]: {
-    layout: { width: 40, height: 4 },
+    layout: { width: 40, height: 10 },
     data: {},
   },
 } satisfies {
@@ -380,7 +380,7 @@ export const ELEMENT_TYPE_DEFINITIONS = {
   },
   [EditorElementType.ContentTable]: {
     label: 'ContentTable',
-    icon: '',
+    icon: 'list-unordered',
     category: 'basic',
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.ContentTable],
