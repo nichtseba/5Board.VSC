@@ -176,7 +176,8 @@
         "headCircle": "Kreis",
         "headSquare": "Quadrat"
       },
-      "delete": "Löschen"
+      "delete": "Löschen",
+      "deleteTooltip": "Löschen (entf)"
     }
   }
 }

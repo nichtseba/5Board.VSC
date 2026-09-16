@@ -176,7 +176,8 @@
         "headCircle": "Circle",
         "headSquare": "Square"
       },
-      "delete": "Delete"
+      "delete": "Delete",
+      "deleteTooltip": "Delete (entf)"
     }
   }
 }

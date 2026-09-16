@@ -13,5 +13,6 @@
   "commands.newBoardFile": "Neue 5Board Datei",
   "commands.startPresentation": "Präsentation starten",
   "commands.addImageFromFile": "Bild aus Datei hinzufügen",
-  "commands.goToElement": "Gehe zu Element"
+  "commands.goToElement": "Gehe zu Element",
+  "commands.savePreset": "Speichere als Voreinstellung"
 }
