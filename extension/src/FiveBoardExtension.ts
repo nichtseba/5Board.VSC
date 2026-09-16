@@ -24,7 +24,7 @@ import { ProjectorProvider } from './providers/ProjectorProvider';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
-import { addImageAsset } from './board/addImageToDocument';
+import { addImageAsset } from './board/addImageAsset';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();

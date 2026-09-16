@@ -15,7 +15,7 @@ export function ImageSettings({ element }: Props) {
       icon="file-media"
     >
       <>
-        <div>{element.id}</div>
+        <div>{element.data.title}</div>
       </>
     </SettingsPanel>
   );
