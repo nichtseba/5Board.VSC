@@ -16,6 +16,7 @@
     "presets": {
       "noElementSelected": "Kein Element ausgewählt. Bitte wähle ein Element aus, um es als Preset zu speichern.",
       "savePreset": "Als Preset speichern",
+      "presetNotSaved": "Preset wurde nicht gespeichert mit aufgrund der ausgewählten Optionen.",
       "presetName": "Preset Name",
       "presetNamePlaceholder": "Preset Name eingeben",
       "keepStyle": "Style beibehalten",

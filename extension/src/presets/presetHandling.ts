@@ -42,6 +42,11 @@ export async function savePresetsToFile(context: vscode.ExtensionContext): Promi
     options: selected.map((x) => x.key),
   };
 
+  if (config.options.length === 0) {
+    vscode.window.showInformationMessage(t('extension.presets.presetNotSaved'));
+    return;
+  }
+
   // Create Preset
   const selectedElementId =
     EXTENSION.activeEditorDocument?.boardPackage.document.content.primarySelectedElementId;
