@@ -5,6 +5,7 @@ import {
   DEFAULT_ELEMENT_PROFILES,
   TranslationKey,
   LineStyle,
+  ELEMENT_TYPE_DEFINITIONS,
 } from './main';
 import type { Preset } from './board/presets';
 
@@ -116,36 +117,21 @@ export function createAddElementTool<T extends EditorElementType>(
     },
   };
 }
-const DRAG_ONLY_PRESET_TYPES = new Set([
+const SHAPE_EXCEPTIONS = new Set([
   EditorElementType.Circle,
   EditorElementType.Rectangle,
   EditorElementType.Line,
 ]);
 
 export function getPresetPlacementMode(preset: Preset): AddElementPlacementMode {
-  const { keepContent, keepStyle, keepXPosition } = preset.settings;
+  const { keepContent, keepXPosition } = preset.settings;
   const type = preset.element.type;
-
-  if (keepStyle && !keepContent && !keepXPosition && DRAG_ONLY_PRESET_TYPES.has(type)) {
+  if ((keepContent || keepXPosition) && SHAPE_EXCEPTIONS.has(type)) {
+    // When not just style is part of the preset the element will be placed with the free mode
     return 'free';
   }
-
-  return getElementPlacementMode(type);
-}
-
-export function getElementPlacementMode(type: EditorElementType): AddElementPlacementMode {
-  const placementModes = {
-    [EditorElementType.Heading]: 'fullRow',
-    [EditorElementType.Text]: 'free',
-    [EditorElementType.Code]: 'fullRow',
-    [EditorElementType.Image]: 'free',
-    [EditorElementType.Rectangle]: 'click',
-    [EditorElementType.Circle]: 'click',
-    [EditorElementType.Line]: 'click',
-    [EditorElementType.Freehand]: 'free',
-  } satisfies Record<EditorElementType, AddElementPlacementMode>;
-
-  return placementModes[type];
+  const placement = ELEMENT_TYPE_DEFINITIONS[type]?.placement;
+  return placement;
 }
 
 export function createAddElementToolFromPreset(
