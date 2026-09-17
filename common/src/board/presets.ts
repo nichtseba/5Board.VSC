@@ -5,6 +5,7 @@ export type Preset = {
   name: string;
   settings: PresetSettings;
   element: EditorElement;
+  asset?: number[]; // Optional asset data for image presets
 };
 export type PresetSettings = {
   keepStyle: boolean;

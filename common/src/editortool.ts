@@ -6,6 +6,7 @@ import {
   TranslationKey,
   LineStyle,
   ELEMENT_TYPE_DEFINITIONS,
+  ImageElementData,
 } from './main';
 import type { Preset } from './board/presets';
 
@@ -152,6 +153,14 @@ export function createAddElementToolFromPreset(
       },
       style: settings.keepStyle ? structuredClone(element.style) : structuredClone(defaults.style),
       data: settings.keepContent ? structuredClone(element.data) : structuredClone(defaults.data),
+      ...(type === EditorElementType.Image && preset.asset
+        ? {
+            asset: {
+              name: (element.data as ImageElementData).src,
+              bytes: [...preset.asset],
+            },
+          }
+        : {}),
     } as AddElementDefaults<typeof type>,
   });
 }

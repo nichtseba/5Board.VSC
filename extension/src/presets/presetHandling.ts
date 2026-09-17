@@ -1,7 +1,15 @@
 import { EXTENSION } from '../extension';
 import * as vscode from 'vscode';
 import { t } from '../localization';
-import { EditorElement, EditorState, EditorElementType, Preset } from '5board.vsc-common';
+import {
+  EditorElement,
+  EditorState,
+  EditorElementType,
+  ImageElementData,
+  Preset,
+} from '5board.vsc-common';
+
+const MAX_PRESET_IMAGE_BYTES = 10 * 1024 * 1024;
 
 export async function savePresetsToFile(context: vscode.ExtensionContext): Promise<void> {
   if (
@@ -54,7 +62,12 @@ export async function savePresetsToFile(context: vscode.ExtensionContext): Promi
     EXTENSION.activeEditorDocument?.boardPackage.document.content.elements.find(
       (e) => e.id === selectedElementId,
     );
-  const preset = {
+  if (!selectedElement) {
+    vscode.window.showWarningMessage(t('extension.presets.noElementSelected'));
+    return;
+  }
+
+  const preset: Preset = {
     id: crypto.randomUUID(),
     name: config.name,
     settings: {
@@ -65,6 +78,21 @@ export async function savePresetsToFile(context: vscode.ExtensionContext): Promi
     element: selectedElement as EditorElement,
   };
 
+  if (selectedElement.type === EditorElementType.Image) {
+    const asset = EXTENSION.activeEditorDocument?.boardPackage.document.assets.find(
+      (candidate) => candidate.name === (selectedElement.data as ImageElementData).src,
+    );
+    if (!asset) {
+      vscode.window.showWarningMessage(t('extension.presets.imageAssetMissing'));
+      return;
+    }
+    if (asset.bytes.length > MAX_PRESET_IMAGE_BYTES) {
+      vscode.window.showWarningMessage(t('extension.presets.imageAssetTooLarge'));
+      return;
+    }
+    preset.asset = Array.from(asset.bytes);
+  }
+
   // Save Preset to Json
   const storageDir = context?.globalStorageUri;
   if (!storageDir) {
@@ -73,16 +101,17 @@ export async function savePresetsToFile(context: vscode.ExtensionContext): Promi
   await vscode.workspace.fs.createDirectory(storageDir);
 
   const file = vscode.Uri.joinPath(storageDir, '5board-vsc-presets.json');
-  let data;
+  let data: unknown = [];
   try {
     const fileContent = await vscode.workspace.fs.readFile(file);
-    data = JSON.parse(new TextDecoder().decode(fileContent));
+    const parsed = JSON.parse(new TextDecoder().decode(fileContent));
+    data = Array.isArray(parsed) ? parsed : [];
   } catch (error) {
     if (error instanceof vscode.FileSystemError && error.code === 'FileNotFound') {
       data = [];
     }
   }
-  data.push(preset);
+  (data as unknown[]).push(preset);
 
   const bytes = new TextEncoder().encode(JSON.stringify(data, null, 2));
 
@@ -120,6 +149,14 @@ function isPreset(value: unknown): value is Preset {
   const element = preset.element;
   const layout = element?.layout;
   const settings = preset.settings;
+  const hasValidAsset =
+    preset.asset === undefined ||
+    (Array.isArray(preset.asset) &&
+      preset.asset.length <= MAX_PRESET_IMAGE_BYTES &&
+      preset.asset.every(isByte));
+  const hasValidImageAsset =
+    element?.type !== EditorElementType.Image ||
+    (typeof (element.data as ImageElementData)?.src === 'string' && Array.isArray(preset.asset));
 
   return (
     typeof preset.id === 'string' &&
@@ -136,8 +173,14 @@ function isPreset(value: unknown): value is Preset {
     Number.isFinite(layout.width) &&
     Number.isFinite(layout.height) &&
     !!element.style &&
-    typeof element.style.visible === 'boolean'
+    typeof element.style.visible === 'boolean' &&
+    hasValidAsset &&
+    hasValidImageAsset
   );
+}
+
+function isByte(value: unknown): value is number {
+  return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 255;
 }
 export async function deletePreset(id: string, context: vscode.ExtensionContext): Promise<void> {
   const presets = EXTENSION.editorState.presets ?? [];

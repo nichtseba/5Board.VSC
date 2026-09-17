@@ -24,6 +24,8 @@
       "keepPosition": "Keep X-Position",
       "presetOptions": "Preset Options",
       "selectOptions": "Select Options",
+      "imageAssetMissing": "The selected image asset could not be found, so the preset was not saved.",
+      "imageAssetTooLarge": "The selected image is too large to store in a preset. The limit is 10 MiB.",
       "presetSaved": "Preset saved successfully."
     }
   },
