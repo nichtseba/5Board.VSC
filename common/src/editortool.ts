@@ -153,11 +153,11 @@ export function createAddElementToolFromPreset(
       },
       style: settings.keepStyle ? structuredClone(element.style) : structuredClone(defaults.style),
       data: settings.keepContent ? structuredClone(element.data) : structuredClone(defaults.data),
-      ...(type === EditorElementType.Image && preset.asset
+      ...(type === EditorElementType.Image && preset.asset?.bytes
         ? {
             asset: {
               name: (element.data as ImageElementData).src,
-              bytes: [...preset.asset],
+              bytes: [...preset.asset.bytes],
             },
           }
         : {}),

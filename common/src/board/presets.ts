@@ -5,7 +5,11 @@ export type Preset = {
   name: string;
   settings: PresetSettings;
   element: EditorElement;
-  asset?: number[]; // Optional asset data for image presets
+  asset?: PresetAsset;
+};
+export type PresetAsset = {
+  fileName: string;
+  bytes?: number[];
 };
 export type PresetSettings = {
   keepStyle: boolean;

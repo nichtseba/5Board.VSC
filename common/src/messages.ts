@@ -80,6 +80,7 @@ type AllWebviewToExtensionMessage =
   | AddElementMessage
   | { type: 'deleteElement'; id: string }
   | { type: 'deletePreset'; id: string }
+  | { type: 'loadPresetAsset'; id: string }
   | { type: 'revealPresetsFile' }
   | {
       type: 'updateElementLayout';

@@ -15,6 +15,7 @@ import {
   DEFAULT_TOOL_ID,
   EditorState,
   ProjectorPointerStyle,
+  createAddElementToolFromPreset,
 } from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
 import { ProjectorProvider } from './providers/ProjectorProvider';
@@ -27,6 +28,7 @@ import {
   loadPresetsFromFile,
   revealPresetsFile,
   savePresetsToFile,
+  loadPresetAsset,
 } from './presets/presetHandling';
 
 export class FiveBoardExtension extends ExtensionBase {
@@ -165,6 +167,19 @@ export class FiveBoardExtension extends ExtensionBase {
       return;
     }
     deletePreset(id, this.context);
+  }
+
+  async loadPresetAsset(id: string): Promise<void> {
+    if (!this.context) {
+      return;
+    }
+    const preset = await loadPresetAsset(id, this.context);
+    if (!preset) {
+      return;
+    }
+    this.editorState = {
+      tool: createAddElementToolFromPreset(preset),
+    };
   }
   async revealPresetsFile(): Promise<void> {
     if (!this.context) {

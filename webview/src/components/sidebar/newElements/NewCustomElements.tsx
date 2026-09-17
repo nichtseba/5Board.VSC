@@ -3,6 +3,7 @@ import {
   ELEMENT_TYPE_DEFINITIONS,
   EditorTool,
   EditorToolId,
+  EditorElementType,
 } from '5board.vsc-common';
 import { Button } from 'vscrui';
 import SidebarSection from '../layout/SidebarSection';
@@ -55,10 +56,20 @@ export function NewCustomElements({ handleToolClick }: newElementProps) {
                 }`}
                 role="button"
                 tabIndex={0}
-                onClick={() => handleToolClick(createAddElementToolFromPreset(preset))}
+                onClick={() => {
+                  if (preset.element.type === EditorElementType.Image) {
+                    messages.send({ type: 'loadPresetAsset', id: preset.id });
+                    return;
+                  }
+                  handleToolClick(createAddElementToolFromPreset(preset));
+                }}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault();
+                    if (preset.element.type === EditorElementType.Image) {
+                      messages.send({ type: 'loadPresetAsset', id: preset.id });
+                      return;
+                    }
                     handleToolClick(createAddElementToolFromPreset(preset));
                   }
                 }}

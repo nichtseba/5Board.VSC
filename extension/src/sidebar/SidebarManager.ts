@@ -42,6 +42,9 @@ export class SidebarManager implements vscode.Disposable {
     this.messages.on('deletePreset', async (msg) => {
       await EXTENSION.deletePreset(msg.id);
     });
+    this.messages.on('loadPresetAsset', async (msg) => {
+      await EXTENSION.loadPresetAsset(msg.id);
+    });
     this.messages.on('revealPresetsFile', async () => {
       await EXTENSION.revealPresetsFile();
     });

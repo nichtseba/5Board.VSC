@@ -10,6 +10,7 @@ import {
 } from '5board.vsc-common';
 
 const MAX_PRESET_IMAGE_BYTES = 10 * 1024 * 1024;
+const PRESET_ASSET_DIRECTORY = 'preset-assets';
 
 export async function savePresetsToFile(context: vscode.ExtensionContext): Promise<void> {
   if (
@@ -78,6 +79,7 @@ export async function savePresetsToFile(context: vscode.ExtensionContext): Promi
     element: selectedElement as EditorElement,
   };
 
+  let imageBytes: Uint8Array | undefined;
   if (selectedElement.type === EditorElementType.Image) {
     const asset = EXTENSION.activeEditorDocument?.boardPackage.document.assets.find(
       (candidate) => candidate.name === (selectedElement.data as ImageElementData).src,
@@ -90,7 +92,8 @@ export async function savePresetsToFile(context: vscode.ExtensionContext): Promi
       vscode.window.showWarningMessage(t('extension.presets.imageAssetTooLarge'));
       return;
     }
-    preset.asset = Array.from(asset.bytes);
+    imageBytes = asset.bytes;
+    preset.asset = { fileName: `${preset.id}.bin` };
   }
 
   // Save Preset to Json
@@ -99,6 +102,15 @@ export async function savePresetsToFile(context: vscode.ExtensionContext): Promi
     return;
   }
   await vscode.workspace.fs.createDirectory(storageDir);
+
+  if (preset.asset) {
+    const assetDirectory = vscode.Uri.joinPath(storageDir, PRESET_ASSET_DIRECTORY);
+    await vscode.workspace.fs.createDirectory(assetDirectory);
+    await vscode.workspace.fs.writeFile(
+      vscode.Uri.joinPath(assetDirectory, preset.asset.fileName),
+      imageBytes!,
+    );
+  }
 
   const file = vscode.Uri.joinPath(storageDir, '5board-vsc-presets.json');
   let data: unknown = [];
@@ -111,9 +123,10 @@ export async function savePresetsToFile(context: vscode.ExtensionContext): Promi
       data = [];
     }
   }
-  (data as unknown[]).push(preset);
+  const persistedPresets = (data as unknown[]).filter(isPreset).map(serializePreset);
+  persistedPresets.push(serializePreset(preset));
 
-  const bytes = new TextEncoder().encode(JSON.stringify(data, null, 2));
+  const bytes = new TextEncoder().encode(JSON.stringify(persistedPresets, null, 2));
 
   await vscode.workspace.fs.writeFile(file, bytes);
   vscode.window.showInformationMessage(t('extension.presets.presetSaved'));
@@ -130,8 +143,32 @@ export async function loadPresetsFromFile(
   const file = vscode.Uri.joinPath(context.globalStorageUri, '5board-vsc-presets.json');
   try {
     const fileContent = await vscode.workspace.fs.readFile(file);
-    const presets = JSON.parse(new TextDecoder().decode(fileContent));
-    return Array.isArray(presets) ? presets.filter(isPreset) : [];
+    const parsed = JSON.parse(new TextDecoder().decode(fileContent));
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    const presets: Preset[] = [];
+    let migratedLegacyPreset = false;
+    for (const value of parsed) {
+      if (isPreset(value)) {
+        presets.push(value);
+        continue;
+      }
+
+      const migrated = await migrateLegacyPreset(value, context.globalStorageUri);
+      if (migrated) {
+        presets.push(migrated);
+        migratedLegacyPreset = true;
+      }
+    }
+    if (migratedLegacyPreset) {
+      await vscode.workspace.fs.writeFile(
+        file,
+        new TextEncoder().encode(JSON.stringify(presets.map(serializePreset), null, 2)),
+      );
+    }
+    return presets;
   } catch (error) {
     if (!(error instanceof vscode.FileSystemError) || error.code !== 'FileNotFound') {
       vscode.window.showWarningMessage(`Failed to load presets: ${String(error)}`);
@@ -151,12 +188,14 @@ function isPreset(value: unknown): value is Preset {
   const settings = preset.settings;
   const hasValidAsset =
     preset.asset === undefined ||
-    (Array.isArray(preset.asset) &&
-      preset.asset.length <= MAX_PRESET_IMAGE_BYTES &&
-      preset.asset.every(isByte));
+    (typeof preset.asset === 'object' &&
+      typeof preset.asset.fileName === 'string' &&
+      isSafeAssetFileName(preset.asset.fileName) &&
+      (preset.asset.bytes === undefined ||
+        (preset.asset.bytes.length <= MAX_PRESET_IMAGE_BYTES && preset.asset.bytes.every(isByte))));
   const hasValidImageAsset =
     element?.type !== EditorElementType.Image ||
-    (typeof (element.data as ImageElementData)?.src === 'string' && Array.isArray(preset.asset));
+    (typeof (element.data as ImageElementData)?.src === 'string' && !!preset.asset);
 
   return (
     typeof preset.id === 'string' &&
@@ -179,11 +218,85 @@ function isPreset(value: unknown): value is Preset {
   );
 }
 
+function isSafeAssetFileName(fileName: string): boolean {
+  return /^[a-zA-Z0-9._-]+$/.test(fileName);
+}
+
+function serializePreset(preset: Preset): Preset {
+  return {
+    ...preset,
+    asset: preset.asset ? { fileName: preset.asset.fileName } : undefined,
+  };
+}
+
+async function migrateLegacyPreset(
+  value: unknown,
+  storageDir: vscode.Uri,
+): Promise<Preset | undefined> {
+  if (!value || typeof value !== 'object') {
+    return undefined;
+  }
+
+  const legacy = value as Partial<Preset> & { asset?: unknown };
+  if (
+    !legacy.element ||
+    legacy.element.type !== EditorElementType.Image ||
+    typeof legacy.id !== 'string' ||
+    !Array.isArray(legacy.asset) ||
+    legacy.asset.length > MAX_PRESET_IMAGE_BYTES ||
+    !legacy.asset.every(isByte)
+  ) {
+    return undefined;
+  }
+
+  const fileName = `${legacy.id}.bin`;
+  const assetDirectory = vscode.Uri.joinPath(storageDir, PRESET_ASSET_DIRECTORY);
+  await vscode.workspace.fs.createDirectory(assetDirectory);
+  await vscode.workspace.fs.writeFile(
+    vscode.Uri.joinPath(assetDirectory, fileName),
+    new Uint8Array(legacy.asset),
+  );
+
+  const migrated = { ...legacy, asset: { fileName } } as Preset;
+  return isPreset(migrated) ? migrated : undefined;
+}
+
+export async function loadPresetAsset(
+  id: string,
+  context: vscode.ExtensionContext,
+): Promise<Preset | undefined> {
+  const preset = (EXTENSION.editorState.presets ?? []).find((candidate) => candidate.id === id);
+  if (!preset?.asset) {
+    return undefined;
+  }
+
+  if (preset.asset.bytes) {
+    return preset;
+  }
+
+  try {
+    const file = vscode.Uri.joinPath(
+      context.globalStorageUri,
+      PRESET_ASSET_DIRECTORY,
+      preset.asset.fileName,
+    );
+    const bytes = await vscode.workspace.fs.readFile(file);
+    if (bytes.length > MAX_PRESET_IMAGE_BYTES) {
+      throw new Error('Preset image asset is too large');
+    }
+    return { ...preset, asset: { ...preset.asset, bytes: Array.from(bytes) } };
+  } catch (error) {
+    vscode.window.showWarningMessage(`Failed to load preset image: ${String(error)}`);
+    return undefined;
+  }
+}
+
 function isByte(value: unknown): value is number {
   return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 255;
 }
 export async function deletePreset(id: string, context: vscode.ExtensionContext): Promise<void> {
   const presets = EXTENSION.editorState.presets ?? [];
+  const deletedPreset = presets.find((preset) => preset.id === id);
   const nextPresets = presets.filter((preset) => preset.id !== id);
 
   if (nextPresets.length === presets.length || !context) {
@@ -191,9 +304,25 @@ export async function deletePreset(id: string, context: vscode.ExtensionContext)
   }
 
   const file = vscode.Uri.joinPath(context.globalStorageUri, '5board-vsc-presets.json');
+  if (deletedPreset?.asset) {
+    try {
+      await vscode.workspace.fs.delete(
+        vscode.Uri.joinPath(
+          context.globalStorageUri,
+          PRESET_ASSET_DIRECTORY,
+          deletedPreset.asset.fileName,
+        ),
+        { useTrash: false },
+      );
+    } catch (error) {
+      if (!(error instanceof vscode.FileSystemError) || error.code !== 'FileNotFound') {
+        throw error;
+      }
+    }
+  }
   await vscode.workspace.fs.writeFile(
     file,
-    new TextEncoder().encode(JSON.stringify(nextPresets, null, 2)),
+    new TextEncoder().encode(JSON.stringify(nextPresets.map(serializePreset), null, 2)),
   );
   EXTENSION.editorState = { presets: nextPresets };
 }
@@ -216,7 +345,9 @@ export async function revealPresetsFile(context: vscode.ExtensionContext): Promi
 
     await vscode.workspace.fs.writeFile(
       file,
-      new TextEncoder().encode(JSON.stringify(EXTENSION.editorState.presets ?? [], null, 2)),
+      new TextEncoder().encode(
+        JSON.stringify((EXTENSION.editorState.presets ?? []).map(serializePreset), null, 2),
+      ),
     );
   }
 
