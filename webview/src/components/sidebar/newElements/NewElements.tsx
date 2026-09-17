@@ -29,9 +29,7 @@ export function NewElements({ handleToolClick }: newElementProps) {
     }
   }, [editorState?.tool.type]);
 
-  const addableElements = Object.entries(ELEMENT_TYPE_DEFINITIONS).filter(
-    ([, definition]) => definition.category === 'basic',
-  );
+  const addableElements = Object.entries(ELEMENT_TYPE_DEFINITIONS);
 
   const handleElementClick = (
     elementType: EditorElementType,
