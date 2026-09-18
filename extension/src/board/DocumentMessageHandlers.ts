@@ -64,37 +64,6 @@ export class DocumentMessageHandlers {
         });
       }),
 
-      this.document.messageService.on('updateElementLayout', (msg) => {
-        this.document.applyEdit((document) => {
-          const element = document.content.elements.find((e) => e.id === msg.id);
-
-          if (!element) {
-            throw new Error(
-              `Tried to update layout of element with id ${msg.id}, but it does not exist in the document`,
-            );
-          }
-          if (deepEquals(msg.changes, element.layout)) {
-            //Skipping updateElementLayout message because the layout hasn't changed
-            return false;
-          }
-          element.layout = {
-            ...element.layout,
-            ...msg.changes,
-          };
-
-          if (element.type === EditorElementType.Image) {
-            const imageElement = element as EditorElement<EditorElementType.Image>;
-
-            imageElement.data = {
-              ...imageElement.data,
-              configuredWidth: true,
-              aspectRatio: msg.aspectRatio ?? imageElement.data.aspectRatio,
-            };
-          }
-          return true;
-        });
-      }),
-
       this.document.messageService.on('updateElementsLayout', (msg) => {
         this.document.applyEdit((document) => {
           let changed = false;
@@ -114,6 +83,16 @@ export class DocumentMessageHandlers {
               ...element.layout,
               ...update.changes,
             };
+
+            if (element.type === EditorElementType.Image) {
+              const imageElement = element as EditorElement<EditorElementType.Image>;
+
+              imageElement.data = {
+                ...imageElement.data,
+                configuredWidth: true,
+                aspectRatio: update.aspectRatio ?? imageElement.data.aspectRatio,
+              };
+            }
 
             changed = true;
           }

@@ -38,13 +38,17 @@ export function ImageElement({ element, assetUrls }: EditorElementProps<EditorEl
     const aspectRatio = img.naturalWidth / img.naturalHeight;
 
     messages.send({
-      type: 'updateElementLayout',
-      id: element.id,
-      changes: {
-        width,
-        height,
-      },
-      aspectRatio,
+      type: 'updateElementsLayout',
+      changes: [
+        {
+          id: element.id,
+          changes: {
+            width,
+            height,
+          },
+          aspectRatio,
+        },
+      ],
     });
   };
 

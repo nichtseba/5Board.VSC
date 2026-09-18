@@ -74,12 +74,13 @@ export default function ElementInteractionController<ElementType extends EditorE
           break;
       }
       messages.send({
-        type: 'updateElementLayout',
-        id: element.id,
-        changes: {
-          xPos: element.layout.xPos + xDelta,
-          yPos: element.layout.yPos + yDelta,
-        },
+        type: 'updateElementsLayout',
+        changes: [
+          {
+            id: element.id,
+            changes: { xPos: element.layout.xPos + xDelta, yPos: element.layout.yPos + yDelta },
+          },
+        ],
       });
     }
 
@@ -104,12 +105,16 @@ export default function ElementInteractionController<ElementType extends EditorE
       pendingPositionUpdate.current = true;
 
       messages.send({
-        type: 'updateElementLayout',
-        id: element.id,
-        changes: {
-          width: newWidth,
-          height: newHeight,
-        },
+        type: 'updateElementsLayout',
+        changes: [
+          {
+            id: element.id,
+            changes: {
+              width: newWidth,
+              height: newHeight,
+            },
+          },
+        ],
       });
     }
 
