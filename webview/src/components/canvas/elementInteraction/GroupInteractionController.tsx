@@ -3,7 +3,7 @@ import Moveable, { OnDragGroup, OnDragGroupEnd } from 'react-moveable';
 import { EditorElement } from '5board.vsc-common';
 import { useGrid } from '../../../providers/GridProvider';
 import { useMessageService } from '../../../services/MessageService';
-import { ELEMENT_INTERACTION_CONFIG, ElementInteractionProfile } from './InteractionConfig';
+import { constrainTranslation, snapTranslationToGrid } from './interactionUtils';
 
 type Props = {
   elements: EditorElement[];
@@ -48,22 +48,11 @@ export default function GroupInteractionController({ elements, selectedElementId
         continue;
       }
 
-      const profile: ElementInteractionProfile = ELEMENT_INTERACTION_CONFIG[element.type];
-
-      let [x, y] = event.beforeTranslate;
-
-      switch (profile.dragDirection) {
-        case 'vertical':
-          x = 0;
-          break;
-
-        case 'horizontal':
-          y = 0;
-          break;
-
-        case 'free':
-          break;
-      }
+      const [x, y] = constrainTranslation(
+        element.type,
+        event.beforeTranslate[0],
+        event.beforeTranslate[1],
+      );
 
       event.target.style.transform = `translate(${x}px, ${y}px)`;
 
@@ -87,10 +76,7 @@ export default function GroupInteractionController({ elements, selectedElementId
         continue;
       }
 
-      const [dx, dy] = translation;
-
-      const xDelta = Math.round(dx / cellSize.width);
-      const yDelta = Math.round(dy / cellSize.height);
+      const [xDelta, yDelta] = snapTranslationToGrid(translation[0], translation[1], cellSize);
 
       if (xDelta !== 0 || yDelta !== 0) {
         changes.push({

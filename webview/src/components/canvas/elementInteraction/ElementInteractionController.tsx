@@ -4,6 +4,7 @@ import { useGrid } from '../../../providers/GridProvider';
 import { ELEMENT_INTERACTION_CONFIG, ElementInteractionProfile } from './InteractionConfig';
 import Moveable, { OnDragEnd, OnResizeEnd } from 'react-moveable';
 import { useMessageService } from '../../../services/MessageService';
+import { constrainTranslation, snapTranslationToGrid } from './interactionUtils';
 
 type Props<T extends EditorElementType> = {
   element: EditorElement<T>;
@@ -59,33 +60,29 @@ export default function ElementInteractionController<ElementType extends EditorE
 
   const handleDragEnd = ({ target, lastEvent }: OnDragEnd) => {
     if (!lastEvent || !target) return;
-    const [dx, dy] = lastEvent.beforeTranslate;
-    let xDelta = Math.round(dx / cellSize.width);
-    let yDelta = Math.round(dy / cellSize.height);
+    const [dx, dy] = constrainTranslation(
+      element.type,
+      lastEvent.beforeTranslate[0],
+      lastEvent.beforeTranslate[1],
+    );
+    const [xDelta, yDelta] = snapTranslationToGrid(dx, dy, cellSize);
 
     if (xDelta !== 0 || yDelta !== 0) {
       pendingPositionUpdate.current = true;
-      switch (profile.dragDirection) {
-        case 'vertical':
-          xDelta = 0;
-          break;
-        case 'horizontal':
-          yDelta = 0;
-          break;
-      }
-      messages.send({
-        type: 'updateElementsLayout',
-        changes: [
-          {
-            id: element.id,
-            changes: { xPos: element.layout.xPos + xDelta, yPos: element.layout.yPos + yDelta },
-          },
-        ],
-      });
     }
-
-    moveableRef.current?.updateRect();
+    messages.send({
+      type: 'updateElementsLayout',
+      changes: [
+        {
+          id: element.id,
+          changes: { xPos: element.layout.xPos + xDelta, yPos: element.layout.yPos + yDelta },
+        },
+      ],
+    });
   };
+
+  //moveableRef.current?.updateRect();
+  //};
 
   const handleResizeEnd = ({ target, lastEvent }: OnResizeEnd) => {
     if (!lastEvent || !target) return;
@@ -134,21 +131,8 @@ export default function ElementInteractionController<ElementType extends EditorE
       snapGridHeight={cellSize.height}
       snapThreshold={cellSize.width / 2}
       onDrag={({ target, beforeTranslate }) => {
-        const [x, y] = beforeTranslate;
-
-        switch (profile.dragDirection) {
-          case 'vertical':
-            target.style.transform = `translate(0px, ${y}px)`;
-            break;
-
-          case 'horizontal':
-            target.style.transform = `translate(${x}px, 0px)`;
-            break;
-
-          case 'free':
-            target.style.transform = `translate(${x}px, ${y}px)`;
-            break;
-        }
+        const [x, y] = constrainTranslation(element.type, beforeTranslate[0], beforeTranslate[1]);
+        target.style.transform = `translate(${x}px, ${y}px)`;
       }}
       onDragEnd={handleDragEnd}
       onResize={({ target, width, height, direction }) => {
