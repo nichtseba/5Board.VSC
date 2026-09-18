@@ -15,6 +15,7 @@ import { useBoardDocument } from '../../providers/BoardDocumentProvider';
 import { useCanvasPointer } from './useCanvasPointer';
 import { useMarqueeSelection } from './useMarqueeSelection';
 import { MarqueeOverlay } from './MarqueeOverlay';
+import GroupInteractionController from './elementInteraction/GroupInteractionController';
 
 export type EditorCanvasProps = {
   // Normalized (0–1) cursor position to display as a live overlay.
@@ -106,9 +107,14 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
             key={element.id}
             element={element}
             selected={selectedElementIds.includes(element.id)}
+            grouped={selectedElementIds.length > 1}
             assetUrls={assetUrls}
           />
         ))}
+
+        {activeToolId === EditorToolId.POINTER && selectedElementIds.length > 1 && (
+          <GroupInteractionController elements={elements} selectedElementIds={selectedElementIds} />
+        )}
 
         {/* Cursor overlay — only rendered in the projector via the cursor prop */}
         <ProjectorMouse cursor={cursor ?? null} style={pointerStyle} />

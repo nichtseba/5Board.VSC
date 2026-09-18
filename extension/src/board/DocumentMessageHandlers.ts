@@ -94,6 +94,33 @@ export class DocumentMessageHandlers {
           return true;
         });
       }),
+
+      this.document.messageService.on('updateElementsLayout', (msg) => {
+        this.document.applyEdit((document) => {
+          let changed = false;
+
+          for (const update of msg.changes) {
+            const element = document.content.elements.find((element) => element.id === update.id);
+
+            if (!element) {
+              continue;
+            }
+
+            if (deepEquals(update.changes, element.layout)) {
+              continue;
+            }
+
+            element.layout = {
+              ...element.layout,
+              ...update.changes,
+            };
+
+            changed = true;
+          }
+
+          return changed;
+        });
+      }),
       //#endregion "General"
 
       //#region "EditorTools"

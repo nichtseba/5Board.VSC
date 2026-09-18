@@ -16,6 +16,7 @@ export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
   selected?: boolean;
   onSelect?: (event?: React.MouseEvent) => void;
+  grouped?: boolean;
   editing?: boolean;
   editingPosition?: {
     x: number;
@@ -35,6 +36,7 @@ export type EditorElementProps<T extends EditorElementType> = {
 export default function EditorElement<ElementType extends EditorElementType>({
   element,
   selected,
+  grouped,
   assetUrls,
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
@@ -120,7 +122,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
           onStopEditing={handleStopEditing}
         />
       </div>
-      {activeToolId === EditorToolId.POINTER && (
+      {activeToolId === EditorToolId.POINTER && !grouped && (
         <ElementInteractionController
           element={element}
           selected={selected && !editing}

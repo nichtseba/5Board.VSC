@@ -80,6 +80,13 @@ type AllWebviewToExtensionMessage =
       changes: Partial<ElementLayout>;
       aspectRatio?: number;
     } // Update the Layout when Element was moved or resized
+  | {
+      type: 'updateElementsLayout';
+      changes: {
+        id: string;
+        changes: Partial<ElementLayout>;
+      }[];
+    }
   | { type: 'updateElement'; id: string; changes: Partial<EditorElement> } // Update element with it's settings
   | { type: 'textEditorCommand'; command: TextEditorCommand }
   | { type: 'addImageFromFile' }
