@@ -3,6 +3,7 @@ import Moveable, { OnDragGroup, OnDragGroupEnd } from 'react-moveable';
 import { EditorElement } from '5board.vsc-common';
 import { useGrid } from '../../../providers/GridProvider';
 import { useMessageService } from '../../../services/MessageService';
+import { ELEMENT_INTERACTION_CONFIG, ElementInteractionProfile } from './InteractionConfig';
 
 type Props = {
   elements: EditorElement[];
@@ -41,9 +42,32 @@ export default function GroupInteractionController({ elements, selectedElementId
 
   const handleDragGroup = ({ events }: OnDragGroup) => {
     for (const event of events) {
-      const [x, y] = event.beforeTranslate;
+      const element = selectedElements.find((element) => element.id === event.target.id);
+
+      if (!element) {
+        continue;
+      }
+
+      const profile: ElementInteractionProfile = ELEMENT_INTERACTION_CONFIG[element.type];
+
+      let [x, y] = event.beforeTranslate;
+
+      switch (profile.dragDirection) {
+        case 'vertical':
+          x = 0;
+          break;
+
+        case 'horizontal':
+          y = 0;
+          break;
+
+        case 'free':
+          break;
+      }
 
       event.target.style.transform = `translate(${x}px, ${y}px)`;
+
+      translationsRef.current.set(event.target.id, [x, y]);
     }
   };
 
