@@ -4,6 +4,7 @@ import {
   EditorTool,
   EditorToolId,
   EditorElementType,
+  AddElementToolParameters,
 } from '5board.vsc-common';
 import { Button } from 'vscrui';
 import SidebarSection from '../layout/SidebarSection';
@@ -24,7 +25,7 @@ export function NewCustomElements({ handleToolClick }: newElementProps) {
   const selectedPresetId =
     editorState.tool.type === EditorToolId.AddElement
       ? (
-          editorState.tool.parameters as EditorTool<EditorToolId.AddElement>['parameters'] & {
+          editorState.tool.parameters as AddElementToolParameters & {
             presetId?: string;
           }
         ).presetId
