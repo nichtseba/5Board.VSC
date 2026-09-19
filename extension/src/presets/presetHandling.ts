@@ -149,24 +149,11 @@ export async function loadPresetsFromFile(
     }
 
     const presets: Preset[] = [];
-    let migratedLegacyPreset = false;
     for (const value of parsed) {
       if (isPreset(value)) {
         presets.push(value);
         continue;
       }
-
-      const migrated = await migrateLegacyPreset(value, context.globalStorageUri);
-      if (migrated) {
-        presets.push(migrated);
-        migratedLegacyPreset = true;
-      }
-    }
-    if (migratedLegacyPreset) {
-      await vscode.workspace.fs.writeFile(
-        file,
-        new TextEncoder().encode(JSON.stringify(presets.map(serializePreset), null, 2)),
-      );
     }
     return presets;
   } catch (error) {
@@ -227,38 +214,6 @@ function serializePreset(preset: Preset): Preset {
     ...preset,
     asset: preset.asset ? { fileName: preset.asset.fileName } : undefined,
   };
-}
-
-async function migrateLegacyPreset(
-  value: unknown,
-  storageDir: vscode.Uri,
-): Promise<Preset | undefined> {
-  if (!value || typeof value !== 'object') {
-    return undefined;
-  }
-
-  const legacy = value as Partial<Preset> & { asset?: unknown };
-  if (
-    !legacy.element ||
-    legacy.element.type !== EditorElementType.Image ||
-    typeof legacy.id !== 'string' ||
-    !Array.isArray(legacy.asset) ||
-    legacy.asset.length > MAX_PRESET_IMAGE_BYTES ||
-    !legacy.asset.every(isByte)
-  ) {
-    return undefined;
-  }
-
-  const fileName = `${legacy.id}.bin`;
-  const assetDirectory = vscode.Uri.joinPath(storageDir, PRESET_ASSET_DIRECTORY);
-  await vscode.workspace.fs.createDirectory(assetDirectory);
-  await vscode.workspace.fs.writeFile(
-    vscode.Uri.joinPath(assetDirectory, fileName),
-    new Uint8Array(legacy.asset),
-  );
-
-  const migrated = { ...legacy, asset: { fileName } } as Preset;
-  return isPreset(migrated) ? migrated : undefined;
 }
 
 export async function loadPresetAsset(
