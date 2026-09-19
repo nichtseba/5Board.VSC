@@ -8,29 +8,37 @@ import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
 import { Button, Icon } from 'vscrui';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
 import { BoardElement } from '5board.vsc-common';
+import MixedElementsSettings from '../components/sidebar/elementSettings/mixedElementsSettings/MixedElementsSettings';
 
 export default function ElementSettingsSidebar() {
   const messages = useMessageService();
   const { t } = useLocalization();
   const document = useBoardDocument();
 
-  const primarySelectedElement =
-    document?.content.elements.find((e) => document.content.primarySelectedElementId === e.id) ??
-    null;
-
   useEffect(() => {
     messages.send({ type: 'ready' });
   }, []);
 
+  const selectedElementIds = document?.content.selectedElementIds ?? [];
+
+  const selectedElements =
+    document?.content.elements.filter((element) => selectedElementIds.includes(element.id)) ?? [];
+
+  const primarySelectedElement =
+    document?.content.elements.find((e) => document.content.primarySelectedElementId === e.id) ??
+    null;
+
   let content: React.ReactNode;
-  if (!primarySelectedElement) {
+  if (selectedElements.length === 0) {
     content = (
       <div>
         <p>{t('webview.sidebar-element-settings.noElementSelected')}</p>
       </div>
     );
+  } else if (selectedElements.length === 1) {
+    content = <ElementSettings element={selectedElements[0]} />;
   } else {
-    content = <ElementSettings element={primarySelectedElement} />;
+    content = <MixedElementsSettings elements={selectedElements} />;
   }
 
   const handleDelete = (selectedElement: BoardElement) => {
