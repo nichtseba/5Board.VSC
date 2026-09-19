@@ -81,9 +81,6 @@ export default function ElementInteractionController<ElementType extends EditorE
     });
   };
 
-  //moveableRef.current?.updateRect();
-  //};
-
   const handleResizeEnd = ({ target, lastEvent }: OnResizeEnd) => {
     if (!lastEvent || !target) return;
 
