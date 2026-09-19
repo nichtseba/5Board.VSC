@@ -26,12 +26,7 @@
         "pointer": "Zeiger",
         "spacer": "Abstand-Tool",
         "freehand": "Freihand-Tool",
-        "addElement": "Element hinzufügen",
-        "text": "Text",
-        "heading": "Überschrift",
-        "link": "Link",
-        "code": "Code",
-        "image": "Bild"
+        "addElement": "Element hinzufügen"
       },
       "freehand": {
         "title": "Freihand-Optionen",
@@ -91,7 +86,9 @@
           "duck": "Ente"
         }
       },
-      "goToElement": "Gehe zu Element"
+      "goToElement": "Gehe zu Element",
+      "addElement": "Element hinzufügen",
+      "addCustomElement": "Custom Element hinzufügen"
     },
     "sidebar-element-settings": {
       "noElementSelected": "Kein Element ausgewählt",
@@ -134,7 +131,8 @@
       },
       "freehandSettings": {
         "title": "Freihand"
-      }
+      },
+      "delete": "Löschen"
     }
   }
 }

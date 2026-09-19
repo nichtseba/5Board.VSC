@@ -22,7 +22,7 @@
   /* Editor System */
   --spacing-editor: 1rem;
   --editor-grid-size: 1rem;
-  --editor-columns: 40;
+  --editor-columns: 50;
 
   /* Colors */
   --color-foreground: var(--vscode-foreground);

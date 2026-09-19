@@ -25,6 +25,7 @@ export type EditorElementProps<T extends EditorElementType> = {
   onStopEditing?: () => void;
   targetRef?: React.RefObject<HTMLDivElement>;
   assetUrls?: Record<string, string>;
+  preview?: boolean;
 };
 
 /**
@@ -38,6 +39,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
   selected,
   grouped,
   assetUrls,
+  preview,
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
@@ -48,8 +50,8 @@ export default function EditorElement<ElementType extends EditorElementType>({
   const ElementComponent =
     (ELEMENT_COMPONENTS[element.type] as React.ComponentType<EditorElementProps<ElementType>>) ??
     UnknownElement;
-  const activeToolId = useEditorState()?.tool.type;
   const messages = useMessageService();
+  const activeToolId = useEditorState()?.tool.type;
 
   const handleSelectElement = (id: string, event?: React.MouseEvent) => {
     if (activeToolId !== EditorToolId.POINTER) return;
@@ -61,6 +63,27 @@ export default function EditorElement<ElementType extends EditorElementType>({
 
     messages.send({ type: 'selectElements', ids: [id] });
   };
+
+  useEffect(() => {
+    const listener = (event: KeyboardEvent) => {
+      if (event.key !== 'Delete') {
+        return;
+      }
+
+      if (!selected) {
+        return;
+      }
+
+      messages.send({
+        type: 'deleteElement',
+        id: element.id,
+      });
+    };
+
+    window.addEventListener('keydown', listener);
+
+    return () => window.removeEventListener('keydown', listener);
+  });
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (element.type !== EditorElementType.Text) {
@@ -119,6 +142,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
           editing={editing}
           editingPosition={editingPosition}
           assetUrls={assetUrls}
+          preview={preview}
           onStopEditing={handleStopEditing}
         />
       </div>

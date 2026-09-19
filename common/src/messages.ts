@@ -3,9 +3,11 @@ import { HeadingLevel, HeadingLevelSettings, HeadingNumberingStyle } from './boa
 import { Language } from './localization';
 import {
   EditorElement,
+  EditorElementType,
   EditorState,
   EditorTool,
   ElementLayout,
+  AddElementDefaults,
   LineStyle,
   TextEditorCommand,
 } from './main';
@@ -25,6 +27,8 @@ export type ExtensionToWebviewMessageType = AllExtensionToWebviewMessage['type']
 type AllExtensionToWebviewMessage =
   | { type: 'updateDocument'; document: BoardDocument }
   | { type: 'init'; document: BoardDocument; editorState: EditorState; language: Language }
+  | { type: 'initSidebar'; document: BoardDocument; editorState: EditorState }
+  | { type: 'updateEditorState'; editorState: EditorState }
   | { type: 'textEditorCommand'; command: TextEditorCommand }
   | { type: 'cursorMove'; x: number; y: number }
   | { type: 'cursorHide' }
@@ -50,7 +54,6 @@ type AllExtensionToWebviewMessage =
       type: 'viewportUpdate';
       viewport: { top: number; left: number; height: number; width: number };
     }
-  | { type: 'updateEditorState'; editorState: EditorState }
   | { type: 'goToElement'; elementId: string };
 
 /**
@@ -82,6 +85,13 @@ type AllWebviewToExtensionMessage =
         aspectRatio?: number;
       }[];
     } // Update the Layout when Element was moved or resized, array can handle one or more elements
+  | {
+      type: 'addElement';
+      elementType: EditorElementType;
+      elementPosition: EditorElement['layout'];
+      defaults?: AddElementDefaults;
+    }
+  | { type: 'deleteElement'; id: string }
   | { type: 'updateElement'; id: string; changes: Partial<EditorElement> } // Update element with it's settings
   | { type: 'textEditorCommand'; command: TextEditorCommand }
   | { type: 'addImageFromFile' }
@@ -89,7 +99,7 @@ type AllWebviewToExtensionMessage =
   | { type: 'toggleCursorTracking' }
   | { type: 'updateProjectorPointer'; style: ProjectorPointerStyle }
   // Sent by the editor after drawing a new element (e.g. a freehand stroke).
-  | { type: 'addElement'; element: EditorElement }
+  | { type: 'addFreehandElement'; element: EditorElement }
   // Live preview of the stroke the editor is currently drawing (normalized 0–1).
   | {
       type: 'freehandPreview';
