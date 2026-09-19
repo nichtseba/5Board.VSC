@@ -4,7 +4,7 @@ import {
   ProjectorPointerStyle,
   computeHeadingNumbers,
 } from '5board.vsc-common';
-import { useEffect, useMemo, useRef, type CSSProperties } from 'react';
+import { useEffect, useMemo, useRef, type CSSProperties, useState } from 'react';
 import EditorElement from './EditorElement';
 import { HeadingNumberingProvider } from './HeadingNumberingContext';
 import ProjectorMouse, { ProjectorCursor } from '../projector/ProjectorMouse';
@@ -12,10 +12,14 @@ import './EditorCanvas.css';
 import { useEditorState } from '../../providers/EditorStateProvider';
 import { useMessageService } from '../../services/MessageService';
 import { useGrid } from '../../providers/GridProvider';
+import { createAssetUrls, revokeAssetUrls } from './assetUrlsUtil';
+import { useImageImport } from './useImageImport';
 import { CanvasTools } from './tools/CanvasTools';
 import FreehandPreviewOverlay, { FreehandPreview } from './tools/FreehandPreviewOverlay';
 import { useBoardDocument } from '../../providers/BoardDocumentProvider';
 import { useCanvasPointer } from './useCanvasPointer';
+import { useMarqueeSelection } from './useMarqueeSelection';
+import { MarqueeOverlay } from './MarqueeOverlay';
 
 export type EditorCanvasProps = {
   // Normalized (0–1) cursor position to display as a live overlay.
@@ -35,12 +39,13 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
   const grid = document?.content.grid ?? DEFAULT_GRID_SETTINGS;
   const editorState = useEditorState();
 
-  const elements = document?.content.elements;
-  const selectedElementId = document?.content.selectedElementId ?? null;
+  const elements = document?.content.elements ?? [];
+  const selectedElementIds = document?.content.selectedElementIds ?? [];
   const activeToolId = editorState?.tool.type;
 
   const messages = useMessageService();
   const canvasRef = useRef<HTMLDivElement | null>(null);
+  const imageImportHandlers = useImageImport();
   const { setGridElement } = useGrid();
 
   useEffect(() => {
@@ -51,18 +56,40 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
   }, [setGridElement]);
 
   useEffect(() => {
-    if (activeToolId !== EditorToolId.POINTER && document?.content.selectedElementId) {
+    if (
+      activeToolId !== EditorToolId.POINTER &&
+      (document?.content?.selectedElementIds?.length ?? 0) > 0
+    ) {
       messages.send({
-        type: 'selectElement',
-        id: null,
+        type: 'selectElements',
+        ids: [],
       });
     }
-  }, [activeToolId, document?.content.selectedElementId, messages]);
+  }, [activeToolId, document?.content.selectedElementIds, messages]);
 
+  const [assetUrls, setAssetUrls] = useState<Record<string, string>>({});
+  useEffect(() => {
+    if (!document) {
+      setAssetUrls({});
+      return;
+    }
+    const urls = createAssetUrls(document.assets);
+    setAssetUrls(urls);
+
+    return () => {
+      revokeAssetUrls(urls);
+    };
+  }, [document]);
   const headingNumbers = useMemo(
     () => computeHeadingNumbers(elements ?? [], document?.content.headingSettings),
     [elements, document?.content.headingSettings],
   );
+
+  const { marqueeRect } = useMarqueeSelection({
+    activeToolId,
+    elements,
+    messages,
+  });
 
   return (
     <HeadingNumberingProvider value={headingNumbers}>
@@ -77,6 +104,7 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
           } as CSSProperties
         }
         {...pointerHandlers}
+        {...imageImportHandlers}
       >
         <CanvasTools />
 
@@ -84,7 +112,8 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
           <EditorElement
             key={element.id}
             element={element}
-            selected={element.id === selectedElementId}
+            selected={selectedElementIds.includes(element.id)}
+            assetUrls={assetUrls}
           />
         ))}
 
@@ -93,6 +122,7 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
 
         {/* Live freehand stroke mirrored from the editor — projector only */}
         <FreehandPreviewOverlay preview={freehandPreview ?? null} />
+        <MarqueeOverlay rect={marqueeRect} />
       </div>
     </HeadingNumberingProvider>
   );

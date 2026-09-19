@@ -1,6 +1,7 @@
 {
   "customEditors.editor": "5Board Editor",
   "customEditors.legacy-converter": "5Board Legacy Konverter",
+  "views.sidebar.sidebar-title": "Werkzeuge & Elemente",
   "customEditors.projector": "5Board Beameransicht",
   "views.sidebar.tool-title": "Werkzeuge & Presets",
   "views.sidebar.projector-title": "Beamer-Einstellungen",
@@ -12,6 +13,7 @@
   "commands.newBoardFile": "Neue 5Board Datei",
   "commands.startPresentation": "Präsentation starten",
   "commands.goToElement": "Gehe zu Element",
+  "commands.addImageFromFile": "Bild aus Datei hinzufügen",
   "configuration.java.home.description": "Pfad zur Verzeichnis des Java Development Kits. Leer lassen, um Java aus dem System-PATH zu verwenden.",
   "configuration.presets.directoryPath.description": "Pfad zum Verzeichnis der Preset-Dateien.",
   "configuration.grid.cellSize.description": "Standardgröße einer Rasterzelle in Pixeln für neue Dokumente.",
