@@ -2,7 +2,14 @@ import { EditorElement, EditorElementType } from '5board.vsc-common';
 import { useLayoutEffect, useRef } from 'react';
 import { useGrid } from '../../../providers/GridProvider';
 import { ELEMENT_INTERACTION_CONFIG, ElementInteractionProfile } from './InteractionConfig';
-import Moveable, { OnDrag, OnDragEnd, OnResize, OnResizeEnd } from 'react-moveable';
+import Moveable, {
+  OnDrag,
+  OnDragEnd,
+  OnResize,
+  OnResizeEnd,
+  OnRotate,
+  OnRotateEnd,
+} from 'react-moveable';
 import { useMessageService } from '../../../services/MessageService';
 
 type Props<T extends EditorElementType> = {
@@ -23,6 +30,18 @@ export default function ElementInteractionController<ElementType extends EditorE
   const messages = useMessageService();
 
   const pendingPositionUpdate = useRef(false);
+  const currentTranslate = useRef({ x: 0, y: 0 });
+  const currentRotation = useRef(element.layout.rotation ?? 0);
+
+  const applyTargetTransform = (
+    target: HTMLElement | SVGElement,
+    x: number,
+    y: number,
+    rotation = currentRotation.current,
+  ) => {
+    currentTranslate.current = { x, y };
+    target.style.transform = `translate(${x}px, ${y}px) rotate(${rotation}deg)`;
+  };
 
   const getImageResizeRatio = () => {
     if (element.type === EditorElementType.Image) {
@@ -45,11 +64,14 @@ export default function ElementInteractionController<ElementType extends EditorE
     Math.max(0, Math.min(xPos, columnCount - width));
 
   useLayoutEffect(() => {
+    currentRotation.current = element.layout.rotation ?? 0;
+
     if (pendingPositionUpdate.current && targetRef.current) {
       pendingPositionUpdate.current = false;
-      targetRef.current.style.transform = '';
+      targetRef.current.style.transform = `rotate(${currentRotation.current}deg)`;
       targetRef.current.style.width = '';
       targetRef.current.style.height = '';
+      currentTranslate.current = { x: 0, y: 0 };
     }
     if (selected) {
       moveableRef.current?.updateRect();
@@ -60,6 +82,7 @@ export default function ElementInteractionController<ElementType extends EditorE
     element.layout.yPos,
     element.layout.width,
     element.layout.height,
+    element.layout.rotation,
   ]);
 
   const handleDrag = ({ target, beforeTranslate }: OnDrag) => {
@@ -70,15 +93,15 @@ export default function ElementInteractionController<ElementType extends EditorE
 
     switch (profile.dragDirection) {
       case 'vertical':
-        target.style.transform = `translate(0px, ${y}px)`;
+        applyTargetTransform(target, 0, y);
         break;
 
       case 'horizontal':
-        target.style.transform = `translate(${x}px, 0px)`;
+        applyTargetTransform(target, x, 0);
         break;
 
       case 'free':
-        target.style.transform = `translate(${x}px, ${y}px)`;
+        applyTargetTransform(target, x, y);
         break;
     }
   };
@@ -140,9 +163,33 @@ export default function ElementInteractionController<ElementType extends EditorE
     const x = direction[0] < 0 ? element.layout.width * cellSize.width - constrainedWidth : 0;
     const y = direction[1] < 0 ? element.layout.height * cellSize.height - constrainedHeight : 0;
 
-    target.style.transform = `translate(${x}px, ${y}px)`;
+    applyTargetTransform(target, x, y);
     target.style.width = `${constrainedWidth}px`;
     target.style.height = `${constrainedHeight}px`;
+  };
+
+  const handleRotate = ({ target, rotation }: OnRotate) => {
+    applyTargetTransform(target, currentTranslate.current.x, currentTranslate.current.y, rotation);
+  };
+
+  const handleRotateEnd = ({ target, lastEvent }: OnRotateEnd) => {
+    if (!lastEvent || !target) return;
+
+    const rotation = Number(lastEvent.rotation ?? currentRotation.current);
+    currentRotation.current = rotation;
+    applyTargetTransform(target, currentTranslate.current.x, currentTranslate.current.y, rotation);
+
+    if (rotation !== (element.layout.rotation ?? 0)) {
+      messages.send({
+        type: 'updateElementLayout',
+        id: element.id,
+        changes: {
+          rotation,
+        },
+      });
+    }
+
+    moveableRef.current?.updateRect();
   };
 
   const handleResizeEnd = ({ target, lastEvent }: OnResizeEnd) => {
@@ -198,6 +245,7 @@ export default function ElementInteractionController<ElementType extends EditorE
       target={targetRef}
       draggable={profile.draggable}
       resizable={profile.resizable}
+      rotatable={profile.rotatable}
       keepRatio={profile.keepRatio}
       snappable={true}
       snapGridWidth={cellSize.width}
@@ -207,6 +255,8 @@ export default function ElementInteractionController<ElementType extends EditorE
       onDragEnd={handleDragEnd}
       onResize={handleResize}
       onResizeEnd={handleResizeEnd}
+      onRotate={handleRotate}
+      onRotateEnd={handleRotateEnd}
     />
   );
 }
