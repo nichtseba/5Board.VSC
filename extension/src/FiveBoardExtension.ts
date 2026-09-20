@@ -7,12 +7,9 @@ import { BoardPackage } from './board/package';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
 import {
   BoardDocument,
-  DEFAULT_ELEMENT_PROFILES,
   AddElementDefaults,
   EditorElement,
-  EditorElementDataMap,
   EditorElementType,
-  ImageElementData,
   EditorToolId,
   DEFAULT_PROJECTOR_POINTER_STYLE,
   DEFAULT_TOOL_ID,
@@ -24,7 +21,7 @@ import { ProjectorProvider } from './providers/ProjectorProvider';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
-import { addImageAsset } from './board/addImageAsset';
+import { createDefaultElement } from './board/addElement/createDefaultElement';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
@@ -46,7 +43,20 @@ export class FiveBoardExtension extends ExtensionBase {
   }
 
   public cursorTrackingEnabled = true;
+  public projectorPaused = false;
   public projectorPointerStyle: ProjectorPointerStyle = DEFAULT_PROJECTOR_POINTER_STYLE;
+  // Document with an attached projector; unlike activeEditorDocument, not tied to editor focus.
+  private projectorDocument_: BoardCustomDocument | null = null;
+  public get projectorDocument(): BoardCustomDocument | null {
+    return this.projectorDocument_;
+  }
+  public set projectorDocument(document: BoardCustomDocument | null) {
+    this.projectorDocument_ = document;
+    this.projectorDocumentChange.fire(document);
+  }
+  // Sidebars run on their own MessageService, so push attach/detach to them here.
+  private projectorDocumentChange = new vscode.EventEmitter<BoardCustomDocument | null>();
+  public onProjectorDocumentChange = this.projectorDocumentChange.event;
 
   private activeEditorDocument_: BoardCustomDocument | null = null;
   public get activeEditorDocument(): BoardCustomDocument | null {
@@ -147,52 +157,9 @@ export class FiveBoardExtension extends ExtensionBase {
     defaults?: AddElementDefaults,
   ): void {
     this.applyEditToActiveDocument((document) => {
-      const element = this.createDefaultElement(type, position, defaults, document);
+      const element = createDefaultElement(type, position, defaults, document);
       document.content.elements.push(element);
     });
-  }
-
-  private createDefaultElement<T extends EditorElementType>(
-    type: T,
-    position: EditorElement['layout'],
-    defaults: AddElementDefaults<T> | undefined,
-    document: BoardDocument,
-  ): EditorElement<T> {
-    const profile = DEFAULT_ELEMENT_PROFILES[type];
-    const data = {
-      ...structuredClone(profile.data),
-      ...defaults?.data,
-    } as EditorElementDataMap[T];
-
-    if (type === EditorElementType.Image && defaults?.asset) {
-      const assetName = addImageAsset(
-        document,
-        defaults.asset.name,
-        new Uint8Array(defaults.asset.bytes),
-      );
-      const imageData = data as ImageElementData;
-      Object.assign(imageData, {
-        src: assetName,
-        title: imageData.title ?? assetName,
-        altText: imageData.altText ?? assetName,
-        configuredWidth: false,
-      });
-    }
-
-    return {
-      id: crypto.randomUUID(),
-      type,
-      layout: {
-        ...position,
-        width: defaults?.layout?.width ?? profile.layout.width,
-        height: defaults?.layout?.height ?? profile.layout.height,
-      },
-      style: {
-        visible: true,
-        ...defaults?.style,
-      },
-      data,
-    };
   }
 
   @Command('5board-vsc.addImageFromFile')

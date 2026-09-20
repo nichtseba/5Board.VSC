@@ -33,7 +33,7 @@ type AllExtensionToWebviewMessage =
   | { type: 'cursorMove'; x: number; y: number }
   | { type: 'cursorHide' }
   | { type: 'cursorTrackingChanged'; enabled: boolean }
-  | { type: 'projectorStateChanged'; active: boolean; open: boolean }
+  | { type: 'projectorStateChanged'; active: boolean; open: boolean; paused: boolean }
   | { type: 'projectorPointerChanged'; style: ProjectorPointerStyle }
   | { type: 'scroll'; top: number; left: number }
   | { type: 'selectElement'; elementId: string | null }
@@ -77,12 +77,7 @@ type AllWebviewToExtensionMessage =
   | { type: 'toggleElementSelection'; ids: string[] }
   | { type: 'selectTool'; tool: EditorTool }
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
-  | {
-      type: 'addElement';
-      elementType: EditorElementType;
-      elementPosition: EditorElement['layout'];
-      defaults?: AddElementDefaults;
-    }
+  | AddElementMessage
   | { type: 'deleteElement'; id: string }
   | {
       type: 'updateElementLayout';
@@ -95,6 +90,7 @@ type AllWebviewToExtensionMessage =
   | { type: 'addImageFromFile' }
   | { type: 'addImageFromBytes'; name: string; bytes: number[] }
   | { type: 'toggleCursorTracking' }
+  | { type: 'toggleProjectorPaused' }
   | { type: 'updateProjectorPointer'; style: ProjectorPointerStyle }
   // Sent by the editor after drawing a new element (e.g. a freehand stroke).
   | { type: 'addFreehandElement'; element: EditorElement }
@@ -125,3 +121,12 @@ type AllWebviewToExtensionMessage =
       level?: HeadingLevel;
       numberingFormat?: HeadingNumberingStyle;
     };
+
+type AddElementMessage = {
+  [T in EditorElementType]: {
+    type: 'addElement';
+    elementType: T;
+    elementPosition: ElementLayout;
+    defaults?: AddElementDefaults;
+  };
+}[EditorElementType];
