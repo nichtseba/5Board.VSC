@@ -225,7 +225,7 @@ export type ElementTypeDefinition<T extends EditorElementType = EditorElementTyp
 
 export const DEFAULT_ELEMENT_PROFILES = {
   [EditorElementType.Heading]: {
-    layout: { width: 40, height: 2 },
+    layout: { width: 40, height: 3 },
     style: {
       visible: true,
     },
