@@ -7,6 +7,10 @@ import { BoardPackage } from './board/package';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
 import {
   BoardDocument,
+  AddElementDefaults,
+  EditorElement,
+  EditorElementType,
+  EditorToolId,
   DEFAULT_PROJECTOR_POINTER_STYLE,
   DEFAULT_TOOL_ID,
   EditorState,
@@ -17,7 +21,7 @@ import { ProjectorProvider } from './providers/ProjectorProvider';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
-import { addImageToDocument } from './board/addImageToDocument';
+import { createDefaultElement } from './board/addElement/createDefaultElement';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
@@ -139,6 +143,25 @@ export class FiveBoardExtension extends ExtensionBase {
     }
   }
 
+  @Command('5board-vsc.deleteEditorElement')
+  deleteEditorElement(id: string): void {
+    this.applyEditToActiveDocument((document) => {
+      document.content.elements = document.content.elements.filter((e) => e.id !== id);
+    });
+  }
+
+  @Command('5board-vsc.addNewEditorElement')
+  addNewEditorElement(
+    type: EditorElementType,
+    position: EditorElement['layout'],
+    defaults?: AddElementDefaults,
+  ): void {
+    this.applyEditToActiveDocument((document) => {
+      const element = createDefaultElement(type, position, defaults, document);
+      document.content.elements.push(element);
+    });
+  }
+
   @Command('5board-vsc.addImageFromFile')
   async addImageFromFileCommand(): Promise<void> {
     const activeDocument = this.activeEditorDocument;
@@ -163,9 +186,21 @@ export class FiveBoardExtension extends ExtensionBase {
 
     const bytes = await vscode.workspace.fs.readFile(fileUri);
     const assetName = path.basename(fileUri.fsPath);
-    activeDocument.applyEdit((document) => {
-      addImageToDocument(document, assetName, bytes);
-    });
+    this.editorState = {
+      tool: {
+        type: EditorToolId.AddElement,
+        parameters: {
+          type: EditorElementType.Image,
+          placementMode: 'free',
+          defaults: {
+            asset: {
+              name: assetName,
+              bytes: Array.from(bytes),
+            },
+          },
+        },
+      },
+    };
   }
 
   public applyEditToActiveDocument(edit: (document: BoardDocument) => void): void {

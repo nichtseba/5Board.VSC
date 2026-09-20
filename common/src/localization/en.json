@@ -28,20 +28,16 @@
         "pointer": "Pointer",
         "spacer": "Spacer Tool",
         "freehand": "Freehand Tool",
-        "addElement": "Add Element",
-        "text": "Text",
-        "heading": "Heading",
-        "link": "Link",
-        "code": "Code",
-        "image": "Image"
+        "addElement": "Add Element"
       },
       "elementType": {
         "heading": "Heading",
         "text": "Text",
         "code": "Code",
         "image": "Image",
-        "shape": "Shape",
-        "arrow": "Arrow",
+        "rectangle": "Rectangle",
+        "circle": "Circle",
+        "line": "Line",
         "freehand": "Freehand"
       },
       "freehand": {
@@ -98,7 +94,9 @@
           "duck": "Duck"
         }
       },
-      "goToElement": "Go to Element"
+      "goToElement": "Go to element",
+      "addElement": "Add Element",
+      "addCustomElement": "Add Custom Element"
     },
     "sidebar-element-settings": {
       "noElementSelected": "No element selected",
@@ -141,7 +139,29 @@
       },
       "freehandSettings": {
         "title": "Freehand"
-      }
+      },
+      "rectangleSettings": {
+        "title": "Rectangle"
+      },
+      "circleSettings": {
+        "title": "Circle"
+      },
+      "lineSettings": {
+        "title": "Line",
+        "symbols": "Symbols",
+        "borderColor": "Border color",
+        "borderWidth": "Border width",
+        "borderStyle": "Border style",
+        "startHead": "Start head",
+        "endHead": "End head",
+        "headSize": "Head size",
+        "headFill": "Fill heads",
+        "headNone": "None",
+        "headArrow": "Arrow",
+        "headCircle": "Circle",
+        "headSquare": "Square"
+      },
+      "delete": "Delete"
     }
   }
 }

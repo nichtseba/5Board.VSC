@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { init } from '../app/init';
 import {
+  AddElementToolParameters,
   DEFAULT_FREEHAND_PARAMETERS,
   EditorTool,
   EditorToolDefinition,
@@ -22,15 +23,16 @@ import SliderInput from '../components/sidebar/components/SliderInput';
 import { ColorPicker } from '../components/sidebar/components/ColorPicker';
 import LineStyleSelect from '../components/sidebar/components/LineStyleSelect';
 import { useMessageService } from '../services/MessageService';
+import { useEditorState } from '../providers/EditorStateProvider';
+import { NewElements } from '../components/sidebar/newElements/NewElements';
+import { NewCustomElements } from '../components/sidebar/newElements/NewCustomElements';
 
 export default function ToolSidebar() {
   const { t } = useLocalization();
   const messages = useMessageService();
+  const editorState = useEditorState();
 
-  const [selectedTool, setSelectedTool] = useState<EditorTool>({
-    type: EditorToolId.POINTER,
-    parameters: undefined,
-  });
+  const selectedTool = editorState?.tool;
   // Freehand drawing options, sent with the tool via 'selectTool'.
   const [freehandParams, setFreehandParams] = useState<FreehandToolParameters>(
     DEFAULT_FREEHAND_PARAMETERS,
@@ -38,25 +40,25 @@ export default function ToolSidebar() {
   const tools = Object.entries(TOOL_DEFINITIONS) as [EditorToolId, EditorToolDefinition][];
 
   useEffect(() => {
-    messages.send({ type: 'selectTool', tool: selectedTool });
     messages.send({ type: 'ready' }); // request current projector settings state
   }, [messages]);
 
-  // Builds the tool payload, attaching freehand parameters for the freehand tool.
-  const toolFor = (toolId: EditorToolId): EditorTool =>
-    toolId === EditorToolId.FREEHAND
-      ? { type: EditorToolId.FREEHAND, parameters: freehandParams }
-      : { type: toolId, parameters: undefined };
+  const handleToolClick = (tool: EditorTool) => {
+    if (tool.type === selectedTool?.type) {
+      if (tool.type === EditorToolId.AddElement) {
+        if (
+          (tool.parameters as AddElementToolParameters).type ===
+          (selectedTool.parameters as AddElementToolParameters).type
+        ) {
+          return;
+        }
+      } else {
+        return;
+      }
+    }
 
-  const selectTool = (toolId: EditorToolId) => {
-    const tool = toolFor(toolId);
-    setSelectedTool(tool);
+    if (tool.type === EditorToolId.FREEHAND) tool.parameters = freehandParams;
     messages.send({ type: 'selectTool', tool });
-  };
-
-  const handleToolClick = (toolId: EditorToolId) => {
-    if (selectedTool.type === toolId) return;
-    selectTool(toolId);
   };
 
   // Patch freehand params and, while the tool is active, re-send it live.
@@ -65,7 +67,7 @@ export default function ToolSidebar() {
     setFreehandParams(parameters);
     if (selectedTool.type === EditorToolId.FREEHAND) {
       const tool: EditorTool = { type: EditorToolId.FREEHAND, parameters };
-      setSelectedTool(tool);
+      //setSelectedTool(tool);
       messages.send({ type: 'selectTool', tool });
     }
   };
@@ -76,26 +78,22 @@ export default function ToolSidebar() {
     <>
       <SidebarShell>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3">
-          {tools.map(([key, tool]) => (
-            <Button
-              key={key}
-              title={t(tool.labelKey)}
-              appearance={selectedTool.type === key ? 'primary' : 'secondary'}
-              className="h-8 flex flex-col items-center justify-center gap-2"
-              onClick={() => handleToolClick(key)}
-            >
-              <span className={`codicon codicon-${tool.icon}`} />
-            </Button>
-          ))}
-          <Button
-            title="Image"
-            appearance="secondary"
-            className="h-8 flex flex-col items-center justify-center gap-2"
-            onClick={() => messages.send({ type: 'addImageFromFile' })}
-          >
-            <span className="codicon codicon-file-media" />
-          </Button>
+          {tools
+            .filter(([key]) => key !== EditorToolId.AddElement)
+            .map(([key, tool]) => (
+              <Button
+                key={key}
+                title={t(tool.labelKey)}
+                appearance={selectedTool?.type === key ? 'primary' : 'secondary'}
+                className="h-8 flex flex-col items-center justify-center gap-2"
+                onClick={() => handleToolClick({ type: key, parameters: undefined })}
+              >
+                <span className={`codicon codicon-${tool.icon}`} />
+              </Button>
+            ))}
         </div>
+        <NewElements handleToolClick={handleToolClick} />
+        <NewCustomElements handleToolClick={handleToolClick} />
         {/* Freehand options — only shown while the freehand tool is active */}
         {freehandSelected && (
           <section className="mt-6 flex flex-col gap-2">

@@ -6,11 +6,12 @@ import { HeadingElement } from './elements/HeadingElement';
 import ElementInteractionController from './elementInteraction/ElementInteractionController';
 import { CodeElement } from './elements/CodeElement';
 import { ImageElement } from './elements/ImageElement';
-import { ShapeElement } from './elements/ShapeElement';
-import { ArrowElement } from './elements/ArrowElement';
+import { LineElement } from './elements/LineElement';
 import { FreehandElement } from './elements/FreehandElement';
 import { useEditorState } from '../../providers/EditorStateProvider';
 import { useMessageService } from '../../services/MessageService';
+import { RectangleElement } from './elements/RectangleElement';
+import { CircleElement } from './elements/CircleElement';
 
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
@@ -24,6 +25,7 @@ export type EditorElementProps<T extends EditorElementType> = {
   onStopEditing?: () => void;
   targetRef?: React.RefObject<HTMLDivElement>;
   assetUrls?: Record<string, string>;
+  preview?: boolean;
 };
 
 /**
@@ -36,6 +38,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
   element,
   selected,
   assetUrls,
+  preview,
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
@@ -46,8 +49,8 @@ export default function EditorElement<ElementType extends EditorElementType>({
   const ElementComponent =
     (ELEMENT_COMPONENTS[element.type] as React.ComponentType<EditorElementProps<ElementType>>) ??
     UnknownElement;
-  const activeToolId = useEditorState()?.tool.type;
   const messages = useMessageService();
+  const activeToolId = useEditorState()?.tool.type;
 
   const handleSelectElement = (id: string, event?: React.MouseEvent) => {
     if (activeToolId !== EditorToolId.POINTER) return;
@@ -59,6 +62,27 @@ export default function EditorElement<ElementType extends EditorElementType>({
 
     messages.send({ type: 'selectElements', ids: [id] });
   };
+
+  useEffect(() => {
+    const listener = (event: KeyboardEvent) => {
+      if (event.key !== 'Delete') {
+        return;
+      }
+
+      if (!selected) {
+        return;
+      }
+
+      messages.send({
+        type: 'deleteElement',
+        id: element.id,
+      });
+    };
+
+    window.addEventListener('keydown', listener);
+
+    return () => window.removeEventListener('keydown', listener);
+  });
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (element.type !== EditorElementType.Text) {
@@ -91,7 +115,8 @@ export default function EditorElement<ElementType extends EditorElementType>({
         onClick={(event) => handleSelectElement(element.id, event)}
         onDoubleClick={handleDoubleClick}
         className={`
-          box-border overflow-hidden
+          box-border 
+          ${element.type === EditorElementType.Line ? '' : 'overflow-hidden'}
           ${activeToolId === EditorToolId.POINTER ? 'cursor-pointer' : ''}
           ${
             activeToolId === EditorToolId.POINTER && !selected
@@ -102,7 +127,6 @@ export default function EditorElement<ElementType extends EditorElementType>({
         `}
         ref={targetRef}
         style={{
-          backgroundColor: element.style.backgroundColor,
           gridRowStart: element.layout.yPos + 1,
           gridRowEnd: `span ${element.layout.height}`,
           gridColumnStart: element.layout.xPos + 1,
@@ -117,6 +141,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
           editing={editing}
           editingPosition={editingPosition}
           assetUrls={assetUrls}
+          preview={preview}
           onStopEditing={handleStopEditing}
         />
       </div>
@@ -139,8 +164,9 @@ const ELEMENT_COMPONENTS = {
   [EditorElementType.Text]: TextElement,
   [EditorElementType.Code]: CodeElement,
   [EditorElementType.Image]: ImageElement,
-  [EditorElementType.Shape]: ShapeElement,
-  [EditorElementType.Arrow]: ArrowElement,
+  [EditorElementType.Rectangle]: RectangleElement,
+  [EditorElementType.Circle]: CircleElement,
+  [EditorElementType.Line]: LineElement,
   [EditorElementType.Freehand]: FreehandElement,
 } as const satisfies {
   [ElementType in EditorElementType]: React.ComponentType<EditorElementProps<ElementType>>;

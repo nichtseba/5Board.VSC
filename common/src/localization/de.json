@@ -28,12 +28,7 @@
         "pointer": "Zeiger",
         "spacer": "Abstand-Tool",
         "freehand": "Freihand-Tool",
-        "addElement": "Element hinzufügen",
-        "text": "Text",
-        "heading": "Überschrift",
-        "link": "Link",
-        "code": "Code",
-        "image": "Bild"
+        "addElement": "Element hinzufügen"
       },
       "freehand": {
         "title": "Freihand-Optionen",
@@ -66,8 +61,9 @@
         "text": "Text",
         "code": "Code",
         "image": "Bild",
-        "shape": "Form",
-        "arrow": "Pfeil",
+        "rectangle": "Rechteck",
+        "circle": "Kreis",
+        "line": "Linie",
         "freehand": "Freihand"
       },
       "projectorSettings": {
@@ -98,7 +94,9 @@
           "duck": "Ente"
         }
       },
-      "goToElement": "Gehe zu Element"
+      "goToElement": "Gehe zu Element",
+      "addElement": "Element hinzufügen",
+      "addCustomElement": "Custom Element hinzufügen"
     },
     "sidebar-element-settings": {
       "noElementSelected": "Kein Element ausgewählt",
@@ -141,7 +139,29 @@
       },
       "freehandSettings": {
         "title": "Freihand"
-      }
+      },
+      "rectangleSettings": {
+        "title": "Rechteck"
+      },
+      "circleSettings": {
+        "title": "Kreis"
+      },
+      "lineSettings": {
+        "title": "Linie",
+        "symbols": "Symbole",
+        "borderColor": "Rahmenfarbe",
+        "borderWidth": "Rahmenbreite",
+        "borderStyle": "Rahmenstil",
+        "startHead": "Startsymbol",
+        "endHead": "Endsymbol",
+        "headSize": "Symbolgröße",
+        "headFill": "Symbole ausfüllen",
+        "headNone": "Keine",
+        "headArrow": "Pfeil",
+        "headCircle": "Kreis",
+        "headSquare": "Quadrat"
+      },
+      "delete": "Löschen"
     }
   }
 }

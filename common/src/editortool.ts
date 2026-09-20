@@ -1,4 +1,10 @@
-import { EditorElement, LineStyle, TranslationKey } from './main';
+import {
+  AddElementDefaults,
+  AddElementPlacementMode,
+  EditorElementType,
+  TranslationKey,
+  LineStyle,
+} from './main';
 
 export enum EditorToolId {
   POINTER = 'pointer',
@@ -87,12 +93,25 @@ export const DEFAULT_FREEHAND_PARAMETERS: FreehandToolParameters = {
   dashScale: FREEHAND_DEFAULT_DASH,
 };
 
-type AddElementToolParameters = {
-  type: EditorElement['type'];
-  layout: Omit<EditorElement['layout'], 'xPos' | 'yPos'>;
-  style: EditorElement['style'];
-  data: EditorElement['data'];
+export type AddElementToolParameters<T extends EditorElementType = EditorElementType> = {
+  type: T;
+  placementMode?: AddElementPlacementMode;
+  defaults?: AddElementDefaults<T>;
 };
+
+export function createAddElementTool<T extends EditorElementType>(
+  type: T,
+  overrides: Partial<AddElementToolParameters<T>> = {},
+): EditorTool<EditorToolId.AddElement> {
+  return {
+    type: EditorToolId.AddElement,
+    parameters: {
+      type,
+      placementMode: 'free',
+      ...overrides,
+    },
+  };
+}
 
 export type EditorTool<EditorToolType extends EditorToolId = EditorToolId> = {
   type: EditorToolType;

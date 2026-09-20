@@ -42,6 +42,9 @@ export class SidebarManager implements vscode.Disposable {
       };
     });
 
+    this.messages.on('deleteElement', (msg) => {
+      EXTENSION.deleteEditorElement(msg.id);
+    });
     this.messages.on('textEditorCommand', (msg) => {
       if (!EXTENSION.activeEditorDocument) {
         return;
@@ -145,7 +148,7 @@ export class SidebarManager implements vscode.Disposable {
             data: {
               ...el.data,
               ...msg.changes.data,
-            },
+            } as typeof el.data,
             style: {
               ...el.style,
               ...msg.changes.style,
