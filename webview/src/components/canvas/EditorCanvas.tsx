@@ -52,7 +52,7 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
   useEffect(() => {
     if (
       activeToolId !== EditorToolId.POINTER &&
-      (document?.content.selectedElementIds?.length ?? 0) > 0
+      (document?.content?.selectedElementIds?.length ?? 0) > 0
     ) {
       messages.send({
         type: 'selectElements',

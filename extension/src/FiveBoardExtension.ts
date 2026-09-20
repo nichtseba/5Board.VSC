@@ -52,7 +52,20 @@ export class FiveBoardExtension extends ExtensionBase {
   }
 
   public cursorTrackingEnabled = true;
+  public projectorPaused = false;
   public projectorPointerStyle: ProjectorPointerStyle = DEFAULT_PROJECTOR_POINTER_STYLE;
+  // Document with an attached projector; unlike activeEditorDocument, not tied to editor focus.
+  private projectorDocument_: BoardCustomDocument | null = null;
+  public get projectorDocument(): BoardCustomDocument | null {
+    return this.projectorDocument_;
+  }
+  public set projectorDocument(document: BoardCustomDocument | null) {
+    this.projectorDocument_ = document;
+    this.projectorDocumentChange.fire(document);
+  }
+  // Sidebars run on their own MessageService, so push attach/detach to them here.
+  private projectorDocumentChange = new vscode.EventEmitter<BoardCustomDocument | null>();
+  public onProjectorDocumentChange = this.projectorDocumentChange.event;
 
   private activeEditorDocument_: BoardCustomDocument | null = null;
   public get activeEditorDocument(): BoardCustomDocument | null {

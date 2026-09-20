@@ -288,7 +288,7 @@ export const DEFAULT_ELEMENT_PROFILES = {
       visible: true,
       opacity: 1,
       border: {
-        color: '#240ae4',
+        color: '#f14c4c',
         width: 2,
         style: 'solid',
       },

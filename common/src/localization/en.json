@@ -11,7 +11,9 @@
       "startPresentation": "Start Presentation",
       "title": "Projector",
       "noFileOpen": "Please open a .5boardz file in the editor before starting the projector view.",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "live": "Live",
+      "paused": "Paused"
     },
     "presets": {
       "noElementSelected": "No element selected. Please select an element to save as a preset.",
@@ -82,6 +84,11 @@
       "projectorSettings": {
         "title": "Projector Settings",
         "cursorTracking": "Cursor Tracking",
+        "pause": "Pause",
+        "resume": "Resume",
+        "statusLive": "Live",
+        "statusPaused": "Paused",
+        "statusClosed": "Ended",
         "pointerColor": "Pointer Color",
         "customColor": "Custom",
         "pointerShape": "Pointer Shape",
