@@ -55,14 +55,35 @@ export default function ToolSidebar() {
         ) {
           return;
         }
+      } else if (tool.type === EditorToolId.FREEHAND) {
+        const nextParameters = tool.parameters as FreehandToolParameters;
+        const selectedParameters = selectedTool.parameters as FreehandToolParameters;
+
+        if (
+          nextParameters?.color === selectedParameters?.color &&
+          nextParameters?.width === selectedParameters?.width &&
+          nextParameters?.opacity === selectedParameters?.opacity &&
+          nextParameters?.lineStyle === selectedParameters?.lineStyle &&
+          nextParameters?.dashScale === selectedParameters?.dashScale
+        ) {
+          return;
+        }
       } else {
         return;
       }
     }
 
-    if (tool.type === EditorToolId.FREEHAND) tool.parameters = freehandParams;
+    if (tool.type === EditorToolId.FREEHAND && !tool.parameters) {
+      tool.parameters = freehandParams;
+    }
     messages.send({ type: 'selectTool', tool });
   };
+
+  useEffect(() => {
+    if (selectedTool?.type === EditorToolId.FREEHAND && selectedTool.parameters) {
+      setFreehandParams(selectedTool.parameters as FreehandToolParameters);
+    }
+  }, [selectedTool]);
 
   // Patch freehand params and, while the tool is active, re-send it live.
   const updateFreehand = (patch: Partial<FreehandToolParameters>) => {
@@ -95,8 +116,6 @@ export default function ToolSidebar() {
               </Button>
             ))}
         </div>
-        <NewElements handleToolClick={handleToolClick} />
-        <NewCustomElements handleToolClick={handleToolClick} />
         {/* Freehand options — only shown while the freehand tool is active */}
         {freehandSelected && (
           <section className="mt-6 flex flex-col gap-2">
@@ -172,6 +191,8 @@ export default function ToolSidebar() {
             )}
           </section>
         )}
+        <NewElements handleToolClick={handleToolClick} />
+        <NewCustomElements handleToolClick={handleToolClick} />
       </SidebarShell>
     </>
   );

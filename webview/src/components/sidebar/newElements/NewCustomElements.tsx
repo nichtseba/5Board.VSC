@@ -1,5 +1,6 @@
 import {
   createAddElementToolFromPreset,
+  createFreehandToolFromPreset,
   ELEMENT_TYPE_DEFINITIONS,
   EditorTool,
   EditorToolId,
@@ -62,7 +63,9 @@ export function NewCustomElements({ handleToolClick }: newElementProps) {
                     messages.send({ type: 'loadPresetAsset', id: preset.id });
                     return;
                   }
-                  handleToolClick(createAddElementToolFromPreset(preset));
+                  handleToolClick(
+                    createFreehandToolFromPreset(preset) ?? createAddElementToolFromPreset(preset),
+                  );
                 }}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter' || event.key === ' ') {
@@ -71,7 +74,10 @@ export function NewCustomElements({ handleToolClick }: newElementProps) {
                       messages.send({ type: 'loadPresetAsset', id: preset.id });
                       return;
                     }
-                    handleToolClick(createAddElementToolFromPreset(preset));
+                    handleToolClick(
+                      createFreehandToolFromPreset(preset) ??
+                        createAddElementToolFromPreset(preset),
+                    );
                   }
                 }}
               >

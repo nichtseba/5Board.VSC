@@ -7,6 +7,7 @@ import {
   LineStyle,
   ELEMENT_TYPE_DEFINITIONS,
   ImageElementData,
+  FreehandElementData,
 } from './main';
 import type { Preset } from './board/presets';
 
@@ -163,6 +164,32 @@ export function createAddElementToolFromPreset(
         : {}),
     } as AddElementDefaults<typeof type>,
   });
+}
+
+export function createFreehandToolFromPreset(
+  preset: Preset,
+): EditorTool<EditorToolId.FREEHAND> | undefined {
+  if (
+    preset.element.type !== EditorElementType.Freehand ||
+    !preset.settings.keepStyle ||
+    preset.settings.keepContent ||
+    preset.settings.keepXPosition
+  ) {
+    return undefined;
+  }
+
+  const stroke = (preset.element.data as FreehandElementData).strokes[0];
+
+  return {
+    type: EditorToolId.FREEHAND,
+    parameters: {
+      color: stroke?.color ?? FREEHAND_COLORS[0].value,
+      width: stroke?.width ?? FREEHAND_DEFAULT_WIDTH,
+      opacity: preset.element.style.opacity ?? 1,
+      lineStyle: stroke?.lineStyle ?? 'solid',
+      dashScale: stroke?.dashScale ?? FREEHAND_DEFAULT_DASH,
+    },
+  };
 }
 
 export type EditorTool<EditorToolType extends EditorToolId = EditorToolId> = {
