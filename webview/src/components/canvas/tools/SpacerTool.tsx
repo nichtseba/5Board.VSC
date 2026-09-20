@@ -35,10 +35,13 @@ export default function SpacerTool() {
 
   const { cellSize, metrics } = useGrid();
   const rowHeight = cellSize.height;
+  const canvas = document.querySelector('.editor-canvas') as HTMLElement | null;
 
   const getRowFromClientY = (clientY: number) => {
-    const y = clientY - metrics.top;
-    return Math.max(0, Math.floor(y / rowHeight));
+    const rect = canvas?.getBoundingClientRect();
+    const y = clientY - (rect?.top ?? metrics.top);
+    const scrollTop = canvas?.scrollTop ?? 0;
+    return Math.max(0, Math.floor((y + scrollTop) / rowHeight));
   };
 
   const handlePointerRelease = () => {
@@ -103,7 +106,9 @@ export default function SpacerTool() {
     return null;
   }
 
-  const labelTop = overlayState.currentY - metrics.top;
+  const rect = canvas?.getBoundingClientRect();
+  const scrollTop = canvas?.scrollTop ?? 0;
+  const labelTop = overlayState.currentY - (rect?.top ?? metrics.top) + scrollTop;
   const canvasTop = Math.min(Math.max(12, labelTop - 12), metrics.height - 36);
 
   return <SpacerOverlay dragState={overlayState} canvasTop={canvasTop} labelTop={labelTop} />;

@@ -13,6 +13,7 @@ import { FileTreeProvider } from '../providers/FileTreeProvider';
 
 export class SidebarManager implements vscode.Disposable {
   private readonly sync: SidebarDocumentSync;
+  private readonly projectorDocumentListener: vscode.Disposable;
 
   constructor(
     context: vscode.ExtensionContext,
@@ -25,6 +26,11 @@ export class SidebarManager implements vscode.Disposable {
     new FileTreeProvider(context).register();
 
     this.sync = new SidebarDocumentSync(messages);
+
+    // Push projector attach/detach to the sidebars (their own MessageService).
+    this.projectorDocumentListener = EXTENSION.onProjectorDocumentChange(() =>
+      this.sendProjectorState(),
+    );
 
     this.registerMessageHandlers();
   }
@@ -67,6 +73,16 @@ export class SidebarManager implements vscode.Disposable {
         },
         sender,
       );
+      this.sendProjectorState(sender);
+    });
+
+    // Pause/resume the projector: freezes all mirroring until resumed.
+    this.messages.on('toggleProjectorPaused', () => {
+      // No projector attached: nothing to pause.
+      if (!EXTENSION.projectorDocument) return;
+      EXTENSION.projectorPaused = !EXTENSION.projectorPaused;
+      this.sendProjectorState(); // sidebars (reflect the button)
+      EXTENSION.projectorDocument.broadcastProjectorState(); // editor + projector
     });
 
     // Toggle the global cursor tracking setting from the sidebar and notify every view.
@@ -78,7 +94,7 @@ export class SidebarManager implements vscode.Disposable {
       };
       this.messages.send(msg); // sidebars (reflect the checkbox)
       // Editor + projector only care whether mirroring is now active.
-      EXTENSION.activeEditorDocument?.broadcastProjectorState();
+      EXTENSION.projectorDocument?.broadcastProjectorState();
     });
 
     // Update the mirrored cursor appearance and notify every view.
@@ -89,8 +105,8 @@ export class SidebarManager implements vscode.Disposable {
         style: EXTENSION.projectorPointerStyle,
       };
       this.messages.send(changed); // sidebars (reflect the controls)
-      // Reach the projector via the active editor document's MessageService.
-      EXTENSION.activeEditorDocument?.messageService.send(changed);
+      // Reach the projector via the document it's attached to.
+      EXTENSION.projectorDocument?.messageService.send(changed);
     });
 
     // Todo: move to document handling
@@ -143,7 +159,7 @@ export class SidebarManager implements vscode.Disposable {
             data: {
               ...el.data,
               ...msg.changes.data,
-            },
+            } as typeof el.data,
             style: {
               ...el.style,
               ...msg.changes.style,
@@ -209,7 +225,19 @@ export class SidebarManager implements vscode.Disposable {
     });
   }
 
+  /** Mirror the projector state to the sidebars (they live on a different MessageService). */
+  private sendProjectorState(receiver?: vscode.Webview): void {
+    const state = EXTENSION.projectorDocument?.projectorState ?? {
+      type: 'projectorStateChanged' as const,
+      active: false,
+      open: false,
+      paused: EXTENSION.projectorPaused,
+    };
+    this.messages.send(state, receiver);
+  }
+
   dispose(): void {
     this.sync.dispose();
+    this.projectorDocumentListener.dispose();
   }
 }

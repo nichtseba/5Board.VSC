@@ -6,20 +6,20 @@ import {
 } from '5board.vsc-common';
 import { useEffect, useMemo, useRef, type CSSProperties, useState } from 'react';
 import EditorElement from './EditorElement';
-import { HeadingNumberingProvider } from './HeadingNumberingContext';
+import { HeadingNumberingProvider } from '../../providers/HeadingNumberingContext';
 import ProjectorMouse, { ProjectorCursor } from '../projector/ProjectorMouse';
 import './EditorCanvas.css';
 import { useEditorState } from '../../providers/EditorStateProvider';
 import { useMessageService } from '../../services/MessageService';
 import { useGrid } from '../../providers/GridProvider';
-import { createAssetUrls, revokeAssetUrls } from './assetUrlsUtil';
-import { useImageImport } from './useImageImport';
+import { createAssetUrls, revokeAssetUrls } from './logic/assetUrlsUtil';
+import { useImageImport } from './logic/useImageImport';
 import { CanvasTools } from './tools/CanvasTools';
 import FreehandPreviewOverlay, { FreehandPreview } from './tools/FreehandPreviewOverlay';
 import { useBoardDocument } from '../../providers/BoardDocumentProvider';
-import { useCanvasPointer } from './useCanvasPointer';
-import { useMarqueeSelection } from './useMarqueeSelection';
-import { MarqueeOverlay } from './MarqueeOverlay';
+import { useCanvasPointer } from './logic/useCanvasPointer';
+import { useMarqueeSelection } from './logic/useMarqueeSelection';
+import { MarqueeOverlay } from './logic/MarqueeOverlay';
 
 export type EditorCanvasProps = {
   // Normalized (0–1) cursor position to display as a live overlay.
