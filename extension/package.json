@@ -176,6 +176,18 @@
           "scope": "window",
           "order": 40,
           "description": "%configuration.grid.columnCount.description%"
+        },
+        "5board-vsc.colorPalette.customColors": {
+          "type": "array",
+          "default": [],
+          "maxItems": 3,
+          "uniqueItems": true,
+          "scope": "window",
+          "items": {
+            "type": "string",
+            "pattern": "^rgb\\(\\s*(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\s*,\\s*(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\s*,\\s*(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\s*\\)$"
+          },
+          "description": "Up to three custom colors in RGB format, e.g. rgb(255, 0, 0)"
         }
       }
     }

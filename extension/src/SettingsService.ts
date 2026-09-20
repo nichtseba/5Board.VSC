@@ -1,4 +1,8 @@
-import { DEFAULT_GRID_SETTINGS, type GridSettings } from '5board.vsc-common';
+import {
+  DEFAULT_GRID_SETTINGS,
+  type GridSettings,
+  type ColorPaletteSettings,
+} from '5board.vsc-common';
 import * as vscode from 'vscode';
 
 export interface JavaSettings {
@@ -13,6 +17,7 @@ export interface FiveBoardSettings {
   java: JavaSettings;
   presets: PresetSettings;
   grid: GridSettings;
+  colorPalette: ColorPaletteSettings;
 }
 
 export class SettingsService implements vscode.Disposable {
@@ -46,6 +51,9 @@ export class SettingsService implements vscode.Disposable {
           'grid.columnCount',
           DEFAULT_GRID_SETTINGS.columnCount,
         ),
+      },
+      colorPalette: {
+        customColors: configuration.get<string[]>('colorPalette.customColors', []),
       },
     };
   }

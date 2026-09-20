@@ -15,8 +15,7 @@ import SettingsPanel from '../layout/SettingsPanel';
 import { useLocalization } from '../../../providers/LocalizationProvider';
 import { useMessageService } from '../../../services/MessageService';
 import { useBoardDocument } from '../../../providers/BoardDocumentProvider';
-import { ColorPresets } from '../components/ColorPresets';
-import { ColorPicker } from '../components/ColorPicker';
+import ColorSelector from '../components/ColorSelector';
 import { FontSizeInput } from './components/FontSizeInput';
 
 type Props = {
@@ -232,19 +231,10 @@ export function HeadingSettings({ element }: Props) {
 
 function ColorField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
   return (
-    <div className="flex flex-col gap-2">
-      <ColorPresets
-        color={value}
-        onChange={onChange}
-        presets={PROJECTOR_POINTER_PRESET_COLORS.map((preset) => ({
-          value: preset.value,
-          theme: true,
-        }))}
-      />
-      <div className="flex items-center gap-2">
-        <ColorPicker color={value} onChange={onChange} />
-        <TextField className="flex-1" value={value} placeholder="#000000" onChange={onChange} />
-      </div>
-    </div>
+    <ColorSelector
+      color={value}
+      onChange={onChange}
+      themePresets={PROJECTOR_POINTER_PRESET_COLORS}
+    />
   );
 }

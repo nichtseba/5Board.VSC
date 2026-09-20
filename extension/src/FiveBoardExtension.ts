@@ -82,6 +82,18 @@ export class FiveBoardExtension extends ExtensionBase {
     new EditorEditorProvider(context, this.packageManager).register();
     new ProjectorProvider(context).register();
     context.subscriptions.push(new SidebarManager(context, this.messages));
+    context.subscriptions.push(
+      this.settingsService.onDidChange((settings) => {
+        const message = {
+          type: 'settingsChanged' as const,
+          settings: {
+            colorPalette: settings.colorPalette,
+          },
+        };
+
+        this.messages.send(message);
+      }),
+    );
     new FiveBoardFileSystemProvider(this.packageManager).register(context);
   }
 

@@ -1,5 +1,7 @@
 import { ColorPicker } from './ColorPicker';
 import { ColorPreset, ColorPresets } from './ColorPresets';
+import { useSettings } from '../../../providers/SettingsProvider';
+import { useState } from 'react';
 
 type ColorSelectorProps = {
   color?: string;
@@ -21,6 +23,11 @@ export default function ColorSelector({
   customColorLabel,
   themeLabel = 'Theme',
 }: ColorSelectorProps) {
+  const settings = useSettings();
+
+  const customColors = settings.colorPalette.customColors;
+  const [pickerColor, setPickerColor] = useState('#000000');
+
   return (
     <div className="flex flex-col gap-2">
       {label && <span className="text-foreground-description">{label}</span>}
@@ -37,7 +44,17 @@ export default function ColorSelector({
           />
         </div>
       )}
-      <ColorPicker color={color} onChange={onChange} label={customColorLabel} />
+      {customColors.length > 0 && (
+        <ColorPresets color={color} onChange={onChange} presets={customColors} />
+      )}
+      <ColorPicker
+        color={pickerColor}
+        onChange={(newColor) => {
+          setPickerColor(newColor);
+          onChange(newColor);
+        }}
+        label={customColorLabel}
+      />
     </div>
   );
 }
