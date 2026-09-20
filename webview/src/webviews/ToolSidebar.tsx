@@ -25,7 +25,7 @@ import LineStyleSelect from '../components/sidebar/components/LineStyleSelect';
 import { useMessageService } from '../services/MessageService';
 import { useEditorState } from '../providers/EditorStateProvider';
 import { NewElements } from '../components/sidebar/newElements/NewElements';
-import { NewCustomElements } from '../components/sidebar/newElements/NewCustomElements';
+import { PresetElements } from '../components/sidebar/newElements/PresetElements';
 
 export default function ToolSidebar() {
   const { t } = useLocalization();
@@ -192,7 +192,7 @@ export default function ToolSidebar() {
           </section>
         )}
         <NewElements handleToolClick={handleToolClick} />
-        <NewCustomElements handleToolClick={handleToolClick} />
+        <PresetElements handleToolClick={handleToolClick} />
       </SidebarShell>
     </>
   );

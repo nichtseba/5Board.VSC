@@ -17,7 +17,7 @@ export type newElementProps = {
   handleToolClick: (tool: EditorTool) => void;
 };
 
-export function NewCustomElements({ handleToolClick }: newElementProps) {
+export function PresetElements({ handleToolClick }: newElementProps) {
   const { t } = useLocalization();
   const editorState = useEditorState();
   const messages = useMessageService();
