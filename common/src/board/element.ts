@@ -290,7 +290,7 @@ export const DEFAULT_ELEMENT_PROFILES = {
       visible: true,
       opacity: 1,
       border: {
-        color: '#240ae4',
+        color: '#050505',
         width: 2,
         style: 'solid',
       },
