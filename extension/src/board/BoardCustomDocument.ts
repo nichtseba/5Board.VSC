@@ -60,12 +60,16 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   /** Attach projector panel (init) */
   public addProjector(): void {
     this.projectorCount++;
+    EXTENSION.projectorDocument = this;
     this.broadcastProjectorState();
   }
 
   /** Detach projector panel (destroy) */
   public removeProjector(): void {
     this.projectorCount = Math.max(0, this.projectorCount - 1);
+    if (!this.hasProjector && EXTENSION.projectorDocument === this) {
+      EXTENSION.projectorDocument = null;
+    }
     this.broadcastProjectorState();
   }
 

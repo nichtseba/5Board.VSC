@@ -77,6 +77,7 @@
         "resume": "Fortsetzen",
         "statusLive": "Live",
         "statusPaused": "Pausiert",
+        "statusClosed": "Beendet",
         "pointerColor": "Zeiger-Farbe",
         "customColor": "Eigene",
         "pointerShape": "Zeiger-Form",

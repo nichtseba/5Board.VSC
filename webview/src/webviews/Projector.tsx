@@ -61,7 +61,8 @@ export default function Projector() {
       window.removeEventListener('scroll', sendViewport);
       window.removeEventListener('resize', sendViewport);
     };
-  }, [messages]);
+    // Re-run once the canvas mounts, so the initial viewport sends right away.
+  }, [messages, !!boardDocument]);
 
   useEffect(() => {
     document.documentElement.style.overflow = 'hidden';

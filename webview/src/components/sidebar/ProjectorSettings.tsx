@@ -27,11 +27,16 @@ export default function ProjectorSettings() {
 
   const [cursorTracking, setCursorTracking] = useState(true);
   const [paused, setPaused] = useState(false);
+  // Whether a projector window is attached.
+  const [open, setOpen] = useState(false);
   const [style, setStyle] = useState<ProjectorPointerStyle>(DEFAULT_PROJECTOR_POINTER_STYLE);
 
   useOnMessage((msg) => {
     if (msg.type === 'cursorTrackingChanged') setCursorTracking(msg.enabled);
-    if (msg.type === 'projectorStateChanged') setPaused(msg.paused);
+    if (msg.type === 'projectorStateChanged') {
+      setPaused(msg.paused);
+      setOpen(msg.open);
+    }
     if (msg.type === 'projectorPointerChanged') setStyle(msg.style);
   });
 
@@ -64,6 +69,7 @@ export default function ProjectorSettings() {
       <div className="flex items-center gap-2 text-sm">
         <button
           type="button"
+          disabled={!open}
           title={
             paused
               ? t('webview.sidebar.projectorSettings.resume')
@@ -76,22 +82,26 @@ export default function ProjectorSettings() {
           }
           aria-pressed={paused}
           onClick={() => messages.send({ type: 'toggleProjectorPaused' })}
-          className="flex h-6 w-6 items-center justify-center rounded border border-foreground-description leading-none"
+          className="flex h-6 w-6 items-center justify-center rounded border border-foreground-description leading-none disabled:cursor-not-allowed disabled:opacity-40"
         >
           {paused ? '▶' : '⏸'}
         </button>
         <span
           className="h-2 w-2 shrink-0 rounded-full"
           style={{
-            backgroundColor: paused
-              ? 'var(--vscode-charts-yellow, #cca700)'
-              : 'var(--vscode-charts-green, #89d185)',
+            backgroundColor: !open
+              ? 'var(--vscode-descriptionForeground, #8a8a8a)'
+              : paused
+                ? 'var(--vscode-charts-yellow, #cca700)'
+                : 'var(--vscode-charts-green, #89d185)',
           }}
         />
         <span className="text-foreground-description">
-          {paused
-            ? t('webview.sidebar.projectorSettings.statusPaused')
-            : t('webview.sidebar.projectorSettings.statusLive')}
+          {!open
+            ? t('webview.sidebar.projectorSettings.statusClosed')
+            : paused
+              ? t('webview.sidebar.projectorSettings.statusPaused')
+              : t('webview.sidebar.projectorSettings.statusLive')}
         </span>
       </div>
 
