@@ -85,12 +85,20 @@ type AllWebviewToExtensionMessage =
     }
   | { type: 'deleteElement'; id: string }
   | {
-      type: 'updateElementLayout';
-      id: string;
-      changes: Partial<ElementLayout>;
-      aspectRatio?: number;
-    } // Update the Layout when Element was moved or resized
-  | { type: 'updateElement'; id: string; changes: Partial<EditorElement> } // Update element with it's settings
+      type: 'updateElementsLayout';
+      changes: {
+        id: string;
+        changes: Partial<ElementLayout>;
+        aspectRatio?: number;
+      }[];
+    } // Update the Layout when Element was moved or resized, array can handle one or more elements
+  | {
+      type: 'updateElements';
+      changes: {
+        id: string;
+        changes: Partial<EditorElement>;
+      }[];
+    } // Update element with it's settings, array can handle one or more elements
   | { type: 'textEditorCommand'; command: TextEditorCommand }
   | { type: 'addImageFromFile' }
   | { type: 'addImageFromBytes'; name: string; bytes: number[] }

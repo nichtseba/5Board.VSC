@@ -80,43 +80,47 @@ export function TextElement({
       }
 
       messages.send({
-        type: 'updateElement',
-        id: element.id,
-        changes: {
-          layout: {
-            height: elementHeight,
-            width: element.layout.width,
-            yPos: element.layout.yPos,
-            xPos: element.layout.xPos,
-          },
-          data: {
-            content: editor.getJSON(),
-            tiptap: {
-              marks: {
-                bold: editor.isActive('bold'),
-                code: editor.isActive('code'),
-                italic: editor.isActive('italic'),
-                link: editor.isActive('link'),
-                strike: editor.isActive('strike'),
-                underline: editor.isActive('underline'),
-                textStyle: {
-                  fontFamily: editor.getAttributes('textStyle').fontFamily,
-                  fontSize: editor.getAttributes('textStyle').fontSize,
-                  lineHeight: editor.getAttributes('textStyle').lineHeight,
-                  color: editor.getAttributes('textStyle').color,
-                  backgroundColor: editor.getAttributes('textStyle').backgroundColor,
-                },
+        type: 'updateElements',
+        changes: [
+          {
+            id: element.id,
+            changes: {
+              layout: {
+                height: elementHeight,
+                width: element.layout.width,
+                yPos: element.layout.yPos,
+                xPos: element.layout.xPos,
               },
-              nodes: {
-                bulletList: editor.isActive('bulletList'),
-                orderedList: editor.isActive('orderedList'),
-                attributes: {
-                  textAlign,
+              data: {
+                content: editor.getJSON(),
+                tiptap: {
+                  marks: {
+                    bold: editor.isActive('bold'),
+                    code: editor.isActive('code'),
+                    italic: editor.isActive('italic'),
+                    link: editor.isActive('link'),
+                    strike: editor.isActive('strike'),
+                    underline: editor.isActive('underline'),
+                    textStyle: {
+                      fontFamily: editor.getAttributes('textStyle').fontFamily,
+                      fontSize: editor.getAttributes('textStyle').fontSize,
+                      lineHeight: editor.getAttributes('textStyle').lineHeight,
+                      color: editor.getAttributes('textStyle').color,
+                      backgroundColor: editor.getAttributes('textStyle').backgroundColor,
+                    },
+                  },
+                  nodes: {
+                    bulletList: editor.isActive('bulletList'),
+                    orderedList: editor.isActive('orderedList'),
+                    attributes: {
+                      textAlign,
+                    },
+                  },
                 },
               },
             },
           },
-        },
+        ],
       });
     },
   });
