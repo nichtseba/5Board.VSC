@@ -7,31 +7,43 @@ import { ImageSettings } from './ImageSettings';
 import { ShapeSettings } from './ShapeSettings';
 import { ArrowSettings } from './ArrowSettings';
 import { FreehandSettings } from './FreehandSettings';
-import { useLocalization } from '../../../providers/LocalizationProvider';
+// import { useLocalization } from '../../../providers/LocalizationProvider';
+import { CommonSettings } from './CommonSettings';
 
 type SettingsProps<T extends EditorElementType> = {
-  element: EditorElement<T>;
+  elements: EditorElement<T>[];
 };
 
+type SelectionType = EditorElementType | 'mixed';
+
+function getSelectionType(elements: EditorElement[]): SelectionType {
+  const type = elements[0].type;
+
+  return elements.every((element) => element.type === type) ? type : 'mixed';
+}
+
 export default function ElementSettings<ElementType extends EditorElementType>({
-  element,
+  elements,
 }: {
-  element: EditorElement<ElementType>;
+  elements: EditorElement<ElementType>[];
 }) {
-  const Component = SETTINGS_COMPONENTS[element.type] as React.ComponentType<
-    SettingsProps<ElementType>
-  >;
-  const { t } = useLocalization();
+  const type = getSelectionType(elements);
 
-  const content = Component ? (
-    <Component element={element} />
-  ) : (
-    <div>
-      <p>{t('webview.sidebar-element-settings.unsupportedElement')}</p>
-    </div>
-  );
+  if (type === 'mixed') {
+    return <CommonSettings elements={elements} />;
+  }
 
-  return content;
+  const Component = SETTINGS_COMPONENTS[type] as React.ComponentType<SettingsProps<ElementType>>;
+
+  return <Component elements={elements} />;
+
+  // const { t } = useLocalization();
+
+  // return (
+  //   <div>
+  //     <p>{t('webview.sidebar-element-settings.unsupportedElement')}</p>
+  //   </div>
+  // );
 }
 
 /**

@@ -8,7 +8,6 @@ import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
 import { Button, Icon } from 'vscrui';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
 import { BoardElement } from '5board.vsc-common';
-import MixedElementsSettings from '../components/sidebar/elementSettings/mixedElementsSettings/MixedElementsSettings';
 
 export default function ElementSettingsSidebar() {
   const messages = useMessageService();
@@ -35,10 +34,8 @@ export default function ElementSettingsSidebar() {
         <p>{t('webview.sidebar-element-settings.noElementSelected')}</p>
       </div>
     );
-  } else if (selectedElements.length === 1) {
-    content = <ElementSettings element={selectedElements[0]} />;
   } else {
-    content = <MixedElementsSettings elements={selectedElements} />;
+    content = <ElementSettings elements={selectedElements} />;
   }
 
   const handleDelete = (selectedElement: BoardElement) => {

@@ -1,9 +1,11 @@
 import { EditorElement, EditorElementType } from '5board.vsc-common';
 
 type Props = {
-  element: EditorElement<EditorElementType.Shape>;
+  elements: EditorElement<EditorElementType.Shape>[];
 };
 
-export function ShapeSettings({ element }: Props) {
-  return <div>Add settings for {element.id}</div>;
+export function ShapeSettings({ elements }: Props) {
+  const selectedElementIds = elements.map((element) => element.id);
+
+  return <div>Add ShapeSettings for {selectedElementIds.join(', ')}</div>;
 }
