@@ -59,8 +59,9 @@
         "text": "Text",
         "code": "Code",
         "image": "Bild",
-        "shape": "Form",
-        "arrow": "Pfeil",
+        "rectangle": "Rechteck",
+        "circle": "Kreis",
+        "line": "Linie",
         "freehand": "Freihand"
       },
       "projectorSettings": {
@@ -131,6 +132,27 @@
       },
       "freehandSettings": {
         "title": "Freihand"
+      },
+      "rectangleSettings": {
+        "title": "Rechteck"
+      },
+      "circleSettings": {
+        "title": "Kreis"
+      },
+      "lineSettings": {
+        "title": "Linie",
+        "symbols": "Symbole",
+        "borderColor": "Rahmenfarbe",
+        "borderWidth": "Rahmenbreite",
+        "borderStyle": "Rahmenstil",
+        "startHead": "Startsymbol",
+        "endHead": "Endsymbol",
+        "headSize": "Symbolgröße",
+        "headFill": "Symbole ausfüllen",
+        "headNone": "Keine",
+        "headArrow": "Pfeil",
+        "headCircle": "Kreis",
+        "headSquare": "Quadrat"
       },
       "delete": "Löschen"
     }

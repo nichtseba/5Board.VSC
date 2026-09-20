@@ -77,12 +77,7 @@ type AllWebviewToExtensionMessage =
   | { type: 'toggleElementSelection'; ids: string[] }
   | { type: 'selectTool'; tool: EditorTool }
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
-  | {
-      type: 'addElement';
-      elementType: EditorElementType;
-      elementPosition: EditorElement['layout'];
-      defaults?: AddElementDefaults;
-    }
+  | AddElementMessage
   | { type: 'deleteElement'; id: string }
   | {
       type: 'updateElementLayout';
@@ -125,3 +120,12 @@ type AllWebviewToExtensionMessage =
       level?: HeadingLevel;
       numberingFormat?: HeadingNumberingStyle;
     };
+
+type AddElementMessage = {
+  [T in EditorElementType]: {
+    type: 'addElement';
+    elementType: T;
+    elementPosition: ElementLayout;
+    defaults?: AddElementDefaults;
+  };
+}[EditorElementType];

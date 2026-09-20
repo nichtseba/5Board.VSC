@@ -132,7 +132,7 @@ export class SidebarManager implements vscode.Disposable {
             data: {
               ...el.data,
               ...msg.changes.data,
-            },
+            } as typeof el.data,
             style: {
               ...el.style,
               ...msg.changes.style,

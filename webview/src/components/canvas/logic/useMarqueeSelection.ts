@@ -2,10 +2,10 @@ import { useRef, useState } from 'react';
 
 import { BoardElement, EditorToolId } from '5board.vsc-common';
 
-import { useCanvasEvents, useCanvasPoint } from '../../providers/CanvasEventsProvider';
+import { useCanvasEvents, useCanvasPoint } from '../../../providers/CanvasEventsProvider';
 
-import { useGrid } from '../../providers/GridProvider';
-import { MessageService } from '../../services/MessageService';
+import { useGrid } from '../../../providers/GridProvider';
+import { MessageService } from '../../../services/MessageService';
 
 type Point = {
   x: number;

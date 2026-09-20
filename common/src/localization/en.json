@@ -33,8 +33,9 @@
         "text": "Text",
         "code": "Code",
         "image": "Image",
-        "shape": "Shape",
-        "arrow": "Arrow",
+        "rectangle": "Rectangle",
+        "circle": "Circle",
+        "line": "Line",
         "freehand": "Freehand"
       },
       "freehand": {
@@ -131,6 +132,27 @@
       },
       "freehandSettings": {
         "title": "Freehand"
+      },
+      "rectangleSettings": {
+        "title": "Rectangle"
+      },
+      "circleSettings": {
+        "title": "Circle"
+      },
+      "lineSettings": {
+        "title": "Line",
+        "symbols": "Symbols",
+        "borderColor": "Border color",
+        "borderWidth": "Border width",
+        "borderStyle": "Border style",
+        "startHead": "Start head",
+        "endHead": "End head",
+        "headSize": "Head size",
+        "headFill": "Fill heads",
+        "headNone": "None",
+        "headArrow": "Arrow",
+        "headCircle": "Circle",
+        "headSquare": "Square"
       },
       "delete": "Delete"
     }
