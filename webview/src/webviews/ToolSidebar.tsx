@@ -46,9 +46,12 @@ export default function ToolSidebar() {
   const handleToolClick = (tool: EditorTool) => {
     if (tool.type === selectedTool?.type) {
       if (tool.type === EditorToolId.AddElement) {
+        const nextParameters = tool.parameters as AddElementToolParameters;
+        const selectedParameters = selectedTool.parameters as AddElementToolParameters;
+
         if (
-          (tool.parameters as AddElementToolParameters).type ===
-          (selectedTool.parameters as AddElementToolParameters).type
+          nextParameters.type === selectedParameters.type &&
+          nextParameters.presetId === selectedParameters.presetId
         ) {
           return;
         }
