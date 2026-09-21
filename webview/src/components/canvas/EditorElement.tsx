@@ -6,12 +6,13 @@ import { HeadingElement } from './elements/HeadingElement';
 import ElementInteractionController from './elementInteraction/ElementInteractionController';
 import { CodeElement } from './elements/CodeElement';
 import { ImageElement } from './elements/ImageElement';
-import { ShapeElement } from './elements/ShapeElement';
-import { ArrowElement } from './elements/ArrowElement';
-import { ContentTableElement } from './elements/ContentTableElement';
+import { LineElement } from './elements/LineElement';
 import { FreehandElement } from './elements/FreehandElement';
+import { ContentTableElement } from './elements/ContentTableElement';
 import { useEditorState } from '../../providers/EditorStateProvider';
 import { useMessageService } from '../../services/MessageService';
+import { RectangleElement } from './elements/RectangleElement';
+import { CircleElement } from './elements/CircleElement';
 
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
@@ -115,7 +116,8 @@ export default function EditorElement<ElementType extends EditorElementType>({
         onClick={(event) => handleSelectElement(element.id, event)}
         onDoubleClick={handleDoubleClick}
         className={`
-          box-border overflow-hidden
+          box-border 
+          ${element.type === EditorElementType.Line ? '' : 'overflow-hidden'}
           ${activeToolId === EditorToolId.POINTER ? 'cursor-pointer' : ''}
           ${
             activeToolId === EditorToolId.POINTER && !selected
@@ -126,11 +128,12 @@ export default function EditorElement<ElementType extends EditorElementType>({
         `}
         ref={targetRef}
         style={{
-          backgroundColor: element.style.backgroundColor,
           gridRowStart: element.layout.yPos + 1,
           gridRowEnd: `span ${element.layout.height}`,
           gridColumnStart: element.layout.xPos + 1,
           gridColumnEnd: `span ${element.layout.width}`,
+          transform: `rotate(${element.layout.rotation ?? 0}deg)`,
+          transformOrigin: 'center center',
         }}
       >
         <ElementComponent
@@ -164,10 +167,11 @@ const ELEMENT_COMPONENTS = {
   [EditorElementType.Text]: TextElement,
   [EditorElementType.Code]: CodeElement,
   [EditorElementType.Image]: ImageElement,
-  [EditorElementType.Shape]: ShapeElement,
-  [EditorElementType.Arrow]: ArrowElement,
-  [EditorElementType.ContentTable]: ContentTableElement,
+  [EditorElementType.Rectangle]: RectangleElement,
+  [EditorElementType.Circle]: CircleElement,
+  [EditorElementType.Line]: LineElement,
   [EditorElementType.Freehand]: FreehandElement,
+  [EditorElementType.ContentTable]: ContentTableElement,
 } as const satisfies {
   [ElementType in EditorElementType]: React.ComponentType<EditorElementProps<ElementType>>;
 };

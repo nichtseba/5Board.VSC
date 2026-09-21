@@ -2,7 +2,7 @@ import { EditorElement, EditorElementType, getHeadingLevelSettings } from '5boar
 import { EditorElementProps } from '../EditorElement';
 import { useBoardDocument } from '../../../providers/BoardDocumentProvider';
 import { useMessageService } from '../../../services/MessageService';
-import { useHeadingNumber } from '../HeadingNumberingContext';
+import { useHeadingNumber } from '../../../providers/HeadingNumberingContext';
 import type React from 'react';
 
 const DEFAULT_CONTENT_TABLE_FONT_SIZE = 14;

@@ -85,8 +85,8 @@ export function NewElements({ handleToolClick }: newElementProps) {
             return (
               <Button
                 key={type}
-                title={definition.label}
-                onMouseEnter={() => setHoveredElementLabel(definition.label)}
+                title={t(definition.label)}
+                onMouseEnter={() => setHoveredElementLabel(t(definition.label))}
                 onMouseLeave={() => setHoveredElementLabel(undefined)}
                 onClick={() => handleElementClick(elementType, definition.placement)}
                 appearance={isSelected ? 'primary' : 'secondary'}

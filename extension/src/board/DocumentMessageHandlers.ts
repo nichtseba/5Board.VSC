@@ -2,7 +2,7 @@ import { EditorElement, EditorElementType, EditorToolId } from '5board.vsc-commo
 import { EXTENSION } from '../extension';
 import { BoardCustomDocument } from './BoardCustomDocument';
 import deepEquals from 'deep-equal';
-import { addImageToDocument } from './addImageToDocument';
+import { addImageToDocument } from './addElement/addImageToDocument';
 
 export class DocumentMessageHandlers {
   constructor(private readonly document: BoardCustomDocument) {}
@@ -20,14 +20,7 @@ export class DocumentMessageHandlers {
           sender,
         );
         // Sync whether the pointer should currently be mirrored, so the new panel starts right.
-        this.document.messageService.send(
-          {
-            type: 'projectorStateChanged',
-            active: EXTENSION.cursorTrackingEnabled && this.document.hasProjector,
-            open: this.document.hasProjector,
-          },
-          sender,
-        );
+        this.document.messageService.send(this.document.projectorState, sender);
         // Sync the mirrored cursor appearance so the projector renders it correctly.
         this.document.messageService.send(
           { type: 'projectorPointerChanged', style: EXTENSION.projectorPointerStyle },
@@ -184,7 +177,7 @@ export class DocumentMessageHandlers {
               data: {
                 ...el.data,
                 ...msg.changes.data,
-              },
+              } as typeof el.data,
               style: {
                 ...el.style,
                 ...msg.changes.style,
@@ -212,6 +205,7 @@ export class DocumentMessageHandlers {
 
       // Mirror the in-progress freehand stroke to the projector while drawing.
       this.document.messageService.on('freehandPreview', (msg) => {
+        if (EXTENSION.projectorPaused) return;
         this.document.messageService.send({
           type: 'freehandPreview',
           points: msg.points,
@@ -232,17 +226,20 @@ export class DocumentMessageHandlers {
 
       // The editor (ProjectorCursorMirror) only sends while mirroring is active, so just relay.
       this.document.messageService.on('cursorMove', (msg) => {
+        if (EXTENSION.projectorPaused) return;
         this.document.messageService.send({ type: 'cursorMove', x: msg.x, y: msg.y });
       }),
 
       // When the mouse leaves the editor canvas, hide the cursor dot in the projector.
       this.document.messageService.on('cursorLeave', () => {
+        if (EXTENSION.projectorPaused) return;
         this.document.messageService.send({ type: 'cursorHide' });
       }),
 
       // Forward scroll position from any panel to all other panels.
       // The editor only sends scroll when a projector window is open
       this.document.messageService.on('scroll', (msg) => {
+        if (EXTENSION.projectorPaused) return;
         this.document.messageService.send({ type: 'scroll', top: msg.top, left: msg.left });
       }),
 

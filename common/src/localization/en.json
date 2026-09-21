@@ -11,7 +11,9 @@
       "startPresentation": "Start Presentation",
       "title": "Projector",
       "noFileOpen": "Please open a .5boardz file in the editor before starting the projector view.",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "live": "Live",
+      "paused": "Paused"
     }
   },
   "webview": {
@@ -33,10 +35,11 @@
         "text": "Text",
         "code": "Code",
         "image": "Image",
-        "shape": "Shape",
-        "arrow": "Arrow",
-        "contentTable": "Content Table",
-        "freehand": "Freehand"
+        "rectangle": "Rectangle",
+        "circle": "Circle",
+        "line": "Line",
+        "freehand": "Freehand",
+        "contentTable": "Content Table"
       },
       "freehand": {
         "title": "Freehand Options",
@@ -67,6 +70,11 @@
       "projectorSettings": {
         "title": "Projector Settings",
         "cursorTracking": "Cursor Tracking",
+        "pause": "Pause",
+        "resume": "Resume",
+        "statusLive": "Live",
+        "statusPaused": "Paused",
+        "statusClosed": "Ended",
         "pointerColor": "Pointer Color",
         "customColor": "Custom",
         "pointerShape": "Pointer Shape",
@@ -136,6 +144,27 @@
       },
       "freehandSettings": {
         "title": "Freehand"
+      },
+      "rectangleSettings": {
+        "title": "Rectangle"
+      },
+      "circleSettings": {
+        "title": "Circle"
+      },
+      "lineSettings": {
+        "title": "Line",
+        "symbols": "Symbols",
+        "borderColor": "Border color",
+        "borderWidth": "Border width",
+        "borderStyle": "Border style",
+        "startHead": "Start head",
+        "endHead": "End head",
+        "headSize": "Head size",
+        "headFill": "Fill heads",
+        "headNone": "None",
+        "headArrow": "Arrow",
+        "headCircle": "Circle",
+        "headSquare": "Square"
       },
       "delete": "Delete"
     }
