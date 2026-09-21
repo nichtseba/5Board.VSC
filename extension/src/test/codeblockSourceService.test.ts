@@ -1,13 +1,5 @@
 import { strict as assert } from 'assert';
-import {
-  BoardDocument,
-  CodeElementData,
-  EditorElementType,
-  extractBlock,
-  hasBlock,
-  sanitizeClassName,
-} from '5board.vsc-common';
-import type { EditorElement } from '5board.vsc-common';
+import { BoardDocument, extractBlock, hasBlock } from '5board.vsc-common';
 import {
   changeClassLanguage,
   createClass,
@@ -15,35 +7,10 @@ import {
   deriveCodeClasses,
   moveBlock,
   renameClass,
-  resetOutput,
   updateBlockCode,
+  updateClass,
 } from '../board/CodeblockSourceService';
-
-function makeCodeElement(id: string, data: Partial<CodeElementData> = {}): EditorElement {
-  return {
-    id,
-    type: EditorElementType.Code,
-    layout: { xPos: 0, yPos: 0, width: 100, height: 100 },
-    style: { visible: true },
-    data: {
-      className: data.className ?? sanitizeClassName(id),
-      language: data.language ?? 'java',
-    },
-  };
-}
-
-function makeDocument(elements: EditorElement[]): BoardDocument {
-  return {
-    manifest: { title: 'test', createdAt: 0, modifiedAt: 0, version: '1' },
-    content: { selectedElementId: null, elements, codeClasses: [] },
-    sources: [],
-    assets: [],
-  };
-}
-
-function data(doc: BoardDocument, elementId: string): CodeElementData {
-  return doc.content.elements.find((e) => e.id === elementId)!.data as CodeElementData;
-}
+import { data, makeCodeElement, makeDocument } from './codeblockTestUtils';
 
 function sourceCode(doc: BoardDocument, name: string): string {
   const source = doc.sources.find((s) => s.name === name);
@@ -60,7 +27,7 @@ describe('CodeblockSourceService', function () {
       const code = sourceCode(doc, 'El1.java');
       assert.ok(code.includes('void main() {'));
       assert.ok(!code.includes('class'));
-      assert.equal(extractBlock(code, 'el1'), 'int x = 1;');
+      assert.equal(extractBlock(code, 'el1', '//'), 'int x = 1;');
     });
 
     it('indents the first edit of an empty block at its marker level', function () {
@@ -72,7 +39,7 @@ describe('CodeblockSourceService', function () {
 
       const student = sourceCode(doc, 'Student.java');
       assert.ok(student.includes('    private int age;'));
-      assert.equal(extractBlock(student, 'el1'), 'private int age;');
+      assert.equal(extractBlock(student, 'el1', '//'), 'private int age;');
     });
 
     it('updates an existing block in place, preserving its indentation', function () {
@@ -81,7 +48,7 @@ describe('CodeblockSourceService', function () {
       updateBlockCode(doc, 'el1', 'int x = 2;');
 
       const code = sourceCode(doc, 'El1.java');
-      assert.equal(extractBlock(code, 'el1'), 'int x = 2;');
+      assert.equal(extractBlock(code, 'el1', '//'), 'int x = 2;');
       assert.ok(code.includes('    int x = 2;'));
       assert.ok(code.includes('    // </block>'));
       assert.equal((code.match(/public class/g) ?? []).length, 0);
@@ -98,9 +65,9 @@ describe('CodeblockSourceService', function () {
 
       assert.equal(data(doc, 'el1').className, 'Student');
       const student = sourceCode(doc, 'Student.java');
-      assert.equal(extractBlock(student, 'el1'), 'private String name;');
+      assert.equal(extractBlock(student, 'el1', '//'), 'private String name;');
       assert.ok(!student.includes('public static void main'));
-      assert.equal(hasBlock(sourceCode(doc, 'El1.java'), 'el1'), false);
+      assert.equal(hasBlock(sourceCode(doc, 'El1.java'), 'el1', '//'), false);
     });
 
     it('collects multiple blocks in one class source', function () {
@@ -113,8 +80,8 @@ describe('CodeblockSourceService', function () {
       moveBlock(doc, 'b', { className: 'Student' });
 
       const student = sourceCode(doc, 'Student.java');
-      assert.equal(extractBlock(student, 'a'), 'private String name;');
-      assert.equal(extractBlock(student, 'b'), 'private int age;');
+      assert.equal(extractBlock(student, 'a', '//'), 'private String name;');
+      assert.equal(extractBlock(student, 'b', '//'), 'private int age;');
       assert.equal((student.match(/public class/g) ?? []).length, 1);
     });
 
@@ -129,8 +96,8 @@ describe('CodeblockSourceService', function () {
       assert.equal(data(doc, 'el1').className, 'El1');
       const code = sourceCode(doc, 'El1.java');
       assert.ok(code.includes('void main() {'));
-      assert.equal(extractBlock(code, 'el1'), 'int x = 1;');
-      assert.equal(hasBlock(sourceCode(doc, 'Student.java'), 'el1'), false);
+      assert.equal(extractBlock(code, 'el1', '//'), 'int x = 1;');
+      assert.equal(hasBlock(sourceCode(doc, 'Student.java'), 'el1', '//'), false);
     });
 
     it('ignores moves to unsupported languages', function () {
@@ -140,7 +107,7 @@ describe('CodeblockSourceService', function () {
       moveBlock(doc, 'el1', { language: 'ruby' });
 
       assert.equal(data(doc, 'el1').language, 'java');
-      assert.equal(extractBlock(sourceCode(doc, 'El1.java'), 'el1'), 'int x = 1;');
+      assert.equal(extractBlock(sourceCode(doc, 'El1.java'), 'el1', '//'), 'int x = 1;');
     });
   });
 
@@ -155,9 +122,10 @@ describe('CodeblockSourceService', function () {
 
     it('createClass rejects duplicates and default class names of existing blocks', function () {
       const doc = makeDocument([makeCodeElement('el1')]);
-      createClass(doc, 'Student', 'java');
-      createClass(doc, 'Student', 'java');
-      createClass(doc, 'El1', 'java'); // would hijack el1's runnable source
+      assert.equal(createClass(doc, 'Student', 'java'), 'ok');
+      assert.equal(createClass(doc, 'Student', 'java'), 'name-taken');
+      // Would hijack el1's runnable source.
+      assert.equal(createClass(doc, 'El1', 'java'), 'name-taken');
 
       assert.equal(doc.content.codeClasses.length, 1);
     });
@@ -174,7 +142,7 @@ describe('CodeblockSourceService', function () {
       assert.equal(data(doc, 'el1').className, 'Person');
       const person = sourceCode(doc, 'Person.java');
       assert.ok(person.includes('public class Person {'));
-      assert.equal(extractBlock(person, 'el1'), 'private String name;');
+      assert.equal(extractBlock(person, 'el1', '//'), 'private String name;');
       assert.equal(doc.sources.length, 2); // Person.java + el1's zombie default source
     });
 
@@ -189,7 +157,7 @@ describe('CodeblockSourceService', function () {
         modifiedAt: 0,
       });
 
-      renameClass(doc, 'Student', 'Person', 'java');
+      assert.equal(renameClass(doc, 'Student', 'Person', 'java'), 'name-taken');
 
       assert.deepEqual(doc.content.codeClasses, [{ name: 'Student', language: 'java' }]);
       assert.equal(doc.sources.filter((s) => s.name === 'Person.java').length, 1);
@@ -203,10 +171,10 @@ describe('CodeblockSourceService', function () {
 
       const result = deleteClass(doc, 'Student', 'java');
 
-      assert.equal(result, 'rejected-not-empty');
+      assert.equal(result, 'not-empty');
       assert.deepEqual(doc.content.codeClasses, [{ name: 'Student', language: 'java' }]);
       assert.equal(data(doc, 'el1').className, 'Student');
-      assert.equal(hasBlock(sourceCode(doc, 'Student.java'), 'el1'), true);
+      assert.equal(hasBlock(sourceCode(doc, 'Student.java'), 'el1', '//'), true);
     });
 
     it('deleteClass removes an empty class and keeps its source as a zombie', function () {
@@ -218,7 +186,7 @@ describe('CodeblockSourceService', function () {
 
       const result = deleteClass(doc, 'Student', 'java');
 
-      assert.equal(result, 'deleted');
+      assert.equal(result, 'ok');
       assert.equal(doc.content.codeClasses.length, 0);
       assert.ok(doc.sources.some((s) => s.name === 'Student.java')); // zombie stays
     });
@@ -229,8 +197,7 @@ describe('CodeblockSourceService', function () {
       assert.equal(deleteClass(doc, 'Student', 'java'), 'not-found');
     });
 
-    // The happy path (moving members across languages) needs a second entry in
-    // SUPPORTED_LANGUAGES and can only be covered once one exists; the guards are testable now.
+    // The happy path needs a second supported language; only the guards are testable for now.
     it('changeClassLanguage ignores unsupported target languages', function () {
       const doc = makeDocument([makeCodeElement('el1')]);
       createClass(doc, 'Student', 'java');
@@ -241,7 +208,7 @@ describe('CodeblockSourceService', function () {
 
       assert.deepEqual(doc.content.codeClasses, [{ name: 'Student', language: 'java' }]);
       assert.equal(data(doc, 'el1').language, 'java');
-      assert.equal(hasBlock(sourceCode(doc, 'Student.java'), 'el1'), true);
+      assert.equal(hasBlock(sourceCode(doc, 'Student.java'), 'el1', '//'), true);
     });
 
     it('changeClassLanguage is a no-op for the current language', function () {
@@ -255,30 +222,38 @@ describe('CodeblockSourceService', function () {
     });
   });
 
-  describe('resetOutput', function () {
-    it('clears a stored transcript and reports that it did', function () {
-      const doc = makeDocument([makeCodeElement('el-1')]);
-      data(doc, 'el-1').lastOutput = {
-        transcript: [{ kind: 'out', text: 'hi' }],
-        success: true,
-        exitCode: 0,
-      };
+  describe('updateClass', function () {
+    it('renames and addresses the class by its sanitized new name', function () {
+      const doc = makeDocument([makeCodeElement('el1')]);
+      createClass(doc, 'Student', 'java');
+      moveBlock(doc, 'el1', { className: 'Student' });
 
-      assert.equal(resetOutput(doc, 'el-1'), true);
-      assert.equal(data(doc, 'el-1').lastOutput, undefined);
-      assert.equal('lastOutput' in data(doc, 'el-1'), false);
+      assert.equal(updateClass(doc, 'Student', 'java', { newName: 'my person' }), 'ok');
+
+      assert.deepEqual(doc.content.codeClasses, [{ name: 'Myperson', language: 'java' }]);
+      assert.equal(data(doc, 'el1').className, 'Myperson');
     });
 
-    it('reports no change when there is nothing stored', function () {
-      const doc = makeDocument([makeCodeElement('el-1')]);
+    it('stops at a rejected rename', function () {
+      const doc = makeDocument([]);
+      createClass(doc, 'Student', 'java');
+      createClass(doc, 'Person', 'java');
 
-      assert.equal(resetOutput(doc, 'el-1'), false);
+      assert.equal(
+        updateClass(doc, 'Student', 'java', { newName: 'Person', newLanguage: 'ruby' }),
+        'name-taken',
+      );
+      assert.equal(doc.content.codeClasses[0].name, 'Student');
     });
 
-    it('reports no change for an unknown element', function () {
-      const doc = makeDocument([makeCodeElement('el-1')]);
+    it('reports nothing to do when neither name nor language changes', function () {
+      const doc = makeDocument([]);
+      createClass(doc, 'Student', 'java');
 
-      assert.equal(resetOutput(doc, 'nope'), false);
+      assert.equal(
+        updateClass(doc, 'Student', 'java', { newName: 'Student', newLanguage: 'java' }),
+        'unchanged',
+      );
     });
   });
 

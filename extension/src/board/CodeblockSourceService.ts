@@ -2,12 +2,12 @@ import {
   BoardContent,
   BoardDocument,
   CodeClass,
-  CodeElementData,
-  COMMENT_PREFIX_BY_LANGUAGE,
   EditorElement,
   EditorElementType,
+  LanguageSupport,
   Source,
   buildSource,
+  commentPrefixFor,
   extractBlock,
   fileNameFromClassName,
   getBlockIndent,
@@ -19,15 +19,39 @@ import {
   updateBlock,
 } from '5board.vsc-common';
 
+export type CodeElement = EditorElement<EditorElementType.Code>;
+
 export interface BlockTarget {
   className?: string | null;
   language?: string;
 }
 
+export type ClassOpResult =
+  | 'ok'
+  | 'unchanged'
+  | 'not-found'
+  | 'invalid'
+  | 'name-taken'
+  | 'not-empty';
+
+export function findCodeElement(
+  document: BoardDocument,
+  elementId: string,
+): CodeElement | undefined {
+  const element = document.content.elements.find((e) => e.id === elementId);
+  return element?.type === EditorElementType.Code ? (element as CodeElement) : undefined;
+}
+
+export function codeElements(document: BoardDocument): CodeElement[] {
+  return document.content.elements.filter(
+    (e): e is CodeElement => e.type === EditorElementType.Code,
+  );
+}
+
 export function moveBlock(document: BoardDocument, elementId: string, target: BlockTarget): void {
   const element = findCodeElement(document, elementId);
   if (!element) return;
-  const data = element.data as CodeElementData;
+  const { data } = element;
 
   const newLanguage = target.language ?? data.language;
   const support = getLanguageSupport(newLanguage);
@@ -35,14 +59,14 @@ export function moveBlock(document: BoardDocument, elementId: string, target: Bl
 
   // Omitted className keeps the current class; null/empty means standalone (id-derived default).
   const requestedName = target.className === undefined ? data.className : (target.className ?? '');
-  const newClassName = requestedName.trim()
-    ? support.sanitizeClassName(requestedName.trim())
-    : support.sanitizeClassName(elementId);
+  const newClassName = support.sanitizeClassName(requestedName.trim() || elementId);
 
   if (newClassName === data.className && newLanguage === data.language) return;
+  // A block can only join a named class in a language that has them.
+  if (!isDefaultClassName(newClassName, elementId) && !support.namedClasses) return;
 
   const code = detachBlock(document, elementId, data.className, data.language);
-  attachBlock(document, elementId, newClassName, newLanguage, code);
+  attachBlock(document, elementId, newClassName, support, code);
 
   data.className = newClassName;
   data.language = newLanguage;
@@ -51,64 +75,50 @@ export function moveBlock(document: BoardDocument, elementId: string, target: Bl
 export function updateBlockCode(document: BoardDocument, elementId: string, code: string): void {
   const element = findCodeElement(document, elementId);
   if (!element) return;
-  const { className, language } = element.data as CodeElementData;
+  const { className, language } = element.data;
 
   const source = findSource(document, className, language);
   if (source) {
-    const prefix = commentPrefix(language);
+    const prefix = commentPrefixFor(language);
     const indent = getBlockIndent(source.code, elementId, prefix);
     source.code = updateBlock(source.code, elementId, indentCode(code, indent), prefix);
     source.modifiedAt = Date.now();
-  } else if (getLanguageSupport(language)) {
-    attachBlock(document, elementId, className, language, code);
+    return;
   }
-}
 
-/**
- * Drops the stored transcript of a block (the "reset output" button).
- *
- * Returns whether anything was actually cleared, so the caller can skip the save and the
- * follow-up broadcast when there was nothing to reset.
- */
-export function resetOutput(document: BoardDocument, elementId: string): boolean {
-  const element = findCodeElement(document, elementId);
-  if (!element) return false;
-
-  const data = element.data as CodeElementData;
-  if (data.lastOutput === undefined) return false;
-
-  delete data.lastOutput;
-  return true;
+  const support = getLanguageSupport(language);
+  if (support) attachBlock(document, elementId, className, support, code);
 }
 
 // Back-compat for documents predating the registry: a source is a named class unless it is some
 // block's id-derived default (standalone) source.
 export function deriveCodeClasses(content: BoardContent, sources: Source[]): CodeClass[] {
-  const codeElements = content.elements.filter((e) => e.type === EditorElementType.Code);
+  const elements = content.elements.filter((e) => e.type === EditorElementType.Code);
   return sources
     .filter((source) => {
       const className = classNameFromFileName(source.name);
-      return !codeElements.some((element) => isDefaultClassName(className, element.id));
+      return !elements.some((element) => isDefaultClassName(className, element.id));
     })
     .map((source) => ({ name: classNameFromFileName(source.name), language: source.language }));
 }
 
-export function createClass(document: BoardDocument, name: string, language: string): void {
+export function createClass(
+  document: BoardDocument,
+  name: string,
+  language: string,
+): ClassOpResult {
   const support = getLanguageSupport(language);
-  if (!support || !name.trim()) return;
+  if (!support?.namedClasses || !name.trim()) return 'invalid';
 
   const className = support.sanitizeClassName(name.trim());
-  if (!isClassNameAvailable(document, className, language)) return;
+  if (!isClassNameAvailable(document, className, language)) return 'name-taken';
 
   document.content.codeClasses.push({ name: className, language });
+  // Created eagerly so the class shows up in the file tree and opens even without members.
   if (!findSource(document, className, language)) {
-    pushSource(
-      document,
-      fileNameFromClassName(className, language),
-      language,
-      support.wrapClassBody(className, ''),
-    );
+    pushSource(document, className, language, support.namedClasses.wrapClassBody(className, ''));
   }
+  return 'ok';
 }
 
 export function renameClass(
@@ -116,79 +126,94 @@ export function renameClass(
   oldName: string,
   newName: string,
   language: string,
-): void {
+): ClassOpResult {
   const support = getLanguageSupport(language);
-  if (!support || !newName.trim()) return;
+  if (!support?.namedClasses || !newName.trim()) return 'invalid';
 
   const entry = findClass(document, oldName, language);
-  if (!entry) return;
+  if (!entry) return 'not-found';
 
   const className = support.sanitizeClassName(newName.trim());
-  if (className === oldName) return;
-  if (!isClassNameAvailable(document, className, language)) return;
+  if (className === oldName) return 'unchanged';
   // A source already at the target file name (e.g. a zombie) would collide on rename.
-  if (findSource(document, className, language)) return;
+  if (
+    !isClassNameAvailable(document, className, language) ||
+    findSource(document, className, language)
+  ) {
+    return 'name-taken';
+  }
 
   const source = findSource(document, oldName, language);
   if (source) {
     source.name = fileNameFromClassName(className, language);
     source.code = source.code.replace(
-      support.classDeclaration(oldName),
-      support.classDeclaration(className),
+      support.namedClasses.classDeclaration(oldName),
+      support.namedClasses.classDeclaration(className),
     );
     source.modifiedAt = Date.now();
   }
 
-  for (const element of document.content.elements) {
-    if (element.type !== EditorElementType.Code) continue;
-    const data = element.data as CodeElementData;
-    if (data.className === oldName && data.language === language) {
-      data.className = className;
-    }
+  for (const element of findMemberElements(document, oldName, language)) {
+    element.data.className = className;
   }
-
   entry.name = className;
+  return 'ok';
 }
 
 /**
- * Re-homes a class (and all its member blocks) into another language. Unlike `renameClass`
- * (an in-place patch), this is genuine re-homing: each member block is detached with the old
- * language's comment prefix/wrapping and attached with the new one via `moveBlock`. The
- * old-language source stays behind as a zombie. Translating the block code itself is the
- * user's responsibility.
+ * Re-homes a class and all its member blocks into another language. The old source stays as a
+ * zombie; translating the block code itself is the user's job.
  */
 export function changeClassLanguage(
   document: BoardDocument,
   name: string,
   language: string,
   newLanguage: string,
-): void {
+): ClassOpResult {
   const support = getLanguageSupport(newLanguage);
-  if (!support || newLanguage === language) return;
+  if (!support?.namedClasses) return 'invalid';
+  if (newLanguage === language) return 'unchanged';
 
   const entry = findClass(document, name, language);
-  if (!entry) return;
-  if (!isClassNameAvailable(document, name, newLanguage)) return;
-  // A source already at the target file name (e.g. a zombie) would collide.
-  if (findSource(document, name, newLanguage)) return;
+  if (!entry) return 'not-found';
+  if (
+    !isClassNameAvailable(document, name, newLanguage) ||
+    findSource(document, name, newLanguage)
+  ) {
+    return 'name-taken';
+  }
 
   entry.language = newLanguage;
-
-  // Eagerly create the class source in the new language (same as createClass), so the class
-  // is immediately visible/openable even with zero members.
-  pushSource(
-    document,
-    fileNameFromClassName(name, newLanguage),
-    newLanguage,
-    support.wrapClassBody(name, ''),
-  );
+  pushSource(document, name, newLanguage, support.namedClasses.wrapClassBody(name, ''));
 
   for (const element of findMemberElements(document, name, language)) {
     moveBlock(document, element.id, { language: newLanguage });
   }
+  return 'ok';
 }
 
-export type DeleteClassResult = 'deleted' | 'rejected-not-empty' | 'not-found';
+/** Rename and language change in one step; a rejected rename leaves the language alone too. */
+export function updateClass(
+  document: BoardDocument,
+  name: string,
+  language: string,
+  changes: { newName?: string; newLanguage?: string },
+): ClassOpResult {
+  let current = name;
+  let result: ClassOpResult = 'unchanged';
+
+  if (changes.newName?.trim()) {
+    result = renameClass(document, name, changes.newName, language);
+    if (result !== 'ok' && result !== 'unchanged') return result;
+    current = getLanguageSupport(language)!.sanitizeClassName(changes.newName.trim());
+  }
+
+  if (changes.newLanguage && changes.newLanguage !== language) {
+    const languageResult = changeClassLanguage(document, current, language, changes.newLanguage);
+    if (languageResult !== 'unchanged') result = languageResult;
+  }
+  return result;
+}
 
 // Only an empty class can be deleted; the elements (not the source's markers) are the source of
 // truth for membership. The class's source stays behind as a zombie.
@@ -196,16 +221,15 @@ export function deleteClass(
   document: BoardDocument,
   name: string,
   language: string,
-): DeleteClassResult {
+): ClassOpResult {
   const index = document.content.codeClasses.findIndex(
     (c) => c.name === name && c.language === language,
   );
   if (index === -1) return 'not-found';
-
-  if (findMemberElements(document, name, language).length > 0) return 'rejected-not-empty';
+  if (findMemberElements(document, name, language).length > 0) return 'not-empty';
 
   document.content.codeClasses.splice(index, 1);
-  return 'deleted';
+  return 'ok';
 }
 
 function findClass(document: BoardDocument, name: string, language: string): CodeClass | undefined {
@@ -215,27 +239,17 @@ function findClass(document: BoardDocument, name: string, language: string): Cod
 function isClassNameAvailable(document: BoardDocument, name: string, language: string): boolean {
   if (findClass(document, name, language)) return false;
   // A name matching a block's default class would hijack that block's runnable source.
-  return !document.content.elements.some(
-    (element) => element.type === EditorElementType.Code && isDefaultClassName(name, element.id),
-  );
+  return !codeElements(document).some((element) => isDefaultClassName(name, element.id));
 }
 
-/** All code elements whose (className, language) address the given class. */
 function findMemberElements(
   document: BoardDocument,
   className: string,
   language: string,
-): EditorElement[] {
-  return document.content.elements.filter((element) => {
-    if (element.type !== EditorElementType.Code) return false;
-    const data = element.data as CodeElementData;
-    return data.className === className && data.language === language;
-  });
-}
-
-function findCodeElement(document: BoardDocument, elementId: string): EditorElement | undefined {
-  const element = document.content.elements.find((e) => e.id === elementId);
-  return element?.type === EditorElementType.Code ? element : undefined;
+): CodeElement[] {
+  return codeElements(document).filter(
+    (element) => element.data.className === className && element.data.language === language,
+  );
 }
 
 function findSource(
@@ -247,17 +261,24 @@ function findSource(
   return document.sources.find((s) => s.name === fileName && s.language === language);
 }
 
-function commentPrefix(language: string) {
-  return COMMENT_PREFIX_BY_LANGUAGE[language] ?? '//';
-}
-
 function classNameFromFileName(fileName: string): string {
   return fileName.replace(/\.[^.]*$/, '');
 }
 
-function pushSource(document: BoardDocument, name: string, language: string, code: string): void {
+function pushSource(
+  document: BoardDocument,
+  className: string,
+  language: string,
+  code: string,
+): void {
   const now = Date.now();
-  document.sources.push({ name, language, code, createdAt: now, modifiedAt: now });
+  document.sources.push({
+    name: fileNameFromClassName(className, language),
+    language,
+    code,
+    createdAt: now,
+    modifiedAt: now,
+  });
 }
 
 function detachBlock(
@@ -269,34 +290,44 @@ function detachBlock(
   const source = findSource(document, className, language);
   if (!source) return '';
 
-  const code = extractBlock(source.code, elementId, commentPrefix(language)) ?? '';
-  source.code = removeBlock(source.code, elementId, commentPrefix(language));
+  const prefix = commentPrefixFor(language);
+  const code = extractBlock(source.code, elementId, prefix) ?? '';
+  source.code = removeBlock(source.code, elementId, prefix);
   source.modifiedAt = Date.now();
   return code;
 }
 
+/** The only place that decides how a block enters a source. */
 function attachBlock(
   document: BoardDocument,
   elementId: string,
   className: string,
-  language: string,
+  support: LanguageSupport,
   code: string,
 ): void {
+  const language = support.id;
   const source = findSource(document, className, language);
   const mainWrap = isDefaultClassName(className, elementId);
 
-  // A named class gets the block appended; a default class is a single-block, main-wrapped source,
-  // so it is rebuilt from scratch — overwriting any zombie of that name keeps the block runnable.
+  // A default class holds exactly one main-wrapped block, so it is rebuilt from scratch —
+  // overwriting any zombie of that name keeps the block runnable.
   if (source && !mainWrap) {
-    source.code = insertBlockIntoClass(source.code, elementId, code, commentPrefix(language));
+    source.code = insertBlockIntoClass(
+      source.code,
+      elementId,
+      code,
+      commentPrefixFor(language),
+      support.memberIndent,
+    );
+    source.modifiedAt = Date.now();
+    return;
+  }
+
+  const built = buildSource({ elementId, className, language, code, mainWrap });
+  if (source) {
+    source.code = built;
     source.modifiedAt = Date.now();
   } else {
-    const built = buildSource({ elementId, className, language, code, mainWrap });
-    if (source) {
-      source.code = built;
-      source.modifiedAt = Date.now();
-    } else {
-      pushSource(document, fileNameFromClassName(className, language), language, built);
-    }
+    pushSource(document, className, language, built);
   }
 }

@@ -123,6 +123,11 @@
         "icon": "$(run)"
       },
       {
+        "command": "5board-vsc.resetAllOutputs",
+        "title": "%commands.resetAllOutputs%",
+        "category": "5Board"
+      },
+      {
         "command": "5board-vsc.goToElement",
         "title": "%commands.goToElement%"
       },

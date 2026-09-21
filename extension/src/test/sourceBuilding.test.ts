@@ -166,7 +166,7 @@ describe('insertBlockIntoClass', function () {
       code: 'private String name;',
       mainWrap: false,
     });
-    source = insertBlockIntoClass(source, 'b', 'private int age;', '//');
+    source = insertBlockIntoClass(source, 'b', 'private int age;', '//', 4);
 
     assert.equal(extractBlock(source, 'a', '//'), 'private String name;');
     assert.equal(extractBlock(source, 'b', '//'), 'private int age;');
@@ -183,7 +183,7 @@ describe('insertBlockIntoClass', function () {
       mainWrap: false,
     });
     const code = 'void greet() {\n    System.out.println(name);\n}';
-    source = insertBlockIntoClass(source, 'b', code, '//');
+    source = insertBlockIntoClass(source, 'b', code, '//', 4);
     assert.equal(extractBlock(source, 'b', '//'), code);
   });
 });
@@ -197,7 +197,7 @@ describe('removeBlock', function () {
       code: 'private String name;',
       mainWrap: false,
     });
-    source = insertBlockIntoClass(source, 'b', 'private int age;', '//');
+    source = insertBlockIntoClass(source, 'b', 'private int age;', '//', 4);
 
     source = removeBlock(source, 'a', '//');
 

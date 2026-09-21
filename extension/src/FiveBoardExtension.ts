@@ -18,8 +18,9 @@ import { ProjectorProvider } from './providers/ProjectorProvider';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
-import { formatToolchainReport, resolveJavaToolchain } from './runner/javaToolchain';
-import { getConfiguredJavaHome } from './config';
+import { resolveJavaToolchain } from './runner/javaToolchain';
+import { formatToolchainReport } from './runner/javaToolchainMessages';
+import { getConfiguredHome } from './config';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
@@ -147,6 +148,28 @@ export class FiveBoardExtension extends ExtensionBase {
     await document.codeblock.executeBlock(element.id);
   }
 
+  @Command('5board-vsc.resetAllOutputs')
+  async resetAllOutputsCommand(): Promise<void> {
+    const document = this.activeEditorDocument;
+    if (!document) {
+      vscode.window.showWarningMessage(t('extension.codeblock.noActiveDocument'));
+      return;
+    }
+    if (!document.codeblock.hasStoredOutputs()) {
+      vscode.window.showInformationMessage(t('extension.codeblock.noOutputsToReset'));
+      return;
+    }
+    const confirm = t('extension.codeblock.resetAllConfirmButton');
+    const choice = await vscode.window.showWarningMessage(
+      t('extension.codeblock.resetAllConfirm'),
+      { modal: true },
+      confirm,
+    );
+    if (choice === confirm) {
+      document.codeblock.resetAllOutputs();
+    }
+  }
+
   public applyEditToActiveDocument(edit: (document: BoardDocument) => void): void {
     if (!this.activeEditorDocument) {
       return;
@@ -161,10 +184,12 @@ export class FiveBoardExtension extends ExtensionBase {
    */
   @Command('5board-vsc.showJavaToolchain')
   public async showJavaToolchain(): Promise<void> {
-    const configuredHome = getConfiguredJavaHome();
+    const configuredHome = getConfiguredHome('java');
     const result = await resolveJavaToolchain(configuredHome);
 
-    this.toolchainOutput ??= vscode.window.createOutputChannel('5Board — Java toolchain');
+    this.toolchainOutput ??= vscode.window.createOutputChannel(
+      t('extension.codeblock.toolchain.report.title'),
+    );
     this.toolchainOutput.clear();
     this.toolchainOutput.appendLine(formatToolchainReport(result, configuredHome));
     this.toolchainOutput.show(true);

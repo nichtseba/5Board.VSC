@@ -49,3 +49,9 @@ export function t(language: Language, key: TranslationKey): string {
   const value = getNestedValue(TRANSLATIONS[locale], key);
   return typeof value === 'string' ? value : key;
 }
+
+export function formatMessage(template: string, params: Record<string, string | number>): string {
+  return template.replace(/\{(\w+)\}/g, (match, name: string) =>
+    name in params ? String(params[name]) : match,
+  );
+}

@@ -168,6 +168,7 @@ describe('ExecutionSessionManager', function () {
     const exited = exitEvent(events);
     assert.equal(exited.kind === 'exited' && exited.truncated, true);
     assert.equal(exited.kind === 'exited' && exited.success, false);
+    assert.equal(exited.kind === 'exited' && exited.transcript.at(-1)?.kind, 'system');
     assert.equal(manager.isRunning('a'), false);
   });
 
@@ -183,6 +184,18 @@ describe('ExecutionSessionManager', function () {
     ]);
     assert.equal(exited.kind === 'exited' && exited.success, false);
     assert.equal(manager.isRunning('a'), false);
+  });
+
+  it('reports a start that failed before compiling as a system message', async function () {
+    const { events, starter, manager } = setup();
+    starter.failure = { error: 'No JDK 25+ found.' };
+
+    await manager.start(document, 'a');
+
+    const exited = exitEvent(events);
+    assert.deepEqual(exited.kind === 'exited' && exited.transcript, [
+      { kind: 'system', text: 'No JDK 25+ found.' },
+    ]);
   });
 
   it('stops every process when the document goes away', async function () {

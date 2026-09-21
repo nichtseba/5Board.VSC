@@ -14,5 +14,6 @@
   "commands.startPresentation": "Start Presentation",
   "commands.executeCodeblock": "Execute Code Block",
   "commands.showJavaToolchain": "Show Java Toolchain",
+  "commands.resetAllOutputs": "Reset All Code Block Outputs",
   "commands.goToElement": "Go to Element"
 }

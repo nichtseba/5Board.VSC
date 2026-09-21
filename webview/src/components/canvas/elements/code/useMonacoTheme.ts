@@ -11,12 +11,7 @@ function getBaseTheme(): BaseTheme {
   return 'vs-dark';
 }
 
-/**
- * Monaco theme colors mirrored from the workbench CSS variables, so the editor chrome matches
- * the active VS Code theme. Token (syntax) colors are NOT exposed to webviews
- * (microsoft/vscode#32813); they stay the base theme's generic rules — the kind mapping
- * guarantees they remain readable on the mirrored background.
- */
+// Token (syntax) colors are not exposed to webviews (microsoft/vscode#32813), only these.
 const COLOR_BY_CSS_VAR: Record<string, string> = {
   'editor.background': '--vscode-editor-background',
   'editor.foreground': '--vscode-editor-foreground',
@@ -36,17 +31,9 @@ const COLOR_BY_CSS_VAR: Record<string, string> = {
   'editorHoverWidget.border': '--vscode-editorHoverWidget-border',
 };
 
-// A fresh name per definition. Re-defining a name that is currently applied can leave Monaco's
-// token colors in a stale/empty state (syntax highlighting flickering on/off when stepping
-// through themes); a new name each time avoids touching the active theme, and `rules: []` +
-// `inherit: true` means tokens always come from `base` — so highlighting stays consistent.
+// A fresh name per definition: redefining the active theme makes syntax highlighting flicker.
 let themeSeq = 0;
 
-/**
- * Defines a Monaco theme built from the current workbench colors and returns its (unique) name.
- * The editor background is the primary `editor.background` (opaque), so the Monaco field shows
- * the primary surface while the block frame around it keeps the secondary widget background.
- */
 function defineThemeFromWorkbench(): string {
   const base = getBaseTheme();
   const name = `5board-${base}-${themeSeq++}`;
@@ -63,7 +50,7 @@ function defineThemeFromWorkbench(): string {
   return name;
 }
 
-/** Tracks the active VS Code theme and mirrors its editor colors into a Monaco theme. */
+/** Mirrors the active VS Code theme's editor colors into a Monaco theme. */
 export function useMonacoTheme(): string {
   const [monacoTheme, setMonacoTheme] = useState(defineThemeFromWorkbench);
 

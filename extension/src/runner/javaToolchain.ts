@@ -3,10 +3,9 @@ import { homedir } from 'os';
 import { posix as posixPath, win32 as win32Path } from 'path';
 import { runCommand } from './runnerUtils';
 
-/** Compact source files (JEP 512) are only supported from this release on. */
+// Compact source files (JEP 512) need Java 25.
 export const MIN_JAVA_MAJOR = 25;
 
-/** Which stage of the fallback chain produced a toolchain. */
 export type ToolchainSource = 'config' | 'java-home' | 'well-known' | 'path';
 
 export interface JavaToolchain {
@@ -27,7 +26,6 @@ export type StageOutcome =
   | 'ok'
   | 'not-reached';
 
-/** One inspected stage, kept for the diagnostics command and the "nothing found" message. */
 export interface CheckedStage {
   source: ToolchainSource;
   outcome: StageOutcome;
@@ -36,11 +34,7 @@ export interface CheckedStage {
   missing?: string[];
 }
 
-/**
- * Structured failures — never prose. `describeToolchainFailure` is the single place that turns
- * these into text, so the diagnostics command can render the same data differently and a later
- * localization only has to touch one function.
- */
+// Structured data only; javaToolchainMessages.ts turns it into text.
 export type ToolchainFailure =
   | { kind: 'config-not-found'; path: string }
   | { kind: 'incomplete-jdk'; path: string; missing: string[] }
@@ -52,10 +46,7 @@ export type ToolchainResult =
   | { ok: true; toolchain: JavaToolchain; checked: CheckedStage[] }
   | { ok: false; failure: ToolchainFailure; checked: CheckedStage[] };
 
-/**
- * Everything the chain touches outside itself. Injected so the tests can play through all three
- * operating systems with a made-up file system and no real process spawns.
- */
+// Injected so the tests can simulate all three operating systems with a fake file system.
 export interface ToolchainEnvironment {
   platform: NodeJS.Platform;
   env: Record<string, string | undefined>;
@@ -95,10 +86,7 @@ async function statKind(path: string, kind: 'file' | 'directory'): Promise<boole
   }
 }
 
-/**
- * Parses the major version out of a tool's `--version` output.
- * "javac 25.0.2" -> 25, "java 25.0.2 2026-01-20 LTS" -> 25, legacy "javac 1.8.0_402" -> 8.
- */
+/** "javac 25.0.2" -> 25, "java 25.0.2 2026-01-20 LTS" -> 25, legacy "javac 1.8.0_402" -> 8. */
 export function parseJavaMajor(versionOutput: string): number | undefined {
   const match = versionOutput.match(/(\d+)(?:\.(\d+))?/);
   if (!match) return undefined;
@@ -109,10 +97,7 @@ export function parseJavaMajor(versionOutput: string): number | undefined {
   return first;
 }
 
-/**
- * Path handling follows the *inspected* platform, not the host, so the tests can play through
- * Windows, macOS and Linux layouts on whatever machine they run on.
- */
+// Follows the inspected platform, not the host, so tests can run every OS layout anywhere.
 function pathFor(platform: NodeJS.Platform) {
   return platform === 'win32' ? win32Path : posixPath;
 }
@@ -125,10 +110,7 @@ function binaryIn(home: string, tool: 'java' | 'javac', platform: NodeJS.Platfor
   return pathFor(platform).join(home, 'bin', toolFileName(tool, platform));
 }
 
-/**
- * Accepts a JDK home, its `bin` directory, or a `java`/`javac` binary and returns the home.
- * The settings entry is meant to hold a home, but users reasonably paste any of the three.
- */
+/** Accepts a JDK home, its `bin` directory or a `java`/`javac` binary and returns the home. */
 export function normalizeJavaHome(input: string, platform: NodeJS.Platform): string {
   const p = pathFor(platform);
   const trimmed = input.trim().replace(/[\\/]+$/, '');
@@ -159,7 +141,6 @@ async function readMajor(
   return parseJavaMajor(result.stdout);
 }
 
-/** Inspects a JDK home: both binaries present, same major version, new enough. */
 async function inspectHome(
   environment: ToolchainEnvironment,
   home: string,
@@ -177,7 +158,6 @@ async function inspectHome(
   return inspectBinaries(environment, javaPath, javacPath);
 }
 
-/** Inspects two binaries that are already known to be launchable (home or PATH). */
 async function inspectBinaries(
   environment: ToolchainEnvironment,
   javaPath: string,
@@ -191,8 +171,7 @@ async function inspectBinaries(
   if (javacMajor === undefined) missing.push('javac');
   if (missing.length > 0) return { kind: 'incomplete', missing };
 
-  // A JRE `java` paired with a foreign `javac` would only surface as an
-  // UnsupportedClassVersionError at run time, so reject the pairing here.
+  // A mismatched pair would only surface as UnsupportedClassVersionError at run time.
   if (javaMajor !== javacMajor) {
     return { kind: 'version-mismatch', java: javaMajor!, javac: javacMajor! };
   }
@@ -240,7 +219,6 @@ function failureFor(path: string, inspection: HomeInspection): ToolchainFailure 
   }
 }
 
-/** Directory patterns per platform, kept as data so a wrong guess is a data fix, not a rewrite. */
 function wellKnownRoots(environment: ToolchainEnvironment): string[] {
   const { platform, env, homeDir } = environment;
   const { join } = pathFor(platform);
@@ -276,11 +254,8 @@ function wellKnownRoots(environment: ToolchainEnvironment): string[] {
   ];
 }
 
-/**
- * On macOS a JDK home sits below `<entry>/Contents/Home`, and Homebrew nests it once more.
- * Returning several shapes and letting `inspectHome` reject the wrong ones is cheaper than
- * probing the layout first.
- */
+// macOS homes sit below `<entry>/Contents/Home` (Homebrew nests once more); inspectHome drops
+// the shapes that don't exist.
 function candidateHomes(root: string, entry: string, platform: NodeJS.Platform): string[] {
   const { join } = pathFor(platform);
   const base = join(root, entry);
@@ -288,7 +263,7 @@ function candidateHomes(root: string, entry: string, platform: NodeJS.Platform):
   return [join(base, 'Contents/Home'), join(base, 'libexec/openjdk.jdk/Contents/Home'), base];
 }
 
-/** Highest version-looking number in a directory name, used to try newer JDKs first. */
+// Used to try newer JDKs first.
 function versionHint(entry: string): number {
   const numbers = entry.match(/\d+/g);
   if (!numbers) return 0;
@@ -320,19 +295,13 @@ async function wellKnownCandidates(environment: ToolchainEnvironment): Promise<s
 
 let cached: { key: string; toolchain: JavaToolchain; checked: CheckedStage[] } | undefined;
 
-/** Invalidates the per-session cache; call when the configured home changes. */
 export function clearToolchainCache(): void {
   cached = undefined;
 }
 
 /**
- * Resolves the JDK to compile and run code blocks with.
- *
- * The chain is: configured home -> JAVA_HOME -> well-known install locations -> PATH. A
- * configured home is **terminal** — if it is broken or too old the resolution fails instead of
- * silently falling through, because silently ignoring an explicit choice would leave the user
- * unable to tell which JDK is running. The automatic stages do filter: each candidate is probed
- * and the first one at or above `MIN_JAVA_MAJOR` wins.
+ * Chain: configured home -> JAVA_HOME -> well-known locations -> PATH. A configured home is
+ * terminal: if it is broken, resolution fails instead of silently using another JDK.
  */
 export async function resolveJavaToolchain(
   configuredHome?: string,
@@ -351,7 +320,7 @@ export async function resolveJavaToolchain(
     return { ok: true, toolchain, checked };
   };
 
-  // Stage 1 — the configured home, terminal in both directions.
+  // Stage 1 — configured home.
   if (key) {
     const home = normalizeJavaHome(key, environment.platform);
     const inspection = await inspectHome(environment, home);
@@ -389,7 +358,7 @@ export async function resolveJavaToolchain(
     }
   }
 
-  // Stage 4 — PATH, the behaviour that existed before this chain.
+  // Stage 4 — PATH.
   const javaOnPath = toolFileName('java', environment.platform);
   const javacOnPath = toolFileName('javac', environment.platform);
   const pathInspection = await inspectBinaries(environment, javaOnPath, javacOnPath);
@@ -419,127 +388,4 @@ function toolchainAt(
     home,
     source,
   };
-}
-
-const STAGE_LABEL: Record<ToolchainSource, string> = {
-  config: 'settings',
-  'java-home': 'JAVA_HOME',
-  'well-known': 'standard install locations',
-  path: 'PATH',
-};
-
-/**
- * The single place that turns a structured failure into user-facing text. Kept apart from the
- * chain so the diagnostics command can render the same data differently, and so translating
- * these messages later is a change to one function.
- */
-export function describeToolchainFailure(failure: ToolchainFailure): string {
-  switch (failure.kind) {
-    case 'config-not-found':
-      return `The configured Java path "${failure.path}" does not exist.`;
-
-    case 'incomplete-jdk': {
-      const missing = failure.missing.map((tool) => `bin/${tool}`).join(' and ');
-      const verb = failure.missing.length > 1 ? 'are' : 'is';
-      // Only a lone missing compiler points at a JRE; if both are gone it is not a JDK at all.
-      const hint =
-        failure.missing.length === 1 && failure.missing[0] === 'javac'
-          ? 'The path most likely points at a JRE (runtime only) instead of a JDK — running code blocks needs a JDK with a compiler.'
-          : 'The path does not look like a JDK — it should be the directory that contains bin/java and bin/javac.';
-      return `${missing} ${verb} missing in "${failure.path}". ${hint}`;
-    }
-
-    case 'too-old':
-      return (
-        `The configured Java path is Java ${failure.found}, but Java ${failure.required} or ` +
-        `newer is required. Runnable blocks use compact source files (JEP 512).`
-      );
-
-    case 'version-mismatch':
-      return (
-        `java is version ${failure.java} but javac is version ${failure.javac} — both must come ` +
-        `from the same JDK.`
-      );
-
-    case 'not-found': {
-      // A stage can contribute several entries (one per well-known candidate), so both lists are
-      // deduplicated — otherwise the message repeats the same label.
-      const searched = [
-        ...new Set(
-          failure.checked
-            .filter((stage) => stage.outcome !== 'not-set')
-            .map((stage) => STAGE_LABEL[stage.source]),
-        ),
-      ];
-      const found = [
-        ...new Set(
-          failure.checked
-            .filter((stage) => stage.majorVersion !== undefined)
-            .map((stage) => `Java ${stage.majorVersion} (${STAGE_LABEL[stage.source]})`),
-        ),
-      ];
-
-      return (
-        `No JDK ${MIN_JAVA_MAJOR}+ found. Searched: ${searched.join(', ') || 'PATH'}.` +
-        (found.length > 0 ? ` Found: ${found.join(', ')}.` : '') +
-        ` Runnable blocks use compact source files (JEP 512) and need JDK ${MIN_JAVA_MAJOR}+.`
-      );
-    }
-  }
-}
-
-const OUTCOME_LABEL: Record<StageOutcome, string> = {
-  'not-set': 'not set',
-  'not-found': 'not found',
-  incomplete: 'incomplete JDK',
-  'too-old': 'too old',
-  'version-mismatch': 'java/javac version mismatch',
-  ok: 'ok',
-  'not-reached': 'not reached',
-};
-
-/**
- * Human-readable report for the diagnostics command — same data as the failure messages, shown
- * as a whole so "why is it picking that JDK?" is answerable in one look.
- */
-export function formatToolchainReport(
-  result: ToolchainResult,
-  configuredHome: string | undefined,
-): string {
-  const lines = ['5Board — Java toolchain', ''];
-
-  lines.push(`  Configured home:  ${configuredHome?.trim() || '(not set)'}`);
-  lines.push(`  Minimum required: Java ${MIN_JAVA_MAJOR} (compact source files, JEP 512)`);
-  lines.push('');
-
-  if (result.ok) {
-    const { toolchain } = result;
-    lines.push(`  Selected:         ${toolchain.home ?? '(from PATH)'}`);
-    lines.push(`  Via stage:        ${STAGE_LABEL[toolchain.source]}`);
-    lines.push(`  Version:          Java ${toolchain.majorVersion}`);
-    lines.push(`  java              ${toolchain.javaPath}`);
-    lines.push(`  javac             ${toolchain.javacPath}`);
-  } else {
-    lines.push('  Selected:         (none)');
-    lines.push(`  Problem:          ${describeToolchainFailure(result.failure)}`);
-  }
-
-  lines.push('', 'Checked:');
-  for (const stage of result.checked) {
-    const details = [
-      stage.path,
-      stage.majorVersion !== undefined ? `Java ${stage.majorVersion}` : undefined,
-      stage.missing?.length ? `missing ${stage.missing.join(', ')}` : undefined,
-    ]
-      .filter(Boolean)
-      .join(' — ');
-    const mark = stage.outcome === 'ok' ? ' <-- selected' : '';
-    lines.push(
-      `  ${STAGE_LABEL[stage.source].padEnd(26)} ${OUTCOME_LABEL[stage.outcome]}` +
-        (details ? `: ${details}` : '') +
-        mark,
-    );
-  }
-
-  return lines.join('\n');
 }

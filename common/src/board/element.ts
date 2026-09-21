@@ -95,6 +95,7 @@ export type CodeElementData = {
    * and shows up in the projector, which renders from the same document.
    */
   lastOutput?: CodeExecutionOutput;
+  outputCollapsed?: boolean;
 };
 
 /**
@@ -103,7 +104,8 @@ export type CodeElementData = {
  * `in` is what the user typed. Pipes do not echo, so nothing would record it otherwise and a
  * stored transcript of an interactive program would show prompts with no answers.
  */
-export type TranscriptSegmentKind = 'out' | 'err' | 'in';
+// `system`: message from 5Board itself (no JDK, output limit …), not from program or compiler.
+export type TranscriptSegmentKind = 'out' | 'err' | 'in' | 'system';
 
 export type TranscriptSegment = {
   kind: TranscriptSegmentKind;

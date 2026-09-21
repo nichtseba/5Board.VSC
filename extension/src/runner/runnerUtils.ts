@@ -1,10 +1,13 @@
 import { spawn } from 'child_process';
 import { StringDecoder } from 'string_decoder';
+import type { CodeblockSession, ExecutionEvent } from '5board.vsc-common';
 
 export interface CommandResult {
   stdout: string;
   stderr: string;
   status: number | null;
+  timedOut?: boolean;
+  /** Set when the process could not be started at all. */
   error?: string;
 }
 
@@ -16,40 +19,33 @@ export function runCommand(
 ): Promise<CommandResult> {
   return new Promise((resolve) => {
     const proc = spawn(command, args, { cwd });
-    let stdout = '';
-    let stderr = '';
+    const stdout = new StringDecoder('utf8');
+    const stderr = new StringDecoder('utf8');
+    let out = '';
+    let err = '';
     let settled = false;
 
-    const finish = (status: number | null, error?: string) => {
+    const finish = (status: number | null, extra: Partial<CommandResult> = {}) => {
       if (settled) return;
       settled = true;
       clearTimeout(timer);
-      resolve({ stdout, stderr, status, error });
+      resolve({ stdout: out + stdout.end(), stderr: err + stderr.end(), status, ...extra });
     };
 
     const timer = setTimeout(() => {
       proc.kill();
-      finish(null, `Command timed out after ${timeoutMs}ms`);
+      finish(null, { timedOut: true });
     }, timeoutMs);
 
-    proc.stdout.on('data', (chunk: Buffer) => {
-      stdout += chunk.toString();
-    });
-    proc.stderr.on('data', (chunk: Buffer) => {
-      stderr += chunk.toString();
-    });
-    proc.on('close', (code) => finish(code, undefined));
-    proc.on('error', (err) => finish(null, err.message));
+    proc.stdout.on('data', (chunk: Buffer) => (out += stdout.write(chunk)));
+    proc.stderr.on('data', (chunk: Buffer) => (err += stderr.write(chunk)));
+    proc.on('close', (code) => finish(code));
+    proc.on('error', (error) => finish(null, { error: error.message }));
   });
 }
 
-/**
- * A process that is still running. Unlike {@link runCommand} this hands the caller stdin and a
- * kill switch, which is what lets a code block read console input while it executes.
- */
 export interface ProcessHandle {
   write(text: string): void;
-  /** Closes stdin. Programs looping until EOF stop here. */
   endInput(): void;
   kill(): void;
   onData(listener: (stream: 'out' | 'err', text: string) => void): void;
@@ -57,10 +53,8 @@ export interface ProcessHandle {
 }
 
 /**
- * Spawns a process and streams its output instead of collecting it.
- *
- * Deliberately has no timeout: an interactive program legitimately sits idle while it waits for
- * the user to type. Callers are responsible for stopping it (see `ExecutionSessionManager`).
+ * Spawns a process and streams its output. No timeout on purpose: an interactive program
+ * legitimately idles while it waits for input; `ExecutionSessionManager` stops it.
  */
 export function startProcess(command: string, args: string[], cwd: string): ProcessHandle {
   const proc = spawn(command, args, { cwd });
@@ -69,29 +63,20 @@ export function startProcess(command: string, args: string[], cwd: string): Proc
   const exitListeners: ((code: number | null) => void)[] = [];
   let exited = false;
 
-  // One decoder per stream: a multi-byte character can be split across two chunks, and
-  // decoding each chunk on its own would turn it into replacement characters.
+  // One decoder per stream: a multi-byte character can be split across two chunks.
   const attach = (stream: NodeJS.ReadableStream, kind: 'out' | 'err') => {
     const decoder = new StringDecoder('utf8');
-    stream.on('data', (chunk: Buffer) => {
-      const text = decoder.write(chunk);
-      if (text) {
-        dataListeners.forEach((listener) => listener(kind, text));
-      }
-    });
-    stream.on('end', () => {
-      const rest = decoder.end();
-      if (rest) {
-        dataListeners.forEach((listener) => listener(kind, rest));
-      }
-    });
+    const emit = (text: string) => {
+      if (text) dataListeners.forEach((listener) => listener(kind, text));
+    };
+    stream.on('data', (chunk: Buffer) => emit(decoder.write(chunk)));
+    stream.on('end', () => emit(decoder.end()));
   };
 
   attach(proc.stdout, 'out');
   attach(proc.stderr, 'err');
 
-  // A program that closed its own stdin turns every further write into an EPIPE error event.
-  // Unhandled, that would take the extension host down for something the user cannot control.
+  // Writing to a program that closed its stdin raises EPIPE, which would crash the extension host.
   proc.stdin.on('error', () => {});
 
   const finish = (code: number | null) => {
@@ -105,16 +90,13 @@ export function startProcess(command: string, args: string[], cwd: string): Proc
 
   return {
     write(text) {
-      if (exited) return;
-      proc.stdin.write(text, 'utf8');
+      if (!exited) proc.stdin.write(text, 'utf8');
     },
     endInput() {
-      if (exited) return;
-      proc.stdin.end();
+      if (!exited) proc.stdin.end();
     },
     kill() {
-      if (exited) return;
-      proc.kill();
+      if (!exited) proc.kill();
     },
     onData(listener) {
       dataListeners.push(listener);
@@ -125,4 +107,35 @@ export function startProcess(command: string, args: string[], cwd: string): Proc
   };
 }
 
-export { indentCode as indent } from '5board.vsc-common';
+/** Adapts a {@link ProcessHandle} to the language-neutral session interface. */
+export class ProcessSession implements CodeblockSession {
+  private readonly listeners = new Set<(event: ExecutionEvent) => void>();
+
+  constructor(private readonly process: ProcessHandle) {
+    this.process.onData((stream, text) => this.emit({ kind: stream, text }));
+    this.process.onExit((code) =>
+      this.emit({ kind: 'exited', exitCode: code, success: code === 0 }),
+    );
+  }
+
+  write(text: string): void {
+    this.process.write(text);
+  }
+
+  endInput(): void {
+    this.process.endInput();
+  }
+
+  kill(): void {
+    this.process.kill();
+  }
+
+  onEvent(listener: (event: ExecutionEvent) => void): () => void {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  }
+
+  private emit(event: ExecutionEvent): void {
+    this.listeners.forEach((listener) => listener(event));
+  }
+}

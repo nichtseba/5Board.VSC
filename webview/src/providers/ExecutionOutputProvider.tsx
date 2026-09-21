@@ -2,32 +2,19 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 import type { CodeExecutionOutput, TranscriptSegment } from '5board.vsc-common';
 import { useOnMessage } from '../services/MessageService';
 
-/**
- * What a code block shows below the editor: the transcript built up while the program runs,
- * plus how it ended.
- */
 export type BlockExecutionState = {
   transcript: TranscriptSegment[];
   running: boolean;
   exit?: { exitCode: number | null; success: boolean; truncated: boolean };
-  /**
-   * Counts up on every start. Restarting a block that is already running never changes
-   * `running`, so this is the only reliable signal that a *new* run began.
-   */
+  // Only reliable signal for a new run: a restart while running never changes `running`.
   runId: number;
 };
 
-/**
- * Live execution state per element id.
- *
- * This is the state of runs happening *right now*. It is not the source of truth: when a run
- * ends the extension writes the transcript onto the element, so a reloaded webview reads it
- * back from the document instead (see {@link useExecutionOutput}).
- */
+// Live runs only. Finished runs are stored on the element (`lastOutput`), see useExecutionOutput.
 type ExecutionOutputMap = Record<string, BlockExecutionState>;
 
 const ExecutionOutputContext = createContext<ExecutionOutputMap>({});
-/** Set in the projector, which mirrors output but must not type into anyone's program. */
+// Set in the projector: it mirrors output but must not type into the program.
 const ExecutionReadOnlyContext = createContext(false);
 
 export function ExecutionOutputProvider({
@@ -79,6 +66,11 @@ export function ExecutionOutputProvider({
         };
       });
     }
+    if (msg.type === 'codeblockOutputCleared') {
+      setOutputs((prev) =>
+        Object.fromEntries(Object.entries(prev).filter(([id]) => id !== msg.elementId)),
+      );
+    }
     if (msg.type === 'codeblockSync') {
       setOutputs((prev) => ({
         ...prev,
@@ -98,10 +90,7 @@ export function ExecutionOutputProvider({
   );
 }
 
-/**
- * Execution state for one block: the live run if there is one, otherwise the transcript stored
- * on the element by the last run.
- */
+/** The live run if there is one, otherwise the transcript stored by the last run. */
 export function useExecutionOutput(
   elementId: string,
   lastOutput?: CodeExecutionOutput,
@@ -122,16 +111,11 @@ export function useExecutionOutput(
   };
 }
 
-/** True in views that display output without being allowed to interact with it. */
 export function useExecutionReadOnly(): boolean {
   return useContext(ExecutionReadOnlyContext);
 }
 
-/**
- * Chunks arrive in whatever pieces the pipes deliver them. Merging neighbours of the same kind
- * keeps the list short and, more importantly, keeps a colour tag that was split across two
- * chunks in one string so it still parses.
- */
+// Merging neighbours of the same kind keeps a colour tag split across two chunks parsable.
 function appendSegment(
   transcript: TranscriptSegment[],
   segment: TranscriptSegment,

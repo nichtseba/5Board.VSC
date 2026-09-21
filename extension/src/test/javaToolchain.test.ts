@@ -1,12 +1,12 @@
 import { strict as assert } from 'assert';
 import {
   clearToolchainCache,
-  describeToolchainFailure,
   normalizeJavaHome,
   parseJavaMajor,
   resolveJavaToolchain,
   type ToolchainEnvironment,
 } from '../runner/javaToolchain';
+import { describeToolchainFailure } from '../runner/javaToolchainMessages';
 
 /**
  * A made-up file system and tool set, so every operating system's layout can be played through

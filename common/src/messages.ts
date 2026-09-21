@@ -51,6 +51,7 @@ type AllExtensionToWebviewMessage =
       transcript: TranscriptSegment[];
       running: boolean;
     }
+  | { type: 'codeblockOutputCleared'; elementId: string }
   | { type: 'goToElement'; elementId: string }
   | { type: 'clipboardContent'; text: string };
 
@@ -87,6 +88,7 @@ type AllWebviewToExtensionMessage =
   | { type: 'codeblockEndInput'; elementId: string }
   | { type: 'codeblockStop'; elementId: string }
   | { type: 'codeblockResetOutput'; elementId: string }
+  | { type: 'codeblockSetOutputCollapsed'; elementId: string; collapsed: boolean }
   | { type: 'updateBlockCode'; elementId: string; code: string }
   | { type: 'openSource'; elementId: string }
   | { type: 'copyToClipboard'; text: string }
@@ -94,7 +96,7 @@ type AllWebviewToExtensionMessage =
   | { type: 'moveBlock'; elementId: string; className?: string | null; language?: string }
   | {
       type: 'manageCodeClass';
-      op: 'create' | 'rename' | 'changeLanguage' | 'delete';
+      op: 'create' | 'update' | 'delete';
       name: string;
       language: string;
       newName?: string;

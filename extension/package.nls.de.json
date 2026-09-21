@@ -14,5 +14,6 @@
   "commands.startPresentation": "Präsentation starten",
   "commands.executeCodeblock": "Codeblock ausführen",
   "commands.showJavaToolchain": "Java-Toolchain anzeigen",
+  "commands.resetAllOutputs": "Alle Codeblock-Ausgaben zurücksetzen",
   "commands.goToElement": "Gehe zu Element"
 }

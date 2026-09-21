@@ -1,12 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { parseOutputColors } from '5board.vsc-common';
+import { formatMessage, parseOutputColors } from '5board.vsc-common';
 import type { TranscriptSegment } from '5board.vsc-common';
 import { Icons } from '../../../Icons';
 import { useMessageService } from '../../../../services/MessageService';
+import { useLocalization } from '../../../../providers/LocalizationProvider';
 import type { BlockExecutionState } from '../../../../providers/ExecutionOutputProvider';
-
-/** Kept short on purpose: it sets the input box's minimum width, see the style below. */
-const INPUT_PLACEHOLDER = 'Enter sends, Ctrl+D ends';
 
 const OUTPUT_COLOR_CLASSES = [
   'text-terminal-ansiRed',
@@ -39,9 +37,15 @@ function renderSegment(segment: TranscriptSegment, index: number) {
       </span>
     );
   }
+  if (segment.kind === 'system') {
+    return (
+      <span key={index} className="text-terminal-ansiYellow">
+        {segment.text}
+      </span>
+    );
+  }
   if (segment.kind === 'in') {
-    // Set apart from the program's own output so it stays readable which lines were typed.
-    // Italic rather than a dimmed colour: dim greys are close to unreadable in some themes.
+    // Italic rather than dimmed: dim greys are unreadable in some themes.
     return (
       <span key={index} className="italic opacity-80">
         {segment.text}
@@ -55,14 +59,25 @@ type OutputPanelProps = {
   elementId: string;
   state: BlockExecutionState | undefined;
   readOnly: boolean;
+  collapsed: boolean;
   onRun: () => void;
   onOpenSource: () => void;
 };
 
-export function OutputPanel({ elementId, state, readOnly, onRun, onOpenSource }: OutputPanelProps) {
+export function OutputPanel({
+  elementId,
+  state,
+  readOnly,
+  collapsed,
+  onRun,
+  onOpenSource,
+}: OutputPanelProps) {
   const messages = useMessageService();
-  const [outputVisible, setOutputVisible] = useState(true);
+  const { t } = useLocalization();
   const [input, setInput] = useState('');
+  const outputVisible = !collapsed;
+  // Also the input's minimum width, so keep the translations short.
+  const inputPlaceholder = t('webview.codeblock.inputPlaceholder');
   const consoleRef = useRef<HTMLPreElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -70,8 +85,8 @@ export function OutputPanel({ elementId, state, readOnly, onRun, onOpenSource }:
   const transcript = state?.transcript ?? [];
   const hasOutput = transcript.length > 0 || running;
   const showInput = running && !readOnly;
+  const canToggle = hasOutput && !readOnly;
 
-  // Follow the output the way a terminal does.
   useLayoutEffect(() => {
     const element = consoleRef.current;
     if (element && outputVisible) {
@@ -80,13 +95,12 @@ export function OutputPanel({ elementId, state, readOnly, onRun, onOpenSource }:
   }, [transcript, outputVisible]);
 
   useEffect(() => {
-    if (showInput) {
+    if (showInput && outputVisible) {
       inputRef.current?.focus();
     }
-  }, [showInput]);
+  }, [showInput, outputVisible]);
 
-  // A new run starts with an empty prompt. Otherwise a line that was typed but never sent
-  // would reappear in the next run and be waiting at its first read.
+  // An unsent line must not carry over into the next run.
   useEffect(() => {
     setInput('');
   }, [state?.runId]);
@@ -98,80 +112,62 @@ export function OutputPanel({ elementId, state, readOnly, onRun, onOpenSource }:
 
   return (
     <div className="border-t border-editor-widget-border">
-      {/* Actionbar */}
       <div className="px-3 py-1 font-sans text-base bg-panel-background flex items-center gap-2">
-        <button
-          onClick={() => hasOutput && setOutputVisible((v) => !v)}
-          disabled={!hasOutput}
-          className={`flex items-center gap-1.5 px-1.5 py-1 font-sans text-base font-semibold uppercase tracking-wide rounded-xs border-none ${
-            hasOutput
-              ? 'text-panelTitle-activeForeground cursor-pointer hover:bg-list-hover-background'
-              : 'text-disabledForeground cursor-default opacity-50'
-          } bg-transparent`}
+        <ActionButton
+          variant="title"
+          disabled={!canToggle}
+          dimmed={!hasOutput}
+          onClick={() =>
+            messages.send({ type: 'codeblockSetOutputCollapsed', elementId, collapsed: !collapsed })
+          }
         >
-          <span>Output</span>
+          <span>{t('webview.codeblock.output')}</span>
           <Icons name={outputVisible && hasOutput ? 'chevron-up' : 'chevron-down'} />
-        </button>
-        <button
-          title="Copy output"
-          disabled={!hasOutput}
-          onClick={() => {
-            if (!transcript.length) return;
+        </ActionButton>
+        <ActionButton
+          title={t('webview.codeblock.copyOutput')}
+          disabled={transcript.length === 0}
+          onClick={() =>
             messages.send({
               type: 'copyToClipboard',
               text: transcript.map((segment) => segment.text).join(''),
-            });
-          }}
-          className={`flex items-center px-1.5 py-1 bg-transparent font-sans text-base rounded-xs border-none ${
-            hasOutput
-              ? 'text-tab-activeForeground cursor-pointer hover:bg-list-hover-background'
-              : 'text-disabledForeground cursor-default opacity-50'
-          }`}
+            })
+          }
         >
           <Icons name="copy" />
-        </button>
+        </ActionButton>
 
         <div className="ml-auto flex items-center gap-2.5">
-          <button
-            title="Open source file"
-            onClick={onOpenSource}
-            className="flex items-center px-1.5 py-1 bg-transparent text-tab-activeForeground font-sans text-base rounded-xs border-none cursor-pointer hover:bg-list-hover-background"
-          >
+          <ActionButton title={t('webview.codeblock.openSource')} onClick={onOpenSource}>
             <Icons name="go-to-file" />
-          </button>
-          {/* Stop takes the run button's place while a program runs, rather than sitting next to
-              it: restarting means stopping first, and the actionbar stays this narrow. */}
+          </ActionButton>
+          {/* Stop replaces Run while a program runs, so restarting is deliberately two steps. */}
           {running && !readOnly ? (
-            <button
-              title="Stop"
+            <ActionButton
+              variant="primary"
+              title={t('webview.codeblock.stop')}
               onClick={() => messages.send({ type: 'codeblockStop', elementId })}
-              className="flex items-center px-1.5 py-1 bg-button-background text-button-foreground font-sans text-base rounded-xs border-none cursor-pointer hover:bg-button-hover-background"
             >
               <Icons name="debug-stop" />
-            </button>
+            </ActionButton>
           ) : (
-            <button
-              title="Run"
-              onClick={onRun}
+            <ActionButton
+              variant="primary"
+              title={t('webview.codeblock.run')}
               disabled={readOnly}
-              className={`flex items-center px-1.5 py-1 bg-button-background text-button-foreground font-sans text-base rounded-xs border-none ${
-                readOnly
-                  ? 'cursor-default opacity-50'
-                  : 'cursor-pointer hover:bg-button-hover-background'
-              }`}
+              onClick={onRun}
             >
               <Icons name="run" />
-            </button>
+            </ActionButton>
           )}
         </div>
       </div>
 
-      {/* Output content — no own background, inherits the block surface (theme default or per-block override) */}
       {hasOutput && outputVisible && (
         <pre
           ref={consoleRef}
           onClick={() => showInput && inputRef.current?.focus()}
-          className="m-0 px-3 py-2 font-mono text-editor leading-relaxed overflow-auto max-h-80 text-terminal-foreground"
+          className="m-0 px-3 py-2 font-mono text-editor leading-relaxed overflow-auto max-h-[calc(10lh+1rem)] text-terminal-foreground"
         >
           {transcript.map(renderSegment)}
           {showInput && (
@@ -185,17 +181,15 @@ export function OutputPanel({ elementId, state, readOnly, onRun, onOpenSource }:
                   sendInput();
                   return;
                 }
-                // Ctrl+D on an empty line closes stdin, the same as in a terminal. Programs
-                // that read until EOF need it to ever leave their loop.
+                // Ctrl+D on an empty line sends EOF, like in a terminal.
                 if (e.key === 'd' && e.ctrlKey && input === '') {
                   e.preventDefault();
                   messages.send({ type: 'codeblockEndInput', elementId });
                 }
               }}
-              placeholder={INPUT_PLACEHOLDER}
-              // Grows with what is typed. A fixed width would clip both the placeholder and
-              // any line longer than the box.
-              style={{ width: `${Math.max(INPUT_PLACEHOLDER.length, input.length) + 1}ch` }}
+              placeholder={inputPlaceholder}
+              // Grows with the input so neither placeholder nor long lines get clipped.
+              style={{ width: `${Math.max(inputPlaceholder.length, input.length) + 1}ch` }}
               className="bg-transparent border-none outline-none p-0 font-mono text-editor text-terminal-foreground placeholder:text-disabledForeground placeholder:opacity-60"
             />
           )}
@@ -205,11 +199,65 @@ export function OutputPanel({ elementId, state, readOnly, onRun, onOpenSource }:
                 state.exit.success ? 'text-terminal-ansiBrightBlack' : 'text-terminal-ansiRed'
               }
             >
-              {`\n[Exit code ${state.exit.exitCode ?? 'none'}]`}
+              {'\n' +
+                formatMessage(t('webview.codeblock.exitCode'), {
+                  code: state.exit.exitCode ?? t('webview.codeblock.exitCodeNone'),
+                })}
             </span>
           )}
         </pre>
       )}
     </div>
+  );
+}
+
+type ActionButtonVariant = 'title' | 'flat' | 'primary';
+
+const VARIANT_COLORS: Record<ActionButtonVariant, { normal: string; dimmed: string }> = {
+  title: {
+    normal: 'text-panelTitle-activeForeground',
+    dimmed: 'text-disabledForeground opacity-50',
+  },
+  flat: { normal: 'text-tab-activeForeground', dimmed: 'text-disabledForeground opacity-50' },
+  primary: { normal: 'text-button-foreground', dimmed: 'text-button-foreground opacity-50' },
+};
+
+type ActionButtonProps = {
+  variant?: ActionButtonVariant;
+  disabled?: boolean;
+  /** Greyed out because there is nothing to act on. Defaults to `disabled`. */
+  dimmed?: boolean;
+  title?: string;
+  onClick: () => void;
+  children: React.ReactNode;
+};
+
+function ActionButton({
+  variant = 'flat',
+  disabled = false,
+  dimmed = disabled,
+  title,
+  onClick,
+  children,
+}: ActionButtonProps) {
+  const primary = variant === 'primary';
+  const colors = VARIANT_COLORS[variant];
+  return (
+    <button
+      title={title}
+      disabled={disabled}
+      onClick={onClick}
+      className={`flex items-center gap-1.5 px-1.5 py-1 font-sans text-base rounded-xs border-none ${
+        primary ? 'bg-button-background' : 'bg-transparent'
+      } ${variant === 'title' ? 'font-semibold uppercase tracking-wide' : ''} ${
+        dimmed ? colors.dimmed : colors.normal
+      } ${
+        disabled
+          ? 'cursor-default'
+          : `cursor-pointer ${primary ? 'hover:bg-button-hover-background' : 'hover:bg-list-hover-background'}`
+      }`}
+    >
+      {children}
+    </button>
   );
 }

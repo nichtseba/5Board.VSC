@@ -1,17 +1,13 @@
 import { useEffect, useState, type KeyboardEvent } from 'react';
-import {
-  SUPPORTED_LANGUAGES,
-  getLanguageSupport,
-  sanitizeClassName,
-  type CodeClass,
-} from '5board.vsc-common';
-import { Button, Dropdown, TextField, type DropdownOption } from 'vscrui';
+import { classLanguages, getLanguageSupport, type CodeClass } from '5board.vsc-common';
+import { Button, Dropdown, TextField } from 'vscrui';
 import { init } from '../app/init';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
 import SettingsPanel from '../components/sidebar/layout/SettingsPanel';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
 import { useLocalization } from '../providers/LocalizationProvider';
 import { useMessageService } from '../services/MessageService';
+import { classLanguageOptions, optionValue } from '../components/sidebar/codeblockOptions';
 
 export default function ClassSettingsSidebar() {
   const messages = useMessageService();
@@ -44,17 +40,6 @@ export default function ClassSettingsSidebar() {
   );
 }
 
-function languageOptions(): DropdownOption[] {
-  return SUPPORTED_LANGUAGES.map((support) => ({
-    value: support.id,
-    label: support.displayName,
-  }));
-}
-
-function optionValue(value: string | DropdownOption | undefined): string | undefined {
-  return typeof value === 'string' ? value : value?.value;
-}
-
 function ClassRow({ codeClass }: { codeClass: CodeClass }) {
   const messages = useMessageService();
   const { t } = useLocalization();
@@ -70,25 +55,13 @@ function ClassRow({ codeClass }: { codeClass: CodeClass }) {
 
   const commitEdit = () => {
     const newName = draftName.trim();
-    const renamed = !!newName && newName !== codeClass.name;
-    if (renamed) {
+    if (newName !== codeClass.name || draftLanguage !== codeClass.language) {
       messages.send({
         type: 'manageCodeClass',
-        op: 'rename',
+        op: 'update',
         name: codeClass.name,
         language: codeClass.language,
-        newName,
-      });
-    }
-    if (draftLanguage !== codeClass.language) {
-      // Runs after the rename; the class is then addressed by its sanitized new name.
-      // Each operation guards target availability independently, so a rejected rename
-      // simply turns the language change into a no-op.
-      messages.send({
-        type: 'manageCodeClass',
-        op: 'changeLanguage',
-        name: renamed ? sanitizeClassName(newName) : codeClass.name,
-        language: codeClass.language,
+        newName: newName || undefined,
         newLanguage: draftLanguage,
       });
     }
@@ -105,7 +78,7 @@ function ClassRow({ codeClass }: { codeClass: CodeClass }) {
       <li className="flex flex-col gap-2 py-0.5">
         <TextField value={draftName} onChange={setDraftName} onKeyDown={handleKeyDown} />
         <Dropdown
-          options={languageOptions()}
+          options={classLanguageOptions()}
           value={draftLanguage}
           onChange={(value) => {
             const selected = optionValue(value);
@@ -160,7 +133,7 @@ function CreateClassRow() {
   const messages = useMessageService();
   const { t } = useLocalization();
   const [name, setName] = useState('');
-  const [language, setLanguage] = useState(SUPPORTED_LANGUAGES[0].id);
+  const [language, setLanguage] = useState(classLanguages()[0]?.id ?? '');
 
   const commitCreate = () => {
     if (!name.trim()) return;
@@ -179,7 +152,7 @@ function CreateClassRow() {
         }}
       />
       <Dropdown
-        options={languageOptions()}
+        options={classLanguageOptions()}
         value={language}
         onChange={(value) => {
           const selected = optionValue(value);

@@ -16,7 +16,65 @@
     "codeblock": {
       "noActiveDocument": "Kein aktives 5Board-Dokument.",
       "noCodeblockSelected": "Wähle einen Codeblock aus, um ihn auszuführen.",
-      "deleteClassNotEmpty": "Die Klasse enthält noch Codeblöcke. Entferne sie zuerst aus der Klasse, bevor du sie löschst."
+      "deleteClassNotEmpty": "Die Klasse enthält noch Codeblöcke. Entferne sie zuerst aus der Klasse, bevor du sie löschst.",
+      "classNameTaken": "Der Klassenname \"{name}\" ist bereits vergeben.",
+      "resetAllConfirm": "Ausgabe aller Codeblöcke in diesem Dokument zurücksetzen?",
+      "resetAllConfirmButton": "Zurücksetzen",
+      "noOutputsToReset": "Es gibt keine Ausgabe zum Zurücksetzen.",
+      "execution": {
+        "notACodeblock": "Element \"{elementId}\" ist kein Codeblock.",
+        "noRunner": "Keine Ausführung verfügbar für die Sprache: {language}",
+        "sourceNotFound": "Quelldatei \"{fileName}\" nicht im Dokument gefunden.",
+        "toolsMissing": "Benötigte Werkzeuge nicht gefunden: {tools}. Bitte installiere sie, um {language}-Codeblöcke auszuführen.",
+        "toolsUnavailable": "Die benötigten Werkzeuge für {language} sind nicht verfügbar.",
+        "compileTimeout": "Die Kompilierung hat länger als {seconds} Sekunden gedauert und wurde abgebrochen.",
+        "compilationFailed": "Kompilierung fehlgeschlagen.",
+        "outputLimit": "Ausgabelimit erreicht, Ausführung gestoppt."
+      },
+      "toolchain": {
+        "configNotFound": "Der konfigurierte Java-Pfad \"{path}\" existiert nicht.",
+        "missingOne": "{missing} fehlt in \"{path}\".",
+        "missingMany": "{missing} fehlen in \"{path}\".",
+        "and": "und",
+        "jreHint": "Der Pfad zeigt vermutlich auf eine JRE (nur Laufzeitumgebung) statt auf ein JDK — zum Ausführen von Codeblöcken wird ein JDK mit Compiler benötigt.",
+        "notJdkHint": "Der Pfad sieht nicht nach einem JDK aus — er sollte auf das Verzeichnis zeigen, das bin/java und bin/javac enthält.",
+        "tooOld": "Der konfigurierte Java-Pfad ist Java {found}, benötigt wird aber Java {required} oder neuer. Ausführbare Blöcke nutzen Compact Source Files (JEP 512).",
+        "versionMismatch": "java hat Version {java}, javac aber Version {javac} — beide müssen aus demselben JDK stammen.",
+        "notFound": "Kein JDK {required}+ gefunden. Durchsucht: {searched}.",
+        "notFoundFound": "Gefunden: {found}.",
+        "notFoundHint": "Ausführbare Blöcke nutzen Compact Source Files (JEP 512) und benötigen JDK {required}+.",
+        "stage": {
+          "config": "Einstellungen",
+          "javaHome": "JAVA_HOME",
+          "wellKnown": "Standard-Installationsorte",
+          "path": "PATH"
+        },
+        "outcome": {
+          "notSet": "nicht gesetzt",
+          "notFound": "nicht gefunden",
+          "incomplete": "unvollständiges JDK",
+          "tooOld": "zu alt",
+          "versionMismatch": "java/javac-Versionen passen nicht zusammen",
+          "ok": "ok",
+          "notReached": "nicht erreicht"
+        },
+        "report": {
+          "title": "5Board — Java-Toolchain",
+          "configuredHome": "Konfigurierter Pfad",
+          "minimumRequired": "Mindestens benötigt",
+          "minimumRequiredValue": "Java {required} (Compact Source Files, JEP 512)",
+          "selected": "Ausgewählt",
+          "viaStage": "Über Stufe",
+          "version": "Version",
+          "problem": "Problem",
+          "checked": "Geprüft:",
+          "notSet": "(nicht gesetzt)",
+          "fromPath": "(aus PATH)",
+          "none": "(keins)",
+          "missing": "fehlt: {tools}",
+          "selectedMark": "<-- ausgewählt"
+        }
+      }
     },
     "goToElement": "Gehe zu Element"
   },
@@ -25,6 +83,19 @@
     "canvas": {
       "spacerLabel": "Abstand",
       "rows": "Zeilen"
+    },
+    "codeblock": {
+      "output": "Ausgabe",
+      "copyOutput": "Ausgabe kopieren",
+      "openSource": "Quelldatei öffnen",
+      "run": "Ausführen",
+      "stop": "Stoppen",
+      "inputPlaceholder": "Enter sendet, Ctrl+D beendet",
+      "exitCode": "[Exit-Code {code}]",
+      "exitCodeNone": "keiner",
+      "sourceNotFound": "Quelldatei nicht gefunden: {fileName}",
+      "cut": "Ausschneiden",
+      "paste": "Einfügen"
     },
     "sidebar": {
       "title": "5Board Seitenleiste",

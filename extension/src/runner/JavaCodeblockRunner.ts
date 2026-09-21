@@ -1,27 +1,24 @@
 import { join } from 'path';
 import { mkdir, mkdtemp, rm, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
-import type {
-  CodeblockExecutionRequest,
-  CodeblockLanguage,
-  CodeblockRunner,
-  CodeblockSession,
-  ExecutionEvent,
-  ExecutionStartResult,
-  Source,
-  ToolCheckResult,
-  ToolchainConfig,
+import {
+  formatMessage,
+  type CodeblockExecutionRequest,
+  type CodeblockRunner,
+  type ExecutionStartResult,
+  type Source,
+  type ToolCheckResult,
+  type ToolchainConfig,
 } from '5board.vsc-common';
-import { runCommand, startProcess, type ProcessHandle } from './runnerUtils';
-import { describeToolchainFailure, resolveJavaToolchain } from './javaToolchain';
+import { ProcessSession, runCommand, startProcess } from './runnerUtils';
+import { resolveJavaToolchain } from './javaToolchain';
+import { describeToolchainFailure } from './javaToolchainMessages';
+import { t } from '../localization';
 
 const COMPILE_TIMEOUT_MS = 30_000;
 
-/**
- * Forces UTF-8 on the child's streams. Piped (non-terminal) stdio makes Java fall back to the
- * platform encoding for stdout, which mangles anything non-ASCII on Windows even though
- * `file.encoding` is already UTF-8.
- */
+// Piped stdio makes Java fall back to the platform encoding (Cp1252 on Windows), which mangles
+// every non-ASCII character even though `file.encoding` is already UTF-8.
 const ENCODING_ARGS = [
   '-Dstdout.encoding=UTF-8',
   '-Dstderr.encoding=UTF-8',
@@ -29,7 +26,7 @@ const ENCODING_ARGS = [
 ];
 
 export class JavaCodeblockRunner implements CodeblockRunner {
-  canHandle(language: CodeblockLanguage): boolean {
+  canHandle(language: string): boolean {
     return language === 'java';
   }
 
@@ -48,10 +45,7 @@ export class JavaCodeblockRunner implements CodeblockRunner {
     const { toolchain } = result;
     return {
       available: true,
-      version: `Java ${toolchain.majorVersion}`,
-      majorVersion: toolchain.majorVersion,
       toolPaths: { java: toolchain.javaPath, javac: toolchain.javacPath },
-      home: toolchain.home,
     };
   }
 
@@ -60,14 +54,13 @@ export class JavaCodeblockRunner implements CodeblockRunner {
     const outDir = join(tempDir, 'out');
 
     try {
-      // Write every source flat into tempDir; it doubles as the sourcepath root below.
+      // Written flat: tempDir doubles as the sourcepath root.
       const javaSources = request.sources.filter((s) => s.language === 'java');
-      await writeProjectSources(javaSources, tempDir);
+      await writeSources(javaSources, tempDir);
       await mkdir(outDir, { recursive: true });
 
-      // Compile only the target: javac pulls the classes it references from the sourcepath on
-      // demand, so unrelated (possibly broken) sources don't block execution. This stays a
-      // batch step with a timeout, because a compiler that hangs is never waiting for a user.
+      // Only the target is compiled; javac pulls referenced classes from the sourcepath, so
+      // unrelated broken sources don't block the run.
       const compile = await runCommand(
         request.toolPaths?.javac ?? 'javac',
         ['-d', outDir, '-sourcepath', tempDir, request.fileName],
@@ -75,11 +68,20 @@ export class JavaCodeblockRunner implements CodeblockRunner {
         COMPILE_TIMEOUT_MS,
       );
 
+      if (compile.timedOut) {
+        await rm(tempDir, { recursive: true, force: true });
+        return {
+          ok: false,
+          error: formatMessage(t('extension.codeblock.execution.compileTimeout'), {
+            seconds: COMPILE_TIMEOUT_MS / 1000,
+          }),
+        };
+      }
       if (compile.status !== 0) {
         await rm(tempDir, { recursive: true, force: true });
         return {
           ok: false,
-          error: compile.error ?? 'Compilation failed.',
+          error: compile.error ?? t('extension.codeblock.execution.compilationFailed'),
           stderr: compile.stderr || compile.stdout,
         };
       }
@@ -88,15 +90,13 @@ export class JavaCodeblockRunner implements CodeblockRunner {
       return { ok: false, error: error instanceof Error ? error.message : String(error) };
     }
 
-    const mainClass = fileNameToClassName(request.fileName);
     const process = startProcess(
       request.toolPaths?.java ?? 'java',
-      [...ENCODING_ARGS, '-cp', outDir, mainClass],
+      [...ENCODING_ARGS, '-cp', outDir, request.fileName.replace(/\.java$/, '')],
       tempDir,
     );
 
-    // The temp directory holds the classes the process is running from, so it can only go once
-    // the process is gone. That is why it is cleaned up here and not in a `finally`.
+    // The program runs out of tempDir, so it can only be removed once the process is gone.
     process.onExit(() => {
       void rm(tempDir, { recursive: true, force: true });
     });
@@ -105,44 +105,7 @@ export class JavaCodeblockRunner implements CodeblockRunner {
   }
 }
 
-/** Adapts a {@link ProcessHandle} to the language-neutral session interface. */
-class ProcessSession implements CodeblockSession {
-  private readonly listeners = new Set<(event: ExecutionEvent) => void>();
-
-  constructor(private readonly process: ProcessHandle) {
-    this.process.onData((stream, text) => this.emit({ kind: stream, text }));
-    this.process.onExit((code) =>
-      this.emit({ kind: 'exited', exitCode: code, success: code === 0 }),
-    );
-  }
-
-  write(text: string): void {
-    this.process.write(text);
-  }
-
-  endInput(): void {
-    this.process.endInput();
-  }
-
-  kill(): void {
-    this.process.kill();
-  }
-
-  onEvent(listener: (event: ExecutionEvent) => void): () => void {
-    this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
-  }
-
-  private emit(event: ExecutionEvent): void {
-    this.listeners.forEach((listener) => listener(event));
-  }
-}
-
-function fileNameToClassName(fileName: string): string {
-  return fileName.replace(/\.java$/, '');
-}
-
-async function writeProjectSources(sources: Source[], tempDir: string): Promise<void> {
+async function writeSources(sources: Source[], tempDir: string): Promise<void> {
   await Promise.all(
     sources.map((source) => writeFile(join(tempDir, source.name), source.code, 'utf8')),
   );

@@ -1,16 +1,17 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
 import MonacoEditor, { loader } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor';
 import {
   EditorElementType,
+  commentPrefixFor,
   extractBlock,
-  COMMENT_PREFIX_BY_LANGUAGE,
   fileNameFromClassName,
+  formatMessage,
   isDefaultClassName,
 } from '5board.vsc-common';
 import type { EditorElementProps } from '../../EditorElement';
-import { useMessageService, useOnMessage } from '../../../../services/MessageService';
+import { useMessageService } from '../../../../services/MessageService';
 import { useSources } from '../../../../providers/SourcesProvider';
+import { useLocalization } from '../../../../providers/LocalizationProvider';
 import {
   useExecutionOutput,
   useExecutionReadOnly,
@@ -18,97 +19,32 @@ import {
 import { OutputPanel } from './OutputPanel';
 import { useMonacoTheme } from './useMonacoTheme';
 import { useEditorAutoHeight, MIN_HEIGHT } from './useEditorAutoHeight';
+import { useBlockCodeSync } from './useBlockCodeSync';
+import { useMonacoClipboard } from './useMonacoClipboard';
 import { Icons } from '../../../Icons';
 
 loader.config({ monaco });
 
-// Kept short: the executeCodeblock command runs the last-synced code, so a long debounce
-// widens the window in which a keyboard-triggered run executes stale code.
-const DEBOUNCE_MS = 200;
-
 export function CodeElement({ element }: EditorElementProps<EditorElementType.Code>) {
   const messages = useMessageService();
   const sources = useSources();
-  const { language, className, lastOutput } = element.data;
+  const { t } = useLocalization();
+  const { language, className, lastOutput, outputCollapsed } = element.data;
   const executionState = useExecutionOutput(element.id, lastOutput);
   const readOnly = useExecutionReadOnly();
 
   const fileName = fileNameFromClassName(className, language);
   const source = sources.find((s) => s.name === fileName && s.language === language);
-  const prefix = COMMENT_PREFIX_BY_LANGUAGE[language] ?? '//';
-  const blockCode = source ? extractBlock(source.code, element.id, prefix) : null;
+  const blockCode = source
+    ? extractBlock(source.code, element.id, commentPrefixFor(language))
+    : null;
 
-  const [code, setCode] = useState(blockCode ?? '');
+  const { code, change, flush } = useBlockCodeSync(element.id, blockCode);
   const monacoTheme = useMonacoTheme();
-
-  const codeRef = useRef(code);
-  codeRef.current = code;
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingCodeRef = useRef<string | null>(null);
-  // The last version handed to the extension. Every edit comes back as a document update a
-  // moment later, and by then the user has usually typed on, so the echo is already stale.
-  const lastSentRef = useRef<string | null>(null);
-
-  const flushPendingUpdate = useCallback(() => {
-    if (debounceRef.current !== null) {
-      clearTimeout(debounceRef.current);
-      debounceRef.current = null;
-    }
-    if (pendingCodeRef.current !== null) {
-      lastSentRef.current = pendingCodeRef.current;
-      messages.send({
-        type: 'updateBlockCode',
-        elementId: element.id,
-        code: pendingCodeRef.current,
-      });
-      pendingCodeRef.current = null;
-    }
-  }, [messages, element.id]);
-
   const { wrapperRef, handleMount } = useEditorAutoHeight();
-  const pasteCallbackRef = useRef<((text: string) => void) | null>(null);
+  const registerClipboard = useMonacoClipboard();
 
-  useOnMessage((msg) => {
-    if (msg.type === 'clipboardContent' && pasteCallbackRef.current) {
-      pasteCallbackRef.current(msg.text);
-      pasteCallbackRef.current = null;
-    }
-  });
-
-  const sendDebouncedUpdate = useCallback(
-    (newCode: string) => {
-      pendingCodeRef.current = newCode;
-      if (debounceRef.current !== null) {
-        clearTimeout(debounceRef.current);
-      }
-      debounceRef.current = setTimeout(() => {
-        flushPendingUpdate();
-      }, DEBOUNCE_MS);
-    },
-    [flushPendingUpdate],
-  );
-
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current !== null) {
-        clearTimeout(debounceRef.current);
-      }
-    };
-  }, []);
-
-  // Only *external* edits (the source opened as a text file, a block moved between classes)
-  // may replace what is in the editor. Adopting the echo of our own edit would drop whatever
-  // was typed while it was in flight and move the caret, which is what made fast typing lose
-  // characters.
-  useEffect(() => {
-    if (blockCode === null) return;
-    if (blockCode === codeRef.current) return;
-    if (blockCode === lastSentRef.current) return;
-    setCode(blockCode);
-  }, [blockCode]);
-
-  // Manual per-block overrides from the settings sidebar; undefined falls back to the
-  // theme defaults set via the CSS classes below.
+  // Per-block overrides from the settings sidebar; undefined falls back to the theme classes.
   const surfaceStyle = {
     backgroundColor: element.style.backgroundColor,
     borderColor: element.style.border?.color,
@@ -121,7 +57,7 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
         className="border border-focus-border rounded-sm p-3 bg-editor-widget-background text-errorForeground"
         style={surfaceStyle}
       >
-        Source not found: {fileName}
+        {formatMessage(t('webview.codeblock.sourceNotFound'), { fileName })}
       </div>
     );
   }
@@ -131,7 +67,6 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
       className="border border-focus-border rounded-sm overflow-hidden bg-editor-widget-background relative"
       style={surfaceStyle}
     >
-      {/* Header — only shown when assigned to a named class */}
       {!isDefaultClassName(className, element.id) && (
         <div className="flex items-center gap-2 px-2 py-0.5 border-b border-editor-widget-border bg-editorGroupHeader-tabsBackground">
           <span className="font-sans text-sm font-normal text-tab-activeForeground flex items-center gap-1 select-none">
@@ -153,28 +88,11 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
           theme={monacoTheme}
           onMount={(editor) => {
             handleMount(editor);
-            // The executeCodeblock command can't flush this webview's debounce buffer, but
-            // opening the Command Palette (or clicking elsewhere) blurs Monaco — flushing here
-            // means those paths always execute fresh code.
-            editor.onDidBlurEditorText(flushPendingUpdate);
-
-            editor.addAction({
-              id: '5board-paste',
-              label: 'Paste',
-              keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV],
-              run: (ed) => {
-                pasteCallbackRef.current = (text) => {
-                  ed.trigger('keyboard', 'type', { text });
-                };
-                messages.send({ type: 'requestClipboard' });
-              },
-            });
+            // Opening the Command Palette blurs Monaco, so Ctrl+Shift+E runs fresh code.
+            editor.onDidBlurEditorText(flush);
+            registerClipboard(editor);
           }}
-          onChange={(v) => {
-            const newCode = v ?? '';
-            setCode(newCode);
-            sendDebouncedUpdate(newCode);
-          }}
+          onChange={(value) => change(value ?? '')}
           options={{
             minimap: { enabled: false },
             padding: { top: 8, bottom: 8 },
@@ -187,14 +105,14 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
         />
       </div>
 
-      {/* Actionbar + Output */}
       <OutputPanel
         elementId={element.id}
         state={executionState}
         readOnly={readOnly}
+        collapsed={outputCollapsed ?? false}
         onOpenSource={() => messages.send({ type: 'openSource', elementId: element.id })}
         onRun={() => {
-          flushPendingUpdate();
+          flush();
           messages.send({ type: 'executeCodeblock', elementId: element.id });
         }}
       />
