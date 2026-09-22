@@ -2,7 +2,13 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig(
-  globalIgnores(['**/webpack.config.js', '**/dist', '**/media/webview', 'scripts/**']),
+  globalIgnores([
+    '**/webpack.config.js',
+    '**/dist',
+    '**/media/webview',
+    'scripts/**',
+    '**/.vscode-test',
+  ]),
   tseslint.configs.strict,
   tseslint.configs.recommended,
   {
@@ -17,6 +23,7 @@ export default defineConfig(
         },
       ],
       '@typescript-eslint/no-non-null-assertion': 'off',
+      'no-console': 'warn',
     },
   },
 );

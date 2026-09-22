@@ -1,23 +1,63 @@
 import * as vscode from 'vscode';
 import { MessageService } from './MessageService';
-import { PackageManager } from './PackageManager';
 import { EditorEditorProvider } from './providers/EditorEditorProvider';
 import { t } from './localization';
 import path from 'path';
 import { BoardPackage } from './board/package';
-import {
-  ElementSettingsSidebarViewProvider,
-  SidebarViewProvider,
-} from './providers/SidebarViewProvider';
-import { StructureTreeProvider } from './providers/StructureTreeProvider';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
-import { BoardDocument, DEFAULT_TOOL_ID, EditorState } from '5board.vsc-common';
+import {
+  BoardDocument,
+  AddElementDefaults,
+  EditorElement,
+  EditorElementType,
+  EditorToolId,
+  DEFAULT_PROJECTOR_POINTER_STYLE,
+  DEFAULT_TOOL_ID,
+  EditorState,
+  ProjectorPointerStyle,
+} from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
 import { ExportPreviewProvider } from './providers/ExportPreviewProvider';
+import { ProjectorProvider } from './providers/ProjectorProvider';
+import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
+import { PackageManager } from './PackageManager';
+import { SidebarManager } from './sidebar/SidebarManager';
+import { createDefaultElement } from './board/addElement/createDefaultElement';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
   public readonly packageManager = new PackageManager();
+  private openDocuments = new Map<string, BoardCustomDocument>();
+
+  public registerDocument(document: BoardCustomDocument): void {
+    if (!this.openDocuments.has(document.uri.toString())) {
+      this.openDocuments.set(document.uri.toString(), document);
+    }
+  }
+
+  public unregisterDocument(uri: vscode.Uri): void {
+    this.openDocuments.delete(uri.toString());
+  }
+
+  public getDocumentForUri(uri: vscode.Uri): BoardCustomDocument | undefined {
+    return this.openDocuments.get(uri.toString());
+  }
+
+  public cursorTrackingEnabled = true;
+  public projectorPaused = false;
+  public projectorPointerStyle: ProjectorPointerStyle = DEFAULT_PROJECTOR_POINTER_STYLE;
+  // Document with an attached projector; unlike activeEditorDocument, not tied to editor focus.
+  private projectorDocument_: BoardCustomDocument | null = null;
+  public get projectorDocument(): BoardCustomDocument | null {
+    return this.projectorDocument_;
+  }
+  public set projectorDocument(document: BoardCustomDocument | null) {
+    this.projectorDocument_ = document;
+    this.projectorDocumentChange.fire(document);
+  }
+  // Sidebars run on their own MessageService, so push attach/detach to them here.
+  private projectorDocumentChange = new vscode.EventEmitter<BoardCustomDocument | null>();
+  public onProjectorDocumentChange = this.projectorDocumentChange.event;
 
   private activeEditorDocument_: BoardCustomDocument | null = null;
   public get activeEditorDocument(): BoardCustomDocument | null {
@@ -48,9 +88,9 @@ export class FiveBoardExtension extends ExtensionBase {
   public activate(context: vscode.ExtensionContext): void {
     super.activate(context);
     new EditorEditorProvider(context, this.packageManager).register();
-    new SidebarViewProvider(context, this.messages).register();
-    new ElementSettingsSidebarViewProvider(context, this.messages).register();
-    new StructureTreeProvider(context).register();
+    new ProjectorProvider(context).register();
+    context.subscriptions.push(new SidebarManager(context, this.messages));
+    new FiveBoardFileSystemProvider(this.packageManager).register(context);
     new ExportPreviewProvider(context, this.packageManager).register();
   }
 
@@ -84,8 +124,85 @@ export class FiveBoardExtension extends ExtensionBase {
   }
 
   @Command('5board-vsc.startPresentation')
-  startPresentationCommand(): void {
-    vscode.window.showInformationMessage('Presentation started');
+  async startPresentationCommand(): Promise<void> {
+    const activeTab = vscode.window.tabGroups.activeTabGroup.activeTab;
+    const tabInput = activeTab?.input;
+
+    if (
+      tabInput instanceof vscode.TabInputCustom &&
+      tabInput.viewType === EditorEditorProvider.VIEW_TYPE
+    ) {
+      await vscode.commands.executeCommand(
+        'vscode.openWith',
+        tabInput.uri,
+        ProjectorProvider.VIEW_TYPE,
+        { viewColumn: vscode.ViewColumn.Beside, preserveFocus: true },
+      );
+      await vscode.commands.executeCommand('workbench.action.focusLastEditorGroup');
+      await vscode.commands.executeCommand('workbench.action.moveEditorGroupToNewWindow');
+    } else {
+      vscode.window.showWarningMessage(t('extension.projector.noFileOpen'));
+    }
+  }
+
+  @Command('5board-vsc.deleteEditorElement')
+  deleteEditorElement(id: string): void {
+    this.applyEditToActiveDocument((document) => {
+      document.content.elements = document.content.elements.filter((e) => e.id !== id);
+    });
+  }
+
+  @Command('5board-vsc.addNewEditorElement')
+  addNewEditorElement(
+    type: EditorElementType,
+    position: EditorElement['layout'],
+    defaults?: AddElementDefaults,
+  ): void {
+    this.applyEditToActiveDocument((document) => {
+      const element = createDefaultElement(type, position, defaults, document);
+      document.content.elements.push(element);
+    });
+  }
+
+  @Command('5board-vsc.addImageFromFile')
+  async addImageFromFileCommand(): Promise<void> {
+    const activeDocument = this.activeEditorDocument;
+
+    if (!activeDocument) {
+      vscode.window.showInformationMessage('No active 5board document');
+      return;
+    }
+
+    const uris = await vscode.window.showOpenDialog({
+      canSelectMany: false,
+      filters: {
+        Images: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'],
+      },
+    });
+
+    const fileUri = uris?.[0];
+
+    if (!fileUri) {
+      return;
+    }
+
+    const bytes = await vscode.workspace.fs.readFile(fileUri);
+    const assetName = path.basename(fileUri.fsPath);
+    this.editorState = {
+      tool: {
+        type: EditorToolId.AddElement,
+        parameters: {
+          type: EditorElementType.Image,
+          placementMode: 'free',
+          defaults: {
+            asset: {
+              name: assetName,
+              bytes: Array.from(bytes),
+            },
+          },
+        },
+      },
+    };
   }
 
   @Command('5board-vsc.previewHtmlExport')
@@ -111,5 +228,13 @@ export class FiveBoardExtension extends ExtensionBase {
     }
     this.activeEditorDocument.applyEdit(edit);
     this.activeDocumentChange.fire(this.activeEditorDocument);
+  }
+
+  @Command('5board-vsc.goToElement')
+  public goToElement(elementId: string): void {
+    if (!this.activeEditorDocument) {
+      return;
+    }
+    this.activeEditorDocument.messageService.send({ type: 'goToElement', elementId }, undefined);
   }
 }

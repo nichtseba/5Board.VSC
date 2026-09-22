@@ -7,7 +7,7 @@ type Props = {
 export default function SettingsPanel({ title, icon, children }: Props) {
   return (
     <section className="flex flex-col gap-4">
-      <h2 className="flex align-center justify-center gap-2 font-semibold uppercase text-[var(--vscode-descriptionForeground)]">
+      <h2 className="flex align-center justify-center gap-2 font-semibold uppercase text-foreground-description">
         <span className={`codicon codicon-${icon}`} />
         {title}
       </h2>

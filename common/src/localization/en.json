@@ -11,6 +11,14 @@
       "noActiveBoard": "Open a .5boardz file or save current file.",
       "saveLabel": "Save HTML Export",
       "saved": "HTML export saved:"
+    },
+    "projector": {
+      "startPresentation": "Start Presentation",
+      "title": "Projector",
+      "noFileOpen": "Please open a .5boardz file in the editor before starting the projector view.",
+      "loading": "Loading...",
+      "live": "Live",
+      "paused": "Paused"
     }
   },
   "webview": {
@@ -27,14 +35,77 @@
       "title": "5Board Sidebar",
       "tools": {
         "pointer": "Pointer",
-        "text": "Text",
+        "spacer": "Spacer Tool",
+        "freehand": "Freehand Tool",
+        "addElement": "Add Element"
+      },
+      "elementType": {
         "heading": "Heading",
-        "link": "Link",
+        "text": "Text",
         "code": "Code",
         "image": "Image",
-        "spacer": "Spacer Tool",
-        "freehand": "Freehand Tool"
-      }
+        "rectangle": "Rectangle",
+        "circle": "Circle",
+        "line": "Line",
+        "freehand": "Freehand"
+      },
+      "freehand": {
+        "title": "Freehand Options",
+        "color": "Color",
+        "customColor": "Custom color",
+        "width": "Thickness",
+        "opacity": "Opacity",
+        "lineStyle": "Line style",
+        "dashScale": "Dash size",
+        "colors": {
+          "red": "Red",
+          "orange": "Orange",
+          "yellow": "Yellow",
+          "green": "Green",
+          "blue": "Blue",
+          "purple": "Purple",
+          "black": "Black",
+          "white": "White"
+        },
+        "lineStyles": {
+          "solid": "Solid",
+          "dashed": "Dashed",
+          "dotted": "Dotted",
+          "custom": "Custom"
+        },
+        "addSettings": "Add Settings for "
+      },
+      "projectorSettings": {
+        "title": "Projector Settings",
+        "cursorTracking": "Cursor Tracking",
+        "pause": "Pause",
+        "resume": "Resume",
+        "statusLive": "Live",
+        "statusPaused": "Paused",
+        "statusClosed": "Ended",
+        "pointerColor": "Pointer Color",
+        "customColor": "Custom",
+        "pointerShape": "Pointer Shape",
+        "colors": {
+          "red": "Red",
+          "orange": "Orange",
+          "yellow": "Yellow",
+          "green": "Green",
+          "blue": "Blue",
+          "purple": "Purple",
+          "black": "Black",
+          "white": "White"
+        },
+        "shapes": {
+          "dot": "Dot",
+          "ring": "Ring",
+          "rectangle": "Rectangle",
+          "duck": "Duck"
+        }
+      },
+      "goToElement": "Go to element",
+      "addElement": "Add Element",
+      "addCustomElement": "Add Custom Element"
     },
     "sidebar-element-settings": {
       "noElementSelected": "No element selected",
@@ -42,8 +113,64 @@
       "selectedElement": "Selected Element",
       "headingSettings": {
         "title": "Heading",
-        "levelLabel": "Hierarchy level"
-      }
+        "levelLabel": "Hierarchy level",
+        "numberingLabel": "Numbering",
+        "numberingEnabled": "Enable numbering",
+        "numberingNone": "No numbers",
+        "numberingDecimal": "Numbers",
+        "numberingLowerAlpha": "Alphabetic lowercase",
+        "numberingUpperAlpha": "Alphabetic uppercase",
+        "numberingLowerRoman": "Roman lowercase",
+        "numberingUpperRoman": "Roman uppercase",
+        "fontFamily": "Font family",
+        "fontFamilyPlaceholder": "Default font",
+        "fontSize": "Font size",
+        "fontSizeDecrease": "Decrease font size by 1",
+        "fontSizeIncrease": "Increase font size by 1",
+        "textStyle": "Text style",
+        "bold": "Bold",
+        "italic": "Italic",
+        "underline": "Underline",
+        "color": "Text color",
+        "colorTheme": "Theme",
+        "customColor": "Custom color",
+        "backgroundColor": "Background color"
+      },
+      "textSettings": {
+        "title": "Text",
+        "textColor": "Text Color",
+        "highlightColor": "Highligt Color",
+        "backgroundColor": "Background Color",
+        "fontSize": "Font size"
+      },
+      "imageSettings": {
+        "title": "Image"
+      },
+      "freehandSettings": {
+        "title": "Freehand"
+      },
+      "rectangleSettings": {
+        "title": "Rectangle"
+      },
+      "circleSettings": {
+        "title": "Circle"
+      },
+      "lineSettings": {
+        "title": "Line",
+        "symbols": "Symbols",
+        "borderColor": "Border color",
+        "borderWidth": "Border width",
+        "borderStyle": "Border style",
+        "startHead": "Start head",
+        "endHead": "End head",
+        "headSize": "Head size",
+        "headFill": "Fill heads",
+        "headNone": "None",
+        "headArrow": "Arrow",
+        "headCircle": "Circle",
+        "headSquare": "Square"
+      },
+      "delete": "Delete"
     }
   }
 }

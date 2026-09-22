@@ -1,13 +1,19 @@
 {
   "customEditors.editor": "5Board Editor",
   "customEditors.legacy-converter": "5Board Legacy Konverter",
+  "views.sidebar.sidebar-title": "Werkzeuge & Elemente",
+  "customEditors.projector": "5Board Beameransicht",
   "customEditors.exportPreview": "HTML-Export Vorschau",
-  "views.sidebar.sidebar-title": "Werkzeuge & Presets",
+  "views.sidebar.tool-title": "Werkzeuge & Presets",
+  "views.sidebar.projector-title": "Beamer-Einstellungen",
   "views.sidebar.element-settings-title": "Element Einstellungen",
   "views.sidebar.structure-title": "Struktur",
+  "views.sidebar.file-title": "Dateiinhalt",
   "commands.openCustomEditor": "5Board Editor öffnen",
   "commands.openBoardFile": "5Board Datei öffnen",
   "commands.newBoardFile": "Neue 5Board Datei",
   "commands.startPresentation": "Präsentation starten",
-  "commands.previewHtmlExport": "HTML-Export Vorschau anzeigen"
+  "commands.previewHtmlExport": "HTML-Export Vorschau anzeigen",
+  "commands.addImageFromFile": "Bild aus Datei hinzufügen",
+  "commands.goToElement": "Gehe zu Element"
 }

@@ -1,66 +1,174 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { init } from '../app/init';
-import { ToolItem } from '5board.vsc-common';
+import {
+  AddElementToolParameters,
+  DEFAULT_FREEHAND_PARAMETERS,
+  EditorTool,
+  EditorToolDefinition,
+  EditorToolId,
+  FREEHAND_COLORS,
+  FREEHAND_LINE_STYLES,
+  FREEHAND_MAX_DASH,
+  FREEHAND_MAX_WIDTH,
+  FREEHAND_MIN_DASH,
+  FREEHAND_MIN_WIDTH,
+  FreehandToolParameters,
+  TOOL_DEFINITIONS,
+  TranslationKey,
+} from '5board.vsc-common';
 import { useLocalization } from '../providers/LocalizationProvider';
 import { Button } from 'vscrui';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
+import SliderInput from '../components/sidebar/components/SliderInput';
+import { ColorPicker } from '../components/sidebar/components/ColorPicker';
+import LineStyleSelect from '../components/sidebar/components/LineStyleSelect';
+import { useMessageService } from '../services/MessageService';
+import { useEditorState } from '../providers/EditorStateProvider';
+import { NewElements } from '../components/sidebar/newElements/NewElements';
+import { NewCustomElements } from '../components/sidebar/newElements/NewCustomElements';
 
 export default function ToolSidebar() {
   const { t } = useLocalization();
-  const [selectedTool, setSelectedTool] = useState<string | null>(null);
+  const messages = useMessageService();
+  const editorState = useEditorState();
 
-  const handleToolClick = (tool: ToolItem) => {
-    setSelectedTool((prev) => (prev === tool.id ? null : tool.id));
+  const selectedTool = editorState?.tool;
+  // Freehand drawing options, sent with the tool via 'selectTool'.
+  const [freehandParams, setFreehandParams] = useState<FreehandToolParameters>(
+    DEFAULT_FREEHAND_PARAMETERS,
+  );
+  const tools = Object.entries(TOOL_DEFINITIONS) as [EditorToolId, EditorToolDefinition][];
+
+  useEffect(() => {
+    messages.send({ type: 'ready' }); // request current projector settings state
+  }, [messages]);
+
+  const handleToolClick = (tool: EditorTool) => {
+    if (tool.type === selectedTool?.type) {
+      if (tool.type === EditorToolId.AddElement) {
+        if (
+          (tool.parameters as AddElementToolParameters).type ===
+          (selectedTool.parameters as AddElementToolParameters).type
+        ) {
+          return;
+        }
+      } else {
+        return;
+      }
+    }
+
+    if (tool.type === EditorToolId.FREEHAND) tool.parameters = freehandParams;
+    messages.send({ type: 'selectTool', tool });
   };
-  const tools: ToolItem[] = [
-    {
-      id: 'pointer',
-      label: t('webview.sidebar.tools.pointer'),
-      icon: 'cursor',
-    },
-    {
-      id: 'text',
-      label: t('webview.sidebar.tools.text'),
-      icon: 'symbol-string',
-    },
-    {
-      id: 'heading',
-      label: t('webview.sidebar.tools.heading'),
-      icon: 'text-size',
-    },
-    {
-      id: 'link',
-      label: t('webview.sidebar.tools.link'),
-      icon: 'link',
-    },
-    {
-      id: 'code',
-      label: t('webview.sidebar.tools.code'),
-      icon: 'code',
-    },
-    {
-      id: 'image',
-      label: t('webview.sidebar.tools.image'),
-      icon: 'file-media',
-    },
-  ];
+
+  // Patch freehand params and, while the tool is active, re-send it live.
+  const updateFreehand = (patch: Partial<FreehandToolParameters>) => {
+    const parameters = { ...freehandParams, ...patch };
+    setFreehandParams(parameters);
+    if (selectedTool.type === EditorToolId.FREEHAND) {
+      const tool: EditorTool = { type: EditorToolId.FREEHAND, parameters };
+      //setSelectedTool(tool);
+      messages.send({ type: 'selectTool', tool });
+    }
+  };
+
+  const freehandSelected = selectedTool.type === EditorToolId.FREEHAND;
 
   return (
     <>
       <SidebarShell>
         <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3">
-          {tools.map((tool) => (
-            <Button
-              key={tool.id}
-              title={tool.label}
-              appearance={selectedTool === tool.id ? 'primary' : 'secondary'}
-              className="h-8 flex flex-col items-center justify-center gap-2"
-              onClick={() => handleToolClick(tool)}
-            >
-              <span className={`codicon codicon-${tool.icon}`} />
-            </Button>
-          ))}
+          {tools
+            .filter(([key]) => key !== EditorToolId.AddElement)
+            .map(([key, tool]) => (
+              <Button
+                key={key}
+                title={t(tool.labelKey)}
+                appearance={selectedTool?.type === key ? 'primary' : 'secondary'}
+                className="h-8 flex flex-col items-center justify-center gap-2"
+                onClick={() => handleToolClick({ type: key, parameters: undefined })}
+              >
+                <span className={`codicon codicon-${tool.icon}`} />
+              </Button>
+            ))}
         </div>
+        <NewElements handleToolClick={handleToolClick} />
+        <NewCustomElements handleToolClick={handleToolClick} />
+        {/* Freehand options — only shown while the freehand tool is active */}
+        {freehandSelected && (
+          <section className="mt-6 flex flex-col gap-2">
+            <span className="text-xs font-semibold uppercase tracking-wide opacity-70">
+              {t('webview.sidebar.freehand.title')}
+            </span>
+
+            <span className="text-xs opacity-80">{t('webview.sidebar.freehand.color')}</span>
+            <div className="flex flex-wrap gap-2">
+              {FREEHAND_COLORS.map((color) => (
+                <button
+                  key={color.id}
+                  title={t(`webview.sidebar.freehand.colors.${color.id}` as TranslationKey)}
+                  onClick={() => updateFreehand({ color: color.value })}
+                  className={`h-6 w-6 rounded-full border border-foreground-description ${
+                    freehandParams.color === color.value
+                      ? 'outline outline-2 outline-offset-1 outline-focus-border'
+                      : ''
+                  }`}
+                  style={{ backgroundColor: color.value }}
+                />
+              ))}
+            </div>
+
+            {/* Custom colour beyond the presets */}
+            <ColorPicker
+              color={freehandParams.color}
+              onChange={(color) => updateFreehand({ color })}
+              label={t('webview.sidebar.freehand.customColor')}
+            />
+
+            <SliderInput
+              label={t('webview.sidebar.freehand.width')}
+              value={freehandParams.width}
+              min={FREEHAND_MIN_WIDTH}
+              max={FREEHAND_MAX_WIDTH}
+              step={1}
+              unit="px"
+              onChange={(width) => updateFreehand({ width })}
+            />
+
+            {/* Opacity slider in percent (0–100%). Stored as opacity (0..1). */}
+            <SliderInput
+              label={t('webview.sidebar.freehand.opacity')}
+              value={Math.round(freehandParams.opacity * 100)}
+              min={0}
+              max={100}
+              step={5}
+              unit="%"
+              onChange={(value) => updateFreehand({ opacity: value / 100 })}
+            />
+
+            <LineStyleSelect
+              label={t('webview.sidebar.freehand.lineStyle')}
+              value={freehandParams.lineStyle}
+              options={FREEHAND_LINE_STYLES.map((s) => ({
+                id: s.id,
+                label: t(`webview.sidebar.freehand.lineStyles.${s.id}` as TranslationKey),
+              }))}
+              onChange={(lineStyle) => updateFreehand({ lineStyle })}
+            />
+
+            {/* Dash size slider — only for the custom line style. */}
+            {freehandParams.lineStyle === 'custom' && (
+              <SliderInput
+                label={t('webview.sidebar.freehand.dashScale')}
+                value={freehandParams.dashScale}
+                min={FREEHAND_MIN_DASH}
+                max={FREEHAND_MAX_DASH}
+                step={1}
+                onChange={(dashScale) => updateFreehand({ dashScale })}
+              />
+            )}
+          </section>
+        )}
       </SidebarShell>
     </>
   );

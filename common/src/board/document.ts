@@ -1,4 +1,5 @@
 import { BoardElement } from './element';
+import { HeadingSettings } from './headingSettings';
 
 /**
  * Represents a single .5boardz file in memory
@@ -17,6 +18,8 @@ export interface Source {
   name: string;
   language: string;
   code: string;
+  createdAt: number;
+  modifiedAt: number;
 }
 
 /**
@@ -25,8 +28,8 @@ export interface Source {
  */
 export interface BoardManifest {
   title: string;
-  createdAt: string;
-  modifiedAt: string;
+  createdAt: number;
+  modifiedAt: number;
   version: string;
 }
 
@@ -35,10 +38,13 @@ export interface BoardManifest {
  * Should be equivalent to the content.json within the .5boardz zip file
  */
 export interface BoardContent {
+  selectedElementIds: string[];
+  primarySelectedElementId: string | null;
   elements: BoardElement[];
   background?: string;
   snapAngle?: number;
   revealOrder?: number;
+  headingSettings?: HeadingSettings;
 }
 
 /**
@@ -47,6 +53,10 @@ export interface BoardContent {
  */
 export interface Asset {
   name: string;
-  mime: string;
+  mime?: string;
   bytes: Uint8Array;
+  // timestamp of creation, should be set when the asset is first created and never modified afterwards
+  createdAt: number;
+  // timestamp of last modification, should be updated whenever the asset is modified
+  modifiedAt: number;
 }
