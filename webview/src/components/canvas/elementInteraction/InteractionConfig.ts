@@ -38,13 +38,19 @@ export const ELEMENT_INTERACTION_CONFIG = {
     keepRatio: true,
     clipable: true,
   },
-  [EditorElementType.Shape]: {
+  [EditorElementType.Rectangle]: {
     draggable: true,
     dragDirection: 'free',
     resizable: true,
     rotatable: true,
   },
-  [EditorElementType.Arrow]: {
+  [EditorElementType.Circle]: {
+    draggable: true,
+    dragDirection: 'free',
+    resizable: true,
+    rotatable: true,
+  },
+  [EditorElementType.Line]: {
     draggable: true,
     dragDirection: 'free',
     resizable: true,

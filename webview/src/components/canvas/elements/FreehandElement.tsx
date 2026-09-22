@@ -1,6 +1,6 @@
 import { EditorElementType } from '5board.vsc-common';
 import { EditorElementProps } from '../EditorElement';
-import { buildSmoothPath, buildStraightPath, dashArrayForLineStyle } from '../freehandPath';
+import { buildSmoothPath, buildStraightPath, dashArrayForLineStyle } from '../logic/freehandPath';
 
 // Virtual canvas the normalized (0..1) points are scaled into.
 // A fixed viewBox lets the SVG stretch to any element size via CSS.

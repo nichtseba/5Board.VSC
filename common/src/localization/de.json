@@ -11,7 +11,9 @@
       "startPresentation": "Beameransicht starten",
       "title": "Beameransicht",
       "noFileOpen": "Bitte öffne zuerst eine .5boardz Datei im Editor, bevor du die Beameransicht startest.",
-      "loading": "Lade…"
+      "loading": "Lade…",
+      "live": "Live",
+      "paused": "Pausiert"
     }
   },
   "webview": {
@@ -59,13 +61,19 @@
         "text": "Text",
         "code": "Code",
         "image": "Bild",
-        "shape": "Form",
-        "arrow": "Pfeil",
+        "rectangle": "Rechteck",
+        "circle": "Kreis",
+        "line": "Linie",
         "freehand": "Freihand"
       },
       "projectorSettings": {
         "title": "Beameransicht-Einstellungen",
         "cursorTracking": "Mauszeiger-Tracking",
+        "pause": "Pausieren",
+        "resume": "Fortsetzen",
+        "statusLive": "Live",
+        "statusPaused": "Pausiert",
+        "statusClosed": "Beendet",
         "pointerColor": "Zeiger-Farbe",
         "customColor": "Eigene",
         "pointerShape": "Zeiger-Form",
@@ -131,6 +139,27 @@
       },
       "freehandSettings": {
         "title": "Freihand"
+      },
+      "rectangleSettings": {
+        "title": "Rechteck"
+      },
+      "circleSettings": {
+        "title": "Kreis"
+      },
+      "lineSettings": {
+        "title": "Linie",
+        "symbols": "Symbole",
+        "borderColor": "Rahmenfarbe",
+        "borderWidth": "Rahmenbreite",
+        "borderStyle": "Rahmenstil",
+        "startHead": "Startsymbol",
+        "endHead": "Endsymbol",
+        "headSize": "Symbolgröße",
+        "headFill": "Symbole ausfüllen",
+        "headNone": "Keine",
+        "headArrow": "Pfeil",
+        "headCircle": "Kreis",
+        "headSquare": "Quadrat"
       },
       "delete": "Löschen"
     }

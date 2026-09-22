@@ -7,7 +7,7 @@ import {
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { EditorElementProps } from '../EditorElement';
-import { useHeadingNumber } from '../HeadingNumberingContext';
+import { useHeadingNumber } from '../../../providers/HeadingNumberingContext';
 import { vscodeApi } from '../../VsCode';
 import { useBoardDocument } from '../../../providers/BoardDocumentProvider';
 

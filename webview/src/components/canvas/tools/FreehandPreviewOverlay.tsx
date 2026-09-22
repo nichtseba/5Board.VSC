@@ -1,5 +1,5 @@
 import { LineStyle } from '5board.vsc-common';
-import { buildSmoothPath, buildStraightPath, dashArrayForLineStyle } from '../freehandPath';
+import { buildSmoothPath, buildStraightPath, dashArrayForLineStyle } from '../logic/freehandPath';
 
 // Live, in-progress freehand stroke (normalized 0–1 to the canvas), rendered as an
 // overlay on top of the canvas. Used both locally while the editor draws and on the

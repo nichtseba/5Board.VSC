@@ -4,8 +4,8 @@ import { useCanvasEvents, useCanvasPoint } from '../../../providers/CanvasEvents
 import { useBoardDocument } from '../../../providers/BoardDocumentProvider';
 import { useGrid } from '../../../providers/GridProvider';
 import { useMessageService } from '../../../services/MessageService';
-import { Point, distPx, snapToAngle } from '../strokeGeometry';
-import { buildFreehandElement } from '../buildFreehandElement';
+import { Point, distPx, snapToAngle } from '../logic/strokeGeometry';
+import { buildFreehandElement } from '../logic/buildFreehandElement';
 
 export type DrawingPreview = { points: Point[]; straight: boolean };
 
