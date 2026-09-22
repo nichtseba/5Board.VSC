@@ -62,6 +62,18 @@ export default function EditorElement<ElementType extends EditorElementType>({
   const activeToolId = useEditorState()?.tool.type;
   const allElements = useBoardDocument()?.content.elements ?? [];
 
+  // Clicking an already-selected element again picks the next one stacked
+  // underneath it at that point (cycles back to the top once past the bottom),
+  // so covered elements stay reachable without a separate "select behind" tool.
+  const pickElementBelow = (event: React.MouseEvent): string | null => {
+    const stackedIds = document
+      .elementsFromPoint(event.clientX, event.clientY)
+      .filter((el): el is HTMLElement => el instanceof HTMLElement && 'editorElement' in el.dataset)
+      .map((el) => el.id);
+    const index = stackedIds.indexOf(element.id);
+    return index === -1 ? null : stackedIds[(index + 1) % stackedIds.length];
+  };
+
   const handleSelectElement = (id: string, event?: React.MouseEvent) => {
     if (activeToolId !== EditorToolId.POINTER) return;
 
@@ -70,7 +82,8 @@ export default function EditorElement<ElementType extends EditorElementType>({
       return;
     }
 
-    messages.send({ type: 'selectElements', ids: [id] });
+    const targetId = (selected && event && pickElementBelow(event)) || id;
+    messages.send({ type: 'selectElements', ids: [targetId] });
   };
 
   const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
