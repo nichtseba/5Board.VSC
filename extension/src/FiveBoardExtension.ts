@@ -218,6 +218,13 @@ export class FiveBoardExtension extends ExtensionBase {
       },
     };
   }
+  @Command('5board-vsc.openSettings')
+  public async openSettingsCommand(): Promise<void> {
+    await vscode.commands.executeCommand(
+      'workbench.action.openSettings',
+      '@ext:undefined_publisher.5board-vsc',
+    );
+  }
 
   public applyEditToActiveDocument(edit: (document: BoardDocument) => void): void {
     if (!this.activeEditorDocument) {

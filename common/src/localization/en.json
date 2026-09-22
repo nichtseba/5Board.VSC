@@ -75,7 +75,7 @@
         "statusPaused": "Paused",
         "statusClosed": "Ended",
         "pointerColor": "Pointer Color",
-        "customColor": "Custom",
+        "customColor": "Custom color",
         "pointerShape": "Pointer Shape",
         "colors": {
           "red": "Red",

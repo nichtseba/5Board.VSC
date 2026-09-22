@@ -230,11 +230,13 @@ export function HeadingSettings({ element }: Props) {
 }
 
 function ColorField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  const { t } = useLocalization();
   return (
     <ColorSelector
       color={value}
       onChange={onChange}
       themePresets={PROJECTOR_POINTER_PRESET_COLORS}
+      customColorLabel={t('webview.sidebar.projectorSettings.customColor')}
     />
   );
 }

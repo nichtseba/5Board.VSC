@@ -120,6 +120,11 @@
       {
         "command": "5board-vsc.goToElement",
         "title": "%commands.goToElement%"
+      },
+      {
+        "command": "5board-vsc.openSettings",
+        "title": "%commands.openSettings%",
+        "icon": "$(gear)"
       }
     ],
     "menus": {
@@ -132,14 +137,19 @@
       ],
       "view/title": [
         {
+          "command": "5board-vsc.openSettings",
+          "when": "view == 5board-vsc.sidebar-tool-view",
+          "group": "navigation@1"
+        },
+        {
           "command": "5board-vsc.newBoard",
           "when": "view == 5board-vsc.sidebar-tool-view",
-          "group": "navigation"
+          "group": "navigation@2"
         },
         {
           "command": "5board-vsc.startPresentation",
           "when": "view == 5board-vsc.sidebar-tool-view",
-          "group": "navigation"
+          "group": "navigation@3"
         }
       ]
     },
@@ -187,7 +197,7 @@
             "type": "string",
             "pattern": "^rgb\\(\\s*(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\s*,\\s*(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\s*,\\s*(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\s*\\)$"
           },
-          "description": "Up to three custom colors in RGB format, e.g. rgb(255, 0, 0)"
+          "description": "%configuration.colorPalette.customColors.description%"
         }
       }
     }

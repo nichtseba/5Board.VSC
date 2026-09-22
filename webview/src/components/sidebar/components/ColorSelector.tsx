@@ -44,17 +44,21 @@ export default function ColorSelector({
           />
         </div>
       )}
-      {customColors.length > 0 && (
-        <ColorPresets color={color} onChange={onChange} presets={customColors} />
-      )}
-      <ColorPicker
-        color={pickerColor}
-        onChange={(newColor) => {
-          setPickerColor(newColor);
-          onChange(newColor);
-        }}
-        label={customColorLabel}
-      />
+      <div className="flex flex-col gap-1">
+        {customColorLabel && (
+          <span className="text-xs uppercase text-foreground-description">{customColorLabel}</span>
+        )}
+        {customColors.length > 0 && (
+          <ColorPresets color={color} onChange={onChange} presets={customColors} />
+        )}
+        <ColorPicker
+          color={pickerColor}
+          onChange={(newColor) => {
+            setPickerColor(newColor);
+            onChange(newColor);
+          }}
+        />
+      </div>
     </div>
   );
 }
