@@ -8,19 +8,19 @@ import { useLocalization } from '../../../providers/LocalizationProvider';
 import { Divider, Dropdown } from 'vscrui';
 import { FontFamilyDropdown } from './components/FontFamilyDropdown';
 import SettingsField from '../layout/SettingsField';
-// import {
-//   AlignCenterButton,
-//   AlignJustifyButton,
-//   AlignLeftButton,
-//   AlignRightButton,
-//   BoldButton,
-//   BulletListButton,
-//   CodeButton,
-//   ItalicButton,
-//   OrderedListButton,
-//   StrikeButton,
-//   UnderlineButton,
-// } from './components/TextSettingsButton';
+import {
+  AlignCenterButton,
+  AlignJustifyButton,
+  AlignLeftButton,
+  AlignRightButton,
+  BoldButton,
+  BulletListButton,
+  CodeButton,
+  ItalicButton,
+  OrderedListButton,
+  StrikeButton,
+  UnderlineButton,
+} from './components/TextSettingsButton';
 import { useMessageService } from '../../../services/MessageService';
 import ColorSelector from '../components/ColorSelector';
 import { FontSizeInput } from './components/FontSizeInput';
@@ -68,6 +68,7 @@ export function TextSettings({ elements }: Props) {
               onChange={(font) => {
                 messages.send({
                   type: 'textEditorCommand',
+                  ids: elements.map((element) => element.id),
                   command: {
                     type: 'setFontFamily',
                     font,
@@ -81,6 +82,7 @@ export function TextSettings({ elements }: Props) {
               onChange={(size) => {
                 messages.send({
                   type: 'textEditorCommand',
+                  ids: elements.map((element) => element.id),
                   command: {
                     type: 'setFontSize',
                     size,
@@ -90,6 +92,7 @@ export function TextSettings({ elements }: Props) {
               onConfirm={() => {
                 messages.send({
                   type: 'textEditorCommand',
+                  ids: elements.map((element) => element.id),
                   command: {
                     type: 'focus',
                   },
@@ -106,6 +109,7 @@ export function TextSettings({ elements }: Props) {
                 if (typeof height !== 'string') return;
                 messages.send({
                   type: 'textEditorCommand',
+                  ids: elements.map((element) => element.id),
                   command: {
                     type: 'setLineHeight',
                     height,
@@ -122,6 +126,7 @@ export function TextSettings({ elements }: Props) {
             onChange={(color) => {
               messages.send({
                 type: 'textEditorCommand',
+                ids: elements.map((element) => element.id),
                 command: {
                   type: 'setTextColor',
                   color,
@@ -138,6 +143,7 @@ export function TextSettings({ elements }: Props) {
             onChange={(color) => {
               messages.send({
                 type: 'textEditorCommand',
+                ids: elements.map((element) => element.id),
                 command: {
                   type: 'setBackgroundColor',
                   color,
@@ -165,32 +171,32 @@ export function TextSettings({ elements }: Props) {
             customColorLabel={t('webview.sidebar.projectorSettings.customColor')}
           />
         </SettingsField>
-        {/* <Divider />
+        <Divider />
         <SettingsField>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3 mt-4">
-            <BoldButton element={element} />
-            <ItalicButton element={element} />
-            <StrikeButton element={element} />
-            <UnderlineButton element={element} />
-            <CodeButton element={element} />
+            <BoldButton elements={elements} />
+            <ItalicButton elements={elements} />
+            <StrikeButton elements={elements} />
+            <UnderlineButton elements={elements} />
+            <CodeButton elements={elements} />
           </div>
         </SettingsField>
         <Divider />
         <SettingsField>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3 mt-4">
-            <BulletListButton element={element} />
-            <OrderedListButton element={element} />
+            <BulletListButton elements={elements} />
+            <OrderedListButton elements={elements} />
           </div>
         </SettingsField>
         <Divider />
         <SettingsField>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3 mt-4">
-            <AlignLeftButton element={element} />
-            <AlignCenterButton element={element} />
-            <AlignRightButton element={element} />
-            <AlignJustifyButton element={element} />
+            <AlignLeftButton elements={elements} />
+            <AlignCenterButton elements={elements} />
+            <AlignRightButton elements={elements} />
+            <AlignJustifyButton elements={elements} />
           </div>
-        </SettingsField> */}
+        </SettingsField>
       </SettingsPanel>
     </>
   );

@@ -159,68 +159,77 @@ export function TextElement({
       return;
     }
 
+    if (!msg.ids.includes(element.id)) {
+      return;
+    }
+
+    const chain = editor.chain();
+
+    if (editing) {
+      chain.focus();
+    } else {
+      chain.selectAll();
+    }
+
     switch (msg.command.type) {
       case 'toggleBold':
-        editor.chain().focus().toggleBold().run();
+        chain.toggleBold().run();
         break;
 
       case 'toggleItalic':
-        editor.chain().focus().toggleItalic().run();
+        chain.toggleItalic().run();
         break;
 
       case 'toggleStrike':
-        editor.chain().focus().toggleStrike().run();
+        chain.toggleStrike().run();
         break;
 
       case 'toggleUnderline':
-        editor.chain().focus().toggleUnderline().run();
+        chain.toggleUnderline().run();
         break;
 
       case 'toggleCode':
-        editor.chain().focus().toggleCode().run();
+        chain.toggleCode().run();
         break;
 
       case 'setTextAlign':
-        editor.chain().focus().setTextAlign(msg.command.value).run();
+        chain.setTextAlign(msg.command.value).run();
         break;
 
       case 'setFontFamily':
         if (msg.command.font === 'default') {
-          editor.chain().focus().unsetFontFamily().run();
+          chain.unsetFontFamily().run();
         } else {
-          editor.chain().focus().setFontFamily(msg.command.font).run();
+          chain.setFontFamily(msg.command.font).run();
         }
         break;
 
       case 'setFontSize':
-        editor
-          .chain()
-          .setFontSize(msg.command.size + 'px')
-          .run();
+        chain.setFontSize(msg.command.size + 'px').run();
         break;
 
       case 'setLineHeight':
-        editor.chain().focus().setLineHeight(msg.command.height).run();
+        chain.setLineHeight(msg.command.height).run();
         break;
 
       case 'setTextColor':
-        editor.chain().focus().setColor(msg.command.color).run();
+        chain.setColor(msg.command.color).run();
         break;
 
       case 'setBackgroundColor':
-        editor.chain().focus().setBackgroundColor(msg.command.color).run();
+        chain.setBackgroundColor(msg.command.color).run();
         break;
 
       case 'toggleBulletList':
-        editor.chain().focus().toggleBulletList().run();
+        chain.toggleBulletList().run();
         break;
 
       case 'toggleOrderedList':
-        editor.chain().focus().toggleOrderedList().run();
+        chain.toggleOrderedList().run();
         break;
 
       case 'focus':
-        editor.chain().focus().run();
+        chain.focus().run();
     }
   });
 
@@ -229,11 +238,11 @@ export function TextElement({
       <EditorContent editor={editor} />
       {editing && (
         <BubbleMenu editor={editor}>
-          <BoldButton element={element} />
-          <ItalicButton element={element} />
-          <StrikeButton element={element} />
-          <UnderlineButton element={element} />
-          <CodeButton element={element} />
+          <BoldButton elements={[element]} />
+          <ItalicButton elements={[element]} />
+          <StrikeButton elements={[element]} />
+          <UnderlineButton elements={[element]} />
+          <CodeButton elements={[element]} />
         </BubbleMenu>
       )}
     </>

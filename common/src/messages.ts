@@ -29,7 +29,7 @@ type AllExtensionToWebviewMessage =
   | { type: 'init'; document: BoardDocument; editorState: EditorState; language: Language }
   | { type: 'initSidebar'; document: BoardDocument; editorState: EditorState }
   | { type: 'updateEditorState'; editorState: EditorState }
-  | { type: 'textEditorCommand'; command: TextEditorCommand }
+  | { type: 'textEditorCommand'; ids: string[]; command: TextEditorCommand }
   | { type: 'cursorMove'; x: number; y: number }
   | { type: 'cursorHide' }
   | { type: 'cursorTrackingChanged'; enabled: boolean }
@@ -99,7 +99,7 @@ type AllWebviewToExtensionMessage =
         changes: Partial<EditorElement>;
       }[];
     } // Update element with it's settings, array can handle one or more elements
-  | { type: 'textEditorCommand'; command: TextEditorCommand }
+  | { type: 'textEditorCommand'; ids: string[]; command: TextEditorCommand }
   | { type: 'addImageFromFile' }
   | { type: 'addImageFromBytes'; name: string; bytes: number[] }
   | { type: 'toggleCursorTracking' }
