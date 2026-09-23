@@ -120,6 +120,38 @@
       {
         "command": "5board-vsc.goToElement",
         "title": "%commands.goToElement%"
+      },
+      {
+        "command": "5board-vsc.copy",
+        "title": "%commands.copy%"
+      },
+      {
+        "command": "5board-vsc.paste",
+        "title": "%commands.paste%"
+      },
+      {
+        "command": "5board-vsc.duplicate",
+        "title": "%commands.duplicate%"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "5board-vsc.copy",
+        "key": "ctrl+c",
+        "mac": "cmd+c",
+        "when": "resourceExtname == .5boardz"
+      },
+      {
+        "command": "5board-vsc.paste",
+        "key": "ctrl+v",
+        "mac": "cmd+v",
+        "when": "resourceExtname == .5boardz"
+      },
+      {
+        "command": "5board-vsc.duplicate",
+        "key": "shift+alt+down",
+        "mac": "shift+alt+down",
+        "when": "resourceExtname == .5boardz"
       }
     ],
     "menus": {

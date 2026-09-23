@@ -23,6 +23,13 @@ import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
 import { createDefaultElement } from './board/addElement/createDefaultElement';
 
+const ELEMENT_CLIPBOARD_MARKER = '5board-vsc.elements';
+
+type ElementClipboardPayload = {
+  marker: typeof ELEMENT_CLIPBOARD_MARKER;
+  elements: EditorElement[];
+};
+
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
   public readonly packageManager = new PackageManager();
@@ -150,6 +157,44 @@ export class FiveBoardExtension extends ExtensionBase {
     });
   }
 
+  @Command('5board-vsc.copy')
+  async copyEditorElements(): Promise<void> {
+    const elements = this.getSelectedEditorElements();
+
+    if (elements.length === 0) {
+      return;
+    }
+
+    const payload: ElementClipboardPayload = {
+      marker: ELEMENT_CLIPBOARD_MARKER,
+      elements: structuredClone(elements),
+    };
+    await vscode.env.clipboard.writeText(JSON.stringify(payload));
+  }
+
+  @Command('5board-vsc.paste')
+  async pasteEditorElements(): Promise<void> {
+    const clipboardText = await vscode.env.clipboard.readText();
+    const elements = this.readElementClipboard(clipboardText);
+
+    if (elements.length === 0) {
+      return;
+    }
+
+    this.insertClonedElements(elements);
+  }
+
+  @Command('5board-vsc.duplicate')
+  duplicateEditorElements(): void {
+    const elements = this.getSelectedEditorElements();
+
+    if (elements.length === 0) {
+      return;
+    }
+
+    this.insertClonedElements(elements);
+  }
+
   @Command('5board-vsc.addNewEditorElement')
   addNewEditorElement(
     type: EditorElementType,
@@ -209,6 +254,52 @@ export class FiveBoardExtension extends ExtensionBase {
     }
     this.activeEditorDocument.applyEdit(edit);
     this.activeDocumentChange.fire(this.activeEditorDocument);
+  }
+
+  private getSelectedEditorElements(): EditorElement[] {
+    const document = this.activeEditorDocument?.boardPackage.document;
+
+    if (!document) {
+      return [];
+    }
+
+    const selectedIds = new Set(document.content.selectedElementIds);
+    return document.content.elements.filter((element) => selectedIds.has(element.id));
+  }
+
+  private readElementClipboard(text: string): EditorElement[] {
+    try {
+      const payload: unknown = JSON.parse(text);
+
+      if (
+        typeof payload !== 'object' ||
+        payload === null ||
+        !('marker' in payload) ||
+        payload.marker !== ELEMENT_CLIPBOARD_MARKER ||
+        !('elements' in payload) ||
+        !Array.isArray(payload.elements)
+      ) {
+        return [];
+      }
+
+      return payload.elements as EditorElement[];
+    } catch {
+      return [];
+    }
+  }
+
+  private insertClonedElements(elements: EditorElement[]): void {
+    const clones = structuredClone(elements).map((element) => ({
+      ...element,
+      id: crypto.randomUUID(),
+    }));
+    const cloneIds = clones.map((element) => element.id);
+
+    this.applyEditToActiveDocument((document) => {
+      document.content.elements.push(...clones);
+      document.content.selectedElementIds = cloneIds;
+      document.content.primarySelectedElementId = cloneIds[0] ?? null;
+    });
   }
 
   @Command('5board-vsc.goToElement')

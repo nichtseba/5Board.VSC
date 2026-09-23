@@ -13,5 +13,8 @@
   "commands.newBoardFile": "New 5Board File",
   "commands.startPresentation": "Start Presentation",
   "commands.addImageFromFile": "Add Image from File",
-  "commands.goToElement": "Go to Element"
+  "commands.goToElement": "Go to Element",
+  "commands.copy": "Copy 5Board Elements",
+  "commands.paste": "Paste 5Board Elements",
+  "commands.duplicate": "Duplicate 5Board Elements"
 }
