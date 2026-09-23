@@ -62,6 +62,17 @@ export class SidebarManager implements vscode.Disposable {
         { type: 'projectorPointerChanged', style: EXTENSION.projectorPointerStyle },
         sender,
       );
+      const settings = EXTENSION.settingsService.getSettings();
+
+      this.messages.send(
+        {
+          type: 'settingsChanged',
+          settings: {
+            colorPalette: settings.colorPalette,
+          },
+        },
+        sender,
+      );
       this.sendProjectorState(sender);
     });
 

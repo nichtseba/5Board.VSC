@@ -79,7 +79,7 @@
         "statusPaused": "Pausiert",
         "statusClosed": "Beendet",
         "pointerColor": "Zeiger-Farbe",
-        "customColor": "Eigene",
+        "customColor": "Eigene Farbe",
         "pointerShape": "Zeiger-Form",
         "colors": {
           "red": "Rot",
