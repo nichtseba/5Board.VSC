@@ -1,3 +1,4 @@
+import { ErrorBoundary } from './ErrorBoundary';
 import { LocalizationProvider } from '../providers/LocalizationProvider';
 import { BoardDocumentProvider } from '../providers/BoardDocumentProvider';
 import { EditorStateProvider } from '../providers/EditorStateProvider';
@@ -6,16 +7,18 @@ import { SettingsProvider } from '../providers/SettingsProvider';
 
 export function App({ RootComponent }: { RootComponent: React.ComponentType }) {
   return (
-    <LocalizationProvider>
-      <SettingsProvider>
-        <BoardDocumentProvider>
-          <EditorStateProvider>
-            <GridProvider>
-              <RootComponent />
-            </GridProvider>
-          </EditorStateProvider>
-        </BoardDocumentProvider>
-      </SettingsProvider>
-    </LocalizationProvider>
+    <ErrorBoundary>
+      <LocalizationProvider>
+        <SettingsProvider>
+          <BoardDocumentProvider>
+            <EditorStateProvider>
+              <GridProvider>
+                <RootComponent />
+              </GridProvider>
+            </EditorStateProvider>
+          </BoardDocumentProvider>
+        </SettingsProvider>
+      </LocalizationProvider>
+    </ErrorBoundary>
   );
 }
