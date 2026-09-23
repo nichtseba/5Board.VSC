@@ -20,7 +20,11 @@
     "customEditor": { "Test": "Testen der Übersetzung" },
     "canvas": {
       "spacerLabel": "Abstand",
-      "rows": "Zeilen"
+      "rows": "Zeilen",
+      "contextMenu": {
+        "bringToFront": "Nach vorne bringen",
+        "sendToBack": "Nach hinten schicken"
+      }
     },
     "sidebar": {
       "title": "5Board Seitenleiste",
@@ -102,6 +106,7 @@
       "noElementSelected": "Kein Element ausgewählt",
       "unsupportedElement": "Elementtyp wird nicht unterstützt",
       "selectedElement": "Ausgewähltes Element",
+      "layer": "Ebene",
       "headingSettings": {
         "title": "Überschrift",
         "levelLabel": "Hierarchiestufe",
