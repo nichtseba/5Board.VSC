@@ -121,35 +121,6 @@ export class FiveBoardExtension extends ExtensionBase {
     }
   }
 
-  @Command('5board-vsc.newTestBoard')
-  async newTest5boardCommand(): Promise<void> {
-    try {
-      const targetUri = await vscode.window.showSaveDialog({
-        defaultUri: vscode.workspace.workspaceFolders?.[0]?.uri,
-        filters: {
-          [t('extension.new5boardCommand.packageFilter')]: ['5boardz'],
-        },
-        saveLabel: t('extension.new5boardCommand.createFile'),
-      });
-
-      if (!targetUri) {
-        return;
-      }
-      // Todo: Maybe this should create an unsaved file
-      const title = path.basename(targetUri.fsPath, path.extname(targetUri.fsPath));
-      await BoardPackage.createTest(title).write(targetUri);
-      await vscode.commands.executeCommand(
-        'vscode.openWith',
-        targetUri,
-        EditorEditorProvider.VIEW_TYPE,
-      );
-    } catch (error) {
-      vscode.window.showErrorMessage(
-        `${t('extension.new5boardCommand.createFileFailed')} ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
-  }
-
   @Command('5board-vsc.startPresentation')
   async startPresentationCommand(): Promise<void> {
     const activeTab = vscode.window.tabGroups.activeTabGroup.activeTab;

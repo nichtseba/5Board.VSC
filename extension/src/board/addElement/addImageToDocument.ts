@@ -23,6 +23,11 @@ export function addImageToDocument(
     style: {
       visible: true,
     },
+    display: {
+      visible: true,
+      excludeFromExport: false,
+      speakerNote: false,
+    },
     data: {
       src: assetName,
       content: '',

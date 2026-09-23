@@ -5,8 +5,6 @@ import {
   BoardContent,
   BoardDocument,
   BoardManifest,
-  EditorElement,
-  EditorElementType,
   Source,
   create5boardzManifest,
 } from '5board.vsc-common';
@@ -57,54 +55,6 @@ export class BoardPackage {
     };
 
     return new BoardPackage(document);
-  }
-
-  public static createTest(title: string): BoardPackage {
-    const boardPackage = BoardPackage.createEmpty(title);
-    boardPackage.document.content.elements.push({
-      id: 'test-heading',
-      type: EditorElementType.Heading,
-      layout: {
-        xPos: 0,
-        yPos: 0,
-        width: 40,
-        height: 2,
-      },
-      style: {
-        visible: true,
-      },
-      data: {
-        content: 'Test Heading',
-        level: 1,
-      },
-      display: {
-        visible: true,
-        speakerNote: false,
-        excludeFromExport: false,
-      },
-    } satisfies EditorElement<EditorElementType.Heading>);
-    boardPackage.document.content.elements.push({
-      id: 'test-text',
-      type: EditorElementType.Text,
-      layout: {
-        xPos: 0,
-        yPos: 0,
-        width: 40,
-        height: 2,
-      },
-      style: {
-        visible: true,
-      },
-      data: {
-        content: 'Test Text',
-      },
-      display: {
-        visible: true,
-        speakerNote: false,
-        excludeFromExport: false,
-      },
-    } satisfies EditorElement<EditorElementType.Text>);
-    return boardPackage;
   }
 
   constructor(public document: BoardDocument) {}
