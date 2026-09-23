@@ -1,6 +1,15 @@
 import { spawn } from 'child_process';
+import { writeFile } from 'fs/promises';
+import { join } from 'path';
 import { StringDecoder } from 'string_decoder';
-import type { CodeblockSession, ExecutionEvent } from '5board.vsc-common';
+import type { CodeblockSession, ExecutionEvent, Source } from '5board.vsc-common';
+
+/** Writes sources flat into a directory, which then doubles as the compiler's/interpreter's root. */
+export async function writeSources(sources: Source[], directory: string): Promise<void> {
+  await Promise.all(
+    sources.map((source) => writeFile(join(directory, source.name), source.code, 'utf8')),
+  );
+}
 
 export interface CommandResult {
   stdout: string;

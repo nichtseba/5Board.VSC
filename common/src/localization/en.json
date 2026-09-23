@@ -74,6 +74,12 @@
           "missing": "missing {tools}",
           "selectedMark": "<-- selected"
         }
+      },
+      "python": {
+        "configUnusable": "The configured Python path \"{path}\" holds no usable interpreter.",
+        "notFound": "No Python {required} or newer found. Tried: {tried}.",
+        "foundOlder": "Found: Python {found}.",
+        "storeStubHint": "One entry reported no version — on Windows that is usually the Microsoft Store placeholder. Install Python from python.org or turn off the store alias under \"App execution aliases\"."
       }
     },
     "goToElement": "Go to Element"

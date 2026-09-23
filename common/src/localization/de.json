@@ -74,6 +74,12 @@
           "missing": "fehlt: {tools}",
           "selectedMark": "<-- ausgewählt"
         }
+      },
+      "python": {
+        "configUnusable": "Der konfigurierte Python-Pfad \"{path}\" enthält keinen nutzbaren Interpreter.",
+        "notFound": "Kein Python {required} oder neuer gefunden. Versucht: {tried}.",
+        "foundOlder": "Gefunden: Python {found}.",
+        "storeStubHint": "Ein Eintrag hat keine Version gemeldet — unter Windows ist das meist der Platzhalter aus dem Microsoft Store. Installiere Python von python.org oder deaktiviere den Store-Alias unter \"App-Ausführungsaliase\"."
       }
     },
     "goToElement": "Gehe zu Element"

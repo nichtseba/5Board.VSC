@@ -100,6 +100,28 @@ describe('CodeblockSourceService', function () {
       assert.equal(hasBlock(sourceCode(doc, 'Student.java'), 'el1', '//'), false);
     });
 
+    it('re-homes a standalone block into another language', function () {
+      const doc = makeDocument([makeCodeElement('el1')]);
+      updateBlockCode(doc, 'el1', 'int x = 1;');
+
+      moveBlock(doc, 'el1', { language: 'python' });
+
+      assert.equal(data(doc, 'el1').language, 'python');
+      // The java source stays behind as a zombie; translating the code is the user's job.
+      assert.equal(hasBlock(sourceCode(doc, 'El1.java'), 'el1', '//'), false);
+      assert.equal(extractBlock(sourceCode(doc, 'El1.py'), 'el1', '#'), 'int x = 1;');
+    });
+
+    it('refuses to move a block into a named class of a language without them', function () {
+      const doc = makeDocument([makeCodeElement('el1', { language: 'python' })]);
+      updateBlockCode(doc, 'el1', 'print(1)');
+
+      moveBlock(doc, 'el1', { className: 'Student' });
+
+      assert.equal(data(doc, 'el1').className, 'El1');
+      assert.equal(extractBlock(sourceCode(doc, 'El1.py'), 'el1', '#'), 'print(1)');
+    });
+
     it('ignores moves to unsupported languages', function () {
       const doc = makeDocument([makeCodeElement('el1')]);
       updateBlockCode(doc, 'el1', 'int x = 1;');
@@ -128,6 +150,21 @@ describe('CodeblockSourceService', function () {
       assert.equal(createClass(doc, 'El1', 'java'), 'name-taken');
 
       assert.equal(doc.content.codeClasses.length, 1);
+    });
+
+    it('createClass rejects a language without named classes', function () {
+      const doc = makeDocument([]);
+
+      assert.equal(createClass(doc, 'Student', 'python'), 'invalid');
+      assert.deepEqual(doc.content.codeClasses, []);
+    });
+
+    it('changeClassLanguage rejects a target language without named classes', function () {
+      const doc = makeDocument([]);
+      createClass(doc, 'Student', 'java');
+
+      assert.equal(changeClassLanguage(doc, 'Student', 'java', 'python'), 'invalid');
+      assert.deepEqual(doc.content.codeClasses, [{ name: 'Student', language: 'java' }]);
     });
 
     it('renameClass updates the registry, the source, and member elements', function () {

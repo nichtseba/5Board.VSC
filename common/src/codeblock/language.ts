@@ -72,7 +72,20 @@ export const JAVA_LANGUAGE_SUPPORT: LanguageSupport = {
   },
 };
 
-export const SUPPORTED_LANGUAGES: readonly LanguageSupport[] = [JAVA_LANGUAGE_SUPPORT];
+export const PYTHON_LANGUAGE_SUPPORT: LanguageSupport = {
+  id: 'python',
+  displayName: 'Python',
+  memberIndent: 0,
+  sanitizeClassName,
+  // Top-level statements are already runnable, and `namedClasses` is left out: a class whose
+  // members are separate blocks has no natural Python equivalent.
+  wrapRunnable: (_className, markedBlock) => `${markedBlock}\n`,
+};
+
+export const SUPPORTED_LANGUAGES: readonly LanguageSupport[] = [
+  JAVA_LANGUAGE_SUPPORT,
+  PYTHON_LANGUAGE_SUPPORT,
+];
 
 export function getLanguageSupport(language: string): LanguageSupport | undefined {
   return SUPPORTED_LANGUAGES.find((support) => support.id === language);

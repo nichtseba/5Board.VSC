@@ -15,6 +15,12 @@ describe('getLanguageSupport', function () {
     assert.equal(getLanguageSupport('java')?.id, 'java');
   });
 
+  it('provides python without a named-class model', function () {
+    const support = getLanguageSupport('python');
+    assert.equal(support?.id, 'python');
+    assert.equal(support?.namedClasses, undefined);
+  });
+
   it('returns undefined for unsupported languages', function () {
     assert.equal(getLanguageSupport('ruby'), undefined);
   });
@@ -142,6 +148,45 @@ describe('buildSource round-trip', function () {
     });
     assert.ok(source.includes('public class Student {'));
     assert.ok(!source.includes('public static void main'));
+  });
+
+  it('round-trips a python block, which needs no wrapper', function () {
+    const code = 'name = input("Name: ")\nprint(f"hi {name}")';
+    const source = buildSource({
+      elementId: 'el-py',
+      className: 'ElPy',
+      language: 'python',
+      code,
+      mainWrap: true,
+    });
+
+    assert.ok(source.startsWith('# <block id="el-py">'));
+    assert.equal(extractBlock(source, 'el-py', '#'), code);
+  });
+
+  it('round-trips an indented python block', function () {
+    const code = 'for i in range(3):\n    print(i)';
+    const source = buildSource({
+      elementId: 'el-py2',
+      className: 'ElPy2',
+      language: 'python',
+      code,
+      mainWrap: true,
+    });
+
+    assert.equal(extractBlock(source, 'el-py2', '#'), code);
+  });
+
+  it('throws for a named class in a language without them', function () {
+    assert.throws(() =>
+      buildSource({
+        elementId: 'el-py3',
+        className: 'Student',
+        language: 'python',
+        code: 'pass',
+        mainWrap: false,
+      }),
+    );
   });
 
   it('throws for unsupported languages', function () {

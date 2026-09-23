@@ -1,16 +1,15 @@
 import { join } from 'path';
-import { mkdir, mkdtemp, rm, writeFile } from 'fs/promises';
+import { mkdir, mkdtemp, rm } from 'fs/promises';
 import { tmpdir } from 'os';
 import {
   formatMessage,
   type CodeblockExecutionRequest,
   type CodeblockRunner,
   type ExecutionStartResult,
-  type Source,
   type ToolCheckResult,
   type ToolchainConfig,
 } from '5board.vsc-common';
-import { ProcessSession, runCommand, startProcess } from './runnerUtils';
+import { ProcessSession, runCommand, startProcess, writeSources } from './runnerUtils';
 import { resolveJavaToolchain } from './javaToolchain';
 import { describeToolchainFailure } from './javaToolchainMessages';
 import { t } from '../localization';
@@ -103,10 +102,4 @@ export class JavaCodeblockRunner implements CodeblockRunner {
 
     return { ok: true, session: new ProcessSession(process) };
   }
-}
-
-async function writeSources(sources: Source[], tempDir: string): Promise<void> {
-  await Promise.all(
-    sources.map((source) => writeFile(join(tempDir, source.name), source.code, 'utf8')),
-  );
 }
