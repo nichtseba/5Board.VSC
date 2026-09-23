@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { EditorElement, EditorElementType, EditorToolId } from '5board.vsc-common';
 import type React from 'react';
 import { TextElement } from './elements/TextElement';
@@ -6,17 +6,27 @@ import { HeadingElement } from './elements/HeadingElement';
 import ElementInteractionController from './elementInteraction/ElementInteractionController';
 import { CodeElement } from './elements/CodeElement';
 import { ImageElement } from './elements/ImageElement';
-import { ShapeElement } from './elements/ShapeElement';
-import { ArrowElement } from './elements/ArrowElement';
+import { LineElement } from './elements/LineElement';
+import { FreehandElement } from './elements/FreehandElement';
 import { useEditorState } from '../../providers/EditorStateProvider';
 import { useMessageService } from '../../services/MessageService';
 import { useViewType } from '../../providers/ViewTypeProvider';
+import { RectangleElement } from './elements/RectangleElement';
+import { CircleElement } from './elements/CircleElement';
 
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
   selected?: boolean;
-  onSelect?: () => void;
+  onSelect?: (event?: React.MouseEvent) => void;
+  editing?: boolean;
+  editingPosition?: {
+    x: number;
+    y: number;
+  } | null;
+  onStopEditing?: () => void;
   targetRef?: React.RefObject<HTMLDivElement>;
+  assetUrls?: Record<string, string>;
+  preview?: boolean;
 };
 
 /**
@@ -28,36 +38,91 @@ export type EditorElementProps<T extends EditorElementType> = {
 export default function EditorElement<ElementType extends EditorElementType>({
   element,
   selected,
+  assetUrls,
+  preview,
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
+  const [editing, setEditing] = useState(false);
+  const [editingPosition, setEditingPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const ElementComponent =
     (ELEMENT_COMPONENTS[element.type] as React.ComponentType<EditorElementProps<ElementType>>) ??
     UnknownElement;
-  const activeToolId = useEditorState()?.tool.type;
   const messages = useMessageService();
+  const activeToolId = useEditorState()?.tool.type;
 
-  const handleSelectElement = (id: string) => {
+  const handleSelectElement = (id: string, event?: React.MouseEvent) => {
     if (activeToolId !== EditorToolId.POINTER) return;
 
-    messages.send({
-      type: 'selectElement',
-      id,
-    });
+    if (event?.shiftKey) {
+      messages.send({ type: 'toggleElementSelection', ids: [id] });
+      return;
+    }
+
+    messages.send({ type: 'selectElements', ids: [id] });
   };
+
+  useEffect(() => {
+    const listener = (event: KeyboardEvent) => {
+      if (event.key !== 'Delete') {
+        return;
+      }
+
+      if (!selected) {
+        return;
+      }
+
+      messages.send({
+        type: 'deleteElement',
+        id: element.id,
+      });
+    };
+
+    window.addEventListener('keydown', listener);
+
+    return () => window.removeEventListener('keydown', listener);
+  });
+
+  const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (element.type !== EditorElementType.Text) {
+      return;
+    }
+    setEditingPosition({
+      x: event.clientX,
+      y: event.clientY,
+    });
+    setEditing(true);
+  };
+
+  const handleStopEditing = () => {
+    setEditing(false);
+    setEditingPosition(null);
+  };
+
+  useEffect(() => {
+    if (!selected) {
+      setEditing(false);
+      setEditingPosition(null);
+    }
+  }, [selected]);
   const viewType = useViewType();
   const hideInProjector = element.display.speakerNote || !element.display.visible;
   const hideInExport = element.display.speakerNote || element.display.excludeFromExport;
   if ((viewType === 'projector' && hideInProjector) || (viewType === 'export' && hideInExport)) {
     return null;
   }
-
   return (
     <>
       <div
         id={element.id}
-        onClick={() => handleSelectElement(element.id)}
+        data-editor-element
+        onClick={(event) => handleSelectElement(element.id, event)}
+        onDoubleClick={handleDoubleClick}
         className={`
-          box-border font-bold
+          box-border 
+          ${element.type === EditorElementType.Line ? '' : 'overflow-hidden'}
           ${activeToolId === EditorToolId.POINTER ? 'cursor-pointer' : ''}
           ${
             activeToolId === EditorToolId.POINTER && !selected
@@ -72,17 +137,28 @@ export default function EditorElement<ElementType extends EditorElementType>({
           gridRowEnd: `span ${element.layout.height}`,
           gridColumnStart: element.layout.xPos + 1,
           gridColumnEnd: `span ${element.layout.width}`,
+          transform: `rotate(${element.layout.rotation ?? 0}deg)`,
+          transformOrigin: 'center center',
         }}
       >
         <ElementComponent
           element={element}
           targetRef={targetRef}
           selected={selected}
-          onSelect={() => handleSelectElement(element.id)}
+          onSelect={(event) => handleSelectElement(element.id, event)}
+          editing={editing}
+          editingPosition={editingPosition}
+          assetUrls={assetUrls}
+          preview={preview}
+          onStopEditing={handleStopEditing}
         />
       </div>
       {activeToolId === EditorToolId.POINTER && (
-        <ElementInteractionController element={element} selected={selected} targetRef={targetRef} />
+        <ElementInteractionController
+          element={element}
+          selected={selected && !editing}
+          targetRef={targetRef}
+        />
       )}
     </>
   );
@@ -96,8 +172,10 @@ const ELEMENT_COMPONENTS = {
   [EditorElementType.Text]: TextElement,
   [EditorElementType.Code]: CodeElement,
   [EditorElementType.Image]: ImageElement,
-  [EditorElementType.Shape]: ShapeElement,
-  [EditorElementType.Arrow]: ArrowElement,
+  [EditorElementType.Rectangle]: RectangleElement,
+  [EditorElementType.Circle]: CircleElement,
+  [EditorElementType.Line]: LineElement,
+  [EditorElementType.Freehand]: FreehandElement,
 } as const satisfies {
   [ElementType in EditorElementType]: React.ComponentType<EditorElementProps<ElementType>>;
 };

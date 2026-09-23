@@ -1,9 +1,22 @@
 import { EditorElement, EditorElementType } from '5board.vsc-common';
+import SettingsPanel from '../layout/SettingsPanel';
+import { useLocalization } from '../../../providers/LocalizationProvider';
 
 type Props = {
   element: EditorElement<EditorElementType.Image>;
 };
 
 export function ImageSettings({ element }: Props) {
-  return <div>Add settings for {element.id}</div>;
+  const { t } = useLocalization();
+
+  return (
+    <SettingsPanel
+      title={t('webview.sidebar-element-settings.imageSettings.title')}
+      icon="file-media"
+    >
+      <>
+        <div>{element.id}</div>
+      </>
+    </SettingsPanel>
+  );
 }

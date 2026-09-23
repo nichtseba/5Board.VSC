@@ -29,21 +29,19 @@ export default function GenericElementSettings({ element }: { element: EditorEle
   );
   return (
     <>
-      <SettingsField label={t('webview.sidebar-element-settings.genericSettings.visibleLabel')}>
+      <SettingsField label={t('webview.sidebar-element-settings.visible')}>
         <Checkbox
           checked={element.display.visible}
           onChange={(checked) => updateElementDisplay({ visible: checked })}
         />
       </SettingsField>
-      <SettingsField label={t('webview.sidebar-element-settings.genericSettings.speakerNoteLabel')}>
+      <SettingsField label={t('webview.sidebar-element-settings.speakerNote')}>
         <Checkbox
           checked={element.display.speakerNote}
           onChange={(checked) => updateElementDisplay({ speakerNote: checked })}
         />
       </SettingsField>
-      <SettingsField
-        label={t('webview.sidebar-element-settings.genericSettings.hideInExportLabel')}
-      >
+      <SettingsField label={t('webview.sidebar-element-settings.hideInExport')}>
         <Checkbox
           checked={element.display.excludeFromExport}
           onChange={(checked) => updateElementDisplay({ excludeFromExport: checked })}

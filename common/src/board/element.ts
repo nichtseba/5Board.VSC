@@ -1,3 +1,6 @@
+import type { JSONContent } from '@tiptap/core';
+import { TranslationKey } from '../localization';
+
 export type BoardElement = EditorElement; // Todo: Replace with new Element type when we have it defined
 // Todo: Add additional element types
 export enum EditorElementType {
@@ -5,8 +8,10 @@ export enum EditorElementType {
   Text = 'text',
   Code = 'code',
   Image = 'image',
-  Shape = 'shape',
-  Arrow = 'arrow',
+  Rectangle = 'rectangle',
+  Circle = 'circle',
+  Line = 'line',
+  Freehand = 'freehand',
 }
 
 /**
@@ -44,7 +49,7 @@ export type ElementStyle = {
   border?: {
     color?: string;
     width?: number;
-    style?: 'solid' | 'dashed' | 'dotted';
+    style?: LineStyle;
     radius?: number;
   };
 };
@@ -59,27 +64,24 @@ export type ElementDisplay = {
  * All Editor Element Data Types
  */
 
-type EditorElementDataMap = {
+export type EditorElementDataMap = {
   [EditorElementType.Heading]: HeadingElementData;
   [EditorElementType.Text]: TextElementData;
   [EditorElementType.Code]: CodeElementData;
   [EditorElementType.Image]: ImageElementData;
-  [EditorElementType.Shape]: ShapeElementData;
-  [EditorElementType.Arrow]: ArrowElementData;
+  [EditorElementType.Rectangle]: undefined; // No need for extra data
+  [EditorElementType.Circle]: undefined; // No need for extra data
+  [EditorElementType.Line]: LineElementData;
+  [EditorElementType.Freehand]: FreehandElementData;
 };
 
 export type HeadingElementData = {
   level: 1 | 2 | 3 | 4 | 5 | 6;
   content: string;
-  textStyle?: TextStyle;
+  textStyle?: TextStyleH;
 };
 
-export type TextElementData = {
-  content: string;
-  textStyle?: TextStyle;
-};
-
-export type TextStyle = {
+export type TextStyleH = {
   fontFamily?: string;
   fontSize?: number;
   fontWeight?: 'normal' | 'bold' | 'bolder' | 'lighter' | number;
@@ -88,10 +90,52 @@ export type TextStyle = {
   textAlign?: 'left' | 'center' | 'right' | 'justify';
   lineHeight?: number;
 };
+
 export type TextDecorationStyle = {
   underline?: boolean;
   overline?: boolean;
   lineThrough?: boolean;
+};
+
+export type TextElementData = {
+  content: JSONContent;
+  tiptap?: Tiptap;
+};
+
+export type Tiptap = {
+  marks?: Marks;
+  nodes?: Nodes;
+};
+
+export type Marks = {
+  bold?: boolean;
+  code?: boolean;
+  italic?: boolean;
+  link?: boolean;
+  strike?: boolean;
+  underline?: boolean;
+  textStyle?: TextStyle;
+};
+
+export type Nodes = {
+  blockquote?: boolean;
+  bulletList?: boolean;
+  codeBlock?: boolean;
+  orderedList?: boolean;
+
+  attributes?: NodeAttributes;
+};
+
+export type TextStyle = {
+  fontFamily?: string;
+  fontSize?: string;
+  lineHeight?: string;
+  color?: string;
+  backgroundColor?: string;
+};
+
+export type NodeAttributes = {
+  textAlign?: 'left' | 'center' | 'right' | 'justify';
 };
 
 export type CodeElementData = {
@@ -112,6 +156,8 @@ export type ImageElementData = {
 
   hideInExport?: boolean;
 
+  configuredWidth?: boolean;
+  aspectRatio?: number;
   cropData?: CropData;
 };
 export type CropData = {
@@ -121,46 +167,236 @@ export type CropData = {
   cropHeight: number;
 };
 
-export type ArrowElementData = {
+/* A freehand drawing is a list of strokes. Each stroke is one continuous
+ * pen movement (pen-down until pen-up) and is rendered as its own line.
+ */
+export type FreehandElementData = {
+  strokes: FreehandStroke[];
+};
+
+/** Line rendering style shared by strokes (and reusable elsewhere).
+ * 'custom' uses a numeric dash scale instead of a fixed pattern. */
+export type LineStyle = 'solid' | 'dashed' | 'dotted' | 'custom';
+type Point = { x: number; y: number };
+export type FreehandStroke = {
+  /**
+   * The sampled points of the stroke, in normalized coordinates (0..1)
+   * relative to the element's bounding box. Normalizing keeps the drawing
+   * resolution-independent so it scales correctly in the projector.
+   */
+  points: Point[];
+  /** Stroke color; falls back to the editor foreground color when omitted. */
+  color?: string;
+  /** Stroke width in screen pixels; stays constant while the element scales. */
+  width?: number;
+  /** Dash rendering of the line; defaults to solid when omitted. */
+  lineStyle?: LineStyle;
+  /** Dash/gap size (multiple of width) when lineStyle is 'custom'. */
+  dashScale?: number;
+  /** Render as straight segments (no smoothing), e.g. pen-tool polylines. */
+  straight?: boolean;
+};
+
+export type LineElementData = {
   headTypeStart?: 'none' | 'arrow' | 'circle' | 'square';
   headTypeEnd?: 'none' | 'arrow' | 'circle' | 'square';
   headSize?: number;
   headFill?: boolean;
-  points: { x: number; y: number }[]; // Start and end points for the arrow
+  points: { x: number; y: number }[]; // Start and end points for the line
 };
 
-export type ShapeElementData =
-  | RectangleShapeData
-  | EllipseShapeData
-  | LineShapeData
-  | PolygonShapeData;
+/**
+ * All Editor Element Defaults when creating a new element
+ */
+export type AddElementPlacementMode = 'free' | 'fullRow' | 'fixed' | 'click';
+export type ElementCategory = 'basic' | 'custom';
 
-type Point = { x: number; y: number };
-
-type BaseShapeData = {
-  fillColor?: string;
-  strokeColor?: string;
-  strokeWidth?: number;
-  shapeType: 'rectangle' | 'ellipse' | 'line' | 'polygon';
+export type AddElementDefaults<T extends EditorElementType = EditorElementType> = {
+  layout?: Partial<Omit<ElementLayout, 'xPos' | 'yPos'>>;
+  style?: Partial<ElementStyle>;
+  data?: Partial<EditorElementDataMap[T]>;
+  asset?: {
+    name: string;
+    bytes: number[];
+  };
 };
 
-type RectangleShapeData = BaseShapeData & {
-  shapeType: 'rectangle';
-  radius?: number;
+export type ElementTypeDefinition<T extends EditorElementType = EditorElementType> = {
+  label: TranslationKey;
+  icon: string;
+  category: ElementCategory;
+  placement: AddElementPlacementMode;
+  profile: {
+    layout: Omit<ElementLayout, 'xPos' | 'yPos'>;
+    data: EditorElementDataMap[T];
+  };
 };
 
-type EllipseShapeData = BaseShapeData & {
-  shapeType: 'ellipse';
-  rx: number;
-  ry: number;
+export const DEFAULT_ELEMENT_PROFILES = {
+  [EditorElementType.Heading]: {
+    layout: { width: 40, height: 2 },
+    style: {
+      visible: true,
+    },
+    data: { level: 1, content: 'Heading' },
+  },
+  [EditorElementType.Text]: {
+    layout: { width: 20, height: 3 },
+    style: {
+      visible: true,
+    },
+    data: {
+      content: {
+        type: 'doc',
+        content: [
+          {
+            type: 'paragraph',
+            content: [
+              {
+                type: 'text',
+                text: 'Enter text here... ',
+                marks: [{ type: 'textStyle', attrs: { fontSize: 12 } }],
+              },
+            ],
+          },
+        ],
+      },
+    },
+  },
+  [EditorElementType.Code]: {
+    layout: { width: 40, height: 10 },
+    style: {
+      visible: true,
+    },
+    data: { codeBlockId: '', content: '', language: 'plaintext' },
+  },
+  [EditorElementType.Image]: {
+    layout: { width: 20, height: 10 },
+    style: {
+      visible: true,
+    },
+    data: { src: '', content: '', altText: 'Image' },
+  },
+  [EditorElementType.Rectangle]: {
+    layout: { width: 20, height: 10 },
+    style: {
+      visible: true,
+    },
+    data: undefined,
+  },
+  [EditorElementType.Circle]: {
+    layout: { width: 20, height: 10 },
+    style: {
+      visible: true,
+    },
+    data: undefined,
+  },
+  [EditorElementType.Line]: {
+    layout: { width: 12, height: 4 },
+    style: {
+      visible: true,
+      opacity: 1,
+      border: {
+        color: '#f14c4c',
+        width: 2,
+        style: 'solid',
+      },
+    },
+    data: {
+      points: [
+        { x: 0, y: 0 },
+        { x: 100, y: 0 },
+      ],
+    },
+  },
+  // This is just a filler here to satisfie the type. Freehand is added with a different tool
+  [EditorElementType.Freehand]: {
+    layout: { width: 10, height: 10 },
+    style: {
+      visible: true,
+    },
+    data: { strokes: [] },
+  },
+} satisfies {
+  [K in EditorElementType]: {
+    layout: Omit<ElementLayout, 'xPos' | 'yPos'>;
+    style: ElementStyle;
+    data: EditorElementDataMap[K];
+  };
 };
 
-type LineShapeData = BaseShapeData & {
-  shapeType: 'line';
-  points: [Point, Point];
+export const ELEMENT_TYPE_DEFINITIONS = {
+  [EditorElementType.Heading]: {
+    label: 'webview.sidebar.elementType.heading',
+    icon: 'text-size',
+    category: 'basic',
+    placement: 'fullRow',
+    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Heading],
+  },
+  [EditorElementType.Text]: {
+    label: 'webview.sidebar.elementType.text',
+    icon: 'symbol-string',
+    category: 'basic',
+    placement: 'free',
+    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Text],
+  },
+  [EditorElementType.Code]: {
+    label: 'webview.sidebar.elementType.code',
+    icon: 'code',
+    category: 'basic',
+    placement: 'fullRow',
+    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Code],
+  },
+  [EditorElementType.Image]: {
+    label: 'webview.sidebar.elementType.image',
+    icon: 'file-media',
+    category: 'basic',
+    placement: 'free',
+    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Image],
+  },
+  [EditorElementType.Rectangle]: {
+    label: 'webview.sidebar.elementType.rectangle',
+    icon: 'primitive-square',
+    category: 'basic',
+    placement: 'click',
+    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Rectangle],
+  },
+  [EditorElementType.Circle]: {
+    label: 'webview.sidebar.elementType.circle',
+    icon: 'circle',
+    category: 'basic',
+    placement: 'click',
+    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Circle],
+  },
+  [EditorElementType.Line]: {
+    label: 'webview.sidebar.elementType.line',
+    icon: 'dash',
+    category: 'basic',
+    placement: 'click',
+    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Line],
+  },
+  // This is just a filler here to satisfie the type. Freehand is added with a different tool
+  [EditorElementType.Freehand]: {
+    label: 'webview.sidebar.elementType.freehand',
+    icon: 'pencil',
+    category: 'basic',
+    placement: 'free',
+    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Freehand],
+  },
+} as const satisfies {
+  [K in EditorElementType]: ElementTypeDefinition<K>;
 };
 
-type PolygonShapeData = BaseShapeData & {
-  shapeType: 'polygon';
-  points: Point[];
-};
+export function getElementTypeDefinition<T extends EditorElementType>(type: T) {
+  return ELEMENT_TYPE_DEFINITIONS[type];
+}
+
+export function getBasicElementTypes() {
+  return Object.entries(ELEMENT_TYPE_DEFINITIONS).filter(
+    ([, definition]) => definition.category === 'basic',
+  ) as [EditorElementType, (typeof ELEMENT_TYPE_DEFINITIONS)[EditorElementType]][];
+}
+
+export function getCustomElementTypes(): [] {
+  return [];
+}

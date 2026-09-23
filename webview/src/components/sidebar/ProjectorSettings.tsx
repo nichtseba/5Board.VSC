@@ -26,10 +26,17 @@ export default function ProjectorSettings() {
   const messages = useMessageService();
 
   const [cursorTracking, setCursorTracking] = useState(true);
+  const [paused, setPaused] = useState(false);
+  // Whether a projector window is attached.
+  const [open, setOpen] = useState(false);
   const [style, setStyle] = useState<ProjectorPointerStyle>(DEFAULT_PROJECTOR_POINTER_STYLE);
 
   useOnMessage((msg) => {
     if (msg.type === 'cursorTrackingChanged') setCursorTracking(msg.enabled);
+    if (msg.type === 'projectorStateChanged') {
+      setPaused(msg.paused);
+      setOpen(msg.open);
+    }
     if (msg.type === 'projectorPointerChanged') setStyle(msg.style);
   });
 
@@ -58,6 +65,46 @@ export default function ProjectorSettings() {
 
   return (
     <div className="flex flex-col gap-4">
+      {/* Playback: one compact row — toggle button plus the current state. */}
+      <div className="flex items-center gap-2 text-sm">
+        <button
+          type="button"
+          disabled={!open}
+          title={
+            paused
+              ? t('webview.sidebar.projectorSettings.resume')
+              : t('webview.sidebar.projectorSettings.pause')
+          }
+          aria-label={
+            paused
+              ? t('webview.sidebar.projectorSettings.resume')
+              : t('webview.sidebar.projectorSettings.pause')
+          }
+          aria-pressed={paused}
+          onClick={() => messages.send({ type: 'toggleProjectorPaused' })}
+          className="flex h-6 w-6 items-center justify-center rounded border border-foreground-description leading-none disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          {paused ? '▶' : '⏸'}
+        </button>
+        <span
+          className="h-2 w-2 shrink-0 rounded-full"
+          style={{
+            backgroundColor: !open
+              ? 'var(--vscode-descriptionForeground, #8a8a8a)'
+              : paused
+                ? 'var(--vscode-charts-yellow, #cca700)'
+                : 'var(--vscode-charts-green, #89d185)',
+          }}
+        />
+        <span className="text-foreground-description">
+          {!open
+            ? t('webview.sidebar.projectorSettings.statusClosed')
+            : paused
+              ? t('webview.sidebar.projectorSettings.statusPaused')
+              : t('webview.sidebar.projectorSettings.statusLive')}
+        </span>
+      </div>
+
       <Checkbox
         checked={cursorTracking}
         onChange={() => messages.send({ type: 'toggleCursorTracking' })}
@@ -95,7 +142,10 @@ export default function ProjectorSettings() {
         <ColorSelector
           color={style.color}
           onChange={(color) => update({ color })}
-          presets={PROJECTOR_POINTER_PRESET_COLORS}
+          themePresets={PROJECTOR_POINTER_PRESET_COLORS.map((c) => ({
+            value: c.value,
+            label: t(`webview.sidebar.projectorSettings.colors.${c.id}` as TranslationKey),
+          }))}
           label={t('webview.sidebar.projectorSettings.pointerColor')}
           customColorLabel={t('webview.sidebar.projectorSettings.customColor')}
         />

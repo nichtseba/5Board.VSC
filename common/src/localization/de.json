@@ -11,9 +11,10 @@
       "startPresentation": "Beameransicht starten",
       "title": "Beameransicht",
       "noFileOpen": "Bitte öffne zuerst eine .5boardz Datei im Editor, bevor du die Beameransicht startest.",
-      "loading": "Lade…"
-    },
-    "goToElement": "Gehe zu Element"
+      "loading": "Lade…",
+      "live": "Live",
+      "paused": "Pausiert"
+    }
   },
   "webview": {
     "customEditor": { "Test": "Testen der Übersetzung" },
@@ -27,34 +28,75 @@
         "pointer": "Zeiger",
         "spacer": "Abstand-Tool",
         "freehand": "Freihand-Tool",
-        "addElement": "Element hinzufügen",
-        "text": "Text",
-        "heading": "Überschrift",
-        "link": "Link",
-        "code": "Code",
-        "image": "Bild"
+        "addElement": "Element hinzufügen"
+      },
+      "freehand": {
+        "title": "Freihand-Optionen",
+        "color": "Farbe",
+        "customColor": "Eigene Farbe",
+        "width": "Dicke",
+        "opacity": "Deckkraft",
+        "lineStyle": "Linienstil",
+        "dashScale": "Strichgröße",
+        "colors": {
+          "red": "Rot",
+          "orange": "Orange",
+          "yellow": "Gelb",
+          "green": "Grün",
+          "blue": "Blau",
+          "purple": "Lila",
+          "black": "Schwarz",
+          "white": "Weiß"
+        },
+        "lineStyles": {
+          "solid": "Durchgezogen",
+          "dashed": "Gestrichelt",
+          "dotted": "Gepunktet",
+          "custom": "Eigene"
+        },
+        "addSettings": "Einstellungen hinzufügen für "
       },
       "elementType": {
         "heading": "Überschrift",
         "text": "Text",
         "code": "Code",
         "image": "Bild",
-        "shape": "Form",
-        "arrow": "Pfeil"
+        "rectangle": "Rechteck",
+        "circle": "Kreis",
+        "line": "Linie",
+        "freehand": "Freihand"
       },
       "projectorSettings": {
         "title": "Beameransicht-Einstellungen",
         "cursorTracking": "Mauszeiger-Tracking",
+        "pause": "Pausieren",
+        "resume": "Fortsetzen",
+        "statusLive": "Live",
+        "statusPaused": "Pausiert",
+        "statusClosed": "Beendet",
         "pointerColor": "Zeiger-Farbe",
         "customColor": "Eigene",
         "pointerShape": "Zeiger-Form",
+        "colors": {
+          "red": "Rot",
+          "orange": "Orange",
+          "yellow": "Gelb",
+          "green": "Grün",
+          "blue": "Blau",
+          "purple": "Lila",
+          "black": "Schwarz",
+          "white": "Weiß"
+        },
         "shapes": {
           "dot": "Punkt",
           "ring": "Ring",
           "rectangle": "Rechteck",
           "duck": "Ente"
         }
-      }
+      },
+      "goToElement": "Gehe zu Element",
+      "addElement": "Element hinzufügen",
+      "addCustomElement": "Custom Element hinzufügen"
     },
     "sidebar-element-settings": {
       "noElementSelected": "Kein Element ausgewählt",
@@ -62,13 +104,65 @@
       "selectedElement": "Ausgewähltes Element",
       "headingSettings": {
         "title": "Überschrift",
-        "levelLabel": "Hierarchiestufe"
+        "levelLabel": "Hierarchiestufe",
+        "numberingLabel": "Nummerierung",
+        "numberingEnabled": "Nummerierung aktivieren",
+        "numberingNone": "Keine Zahlen",
+        "numberingDecimal": "Zahlen",
+        "numberingLowerAlpha": "Alphabetisch klein",
+        "numberingUpperAlpha": "Alphabetisch groß",
+        "numberingLowerRoman": "Römisch klein",
+        "numberingUpperRoman": "Römisch groß",
+        "fontFamily": "Schriftart",
+        "fontFamilyPlaceholder": "Standardschrift",
+        "fontSize": "Schriftgröße",
+        "fontSizeDecrease": "Schriftgröße um 1 kleiner machen",
+        "fontSizeIncrease": "Schriftgröße um 1 größer machen",
+        "textStyle": "Textstil",
+        "bold": "Fett",
+        "italic": "Kursiv",
+        "underline": "Unterstrichen",
+        "color": "Schriftfarbe",
+        "colorTheme": "Theme",
+        "customColor": "Eigene Farbe",
+        "backgroundColor": "Hintergrundfarbe"
       },
-      "genericSettings": {
-        "visibleLabel": "Sichtbar",
-        "speakerNoteLabel": "Sprechernotiz",
-        "hideInExportLabel": "Beim Export ausblenden"
-      }
+      "textSettings": {
+        "title": "Text",
+        "textColor": "Textfarbe",
+        "highlightColor": "Textmarker",
+        "backgroundColor": "Hintergrundfarbe",
+        "fontSize": "Schriftgröße"
+      },
+      "imageSettings": {
+        "title": "Bild"
+      },
+      "freehandSettings": {
+        "title": "Freihand"
+      },
+      "rectangleSettings": {
+        "title": "Rechteck"
+      },
+      "circleSettings": {
+        "title": "Kreis"
+      },
+      "lineSettings": {
+        "title": "Linie",
+        "symbols": "Symbole",
+        "borderColor": "Rahmenfarbe",
+        "borderWidth": "Rahmenbreite",
+        "borderStyle": "Rahmenstil",
+        "startHead": "Startsymbol",
+        "endHead": "Endsymbol",
+        "headSize": "Symbolgröße",
+        "headFill": "Symbole ausfüllen",
+        "headNone": "Keine",
+        "headArrow": "Pfeil",
+        "headCircle": "Kreis",
+        "headSquare": "Quadrat"
+      },
+      "delete": "Löschen",
+      "hideInExport": "Im Export ausblenden"
     }
   }
 }

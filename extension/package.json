@@ -113,8 +113,9 @@
         "icon": "$(play)"
       },
       {
-        "command": "5board-vsc.newTestBoard",
-        "title": "New Test Board"
+        "command": "5board-vsc.addImageFromFile",
+        "title": "%commands.addImageFromFile%",
+        "icon": "$(file-media)"
       },
       {
         "command": "5board-vsc.goToElement",
@@ -161,6 +162,7 @@
     "clean": "rimraf dist media/webview out"
   },
   "devDependencies": {
+    "@types/deep-equal": "^1.0.4",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
     "@types/vscode": "^1.107.0",
@@ -177,6 +179,7 @@
   },
   "dependencies": {
     "5board.vsc-common": "link:../common",
+    "deep-equal": "^2.2.3",
     "jszip": "^3.10.1"
   }
 }
