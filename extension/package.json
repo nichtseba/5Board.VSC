@@ -149,8 +149,8 @@
       },
       {
         "command": "5board-vsc.duplicate",
-        "key": "shift+alt+down",
-        "mac": "shift+alt+down",
+        "key": "ctrl+d",
+        "mac": "cmd+d",
         "when": "resourceExtname == .5boardz"
       }
     ],

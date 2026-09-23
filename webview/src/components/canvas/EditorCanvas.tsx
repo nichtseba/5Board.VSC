@@ -74,16 +74,15 @@ export default function EditorCanvas({
 
       if (modifierPressed && event.key.toLowerCase() === 'c') {
         event.preventDefault();
+        event.stopImmediatePropagation();
         messages.send({ type: 'copyElements' });
       } else if (modifierPressed && event.key.toLowerCase() === 'v') {
         event.preventDefault();
+        event.stopImmediatePropagation();
         messages.send({ type: 'pasteElements' });
-      } else if (
-        event.altKey &&
-        event.shiftKey &&
-        (event.key === 'ArrowDown' || event.key === 'ArrowUp')
-      ) {
+      } else if (modifierPressed && event.key.toLowerCase() === 'd') {
         event.preventDefault();
+        event.stopImmediatePropagation();
         messages.send({ type: 'duplicateElements' });
       }
     };
