@@ -171,6 +171,8 @@ export default function EditorElement<ElementType extends EditorElementType>({
           gridRowEnd: `span ${element.layout.height}`,
           gridColumnStart: element.layout.xPos + 1,
           gridColumnEnd: `span ${element.layout.width}`,
+          transform: `rotate(${element.layout.rotation ?? 0}deg)`,
+          transformOrigin: 'center center',
           zIndex: element.layout.zIndex,
         }}
       >
