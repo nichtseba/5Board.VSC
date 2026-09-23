@@ -34,6 +34,15 @@ export class DocumentMessageHandlers {
           this.document.clearActiveEditorDocument();
         }
       }),
+      this.document.messageService.on('copyElements', () => {
+        void EXTENSION.copyEditorElements();
+      }),
+      this.document.messageService.on('pasteElements', () => {
+        void EXTENSION.pasteEditorElements();
+      }),
+      this.document.messageService.on('duplicateElements', () => {
+        EXTENSION.duplicateEditorElements();
+      }),
 
       this.document.messageService.on('toggleElementSelection', (msg) => {
         this.document.applyEdit((document) => {

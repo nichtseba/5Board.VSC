@@ -70,6 +70,9 @@ export type WebviewToExtensionMessageType = AllWebviewToExtensionMessage['type']
 type AllWebviewToExtensionMessage =
   | { type: 'ready' }
   | { type: 'focus'; focus: boolean }
+  | { type: 'copyElements' }
+  | { type: 'pasteElements' }
+  | { type: 'duplicateElements' }
   | { type: 'cursorMove'; x: number; y: number }
   | { type: 'cursorLeave' }
   | { type: 'scroll'; top: number; left: number }

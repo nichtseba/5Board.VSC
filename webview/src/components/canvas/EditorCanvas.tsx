@@ -17,6 +17,7 @@ import { useMarqueeSelection } from './logic/useMarqueeSelection';
 import { MarqueeOverlay } from './logic/MarqueeOverlay';
 
 export type EditorCanvasProps = {
+  enableKeyboardShortcuts?: boolean;
   // Normalized (0–1) cursor position to display as a live overlay.
   // Only the projector passes this to mirror the editor's pointer position.
   cursor?: ProjectorCursor | null;
@@ -26,7 +27,12 @@ export type EditorCanvasProps = {
   freehandPreview?: FreehandPreview | null;
 };
 
-export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: EditorCanvasProps) {
+export default function EditorCanvas({
+  enableKeyboardShortcuts = false,
+  cursor,
+  pointerStyle,
+  freehandPreview,
+}: EditorCanvasProps) {
   // All pointer handling lives in one hook.
   const pointerHandlers = useCanvasPointer();
 
@@ -48,6 +54,43 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
       setGridElement(null);
     };
   }, [setGridElement]);
+
+  useEffect(() => {
+    if (!enableKeyboardShortcuts) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target;
+
+      if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable || ['INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName))
+      ) {
+        return;
+      }
+
+      const modifierPressed = event.metaKey || event.ctrlKey;
+
+      if (modifierPressed && event.key.toLowerCase() === 'c') {
+        event.preventDefault();
+        messages.send({ type: 'copyElements' });
+      } else if (modifierPressed && event.key.toLowerCase() === 'v') {
+        event.preventDefault();
+        messages.send({ type: 'pasteElements' });
+      } else if (
+        event.altKey &&
+        event.shiftKey &&
+        (event.key === 'ArrowDown' || event.key === 'ArrowUp')
+      ) {
+        event.preventDefault();
+        messages.send({ type: 'duplicateElements' });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [enableKeyboardShortcuts, messages]);
 
   useEffect(() => {
     if (
