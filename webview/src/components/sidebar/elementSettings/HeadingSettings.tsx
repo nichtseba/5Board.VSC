@@ -43,10 +43,6 @@ export function HeadingSettings({ elements }: Props) {
       getHeadingNumberingStyle(document?.content.headingSettings, element.data.level),
     ),
   );
-  // const numberingFormat = getHeadingNumberingStyle(
-  //   document?.content.headingSettings,
-  //   element.data.level,
-  // );
 
   const handleLevelChange = (value: string | DropdownOption | undefined) => {
     if (!value) {
@@ -84,13 +80,6 @@ export function HeadingSettings({ elements }: Props) {
       return;
     }
 
-    // messages.send({
-    //   type: 'updateHeadingNumbering',
-    //   enabled: true,
-    //   level: element.data.level,
-    //   numberingFormat: nextFormat as HeadingNumberingStyle,
-    // });
-
     const levels = [...new Set(elements.map((element) => element.data.level))];
     for (const level of levels) {
       messages.send({
@@ -113,13 +102,6 @@ export function HeadingSettings({ elements }: Props) {
       });
     }
   };
-  // const handleLevelSettingsChange = (changes: HeadingLevelSettings) => {
-  //   messages.send({
-  //     type: 'updateHeadingLevelSettings',
-  //     level: element.data.level,
-  //     changes,
-  //   });
-  // };
 
   const handleFontSizeChange = (value: string) => {
     const fontSize = Number(value);
