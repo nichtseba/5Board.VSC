@@ -125,7 +125,7 @@ const SHAPE_EXCEPTIONS = new Set([
   EditorElementType.Line,
 ]);
 
-export function getPresetPlacementMode(preset: Preset): AddElementPlacementMode {
+function getPresetPlacementMode(preset: Preset): AddElementPlacementMode {
   const { keepContent, keepXPosition } = preset.settings;
   const type = preset.element.type;
   if ((keepContent || keepXPosition) && SHAPE_EXCEPTIONS.has(type)) {
@@ -197,4 +197,4 @@ export type EditorTool<EditorToolType extends EditorToolId = EditorToolId> = {
   parameters: TYPE_TOOL_PARAMETERS[EditorToolType];
 };
 
-export type EditorState = { tool: EditorTool; presets?: Preset[] };
+export type EditorState = { tool: EditorTool; presets: Preset[] };

@@ -228,14 +228,14 @@ export class FiveBoardExtension extends ExtensionBase {
 
     await this.presetProvider.savePreset(preset, imageBytes);
     vscode.window.showInformationMessage(t('extension.presets.presetSaved'));
-    this.editorState = { presets: [...(this.editorState.presets ?? []), preset] };
+    this.editorState = { presets: [...this.editorState.presets, preset] };
   }
 
   @Command('5board-vsc.deletePreset')
   async deletePreset(id?: string): Promise<void> {
     let presetId = id;
     if (!presetId) {
-      const presets = this.editorState.presets ?? [];
+      const presets = this.editorState.presets;
       if (presets.length === 0) {
         return;
       }
@@ -251,13 +251,13 @@ export class FiveBoardExtension extends ExtensionBase {
     const deletedPreset = await this.presetProvider.deletePreset(presetId);
     if (deletedPreset) {
       this.editorState = {
-        presets: (this.editorState.presets ?? []).filter((preset) => preset.id !== presetId),
+        presets: this.editorState.presets.filter((preset) => preset.id !== presetId),
       };
     }
   }
 
   async loadPresetAsset(id: string): Promise<void> {
-    const preset = (this.editorState.presets ?? []).find((candidate) => candidate.id === id);
+    const preset = this.editorState.presets.find((candidate) => candidate.id === id);
     if (!preset) {
       return;
     }
@@ -272,7 +272,7 @@ export class FiveBoardExtension extends ExtensionBase {
 
   @Command('5board-vsc.revealPresetsFile')
   async revealPresetsFile(): Promise<void> {
-    await this.presetProvider.revealPresetsFile(this.editorState.presets ?? []);
+    await this.presetProvider.revealPresetsFile(this.editorState.presets);
   }
 
   @Command('5board-vsc.deleteEditorElement')

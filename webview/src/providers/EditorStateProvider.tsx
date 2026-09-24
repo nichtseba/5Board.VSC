@@ -9,6 +9,7 @@ import { DEFAULT_TOOL_ID, EditorState } from '5board.vsc-common';
 
 const defaultEditorState: EditorState = {
   tool: { type: DEFAULT_TOOL_ID, parameters: undefined },
+  presets: [],
 };
 
 // Context
