@@ -22,11 +22,13 @@ import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
 import { createDefaultElement } from './board/addElement/createDefaultElement';
+import { addImageAsset } from './board/addElement/addImageToDocument';
 
 const ELEMENT_CLIPBOARD_MARKER = '5board-vsc.elements';
 
 type ElementClipboardPayload = {
   marker: typeof ELEMENT_CLIPBOARD_MARKER;
+  sourceDocumentUri: string;
   elements: EditorElement[];
 };
 
@@ -167,6 +169,7 @@ export class FiveBoardExtension extends ExtensionBase {
 
     const payload: ElementClipboardPayload = {
       marker: ELEMENT_CLIPBOARD_MARKER,
+      sourceDocumentUri: this.activeEditorDocument!.uri.toString(),
       elements: structuredClone(elements),
     };
     await vscode.env.clipboard.writeText(JSON.stringify(payload));
@@ -175,13 +178,21 @@ export class FiveBoardExtension extends ExtensionBase {
   @Command('5board-vsc.paste')
   async pasteEditorElements(): Promise<void> {
     const clipboardText = await vscode.env.clipboard.readText();
-    const elements = this.readElementClipboard(clipboardText);
+    const payload = this.readElementClipboard(clipboardText);
+    const activeDocument = this.activeEditorDocument;
 
-    if (elements.length === 0) {
+    if (!payload || payload.elements.length === 0 || !activeDocument) {
       return;
     }
 
-    this.insertClonedElements(elements);
+    try {
+      const imageAssets = await this.getImageAssetsForPaste(payload, activeDocument);
+      this.insertClonedElements(payload.elements, imageAssets);
+    } catch (error) {
+      void vscode.window.showErrorMessage(
+        `Image could not be inserted: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 
   @Command('5board-vsc.duplicate')
@@ -267,7 +278,7 @@ export class FiveBoardExtension extends ExtensionBase {
     return document.content.elements.filter((element) => selectedIds.has(element.id));
   }
 
-  private readElementClipboard(text: string): EditorElement[] {
+  private readElementClipboard(text: string): ElementClipboardPayload | null {
     try {
       const payload: unknown = JSON.parse(text);
 
@@ -277,18 +288,54 @@ export class FiveBoardExtension extends ExtensionBase {
         !('marker' in payload) ||
         payload.marker !== ELEMENT_CLIPBOARD_MARKER ||
         !('elements' in payload) ||
-        !Array.isArray(payload.elements)
+        !Array.isArray(payload.elements) ||
+        !('sourceDocumentUri' in payload) ||
+        typeof payload.sourceDocumentUri !== 'string'
       ) {
-        return [];
+        return null;
       }
 
-      return payload.elements as EditorElement[];
+      return payload as ElementClipboardPayload;
     } catch {
-      return [];
+      return null;
     }
   }
 
-  private insertClonedElements(elements: EditorElement[]): void {
+  private async getImageAssetsForPaste(
+    payload: ElementClipboardPayload,
+    targetDocument: BoardCustomDocument,
+  ): Promise<Map<string, Uint8Array> | undefined> {
+    if (payload.sourceDocumentUri === targetDocument.uri.toString()) {
+      return undefined;
+    }
+
+    const sourceUri = vscode.Uri.parse(payload.sourceDocumentUri);
+    const sourceDocument = this.getDocumentForUri(sourceUri)?.boardPackage.document;
+    const sourcePackage = sourceDocument ?? (await BoardPackage.read(sourceUri)).document;
+    const imageAssets = new Map<string, Uint8Array>();
+
+    for (const element of payload.elements) {
+      if (element.type !== EditorElementType.Image) {
+        continue;
+      }
+
+      const imageElement = element as EditorElement<EditorElementType.Image>;
+      const sourceAsset = sourcePackage.assets.find(
+        (asset) => asset.name === imageElement.data.src,
+      );
+      if (!sourceAsset) {
+        throw new Error(`Asset "${imageElement.data.src}" fehlt im Quelldokument`);
+      }
+      imageAssets.set(imageElement.data.src, sourceAsset.bytes);
+    }
+
+    return imageAssets;
+  }
+
+  private insertClonedElements(
+    elements: EditorElement[],
+    imageAssets?: Map<string, Uint8Array>,
+  ): void {
     const clones = structuredClone(elements).map((element) => ({
       ...element,
       id: crypto.randomUUID(),
@@ -296,6 +343,22 @@ export class FiveBoardExtension extends ExtensionBase {
     const cloneIds = clones.map((element) => element.id);
 
     this.applyEditToActiveDocument((document) => {
+      for (const clone of clones) {
+        if (clone.type !== EditorElementType.Image || !imageAssets) {
+          continue;
+        }
+
+        const imageClone = clone as EditorElement<EditorElementType.Image>;
+        const bytes = imageAssets.get(imageClone.data.src);
+        if (!bytes) {
+          continue;
+        }
+
+        imageClone.data = {
+          ...imageClone.data,
+          src: addImageAsset(document, imageClone.data.src, new Uint8Array(bytes)),
+        };
+      }
       document.content.elements.push(...clones);
       document.content.selectedElementIds = cloneIds;
       document.content.primarySelectedElementId = cloneIds[0] ?? null;
