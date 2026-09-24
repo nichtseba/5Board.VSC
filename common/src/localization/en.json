@@ -112,6 +112,7 @@
       "addElement": "Add Element",
       "presets": {
         "presets": "Select Preset",
+        "filtered": "Presets are filtered by the selected tool",
         "deletePreset": "Delete Preset",
         "noPresets": "No Presets Saved",
         "settings": {

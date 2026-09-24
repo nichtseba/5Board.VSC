@@ -6,6 +6,7 @@ import {
   EditorToolId,
   EditorElementType,
   AddElementToolParameters,
+  Preset,
 } from '5board.vsc-common';
 import { Button } from 'vscrui';
 import SidebarSection from '../layout/SidebarSection';
@@ -22,6 +23,9 @@ export function PresetElements({ handleToolClick }: newElementProps) {
   const editorState = useEditorState();
   const messages = useMessageService();
   const presets = editorState.presets ?? [];
+  const presetsAreFiltered =
+    editorState.tool.type === EditorToolId.AddElement ||
+    editorState.tool.type === EditorToolId.FREEHAND;
 
   const selectedPresetId =
     editorState.tool.type === EditorToolId.AddElement
@@ -32,11 +36,33 @@ export function PresetElements({ handleToolClick }: newElementProps) {
         ).presetId
       : undefined;
 
+  const filterPresets = (preset: Preset): boolean => {
+    if (editorState.tool.type === EditorToolId.AddElement) {
+      return (
+        (editorState.tool.parameters as AddElementToolParameters)?.type === preset.element.type
+      );
+    } else if (editorState.tool.type === EditorToolId.FREEHAND) {
+      return preset.element.type === EditorElementType.Freehand;
+    }
+    return true;
+  };
+
   return (
-    <SidebarSection title={t('webview.sidebar.presets.presets')}>
+    <SidebarSection
+      title={t('webview.sidebar.presets.presets')}
+      titleAddon={
+        presetsAreFiltered ? (
+          <span
+            className="codicon codicon-filter ml-1 align-middle text-[var(--vscode-descriptionForeground)]"
+            title={t('webview.sidebar.presets.filtered')}
+            aria-label={t('webview.sidebar.presets.filtered')}
+          />
+        ) : null
+      }
+    >
       {presets.length > 0 ? (
         <ul className="space-y-1">
-          {presets.map((preset) => {
+          {presets.filter(filterPresets).map((preset) => {
             const definition = ELEMENT_TYPE_DEFINITIONS[preset.element.type];
             const presetOptions = [
               preset.settings.keepStyle ? t('webview.sidebar.presets.settings.keepStyle') : null,
