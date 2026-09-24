@@ -97,12 +97,12 @@ export class FiveBoardExtension extends ExtensionBase {
   }
 
   public async activate(context: vscode.ExtensionContext): Promise<void> {
+    super.activate(context);
     this.context = context;
     this.editorState_ = {
       tool: { type: DEFAULT_TOOL_ID, parameters: undefined },
       presets: await this.loadPresets(),
     };
-    super.activate(context);
     new EditorEditorProvider(context, this.packageManager).register();
     new ProjectorProvider(context).register();
     context.subscriptions.push(new SidebarManager(context, this.messages));
@@ -172,14 +172,14 @@ export class FiveBoardExtension extends ExtensionBase {
     if (!this.context) {
       return;
     }
-    savePresetsToFile(this.context);
+    await savePresetsToFile(this.context);
   }
 
   async deletePreset(id: string): Promise<void> {
     if (!this.context) {
       return;
     }
-    deletePreset(id, this.context);
+    await deletePreset(id, this.context);
   }
 
   async loadPresetAsset(id: string): Promise<void> {
@@ -198,7 +198,7 @@ export class FiveBoardExtension extends ExtensionBase {
     if (!this.context) {
       return;
     }
-    revealPresetsFile(this.context);
+    await revealPresetsFile(this.context);
   }
 
   @Command('5board-vsc.deleteEditorElement')

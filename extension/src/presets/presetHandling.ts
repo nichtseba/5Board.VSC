@@ -9,7 +9,6 @@ import {
   Preset,
 } from '5board.vsc-common';
 
-const MAX_PRESET_IMAGE_BYTES = 10 * 1024 * 1024;
 const PRESET_ASSET_DIRECTORY = 'preset-assets';
 
 export async function savePresetsToFile(context: vscode.ExtensionContext): Promise<void> {
@@ -88,12 +87,11 @@ export async function savePresetsToFile(context: vscode.ExtensionContext): Promi
       vscode.window.showWarningMessage(t('extension.presets.imageAssetMissing'));
       return;
     }
-    if (asset.bytes.length > MAX_PRESET_IMAGE_BYTES) {
-      vscode.window.showWarningMessage(t('extension.presets.imageAssetTooLarge'));
-      return;
-    }
     imageBytes = asset.bytes;
     preset.asset = { fileName: `${preset.id}.bin` };
+    if (!(config.options.includes('keepStyle') && config.options.length === 1)) {
+      (preset.element.data as ImageElementData).configuredWidth = true;
+    }
   }
 
   // Save Preset to Json
@@ -177,9 +175,7 @@ function isPreset(value: unknown): value is Preset {
     preset.asset === undefined ||
     (typeof preset.asset === 'object' &&
       typeof preset.asset.fileName === 'string' &&
-      isSafeAssetFileName(preset.asset.fileName) &&
-      (preset.asset.bytes === undefined ||
-        (preset.asset.bytes.length <= MAX_PRESET_IMAGE_BYTES && preset.asset.bytes.every(isByte))));
+      isSafeAssetFileName(preset.asset.fileName));
   const hasValidImageAsset =
     element?.type !== EditorElementType.Image ||
     (typeof (element.data as ImageElementData)?.src === 'string' && !!preset.asset);
@@ -236,9 +232,6 @@ export async function loadPresetAsset(
       preset.asset.fileName,
     );
     const bytes = await vscode.workspace.fs.readFile(file);
-    if (bytes.length > MAX_PRESET_IMAGE_BYTES) {
-      throw new Error('Preset image asset is too large');
-    }
     return { ...preset, asset: { ...preset.asset, bytes: Array.from(bytes) } };
   } catch (error) {
     vscode.window.showWarningMessage(`Failed to load preset image: ${String(error)}`);
@@ -246,9 +239,6 @@ export async function loadPresetAsset(
   }
 }
 
-function isByte(value: unknown): value is number {
-  return typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 255;
-}
 export async function deletePreset(id: string, context: vscode.ExtensionContext): Promise<void> {
   const presets = EXTENSION.editorState.presets ?? [];
   const deletedPreset = presets.find((preset) => preset.id === id);

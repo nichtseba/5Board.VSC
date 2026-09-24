@@ -27,7 +27,6 @@
       "presetOptions": "Preset Optionen",
       "selectOptions": "Optionen auswählen",
       "imageAssetMissing": "Das ausgewählte Bild-Asset wurde nicht gefunden. Das Preset wurde nicht gespeichert.",
-      "imageAssetTooLarge": "Das ausgewählte Bild ist zu groß, um es in einem Preset zu speichern. Das Limit beträgt 10 MiB.",
       "presetSaved": "Preset erfolgreich gespeichert."
     }
   },
