@@ -5,10 +5,10 @@ import { useMessageService } from '../../../services/MessageService';
 import { useHeadingNumber } from '../../../providers/HeadingNumberingContext';
 import type React from 'react';
 
-const DEFAULT_CONTENT_TABLE_FONT_SIZE = 14;
+const DEFAULT_TABLE_OF_CONTENTS_FONT_SIZE = 14;
 
 //builds CSS style for one toc entry, based on the corresponding heading
-function getContentTableEntryStyle(
+function getTableOfContentsEntryStyle(
   heading: EditorElement<EditorElementType.Heading>,
   boardDocument: ReturnType<typeof useBoardDocument>,
 ): React.CSSProperties {
@@ -26,9 +26,9 @@ function getContentTableEntryStyle(
   };
 }
 
-export function ContentTableElement({
+export function TableOfContentsElement({
   element,
-}: EditorElementProps<EditorElementType.ContentTable>) {
+}: EditorElementProps<EditorElementType.TableOfContents>) {
   const boardDocument = useBoardDocument();
   const messages = useMessageService();
 
@@ -60,10 +60,10 @@ export function ContentTableElement({
   return (
     <div
       className="flex flex-col gap-1 font-normal"
-      style={{ fontSize: `${element.data.fontSize ?? DEFAULT_CONTENT_TABLE_FONT_SIZE}px` }}
+      style={{ fontSize: `${element.data.fontSize ?? DEFAULT_TABLE_OF_CONTENTS_FONT_SIZE}px` }}
     >
       {headings.map((heading) => (
-        <ContentTableEntry
+        <TableOfContentsEntry
           key={heading.id}
           heading={heading}
           boardDocument={boardDocument}
@@ -75,7 +75,7 @@ export function ContentTableElement({
 }
 
 //renders a single clickable toc entry with numbering, indentation and visual styling
-function ContentTableEntry({
+function TableOfContentsEntry({
   heading,
   boardDocument,
   onClick,
@@ -95,7 +95,7 @@ function ContentTableEntry({
       }}
       className="w-fit text-left hover:underline"
       style={{
-        ...getContentTableEntryStyle(heading, boardDocument),
+        ...getTableOfContentsEntryStyle(heading, boardDocument),
         marginLeft: `${(heading.data.level - 1) * 20}px`,
       }}
     >

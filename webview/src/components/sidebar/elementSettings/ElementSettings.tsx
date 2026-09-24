@@ -6,7 +6,7 @@ import { CodeSettings } from './CodeSettings';
 import { ImageSettings } from './ImageSettings';
 import { LineSettings } from './LineSettings';
 import { FreehandSettings } from './FreehandSettings';
-import { ContentTableSettings } from './ContentTableSettings';
+import { TableOfContentsSettings } from './TableOfContentsSettings';
 import { useLocalization } from '../../../providers/LocalizationProvider';
 import { RectangleSettings } from './RectangleSettings';
 import { CircleSettings } from './CircleSettings';
@@ -50,5 +50,5 @@ const SETTINGS_COMPONENTS: {
   [EditorElementType.Circle]: CircleSettings,
   [EditorElementType.Line]: LineSettings,
   [EditorElementType.Freehand]: FreehandSettings,
-  [EditorElementType.ContentTable]: ContentTableSettings,
+  [EditorElementType.TableOfContents]: TableOfContentsSettings,
 };

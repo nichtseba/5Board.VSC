@@ -51,9 +51,9 @@ export class DocumentMessageHandlers {
       }),
       this.document.messageService.on('addElement', (msg) => {
         const tocAlreadyExists =
-          msg.elementType === EditorElementType.ContentTable &&
+          msg.elementType === EditorElementType.TableOfContents &&
           this.document.boardPackage.document.content.elements.some(
-            (element) => element.type === EditorElementType.ContentTable,
+            (element) => element.type === EditorElementType.TableOfContents,
           );
 
         if (!tocAlreadyExists) {

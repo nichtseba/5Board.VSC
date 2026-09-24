@@ -56,7 +56,7 @@ export const ELEMENT_INTERACTION_CONFIG = {
     resizable: true,
     rotatable: true,
   },
-  [EditorElementType.ContentTable]: {
+  [EditorElementType.TableOfContents]: {
     draggable: true,
     dragDirection: 'free',
     resizable: true,

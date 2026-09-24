@@ -5,10 +5,10 @@ import { useLocalization } from '../../../providers/LocalizationProvider';
 import { useMessageService } from '../../../services/MessageService';
 
 type Props = {
-  element: EditorElement<EditorElementType.ContentTable>;
+  element: EditorElement<EditorElementType.TableOfContents>;
 };
 
-export function ContentTableSettings({ element }: Props) {
+export function TableOfContentsSettings({ element }: Props) {
   const { t } = useLocalization();
   const messages = useMessageService();
 
@@ -27,7 +27,7 @@ export function ContentTableSettings({ element }: Props) {
 
   return (
     <SettingsPanel
-      title={t('webview.sidebar-element-settings.contentTableSettings.title')}
+      title={t('webview.sidebar-element-settings.tableOfContentsSettings.title')}
       icon="list-unordered"
     >
       <SettingsField label={t('webview.sidebar-element-settings.headingSettings.fontSize')} inline>

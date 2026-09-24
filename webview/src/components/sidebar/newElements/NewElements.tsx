@@ -27,7 +27,7 @@ export function NewElements({ handleToolClick }: newElementProps) {
   const [showTocNotice, setShowTocNotice] = useState(false);
 
   const existingToc = boardDocument?.content.elements.find(
-    (element) => element.type === EditorElementType.ContentTable,
+    (element) => element.type === EditorElementType.TableOfContents,
   );
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export function NewElements({ handleToolClick }: newElementProps) {
       return;
     }
 
-    if (elementType === EditorElementType.ContentTable && existingToc) {
+    if (elementType === EditorElementType.TableOfContents && existingToc) {
       setShowTocNotice(true);
       return;
     }
@@ -93,7 +93,7 @@ export function NewElements({ handleToolClick }: newElementProps) {
                 className="relative h-8 w-8 flex items-center justify-center"
               >
                 <span className={`codicon codicon-${definition.icon}`} />
-                {elementType === EditorElementType.ContentTable && existingToc && (
+                {elementType === EditorElementType.TableOfContents && existingToc && (
                   <span className="pointer-events-none absolute -inset-x-0.5 top-1/2 h-0.5 -rotate-45 bg-current" />
                 )}
               </Button>
@@ -102,7 +102,7 @@ export function NewElements({ handleToolClick }: newElementProps) {
       </div>
       {showTocNotice && (
         <div className="mt-2 rounded border p-2 text-sm">
-          {t('webview.sidebar.contentTableAlreadyExists')}
+          {t('webview.sidebar.tableOfContentsAlreadyExists')}
         </div>
       )}
     </SidebarSection>

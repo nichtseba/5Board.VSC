@@ -12,7 +12,7 @@ export enum EditorElementType {
   Circle = 'circle',
   Line = 'line',
   Freehand = 'freehand',
-  ContentTable = 'contentTable',
+  TableOfContents = 'tableOfContents',
 }
 
 /**
@@ -67,7 +67,7 @@ export type EditorElementDataMap = {
   [EditorElementType.Circle]: undefined; // No need for extra data
   [EditorElementType.Line]: LineElementData;
   [EditorElementType.Freehand]: FreehandElementData;
-  [EditorElementType.ContentTable]: ContentTableElementData;
+  [EditorElementType.TableOfContents]: TableOfContentsElementData;
 };
 
 export type HeadingElementData = {
@@ -200,7 +200,7 @@ export type LineElementData = {
   points: { x: number; y: number }[]; // Start and end points for the line
 };
 
-type ContentTableElementData = {
+type TableOfContentsElementData = {
   title?: string;
   fontSize?: number;
 };
@@ -317,7 +317,7 @@ export const DEFAULT_ELEMENT_PROFILES = {
     },
     data: { strokes: [] },
   },
-  [EditorElementType.ContentTable]: {
+  [EditorElementType.TableOfContents]: {
     layout: { width: 40, height: 10 },
     style: {
       visible: true,
@@ -390,12 +390,12 @@ export const ELEMENT_TYPE_DEFINITIONS = {
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Freehand],
   },
-  [EditorElementType.ContentTable]: {
-    label: 'webview.sidebar.elementType.contentTable',
+  [EditorElementType.TableOfContents]: {
+    label: 'webview.sidebar.elementType.tableOfContents',
     icon: 'list-unordered',
     category: 'basic',
     placement: 'free',
-    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.ContentTable],
+    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.TableOfContents],
   },
 } as const satisfies {
   [K in EditorElementType]: ElementTypeDefinition<K>;
