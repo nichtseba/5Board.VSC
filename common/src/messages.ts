@@ -12,6 +12,7 @@ import {
   TextEditorCommand,
 } from './main';
 import { ProjectorPointerStyle } from './projector';
+import { WebviewSettings } from './main';
 
 /**
  * Messages from the extension to webviews
@@ -54,8 +55,8 @@ type AllExtensionToWebviewMessage =
       type: 'viewportUpdate';
       viewport: { top: number; left: number; height: number; width: number };
     }
-  | { type: 'goToElement'; elementId: string };
-
+  | { type: 'goToElement'; elementId: string }
+  | { type: 'settingsChanged'; settings: WebviewSettings };
 /**
  * Messages from the webviews to the extension
  * This is a utility type that allows specifing the type of the message and getting the corresponding content type

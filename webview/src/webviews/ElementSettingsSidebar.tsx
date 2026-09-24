@@ -2,6 +2,7 @@ import type React from 'react';
 import { init } from '../app/init';
 import { useEffect } from 'react';
 import ElementSettings from '../components/sidebar/elementSettings/ElementSettings';
+import { LayerSettings } from '../components/sidebar/elementSettings/LayerSettings';
 import { useMessageService } from '../services/MessageService';
 import { useLocalization } from '../providers/LocalizationProvider';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
@@ -43,6 +44,7 @@ export default function ElementSettingsSidebar() {
   return (
     <SidebarShell>
       {content}
+      {primarySelectedElement && <LayerSettings element={primarySelectedElement} />}
       {primarySelectedElement && (
         <Button
           appearance="secondary"
