@@ -134,26 +134,6 @@
         "title": "%commands.duplicate%"
       }
     ],
-    "keybindings": [
-      {
-        "command": "5board-vsc.copy",
-        "key": "ctrl+c",
-        "mac": "cmd+c",
-        "when": "resourceExtname == .5boardz"
-      },
-      {
-        "command": "5board-vsc.paste",
-        "key": "ctrl+v",
-        "mac": "cmd+v",
-        "when": "resourceExtname == .5boardz"
-      },
-      {
-        "command": "5board-vsc.duplicate",
-        "key": "ctrl+d",
-        "mac": "cmd+d",
-        "when": "resourceExtname == .5boardz"
-      }
-    ],
     "menus": {
       "explorer/context": [
         {
