@@ -266,7 +266,7 @@ export const DEFAULT_ELEMENT_PROFILES = {
     style: {
       visible: true,
     },
-    data: { src: '', content: '', altText: 'Image' },
+    data: { src: '', content: '', altText: 'Image', configuredWidth: true },
   },
   [EditorElementType.Rectangle]: {
     layout: { width: 20, height: 10 },
