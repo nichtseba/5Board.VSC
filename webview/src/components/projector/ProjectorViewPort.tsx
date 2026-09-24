@@ -17,6 +17,10 @@ export default function ProjectorViewPort() {
     if (msg.type === 'viewportUpdate') {
       setViewport(msg.viewport);
     }
+    // Hide the rectangle once the projector closes.
+    if (msg.type === 'projectorStateChanged' && !msg.open) {
+      setViewport(null);
+    }
   });
 
   if (!viewport) {

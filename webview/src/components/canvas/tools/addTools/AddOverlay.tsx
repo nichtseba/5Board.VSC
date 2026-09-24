@@ -8,6 +8,12 @@ export type AddOverlayProps = {
 
 export default function AddOverlay({ element }: AddOverlayProps) {
   const { cellSize } = useGrid();
+  const { left, top, width, height } = {
+    left: element.layout.xPos * cellSize.width,
+    top: element.layout.yPos * cellSize.height,
+    width: element.layout.width * cellSize.width,
+    height: element.layout.height * cellSize.height,
+  };
 
   return (
     <div
@@ -16,17 +22,17 @@ export default function AddOverlay({ element }: AddOverlayProps) {
         absolute
         z-20
         box-border
-        overflow-hidden
+        overflow-visible
         rounded-md
         border-2
         border-focus-border
         bg-focus-background/20
       "
       style={{
-        left: element.layout.xPos * cellSize.width,
-        top: element.layout.yPos * cellSize.height,
-        width: element.layout.width * cellSize.width,
-        height: element.layout.height * cellSize.height,
+        left: left,
+        top: top,
+        width: width,
+        height: height,
       }}
     >
       <EditorElement element={element} preview />

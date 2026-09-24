@@ -12,6 +12,12 @@
   "commands.openBoardFile": "5Board Datei öffnen",
   "commands.newBoardFile": "Neue 5Board Datei",
   "commands.startPresentation": "Präsentation starten",
+  "commands.goToElement": "Gehe zu Element",
   "commands.addImageFromFile": "Bild aus Datei hinzufügen",
-  "commands.goToElement": "Gehe zu Element"
+  "commands.openSettings": "5Board-Einstellungen öffnen",
+  "configuration.java.home.description": "Pfad zur Verzeichnis des Java Development Kits. Leer lassen, um Java aus dem System-PATH zu verwenden.",
+  "configuration.presets.directoryPath.description": "Pfad zum Verzeichnis der Preset-Dateien.",
+  "configuration.grid.cellSize.description": "Standardgröße einer Rasterzelle in Pixeln für neue Dokumente.",
+  "configuration.grid.columnCount.description": "Standardanzahl der Rasterspalten für neue Dokumente.",
+  "configuration.colorPalette.customColors.description": "Füge bis zu drei eigene Farben zur Farbauswahl im RGB-Format hinzu, z.B. rgb(255, 0, 0)"
 }

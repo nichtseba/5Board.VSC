@@ -4,13 +4,18 @@ import type React from 'react';
 import { TextElement } from './elements/TextElement';
 import { HeadingElement } from './elements/HeadingElement';
 import ElementInteractionController from './elementInteraction/ElementInteractionController';
+import ElementContextMenu from './elementInteraction/ElementContextMenu';
 import { CodeElement } from './elements/CodeElement';
 import { ImageElement } from './elements/ImageElement';
-import { ShapeElement } from './elements/ShapeElement';
-import { ArrowElement } from './elements/ArrowElement';
+import { LineElement } from './elements/LineElement';
 import { FreehandElement } from './elements/FreehandElement';
 import { useEditorState } from '../../providers/EditorStateProvider';
 import { useMessageService } from '../../services/MessageService';
+import { useBoardDocument } from '../../providers/BoardDocumentProvider';
+import { useLocalization } from '../../providers/LocalizationProvider';
+import { RectangleElement } from './elements/RectangleElement';
+import { CircleElement } from './elements/CircleElement';
+import { maxZIndex, minZIndex } from './logic/zIndex';
 
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
@@ -47,11 +52,17 @@ export default function EditorElement<ElementType extends EditorElementType>({
     x: number;
     y: number;
   } | null>(null);
+  const [contextMenuPosition, setContextMenuPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const ElementComponent =
     (ELEMENT_COMPONENTS[element.type] as React.ComponentType<EditorElementProps<ElementType>>) ??
     UnknownElement;
   const messages = useMessageService();
+  const { t } = useLocalization();
   const activeToolId = useEditorState()?.tool.type;
+  const allElements = useBoardDocument()?.content.elements ?? [];
 
   const handleSelectElement = (id: string, event?: React.MouseEvent) => {
     if (activeToolId !== EditorToolId.POINTER) return;
@@ -62,6 +73,22 @@ export default function EditorElement<ElementType extends EditorElementType>({
     }
 
     messages.send({ type: 'selectElements', ids: [id] });
+  };
+
+  const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (activeToolId !== EditorToolId.POINTER) return;
+    event.preventDefault();
+    if (!selected) handleSelectElement(element.id);
+    setContextMenuPosition({ x: event.clientX, y: event.clientY });
+  };
+
+  const setZIndex = (zIndex: number) => {
+    messages.send({
+      type: 'updateElement',
+      id: element.id,
+      changes: { layout: { ...element.layout, zIndex } },
+    });
+    setContextMenuPosition(null);
   };
 
   useEffect(() => {
@@ -115,8 +142,10 @@ export default function EditorElement<ElementType extends EditorElementType>({
         data-editor-element
         onClick={(event) => handleSelectElement(element.id, event)}
         onDoubleClick={handleDoubleClick}
+        onContextMenu={handleContextMenu}
         className={`
-          box-border overflow-hidden
+          box-border 
+          ${element.type === EditorElementType.Line ? '' : 'overflow-hidden'}
           ${activeToolId === EditorToolId.POINTER ? 'cursor-pointer' : ''}
           ${
             activeToolId === EditorToolId.POINTER && !selected
@@ -127,11 +156,13 @@ export default function EditorElement<ElementType extends EditorElementType>({
         `}
         ref={targetRef}
         style={{
-          backgroundColor: element.style.backgroundColor,
           gridRowStart: element.layout.yPos + 1,
           gridRowEnd: `span ${element.layout.height}`,
           gridColumnStart: element.layout.xPos + 1,
           gridColumnEnd: `span ${element.layout.width}`,
+          transform: `rotate(${element.layout.rotation ?? 0}deg)`,
+          transformOrigin: 'center center',
+          zIndex: element.layout.zIndex,
         }}
       >
         <ElementComponent
@@ -153,6 +184,24 @@ export default function EditorElement<ElementType extends EditorElementType>({
           targetRef={targetRef}
         />
       )}
+      {contextMenuPosition && (
+        <ElementContextMenu
+          position={contextMenuPosition}
+          onClose={() => setContextMenuPosition(null)}
+          items={[
+            {
+              label: t('webview.canvas.contextMenu.bringToFront'),
+              icon: 'arrow-up',
+              onClick: () => setZIndex(maxZIndex(allElements) + 1),
+            },
+            {
+              label: t('webview.canvas.contextMenu.sendToBack'),
+              icon: 'arrow-down',
+              onClick: () => setZIndex(minZIndex(allElements) - 1),
+            },
+          ]}
+        />
+      )}
     </>
   );
 }
@@ -165,8 +214,9 @@ const ELEMENT_COMPONENTS = {
   [EditorElementType.Text]: TextElement,
   [EditorElementType.Code]: CodeElement,
   [EditorElementType.Image]: ImageElement,
-  [EditorElementType.Shape]: ShapeElement,
-  [EditorElementType.Arrow]: ArrowElement,
+  [EditorElementType.Rectangle]: RectangleElement,
+  [EditorElementType.Circle]: CircleElement,
+  [EditorElementType.Line]: LineElement,
   [EditorElementType.Freehand]: FreehandElement,
 } as const satisfies {
   [ElementType in EditorElementType]: React.ComponentType<EditorElementProps<ElementType>>;

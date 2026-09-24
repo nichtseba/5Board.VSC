@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useCanvasEventDispatcher } from '../../providers/CanvasEventsProvider';
+import { useCanvasEventDispatcher } from '../../../providers/CanvasEventsProvider';
 
 // Forwards canvas pointer events to the canvas event hub. Generic and reusable —
 // no feature logic (cursor mirroring, tools, …) lives here. Subscribe to the hub

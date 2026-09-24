@@ -11,14 +11,20 @@
       "startPresentation": "Start Presentation",
       "title": "Projector",
       "noFileOpen": "Please open a .5boardz file in the editor before starting the projector view.",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "live": "Live",
+      "paused": "Paused"
     }
   },
   "webview": {
     "customEditor": { "Test": "Test the translation." },
     "canvas": {
       "spacerLabel": "Spacer",
-      "rows": "rows"
+      "rows": "rows",
+      "contextMenu": {
+        "bringToFront": "Bring to front",
+        "sendToBack": "Send to back"
+      }
     },
     "sidebar": {
       "title": "5Board Sidebar",
@@ -33,8 +39,9 @@
         "text": "Text",
         "code": "Code",
         "image": "Image",
-        "shape": "Shape",
-        "arrow": "Arrow",
+        "rectangle": "Rectangle",
+        "circle": "Circle",
+        "line": "Line",
         "freehand": "Freehand"
       },
       "freehand": {
@@ -66,8 +73,13 @@
       "projectorSettings": {
         "title": "Projector Settings",
         "cursorTracking": "Cursor Tracking",
+        "pause": "Pause",
+        "resume": "Resume",
+        "statusLive": "Live",
+        "statusPaused": "Paused",
+        "statusClosed": "Ended",
         "pointerColor": "Pointer Color",
-        "customColor": "Custom",
+        "customColor": "Custom color",
         "pointerShape": "Pointer Shape",
         "colors": {
           "red": "Red",
@@ -94,6 +106,7 @@
       "noElementSelected": "No element selected",
       "unsupportedElement": "Unsupported element type",
       "selectedElement": "Selected Element",
+      "layer": "Layer",
       "headingSettings": {
         "title": "Heading",
         "levelLabel": "Hierarchy level",
@@ -131,6 +144,27 @@
       },
       "freehandSettings": {
         "title": "Freehand"
+      },
+      "rectangleSettings": {
+        "title": "Rectangle"
+      },
+      "circleSettings": {
+        "title": "Circle"
+      },
+      "lineSettings": {
+        "title": "Line",
+        "symbols": "Symbols",
+        "borderColor": "Border color",
+        "borderWidth": "Border width",
+        "borderStyle": "Border style",
+        "startHead": "Start head",
+        "endHead": "End head",
+        "headSize": "Head size",
+        "headFill": "Fill heads",
+        "headNone": "None",
+        "headArrow": "Arrow",
+        "headCircle": "Circle",
+        "headSquare": "Square"
       },
       "delete": "Delete"
     }

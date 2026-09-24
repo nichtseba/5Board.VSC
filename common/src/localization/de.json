@@ -11,14 +11,20 @@
       "startPresentation": "Beameransicht starten",
       "title": "Beameransicht",
       "noFileOpen": "Bitte öffne zuerst eine .5boardz Datei im Editor, bevor du die Beameransicht startest.",
-      "loading": "Lade…"
+      "loading": "Lade…",
+      "live": "Live",
+      "paused": "Pausiert"
     }
   },
   "webview": {
     "customEditor": { "Test": "Testen der Übersetzung" },
     "canvas": {
       "spacerLabel": "Abstand",
-      "rows": "Zeilen"
+      "rows": "Zeilen",
+      "contextMenu": {
+        "bringToFront": "Nach vorne bringen",
+        "sendToBack": "Nach hinten schicken"
+      }
     },
     "sidebar": {
       "title": "5Board Seitenleiste",
@@ -59,15 +65,21 @@
         "text": "Text",
         "code": "Code",
         "image": "Bild",
-        "shape": "Form",
-        "arrow": "Pfeil",
+        "rectangle": "Rechteck",
+        "circle": "Kreis",
+        "line": "Linie",
         "freehand": "Freihand"
       },
       "projectorSettings": {
         "title": "Beameransicht-Einstellungen",
         "cursorTracking": "Mauszeiger-Tracking",
+        "pause": "Pausieren",
+        "resume": "Fortsetzen",
+        "statusLive": "Live",
+        "statusPaused": "Pausiert",
+        "statusClosed": "Beendet",
         "pointerColor": "Zeiger-Farbe",
-        "customColor": "Eigene",
+        "customColor": "Eigene Farbe",
         "pointerShape": "Zeiger-Form",
         "colors": {
           "red": "Rot",
@@ -94,6 +106,7 @@
       "noElementSelected": "Kein Element ausgewählt",
       "unsupportedElement": "Elementtyp wird nicht unterstützt",
       "selectedElement": "Ausgewähltes Element",
+      "layer": "Ebene",
       "headingSettings": {
         "title": "Überschrift",
         "levelLabel": "Hierarchiestufe",
@@ -131,6 +144,27 @@
       },
       "freehandSettings": {
         "title": "Freihand"
+      },
+      "rectangleSettings": {
+        "title": "Rechteck"
+      },
+      "circleSettings": {
+        "title": "Kreis"
+      },
+      "lineSettings": {
+        "title": "Linie",
+        "symbols": "Symbole",
+        "borderColor": "Rahmenfarbe",
+        "borderWidth": "Rahmenbreite",
+        "borderStyle": "Rahmenstil",
+        "startHead": "Startsymbol",
+        "endHead": "Endsymbol",
+        "headSize": "Symbolgröße",
+        "headFill": "Symbole ausfüllen",
+        "headNone": "Keine",
+        "headArrow": "Pfeil",
+        "headCircle": "Kreis",
+        "headSquare": "Quadrat"
       },
       "delete": "Löschen"
     }

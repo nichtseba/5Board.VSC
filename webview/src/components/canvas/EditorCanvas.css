@@ -1,10 +1,12 @@
 .editor-canvas {
   position: relative;
+  isolation: isolate;
   width: calc(var(--spacing-editor) * var(--editor-columns));
   display: grid;
   grid-template-columns: repeat(var(--editor-columns), var(--spacing-editor));
-  /* grid-template-rows: repeat(auto-fill, var(--spacing-editor)); */
   grid-auto-rows: var(--spacing-editor);
+  min-height: calc(var(--spacing-editor) * 10);
+  padding-bottom: calc(var(--spacing-editor) * 3);
   background-size: var(--spacing-editor) var(--spacing-editor);
   background-image:
     linear-gradient(to right, var(--vscode-editorWidget-border) 1px, transparent 1px),

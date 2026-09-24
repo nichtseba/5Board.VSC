@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import type { ClipboardEvent, DragEvent } from 'react';
-import { useMessageService } from '../../services/MessageService';
+import { useMessageService } from '../../../services/MessageService';
 
 /*
  * Converts a browser file into byte data and sends it to the extension for import

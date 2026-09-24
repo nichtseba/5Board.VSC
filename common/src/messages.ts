@@ -12,6 +12,7 @@ import {
   TextEditorCommand,
 } from './main';
 import { ProjectorPointerStyle } from './projector';
+import { WebviewSettings } from './main';
 
 /**
  * Messages from the extension to webviews
@@ -33,7 +34,7 @@ type AllExtensionToWebviewMessage =
   | { type: 'cursorMove'; x: number; y: number }
   | { type: 'cursorHide' }
   | { type: 'cursorTrackingChanged'; enabled: boolean }
-  | { type: 'projectorStateChanged'; active: boolean; open: boolean }
+  | { type: 'projectorStateChanged'; active: boolean; open: boolean; paused: boolean }
   | { type: 'projectorPointerChanged'; style: ProjectorPointerStyle }
   | { type: 'scroll'; top: number; left: number }
   | { type: 'selectElement'; elementId: string | null }
@@ -54,8 +55,8 @@ type AllExtensionToWebviewMessage =
       type: 'viewportUpdate';
       viewport: { top: number; left: number; height: number; width: number };
     }
-  | { type: 'goToElement'; elementId: string };
-
+  | { type: 'goToElement'; elementId: string }
+  | { type: 'settingsChanged'; settings: WebviewSettings };
 /**
  * Messages from the webviews to the extension
  * This is a utility type that allows specifing the type of the message and getting the corresponding content type
@@ -85,18 +86,14 @@ type AllWebviewToExtensionMessage =
         aspectRatio?: number;
       }[];
     } // Update the Layout when Element was moved or resized, array can handle one or more elements
-  | {
-      type: 'addElement';
-      elementType: EditorElementType;
-      elementPosition: EditorElement['layout'];
-      defaults?: AddElementDefaults;
-    }
+  | AddElementMessage
   | { type: 'deleteElement'; id: string }
   | { type: 'updateElement'; id: string; changes: Partial<EditorElement> } // Update element with it's settings
   | { type: 'textEditorCommand'; command: TextEditorCommand }
   | { type: 'addImageFromFile' }
   | { type: 'addImageFromBytes'; name: string; bytes: number[] }
   | { type: 'toggleCursorTracking' }
+  | { type: 'toggleProjectorPaused' }
   | { type: 'updateProjectorPointer'; style: ProjectorPointerStyle }
   // Sent by the editor after drawing a new element (e.g. a freehand stroke).
   | { type: 'addFreehandElement'; element: EditorElement }
@@ -127,3 +124,12 @@ type AllWebviewToExtensionMessage =
       level?: HeadingLevel;
       numberingFormat?: HeadingNumberingStyle;
     };
+
+type AddElementMessage = {
+  [T in EditorElementType]: {
+    type: 'addElement';
+    elementType: T;
+    elementPosition: ElementLayout;
+    defaults?: AddElementDefaults;
+  };
+}[EditorElementType];

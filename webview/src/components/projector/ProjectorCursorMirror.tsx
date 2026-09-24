@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useCanvasEvents, useCanvasPoint } from '../../providers/CanvasEventsProvider';
 import { useMessageService, useOnMessage } from '../../services/MessageService';
 
@@ -32,6 +32,15 @@ export default function ProjectorCursorMirror() {
     },
     [active, calculateCanvasPoint, messages],
   );
+
+  // Push the last known position as soon as mirroring turns on again, so resuming
+  // does not wait for the next pointer move. Kept in a ref so the effect only runs
+  // on the active flag, not on every sendCursor identity change.
+  const sendCursorRef = useRef(sendCursor);
+  sendCursorRef.current = sendCursor;
+  useEffect(() => {
+    if (active && lastEventRef.current) sendCursorRef.current(lastEventRef.current);
+  }, [active]);
 
   // Memoized so the hub subscribes once (a new object each render would re-subscribe
   // the scroll listener every render, like ProjectorScrollMirror avoids).
