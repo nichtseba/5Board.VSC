@@ -125,6 +125,16 @@
         "command": "5board-vsc.savePreset",
         "title": "%commands.savePreset%",
         "icon": "$(save)"
+      },
+      {
+        "command": "5board-vsc.deletePreset",
+        "title": "%commands.deletePreset%",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "5board-vsc.revealPresetsFile",
+        "title": "%commands.revealPresetsFile%",
+        "icon": "$(folder-opened)"
       }
     ],
     "menus": {

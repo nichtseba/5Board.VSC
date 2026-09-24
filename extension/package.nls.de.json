@@ -14,5 +14,7 @@
   "commands.startPresentation": "Präsentation starten",
   "commands.addImageFromFile": "Bild aus Datei hinzufügen",
   "commands.goToElement": "Gehe zu Element",
-  "commands.savePreset": "Speichere als Voreinstellung"
+  "commands.savePreset": "Speichere als Voreinstellung",
+  "commands.deletePreset": "Voreinstellung löschen",
+  "commands.revealPresetsFile": "Voreinstellungsdatei anzeigen"
 }

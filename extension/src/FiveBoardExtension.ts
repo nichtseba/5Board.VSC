@@ -14,6 +14,8 @@ import {
   DEFAULT_PROJECTOR_POINTER_STYLE,
   DEFAULT_TOOL_ID,
   EditorState,
+  ImageElementData,
+  Preset,
   ProjectorPointerStyle,
   createAddElementToolFromPreset,
 } from '5board.vsc-common';
@@ -23,17 +25,11 @@ import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
 import { createDefaultElement } from './board/addElement/createDefaultElement';
-import {
-  deletePreset,
-  loadPresetsFromFile,
-  revealPresetsFile,
-  savePresetsToFile,
-  loadPresetAsset,
-} from './presets/presetHandling';
+import { PresetProvider } from './presets/PresetProvider';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
-  private context: vscode.ExtensionContext | undefined;
+  private presetProvider!: PresetProvider;
   public readonly packageManager = new PackageManager();
   private openDocuments = new Map<string, BoardCustomDocument>();
 
@@ -98,22 +94,15 @@ export class FiveBoardExtension extends ExtensionBase {
 
   public async activate(context: vscode.ExtensionContext): Promise<void> {
     super.activate(context);
-    this.context = context;
+    this.presetProvider = new PresetProvider(context.globalStorageUri);
     this.editorState_ = {
       tool: { type: DEFAULT_TOOL_ID, parameters: undefined },
-      presets: await this.loadPresets(),
+      presets: await this.presetProvider.loadPresets(),
     };
     new EditorEditorProvider(context, this.packageManager).register();
     new ProjectorProvider(context).register();
     context.subscriptions.push(new SidebarManager(context, this.messages));
     new FiveBoardFileSystemProvider(this.packageManager).register(context);
-  }
-
-  private async loadPresets(): Promise<EditorState['presets']> {
-    if (!this.context) {
-      return [];
-    }
-    return await loadPresetsFromFile(this.context);
   }
 
   @Command('5board-vsc.newBoard')
@@ -169,36 +158,121 @@ export class FiveBoardExtension extends ExtensionBase {
 
   @Command('5board-vsc.savePreset')
   async savePresetCommand(): Promise<void> {
-    if (!this.context) {
+    const activeDocument = this.activeEditorDocument;
+    if (!activeDocument) {
+      vscode.window.showWarningMessage(t('extension.presets.noElementSelected'));
       return;
     }
-    await savePresetsToFile(this.context);
+
+    const selectedElementId = activeDocument.boardPackage.document.content.primarySelectedElementId;
+    const selectedElement = activeDocument.boardPackage.document.content.elements.find(
+      (element) => element.id === selectedElementId,
+    );
+    if (!selectedElement) {
+      vscode.window.showWarningMessage(t('extension.presets.noElementSelected'));
+      return;
+    }
+
+    const name = await vscode.window.showInputBox({
+      title: t('extension.presets.savePreset'),
+      prompt: t('extension.presets.presetName'),
+      placeHolder: t('extension.presets.presetNamePlaceholder'),
+    });
+    if (name === undefined) {
+      return;
+    }
+
+    const options = [
+      { key: 'keepStyle', label: t('extension.presets.keepStyle'), picked: true },
+      { key: 'keepXPosition', label: t('extension.presets.keepPosition'), picked: false },
+      { key: 'keepContent', label: t('extension.presets.keepContent'), picked: false },
+    ];
+    const selectedOptions = await vscode.window.showQuickPick(options, {
+      title: t('extension.presets.presetOptions'),
+      placeHolder: t('extension.presets.selectOptions'),
+      canPickMany: true,
+    });
+    if (!selectedOptions?.length) {
+      vscode.window.showInformationMessage(t('extension.presets.presetNotSaved'));
+      return;
+    }
+
+    const optionKeys = selectedOptions.map((option) => option.key);
+    const preset: Preset = {
+      id: crypto.randomUUID(),
+      name,
+      settings: {
+        keepStyle: optionKeys.includes('keepStyle'),
+        keepXPosition: optionKeys.includes('keepXPosition'),
+        keepContent: optionKeys.includes('keepContent'),
+      },
+      element: selectedElement,
+    };
+
+    let imageBytes: Uint8Array | undefined;
+    if (selectedElement.type === EditorElementType.Image) {
+      const imageData = selectedElement.data as ImageElementData;
+      const asset = activeDocument.boardPackage.document.assets.find(
+        (candidate) => candidate.name === imageData.src,
+      );
+      if (!asset) {
+        vscode.window.showWarningMessage(t('extension.presets.imageAssetMissing'));
+        return;
+      }
+      imageBytes = asset.bytes;
+      preset.asset = { fileName: `${preset.id}.bin` };
+      if (!(optionKeys.includes('keepStyle') && optionKeys.length === 1)) {
+        imageData.configuredWidth = true;
+      }
+    }
+
+    await this.presetProvider.savePreset(preset, imageBytes);
+    vscode.window.showInformationMessage(t('extension.presets.presetSaved'));
+    this.editorState = { presets: [...(this.editorState.presets ?? []), preset] };
   }
 
-  async deletePreset(id: string): Promise<void> {
-    if (!this.context) {
+  @Command('5board-vsc.deletePreset')
+  async deletePreset(id?: string): Promise<void> {
+    let presetId = id;
+    if (!presetId) {
+      const presets = this.editorState.presets ?? [];
+      if (presets.length === 0) {
+        return;
+      }
+      const selected = await vscode.window.showQuickPick(
+        presets.map((preset) => ({ label: preset.name, description: preset.id })),
+      );
+      presetId = selected?.description;
+    }
+    if (!presetId) {
       return;
     }
-    await deletePreset(id, this.context);
+
+    const deletedPreset = await this.presetProvider.deletePreset(presetId);
+    if (deletedPreset) {
+      this.editorState = {
+        presets: (this.editorState.presets ?? []).filter((preset) => preset.id !== presetId),
+      };
+    }
   }
 
   async loadPresetAsset(id: string): Promise<void> {
-    if (!this.context) {
-      return;
-    }
-    const preset = await loadPresetAsset(id, this.context);
+    const preset = (this.editorState.presets ?? []).find((candidate) => candidate.id === id);
     if (!preset) {
       return;
     }
-    this.editorState = {
-      tool: createAddElementToolFromPreset(preset),
-    };
-  }
-  async revealPresetsFile(): Promise<void> {
-    if (!this.context) {
+    const presetWithAsset = await this.presetProvider.loadPresetAsset(preset);
+    if (!presetWithAsset) {
       return;
     }
-    await revealPresetsFile(this.context);
+    this.editorState = {
+      tool: createAddElementToolFromPreset(presetWithAsset),
+    };
+  }
+
+  @Command('5board-vsc.revealPresetsFile')
+  async revealPresetsFile(): Promise<void> {
+    await this.presetProvider.revealPresetsFile(this.editorState.presets ?? []);
   }
 
   @Command('5board-vsc.deleteEditorElement')

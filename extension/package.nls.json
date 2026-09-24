@@ -14,5 +14,7 @@
   "commands.startPresentation": "Start Presentation",
   "commands.addImageFromFile": "Add Image from File",
   "commands.goToElement": "Go to Element",
-  "commands.savePreset": "Save as preset"
+  "commands.savePreset": "Save as preset",
+  "commands.deletePreset": "Delete preset",
+  "commands.revealPresetsFile": "Reveal presets file"
 }
