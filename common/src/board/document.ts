@@ -1,3 +1,4 @@
+import { GridSettings } from '../settings';
 import { BoardElement } from './element';
 import { HeadingSettings } from './headingSettings';
 
@@ -41,6 +42,7 @@ export interface BoardContent {
   selectedElementIds: string[];
   primarySelectedElementId: string | null;
   elements: BoardElement[];
+  grid?: GridSettings;
   background?: string;
   snapAngle?: number;
   revealOrder?: number;
