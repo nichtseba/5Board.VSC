@@ -14,7 +14,7 @@ export default function GroupInteractionController({ elements, selectedElementId
   const moveableRef = useRef<Moveable | null>(null);
   const [targets, setTargets] = useState<HTMLElement[]>([]);
 
-  const { cellSize } = useGrid();
+  const { cellSize, metrics } = useGrid();
   const messages = useMessageService();
 
   const selectedElements = useMemo(
@@ -23,6 +23,20 @@ export default function GroupInteractionController({ elements, selectedElementId
   );
 
   const translationsRef = useRef(new Map<string, [number, number]>());
+
+  const columnCount = Math.max(1, Math.round(metrics.width / cellSize.width));
+  const groupStart = Math.min(...selectedElements.map((element) => element.layout.xPos));
+  const groupEnd = Math.max(
+    ...selectedElements.map((element) => element.layout.xPos + element.layout.width),
+  );
+
+  const clampGroupTranslation = (x: number, y: number): [number, number] => {
+    const minX = -groupStart * cellSize.width;
+
+    const maxX = (columnCount - groupEnd) * cellSize.width;
+
+    return [Math.max(minX, Math.min(x, maxX)), y];
+  };
 
   useEffect(() => {
     const nextTargets = selectedElementIds
@@ -41,22 +55,38 @@ export default function GroupInteractionController({ elements, selectedElementId
   }
 
   const handleDragGroup = ({ events }: OnDragGroup) => {
-    for (const event of events) {
-      const element = selectedElements.find((element) => element.id === event.target.id);
+    const firstEvent = events[0];
 
-      if (!element) {
-        continue;
+    if (!firstEvent) {
+      return;
+    }
+
+    let [groupX, groupY] = firstEvent.beforeTranslate;
+
+    const constrainedTranslations = selectedElements.map((element) =>
+      constrainTranslation(element.type, groupX, groupY),
+    );
+
+    if (constrainedTranslations.length > 0) {
+      const allowsX = constrainedTranslations.some(([x]) => x !== 0);
+
+      const allowsY = constrainedTranslations.some(([, y]) => y !== 0);
+
+      if (!allowsX) {
+        groupX = 0;
       }
 
-      const [x, y] = constrainTranslation(
-        element.type,
-        event.beforeTranslate[0],
-        event.beforeTranslate[1],
-      );
+      if (!allowsY) {
+        groupY = 0;
+      }
+    }
 
-      event.target.style.transform = `translate(${x}px, ${y}px)`;
+    [groupX, groupY] = clampGroupTranslation(groupX, groupY);
 
-      translationsRef.current.set(event.target.id, [x, y]);
+    for (const event of events) {
+      event.target.style.transform = `translate(${groupX}px, ${groupY}px)`;
+
+      translationsRef.current.set(event.target.id, [groupX, groupY]);
     }
   };
 
