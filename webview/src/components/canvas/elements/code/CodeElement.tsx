@@ -1,102 +1,67 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
 import MonacoEditor, { loader } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor';
 import {
   EditorElementType,
+  commentPrefixFor,
   extractBlock,
-  COMMENT_PREFIX_BY_LANGUAGE,
   fileNameFromClassName,
+  formatMessage,
   isDefaultClassName,
 } from '5board.vsc-common';
 import type { EditorElementProps } from '../../EditorElement';
 import { useMessageService } from '../../../../services/MessageService';
 import { useSources } from '../../../../providers/SourcesProvider';
-import { useExecutionOutput } from '../../../../providers/ExecutionOutputProvider';
-import { useOnMessage } from '../../../../services/MessageService';
-import { OutputPanel } from './OutputPanel';
+import { useLocalization } from '../../../../providers/LocalizationProvider';
+import {
+  useExecutionOutput,
+  useExecutionReadOnly,
+} from '../../../../providers/ExecutionOutputProvider';
+import { OutputPanel, hasOutput } from './OutputPanel';
 import { useMonacoTheme } from './useMonacoTheme';
-import { useEditorAutoHeight, MIN_HEIGHT } from './useEditorAutoHeight';
+import { useEditorAutoHeight } from './useEditorAutoHeight';
+import { useCodeBlockMinHeight } from './useCodeBlockMinHeight';
+import { useBlockCodeSync } from './useBlockCodeSync';
+import { useMonacoClipboard } from './useMonacoClipboard';
+import { useMonacoEditing } from './useMonacoEditing';
 import { Icons } from '../../../Icons';
 
 loader.config({ monaco });
 
-// Kept short: the executeCodeblock command runs the last-synced code, so a long debounce
-// widens the window in which a keyboard-triggered run executes stale code.
-const DEBOUNCE_MS = 200;
-
-export function CodeElement({ element }: EditorElementProps<EditorElementType.Code>) {
+export function CodeElement({
+  element,
+  editing = false,
+  editingPosition,
+  onStopEditing,
+  onMinHeightChange,
+}: EditorElementProps<EditorElementType.Code>) {
   const messages = useMessageService();
   const sources = useSources();
-  const output = useExecutionOutput(element.id);
-  const { language, className } = element.data;
+  const { t } = useLocalization();
+  const { language, className, lastOutput, outputCollapsed } = element.data;
+  const executionState = useExecutionOutput(element.id, lastOutput);
+  const readOnly = useExecutionReadOnly();
 
   const fileName = fileNameFromClassName(className, language);
   const source = sources.find((s) => s.name === fileName && s.language === language);
-  const prefix = COMMENT_PREFIX_BY_LANGUAGE[language] ?? '//';
-  const blockCode = source ? extractBlock(source.code, element.id, prefix) : null;
+  const blockCode = source
+    ? extractBlock(source.code, element.id, commentPrefixFor(language))
+    : null;
 
-  const [code, setCode] = useState(blockCode ?? '');
+  const { code, change, flush } = useBlockCodeSync(element.id, blockCode);
   const monacoTheme = useMonacoTheme();
-
-  const codeRef = useRef(code);
-  codeRef.current = code;
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingCodeRef = useRef<string | null>(null);
-
-  const flushPendingUpdate = useCallback(() => {
-    if (debounceRef.current !== null) {
-      clearTimeout(debounceRef.current);
-      debounceRef.current = null;
-    }
-    if (pendingCodeRef.current !== null) {
-      messages.send({
-        type: 'updateBlockCode',
-        elementId: element.id,
-        code: pendingCodeRef.current,
-      });
-      pendingCodeRef.current = null;
-    }
-  }, [messages, element.id]);
-
   const { wrapperRef, handleMount } = useEditorAutoHeight();
-  const pasteCallbackRef = useRef<((text: string) => void) | null>(null);
-
-  useOnMessage((msg) => {
-    if (msg.type === 'clipboardContent' && pasteCallbackRef.current) {
-      pasteCallbackRef.current(msg.text);
-      pasteCallbackRef.current = null;
-    }
-  });
-
-  const sendDebouncedUpdate = useCallback(
-    (newCode: string) => {
-      pendingCodeRef.current = newCode;
-      if (debounceRef.current !== null) {
-        clearTimeout(debounceRef.current);
-      }
-      debounceRef.current = setTimeout(() => {
-        flushPendingUpdate();
-      }, DEBOUNCE_MS);
-    },
-    [flushPendingUpdate],
+  const registerClipboard = useMonacoClipboard();
+  const registerEditing = useMonacoEditing(editing, editingPosition, onStopEditing);
+  const { surfaceRef, editorAreaRef, actionBarRef } = useCodeBlockMinHeight(
+    element,
+    source !== undefined,
+    !readOnly,
+    onMinHeightChange,
   );
+  // Without a console the surface ends at the actionbar and the rest of the element stays empty.
+  const consoleVisible = !(outputCollapsed ?? false) && hasOutput(executionState);
 
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current !== null) {
-        clearTimeout(debounceRef.current);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (blockCode !== null && blockCode !== codeRef.current) {
-      setCode(blockCode);
-    }
-  }, [blockCode]);
-
-  // Manual per-block overrides from the settings sidebar; undefined falls back to the
-  // theme defaults set via the CSS classes below.
+  // Per-block overrides from the settings sidebar; undefined falls back to the theme classes.
   const surfaceStyle = {
     backgroundColor: element.style.backgroundColor,
     borderColor: element.style.border?.color,
@@ -106,84 +71,84 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
   if (!source) {
     return (
       <div
-        className="border border-focus-border rounded-sm p-3 bg-editor-widget-background text-errorForeground"
+        className="pointer-events-auto border border-focus-border rounded-sm p-3 bg-editor-widget-background text-errorForeground"
         style={surfaceStyle}
       >
-        Source not found: {fileName}
+        {formatMessage(t('webview.codeblock.sourceNotFound'), { fileName })}
       </div>
     );
   }
 
   return (
-    <div
-      className="border border-focus-border rounded-sm overflow-hidden bg-editor-widget-background relative"
-      style={surfaceStyle}
-    >
-      {/* Header — only shown when assigned to a named class */}
-      {!isDefaultClassName(className, element.id) && (
-        <div className="flex items-center gap-2 px-2 py-0.5 border-b border-editor-widget-border bg-editorGroupHeader-tabsBackground">
-          <span className="font-sans text-sm font-normal text-tab-activeForeground flex items-center gap-1 select-none">
-            <Icons name="symbol-class" className="text-symbolIcon-classForeground" />
-            {className}
-          </span>
+    <div className="h-full flex flex-col">
+      <div
+        ref={surfaceRef}
+        className={`pointer-events-auto border border-focus-border rounded-sm overflow-hidden bg-editor-widget-background relative flex flex-col ${
+          consoleVisible ? 'flex-1 min-h-0' : 'flex-none'
+        }`}
+        style={surfaceStyle}
+      >
+        <div ref={editorAreaRef} className="flex-none">
+          {!isDefaultClassName(className, element.id) && (
+            <div className="flex items-center gap-2 px-2 py-0.5 border-b border-editor-widget-border bg-editorGroupHeader-tabsBackground">
+              <span className="font-sans text-sm font-normal text-tab-activeForeground flex items-center gap-1 select-none">
+                <Icons name="symbol-class" className="text-symbolIcon-classForeground" />
+                {className}
+              </span>
+            </div>
+          )}
+
+          <div
+            ref={wrapperRef}
+            data-code-id={element.id}
+            className={editing ? '' : 'pointer-events-none'}
+          >
+            {hasCustomBg && (
+              <style>{`[data-code-id="${element.id}"] .monaco-editor, [data-code-id="${element.id}"] .monaco-editor-background, [data-code-id="${element.id}"] .monaco-editor .margin { background-color: transparent !important; }`}</style>
+            )}
+            <MonacoEditor
+              height="100%"
+              width="100%"
+              value={code}
+              language={language}
+              theme={monacoTheme}
+              onMount={(editor) => {
+                handleMount(editor);
+                // Opening the Command Palette blurs Monaco, so Ctrl+Shift+E runs fresh code.
+                editor.onDidBlurEditorText(flush);
+                registerClipboard(editor);
+                registerEditing(editor);
+              }}
+              onChange={(value) => change(value ?? '')}
+              options={{
+                minimap: { enabled: false },
+                readOnly: !editing,
+                padding: { top: 8, bottom: 8 },
+                scrollBeyondLastLine: false,
+                // The editor is as tall as its content, so the wheel belongs to the canvas.
+                scrollbar: { vertical: 'hidden', alwaysConsumeMouseWheel: false },
+                lineNumbers: 'on',
+                renderLineHighlight: 'none',
+                overviewRulerLanes: 0,
+                automaticLayout: true,
+              }}
+            />
+          </div>
         </div>
-      )}
 
-      <div ref={wrapperRef} style={{ height: MIN_HEIGHT }} data-code-id={element.id}>
-        {hasCustomBg && (
-          <style>{`[data-code-id="${element.id}"] .monaco-editor, [data-code-id="${element.id}"] .monaco-editor-background, [data-code-id="${element.id}"] .monaco-editor .margin { background-color: transparent !important; }`}</style>
-        )}
-        <MonacoEditor
-          height="100%"
-          width="100%"
-          value={code}
-          language={language}
-          theme={monacoTheme}
-          onMount={(editor) => {
-            handleMount(editor);
-            // The executeCodeblock command can't flush this webview's debounce buffer, but
-            // opening the Command Palette (or clicking elsewhere) blurs Monaco — flushing here
-            // means those paths always execute fresh code.
-            editor.onDidBlurEditorText(flushPendingUpdate);
-
-            editor.addAction({
-              id: '5board-paste',
-              label: 'Paste',
-              keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyV],
-              run: (ed) => {
-                pasteCallbackRef.current = (text) => {
-                  ed.trigger('keyboard', 'type', { text });
-                };
-                messages.send({ type: 'requestClipboard' });
-              },
-            });
-          }}
-          onChange={(v) => {
-            const newCode = v ?? '';
-            setCode(newCode);
-            sendDebouncedUpdate(newCode);
-          }}
-          options={{
-            minimap: { enabled: false },
-            padding: { top: 8, bottom: 8 },
-            scrollBeyondLastLine: false,
-            lineNumbers: 'on',
-            renderLineHighlight: 'none',
-            overviewRulerLanes: 0,
-            automaticLayout: true,
+        <OutputPanel
+          elementId={element.id}
+          state={executionState}
+          readOnly={readOnly}
+          collapsed={outputCollapsed ?? false}
+          actionBarRef={actionBarRef}
+          onOpenSource={() => messages.send({ type: 'openSource', elementId: element.id })}
+          onRun={() => {
+            flush();
+            messages.send({ type: 'executeCodeblock', elementId: element.id });
           }}
         />
       </div>
-
-      {/* Actionbar + Output */}
-      <OutputPanel
-        output={output}
-        onOpenSource={() => messages.send({ type: 'openSource', elementId: element.id })}
-        onRun={() => {
-          flushPendingUpdate();
-          messages.send({ type: 'executeCodeblock', elementId: element.id });
-        }}
-      />
     </div>
   );
 }

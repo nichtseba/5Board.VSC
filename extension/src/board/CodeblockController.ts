@@ -1,82 +1,165 @@
 import vscode from 'vscode';
-import {
-  EditorElementType,
-  fileNameFromClassName,
-  type CodeElementData,
-  type CodeExecutionOutput,
-} from '5board.vsc-common';
+import { fileNameFromClassName, type BoardDocument } from '5board.vsc-common';
 import { BoardCustomDocument } from './BoardCustomDocument';
-import { ExecutionService } from '../runner/ExecutionService';
+import { ExecutionSessionManager, type SessionEvent } from '../runner/ExecutionSessionManager';
 import { SRC_ROOT } from './package';
-import { updateBlockCode } from './CodeblockSourceService';
+import { findCodeElement, updateBlockCode } from './CodeblockSourceService';
+import { SaveScheduler } from './SaveScheduler';
+import {
+  hasStoredOutputs,
+  resetAllOutputs,
+  resetOutput,
+  setLastOutput,
+  setOutputCollapsed,
+} from './CodeblockOutputService';
+
+/** Upper bound on how often typing in a block writes the document. */
+const CODE_SAVE_INTERVAL_MS = 1000;
 
 /**
- * Per-document I/O boundary for codeblocks: wires inbound webview messages and the
- * `5board-vsc.executeCodeblock` command to the services and broadcasts results.
+ * Per-document I/O boundary for codeblocks: wires inbound webview messages and the codeblock
+ * commands to the services and broadcasts results.
  */
 export class CodeblockController {
-  private readonly executionService = new ExecutionService();
+  private readonly sessions = new ExecutionSessionManager((elementId, event) =>
+    this.handleSessionEvent(elementId, event),
+  );
+  private readonly saves = new SaveScheduler(
+    () => void this.document.saveDocument(),
+    CODE_SAVE_INTERVAL_MS,
+  );
+  // Kept for webviews that open mid-run.
+  private readonly inputDrafts = new Map<string, string>();
 
   constructor(private readonly document: BoardCustomDocument) {}
 
   register(): (() => void)[] {
+    const messages = this.document.messageService;
     return [
-      this.document.messageService.on('updateBlockCode', (msg) => {
-        this.document.applyEdit((document) => {
-          updateBlockCode(document, msg.elementId, msg.code);
-        });
-        void this.document.saveDocument();
+      messages.on('updateBlockCode', (msg) => {
+        this.document.applyEdit((document) => updateBlockCode(document, msg.elementId, msg.code));
+        this.saves.requestSave();
       }),
-      this.document.messageService.on('openSource', (msg) => {
-        this.openSource(msg.elementId);
+      messages.on('openSource', (msg) => this.openSource(msg.elementId)),
+      messages.on('executeCodeblock', (msg) => void this.executeBlock(msg.elementId)),
+      messages.on('codeblockInput', (msg) => this.sessions.input(msg.elementId, msg.text)),
+      messages.on('codeblockInputDraft', (msg) => {
+        if (!this.sessions.isRunning(msg.elementId)) return;
+        this.inputDrafts.set(msg.elementId, msg.text);
+        messages.send(msg);
       }),
-      this.document.messageService.on('executeCodeblock', (msg) => {
-        void this.executeBlock(msg.elementId);
+      messages.on('codeblockEndInput', (msg) => this.sessions.endInput(msg.elementId)),
+      messages.on('codeblockStop', (msg) => this.sessions.stop(msg.elementId)),
+      messages.on('codeblockSetOutputCollapsed', (msg) => {
+        this.editAndSave((document) => setOutputCollapsed(document, msg.elementId, msg.collapsed));
       }),
+      // A webview that opened or reloaded mid-run catches up on every still-running block.
+      messages.on('ready', (_msg, sender) => {
+        for (const block of this.sessions.runningBlocks()) {
+          messages.send(
+            {
+              type: 'codeblockSync',
+              elementId: block.elementId,
+              transcript: block.transcript,
+              running: true,
+              draft: this.inputDrafts.get(block.elementId),
+            },
+            sender,
+          );
+        }
+      }),
+      () => this.sessions.stopAll(),
+      // The document is closing; an edit that is only in memory would be lost.
+      () => this.saves.flush(),
     ];
   }
 
-  private openSource(elementId: string): void {
-    const element = this.document.boardPackage.document.content.elements.find(
-      (e) => e.id === elementId,
-    );
-    if (!element || element.type !== EditorElementType.Code) return;
+  public async executeBlock(elementId: string): Promise<void> {
+    await this.sessions.start(this.document.boardPackage.document, elementId);
+  }
 
-    const { className, language } = element.data as CodeElementData;
-    const fileName = fileNameFromClassName(className, language);
+  /** A running block is skipped: its transcript still belongs to the process writing it. */
+  public resetOutput(elementId: string): void {
+    if (this.sessions.isRunning(elementId)) return;
+    if (this.editAndSave((document) => resetOutput(document, elementId))) {
+      this.broadcastCleared([elementId]);
+    }
+  }
+
+  public resetAllOutputs(): void {
+    let cleared: string[] = [];
+    this.editAndSave((document) => {
+      cleared = resetAllOutputs(document, (id) => this.sessions.isRunning(id));
+      return cleared.length > 0;
+    });
+    this.broadcastCleared(cleared);
+  }
+
+  public hasStoredOutputs(): boolean {
+    return hasStoredOutputs(this.document.boardPackage.document);
+  }
+
+  private openSource(elementId: string): void {
+    const element = findCodeElement(this.document.boardPackage.document, elementId);
+    if (!element) return;
+
+    const { className, language } = element.data;
     const uri = this.document.uri.with({
       scheme: '5board',
-      path: `${this.document.uri.path}/${SRC_ROOT}/${language}/${fileName}`,
+      path: `${this.document.uri.path}/${SRC_ROOT}/${language}/${fileNameFromClassName(className, language)}`,
     });
     void vscode.commands.executeCommand('vscode.open', uri);
   }
 
-  public async executeBlock(elementId: string): Promise<void> {
-    const result = await this.executionService.execute(
-      this.document.boardPackage.document,
-      elementId,
-    );
+  // Live state wins over the stored one in the webviews, so they have to drop it explicitly.
+  private broadcastCleared(elementIds: string[]): void {
+    for (const elementId of elementIds) {
+      this.document.messageService.send({ type: 'codeblockOutputCleared', elementId });
+    }
+  }
 
-    const output: CodeExecutionOutput = {
-      stdout: result.stdout,
-      // Surface execution-level failures (missing toolchain, no source) that have no stderr.
-      stderr: result.stderr || result.error || '',
-      success: result.success,
-      exitCode: result.exitCode,
-    };
-
+  /** Saves only when `edit` reports a change. Typing goes through the scheduler instead. */
+  private editAndSave(edit: (document: BoardDocument) => boolean): boolean {
+    let changed = false;
     this.document.applyEdit((document) => {
-      const element = document.content.elements.find((e) => e.id === elementId);
-      if (element && element.type === EditorElementType.Code) {
-        (element.data as CodeElementData).output = output;
-      }
+      changed = edit(document);
     });
-    void this.document.saveDocument();
+    if (changed) {
+      this.saves.saveNow();
+    }
+    return changed;
+  }
 
-    this.document.messageService.send({
-      type: 'codeblockResult',
-      elementId,
-      output,
-    });
+  private handleSessionEvent(elementId: string, event: SessionEvent): void {
+    const messages = this.document.messageService;
+    switch (event.kind) {
+      case 'started':
+        this.inputDrafts.delete(elementId);
+        messages.send({ type: 'codeblockStarted', elementId });
+        this.editAndSave((document) => setOutputCollapsed(document, elementId, false));
+        return;
+      case 'segment':
+        messages.send({ type: 'codeblockChunk', elementId, segment: event.segment });
+        return;
+      case 'exited':
+        this.inputDrafts.delete(elementId);
+        messages.send({
+          type: 'codeblockExited',
+          elementId,
+          exitCode: event.exitCode,
+          success: event.success,
+          truncated: event.truncated,
+        });
+        // Stored once at the end, not per chunk: every save rewrites the whole archive.
+        this.editAndSave((document) =>
+          setLastOutput(document, elementId, {
+            transcript: event.transcript,
+            success: event.success,
+            exitCode: event.exitCode,
+            truncated: event.truncated,
+          }),
+        );
+        return;
+    }
   }
 }

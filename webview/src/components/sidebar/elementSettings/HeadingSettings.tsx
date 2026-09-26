@@ -15,8 +15,8 @@ import SettingsPanel from '../layout/SettingsPanel';
 import { useLocalization } from '../../../providers/LocalizationProvider';
 import { useMessageService } from '../../../services/MessageService';
 import { useBoardDocument } from '../../../providers/BoardDocumentProvider';
-import { ColorPresets } from '../components/ColorPresets';
-import { ColorPicker } from '../components/ColorPicker';
+import ColorSelector from '../components/ColorSelector';
+import { FontSizeInput } from './components/FontSizeInput';
 
 type Props = {
   element: EditorElement<EditorElementType.Heading>;
@@ -166,13 +166,7 @@ export function HeadingSettings({ element }: Props) {
           label={t('webview.sidebar-element-settings.headingSettings.fontSize')}
           inline
         >
-          <input
-            type="number"
-            min={1}
-            value={levelSettings.fontSize ?? ''}
-            onChange={(e) => handleFontSizeChange(e.target.value)}
-            className="w-20 rounded-xs border border-dropdown-border bg-input-background px-2 py-[3px] text-input-foreground [color-scheme:light_dark] focus:border-focus-border focus:outline-none"
-          />
+          <FontSizeInput value={levelSettings.fontSize ?? ''} onChange={handleFontSizeChange} />
         </SettingsField>
         <SettingsField
           label={t('webview.sidebar-element-settings.headingSettings.textStyle')}
@@ -236,17 +230,13 @@ export function HeadingSettings({ element }: Props) {
 }
 
 function ColorField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  const { t } = useLocalization();
   return (
-    <div className="flex flex-col gap-2">
-      <ColorPresets
-        color={value}
-        onChange={onChange}
-        presets={PROJECTOR_POINTER_PRESET_COLORS.map((preset) => ({ value: preset, theme: true }))}
-      />
-      <div className="flex items-center gap-2">
-        <ColorPicker color={value} onChange={onChange} />
-        <TextField className="flex-1" value={value} placeholder="#000000" onChange={onChange} />
-      </div>
-    </div>
+    <ColorSelector
+      color={value}
+      onChange={onChange}
+      themePresets={PROJECTOR_POINTER_PRESET_COLORS}
+      customColorLabel={t('webview.sidebar.projectorSettings.customColor')}
+    />
   );
 }

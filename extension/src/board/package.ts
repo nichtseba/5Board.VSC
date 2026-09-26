@@ -5,6 +5,7 @@ import {
   BoardContent,
   BoardDocument,
   BoardManifest,
+  GridSettings,
   Source,
   create5boardzManifest,
 } from '5board.vsc-common';
@@ -43,13 +44,15 @@ export class BoardPackage {
     return new BoardPackage(document);
   }
 
-  public static createEmpty(title: string): BoardPackage {
+  public static createEmpty(title: string, grid: GridSettings): BoardPackage {
     const document: BoardDocument = {
       manifest: create5boardzManifest(title),
       content: {
-        selectedElementId: null,
+        selectedElementIds: [],
+        primarySelectedElementId: null,
         elements: [],
         codeClasses: [],
+        grid: { ...grid },
         background: '',
         snapAngle: 0,
         revealOrder: -1,

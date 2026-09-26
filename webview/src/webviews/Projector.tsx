@@ -5,8 +5,10 @@ import { useBoardDocument } from '../providers/BoardDocumentProvider';
 import { DEFAULT_PROJECTOR_POINTER_STYLE, ProjectorPointerStyle } from '5board.vsc-common';
 import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
+import { FreehandPreview } from '../components/canvas/tools/FreehandPreviewOverlay';
 import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
 import { SourcesProvider } from '../providers/SourcesProvider';
+import { ExecutionOutputProvider } from '../providers/ExecutionOutputProvider';
 
 // The projector view shows the same canvas as the editor,
 // but is read-only and display-only — no interactive controls.
@@ -19,6 +21,10 @@ export default function Projector() {
   const [pointerStyle, setPointerStyle] = useState<ProjectorPointerStyle>(
     DEFAULT_PROJECTOR_POINTER_STYLE,
   );
+  // Live freehand stroke the editor is currently drawing (cleared when finished).
+  const [freehandPreview, setFreehandPreview] = useState<FreehandPreview | null>(null);
+  // Frozen state: mirroring is on hold
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     messages.send({ type: 'ready' });
@@ -57,7 +63,8 @@ export default function Projector() {
       window.removeEventListener('scroll', sendViewport);
       window.removeEventListener('resize', sendViewport);
     };
-  }, [messages]);
+    // Re-run once the canvas mounts, so the initial viewport sends right away.
+  }, [messages, !!boardDocument]);
 
   useEffect(() => {
     document.documentElement.style.overflow = 'hidden';
@@ -77,13 +84,32 @@ export default function Projector() {
       setCursor(null);
     }
     if (msg.type === 'projectorStateChanged') {
+      setPaused(msg.paused);
       // If mirroring was just turned off, clear any lingering cursor dot.
       if (!msg.active) {
         setCursor(null);
       }
+      // Drop a half-drawn stroke so it does not stick around while paused.
+      if (msg.paused) {
+        setFreehandPreview(null);
+      }
     }
     if (msg.type === 'projectorPointerChanged') {
       setPointerStyle(msg.style);
+    }
+    if (msg.type === 'freehandPreview') {
+      setFreehandPreview({
+        points: msg.points,
+        color: msg.color,
+        width: msg.width,
+        opacity: msg.opacity,
+        lineStyle: msg.lineStyle,
+        dashScale: msg.dashScale,
+        straight: msg.straight,
+      });
+    }
+    if (msg.type === 'freehandPreviewEnd') {
+      setFreehandPreview(null);
     }
     if (msg.type === 'scroll') {
       const canvas = document.querySelector('.editor-canvas') as HTMLElement | null;
@@ -101,8 +127,12 @@ export default function Projector() {
       {/* Projector badge — display only, no interactive elements */}
       <div
         style={{
-          background: 'var(--vscode-badge-background)',
-          color: 'var(--vscode-badge-foreground)',
+          background: paused
+            ? 'var(--vscode-statusBarItem-warningBackground, #cca700)'
+            : 'var(--vscode-badge-background)',
+          color: paused
+            ? 'var(--vscode-statusBarItem-warningForeground, #000000)'
+            : 'var(--vscode-badge-foreground)',
           padding: '4px 12px',
           fontWeight: 'bold',
           fontSize: '0.85rem',
@@ -110,7 +140,8 @@ export default function Projector() {
           textTransform: 'uppercase',
         }}
       >
-        📽 {t('extension.projector.title')} — {boardDocument?.manifest.title ?? ''}
+        {t('extension.projector.title')} — {boardDocument?.manifest.title ?? ''} ·{' '}
+        {paused ? t('extension.projector.paused') : t('extension.projector.live')}
       </div>
       {/*
         Pass the live cursor position directly into EditorCanvas so the overlay
@@ -127,13 +158,21 @@ export default function Projector() {
       */}
       <div style={{ pointerEvents: 'none' }}>
         {boardDocument ? (
-          // Same SourcesProvider as the editor — without it every CodeElement
-          // shows "Source not found".
-          <SourcesProvider value={boardDocument.sources}>
-            <CanvasEventsProvider>
-              <EditorCanvas cursor={cursor} pointerStyle={pointerStyle} />
-            </CanvasEventsProvider>
-          </SourcesProvider>
+          // Mirrors code block output live, but read-only: input belongs to the editor
+          // window, so two windows can never write into the same program.
+          <ExecutionOutputProvider readOnly>
+            {/* Same SourcesProvider as the editor, without it every CodeElement shows
+                "Source not found". */}
+            <SourcesProvider value={boardDocument.sources}>
+              <CanvasEventsProvider>
+                <EditorCanvas
+                  cursor={cursor}
+                  pointerStyle={pointerStyle}
+                  freehandPreview={freehandPreview}
+                />
+              </CanvasEventsProvider>
+            </SourcesProvider>
+          </ExecutionOutputProvider>
         ) : (
           // Shown while waiting for the first 'init' message from the extension.
           <div style={{ padding: '1rem', opacity: 0.5 }}>{t('extension.projector.loading')}</div>

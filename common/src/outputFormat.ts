@@ -9,10 +9,6 @@
  *   4 = magenta, 5 = cyan, 6 = white, 7 = gray
  */
 
-export const OUTPUT_COLOR_OPEN_RE = /<C(\d)>/g;
-export const OUTPUT_COLOR_CLOSE = '</C>';
-export const OUTPUT_COLOR_COUNT = 8;
-
 export type OutputSegment =
   | { kind: 'text'; value: string }
   | { kind: 'colored'; colorIndex: number; value: string };

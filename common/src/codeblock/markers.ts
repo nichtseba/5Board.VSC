@@ -1,45 +1,70 @@
 export type CommentPrefix = '//' | '#';
 
-const openTag = (blockId: string, prefix: CommentPrefix = '//') =>
-  `${prefix} <block id="${blockId}">`;
-const closeTag = (prefix: CommentPrefix = '//') => `${prefix} </block>`;
+const openTag = (blockId: string, prefix: CommentPrefix) => `${prefix} <block id="${blockId}">`;
+const closeTag = (prefix: CommentPrefix) => `${prefix} </block>`;
+
+/** Wraps code in a block's open and close markers, without any indentation. */
+export function markBlock(blockId: string, code: string, prefix: CommentPrefix): string {
+  return `${openTag(blockId, prefix)}\n${code}\n${closeTag(prefix)}`;
+}
+
+interface BlockLocation {
+  openTagStart: number;
+  contentStart: number;
+  closeTagStart: number;
+}
+
+function findBlock(
+  sourceCode: string,
+  blockId: string,
+  prefix: CommentPrefix,
+): BlockLocation | null {
+  const open = openTag(blockId, prefix);
+  const openTagStart = sourceCode.indexOf(open);
+  if (openTagStart === -1) return null;
+
+  const contentStart = openTagStart + open.length;
+  const closeTagStart = sourceCode.indexOf(closeTag(prefix), contentStart);
+  if (closeTagStart === -1) return null;
+
+  return { openTagStart, contentStart, closeTagStart };
+}
+
+function lineStart(sourceCode: string, index: number): number {
+  return sourceCode.lastIndexOf('\n', index) + 1;
+}
 
 export function extractBlock(
   sourceCode: string,
   blockId: string,
-  prefix: CommentPrefix = '//',
+  prefix: CommentPrefix,
 ): string | null {
-  const open = openTag(blockId, prefix);
-  const close = closeTag(prefix);
-
-  const startIndex = sourceCode.indexOf(open);
-  if (startIndex === -1) return null;
-
-  const contentStart = startIndex + open.length;
-  const endIndex = sourceCode.indexOf(close, contentStart);
-  if (endIndex === -1) return null;
-
-  return dedentBlock(sourceCode.slice(contentStart, endIndex));
+  const block = findBlock(sourceCode, blockId, prefix);
+  if (!block) return null;
+  return dedentBlock(sourceCode.slice(block.contentStart, block.closeTagStart));
 }
 
+/**
+ * Must stay the exact inverse of {@link indentCode}: any difference replaces the Monaco model
+ * and moves the caret. So only the two structural lines are dropped and blank lines never change.
+ */
 function dedentBlock(raw: string): string {
   const lines = raw.split('\n');
-  while (lines.length > 0 && lines[0].trim() === '') lines.shift();
-  while (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
+  if (lines.length > 0 && lines[0].trim() === '') lines.shift();
+  if (lines.length > 0 && lines[lines.length - 1].trim() === '') lines.pop();
 
+  const minIndent = minIndentOf(lines);
+  return lines.map((line) => (line.trim() === '' ? line : line.slice(minIndent))).join('\n');
+}
+
+function minIndentOf(lines: string[]): number {
   const indents = lines
     .filter((line) => line.trim() !== '')
     .map((line) => line.match(/^[ \t]*/)![0].length);
-  const minIndent = indents.length > 0 ? Math.min(...indents) : 0;
-
-  return lines.map((line) => line.slice(minIndent)).join('\n');
+  return indents.length > 0 ? Math.min(...indents) : 0;
 }
 
-export function hasBlock(
-  sourceCode: string,
-  blockId: string,
-  prefix: CommentPrefix = '//',
-): boolean {
+export function hasBlock(sourceCode: string, blockId: string, prefix: CommentPrefix): boolean {
   return sourceCode.includes(openTag(blockId, prefix));
 }
 
@@ -47,14 +72,10 @@ export function insertBlockIntoClass(
   sourceCode: string,
   blockId: string,
   blockCode: string,
-  prefix: CommentPrefix = '//',
+  prefix: CommentPrefix,
+  indent: number,
 ): string {
-  const indent = 4;
-  const pad = ' '.repeat(indent);
-  const block =
-    `${pad}${openTag(blockId, prefix)}\n` +
-    `${indentCode(blockCode, indent)}\n` +
-    `${pad}${closeTag(prefix)}\n`;
+  const block = `${indentCode(markBlock(blockId, blockCode, prefix), indent)}\n`;
 
   // Generated sources hold exactly one top-level class, so the last `}` is its closing brace.
   const braceIndex = sourceCode.lastIndexOf('}');
@@ -62,21 +83,12 @@ export function insertBlockIntoClass(
   return sourceCode.slice(0, braceIndex) + block + sourceCode.slice(braceIndex);
 }
 
-export function removeBlock(
-  sourceCode: string,
-  blockId: string,
-  prefix: CommentPrefix = '//',
-): string {
-  const open = openTag(blockId, prefix);
-  const close = closeTag(prefix);
+export function removeBlock(sourceCode: string, blockId: string, prefix: CommentPrefix): string {
+  const block = findBlock(sourceCode, blockId, prefix);
+  if (!block) return sourceCode;
 
-  const openIndex = sourceCode.indexOf(open);
-  if (openIndex === -1) return sourceCode;
-  const closeIndex = sourceCode.indexOf(close, openIndex + open.length);
-  if (closeIndex === -1) return sourceCode;
-
-  const start = sourceCode.lastIndexOf('\n', openIndex) + 1;
-  const newlineAfterClose = sourceCode.indexOf('\n', closeIndex);
+  const start = lineStart(sourceCode, block.openTagStart);
+  const newlineAfterClose = sourceCode.indexOf('\n', block.closeTagStart);
   const end = newlineAfterClose === -1 ? sourceCode.length : newlineAfterClose + 1;
 
   return sourceCode.slice(0, start) + sourceCode.slice(end);
@@ -86,57 +98,37 @@ export function updateBlock(
   sourceCode: string,
   blockId: string,
   newCode: string,
-  prefix: CommentPrefix = '//',
+  prefix: CommentPrefix,
 ): string {
-  const open = openTag(blockId, prefix);
-  const close = closeTag(prefix);
-
-  const startIndex = sourceCode.indexOf(open);
-  if (startIndex === -1) return sourceCode;
-
-  const contentStart = startIndex + open.length;
-  const endIndex = sourceCode.indexOf(close, contentStart);
-  if (endIndex === -1) return sourceCode;
+  const block = findBlock(sourceCode, blockId, prefix);
+  if (!block) return sourceCode;
 
   // The replaced range swallows the close tag's leading whitespace, so restore its indentation.
-  const markerLineStart = sourceCode.lastIndexOf('\n', startIndex) + 1;
-  const markerIndent = sourceCode.slice(markerLineStart, startIndex);
+  const markerIndent = sourceCode.slice(
+    lineStart(sourceCode, block.openTagStart),
+    block.openTagStart,
+  );
 
   return (
-    sourceCode.slice(0, contentStart) +
-    '\n' +
-    newCode +
-    '\n' +
-    markerIndent +
-    sourceCode.slice(endIndex)
+    sourceCode.slice(0, block.contentStart) +
+    `\n${newCode}\n${markerIndent}` +
+    sourceCode.slice(block.closeTagStart)
   );
 }
 
-export function getBlockIndent(
-  sourceCode: string,
-  blockId: string,
-  prefix: CommentPrefix = '//',
-): number {
-  const open = openTag(blockId, prefix);
-  const close = closeTag(prefix);
+export function getBlockIndent(sourceCode: string, blockId: string, prefix: CommentPrefix): number {
+  const block = findBlock(sourceCode, blockId, prefix);
+  if (!block) return 0;
 
-  const startIndex = sourceCode.indexOf(open);
-  if (startIndex === -1) return 0;
-
-  const contentStart = startIndex + open.length;
-  const endIndex = sourceCode.indexOf(close, contentStart);
-  if (endIndex === -1) return 0;
-
-  const raw = sourceCode.slice(contentStart, endIndex);
-  const lines = raw.split('\n').filter((line) => line.trim() !== '');
-  // An empty block has no content to measure, so match the marker's own indentation.
+  const lines = sourceCode
+    .slice(block.contentStart, block.closeTagStart)
+    .split('\n')
+    .filter((line) => line.trim() !== '');
+  // An empty block has nothing to measure, so match the marker's own indentation.
   if (lines.length === 0) {
-    const markerLineStart = sourceCode.lastIndexOf('\n', startIndex) + 1;
-    return startIndex - markerLineStart;
+    return block.openTagStart - lineStart(sourceCode, block.openTagStart);
   }
-
-  const indents = lines.map((line) => line.match(/^[ \t]*/)![0].length);
-  return Math.min(...indents);
+  return minIndentOf(lines);
 }
 
 export function indentCode(code: string, spaces: number): string {

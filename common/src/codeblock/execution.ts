@@ -1,34 +1,47 @@
 import { Source } from '../board/document.js';
-import { CodeblockLanguage } from './language.js';
 
 export interface CodeblockExecutionRequest {
   fileName: string;
   sources: Source[];
-  language: CodeblockLanguage;
+  language: string;
+  /** Resolved binaries keyed by tool name, e.g. `java`. */
+  toolPaths?: Record<string, string>;
 }
 
-export interface GeneratedSourceFile {
-  path: string;
-  content: string;
+export interface ToolchainConfig {
+  home?: string;
 }
 
 export interface ToolCheckResult {
   available: boolean;
-  version?: string;
+  toolPaths?: Record<string, string>;
   missingTools?: string[];
   error?: string;
 }
 
-export interface CodeblockExecutionResult {
-  success: boolean;
-  stdout: string;
-  stderr: string;
-  exitCode: number | null;
-  error?: string;
+export type ExecutionEvent =
+  | { kind: 'out' | 'err'; text: string }
+  | { kind: 'exited'; exitCode: number | null; success: boolean };
+
+/** A running program. Every method is a no-op once the process has exited. */
+export interface CodeblockSession {
+  /** The caller supplies the trailing newline. */
+  write(text: string): void;
+  /** Closes stdin (EOF). */
+  endInput(): void;
+  kill(): void;
+  onEvent(listener: (event: ExecutionEvent) => void): () => void;
 }
 
+/** `stderr` is set for compile errors; `error` alone means the program never got to compile. */
+export type ExecutionStartResult =
+  | { ok: true; session: CodeblockSession }
+  | { ok: false; error: string; stderr?: string };
+
 export interface CodeblockRunner {
-  canHandle(language: CodeblockLanguage): boolean;
-  checkTools(): Promise<ToolCheckResult>;
-  execute(request: CodeblockExecutionRequest): Promise<CodeblockExecutionResult>;
+  canHandle(language: string): boolean;
+  checkTools(config?: ToolchainConfig): Promise<ToolCheckResult>;
+  /** Which toolchain the lookup settled on and everything it checked, as plain text. */
+  toolchainReport(config?: ToolchainConfig): Promise<string>;
+  start(request: CodeblockExecutionRequest): Promise<ExecutionStartResult>;
 }

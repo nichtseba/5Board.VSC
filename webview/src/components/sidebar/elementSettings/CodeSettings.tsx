@@ -1,12 +1,12 @@
 import {
   EditorElement,
   EditorElementType,
-  SUPPORTED_LANGUAGES,
   getLanguageSupport,
   isDefaultClassName,
 } from '5board.vsc-common';
 import type { ElementStyle } from '5board.vsc-common';
 import { Button, Dropdown, DropdownOption } from 'vscrui';
+import { languageOptions as supportedLanguageOptions, optionValue } from '../codeblockOptions';
 import ColorSelector from '../components/ColorSelector';
 import SettingsField from '../layout/SettingsField';
 import SettingsPanel from '../layout/SettingsPanel';
@@ -20,16 +20,14 @@ type Props = {
 
 const NONE = '';
 
-function optionValue(value: string | DropdownOption | undefined): string | undefined {
-  return typeof value === 'string' ? value : value?.value;
-}
-
 export function CodeSettings({ element }: Props) {
   const { t } = useLocalization();
   const messages = useMessageService();
   const document = useBoardDocument();
   const { className, language } = element.data;
   const standalone = isDefaultClassName(className, element.id);
+  // Languages without a named-class model only ever hold standalone blocks.
+  const hasClasses = getLanguageSupport(language)?.namedClasses !== undefined;
 
   const classes = (document?.content.codeClasses ?? []).filter((c) => c.language === language);
   const classOptions: DropdownOption[] = [
@@ -41,10 +39,7 @@ export function CodeSettings({ element }: Props) {
     classOptions.push({ value: className, label: className });
   }
 
-  const languageOptions: DropdownOption[] = SUPPORTED_LANGUAGES.map((support) => ({
-    value: support.id,
-    label: support.displayName,
-  }));
+  const languageOptions = supportedLanguageOptions();
   if (!getLanguageSupport(language)) {
     languageOptions.push({ value: language, label: language, disabled: true });
   }
@@ -91,18 +86,20 @@ export function CodeSettings({ element }: Props) {
           </InfoLine>
         )}
       </SettingsField>
-      <SettingsField label={t('webview.sidebar-element-settings.codeSettings.classNameLabel')}>
-        <Dropdown
-          options={classOptions}
-          value={standalone ? NONE : className}
-          onChange={selectClass}
-        />
-        <InfoLine icon={standalone ? 'symbol-method' : 'symbol-class'}>
-          {standalone
-            ? t('webview.sidebar-element-settings.codeSettings.mainWrapInfo')
-            : t('webview.sidebar-element-settings.codeSettings.noMainWrapInfo')}
-        </InfoLine>
-      </SettingsField>
+      {hasClasses && (
+        <SettingsField label={t('webview.sidebar-element-settings.codeSettings.classNameLabel')}>
+          <Dropdown
+            options={classOptions}
+            value={standalone ? NONE : className}
+            onChange={selectClass}
+          />
+          <InfoLine icon={standalone ? 'symbol-method' : 'symbol-class'}>
+            {standalone
+              ? t('webview.sidebar-element-settings.codeSettings.mainWrapInfo')
+              : t('webview.sidebar-element-settings.codeSettings.noMainWrapInfo')}
+          </InfoLine>
+        </SettingsField>
+      )}
       <SettingsField label={t('webview.sidebar-element-settings.codeSettings.backgroundLabel')}>
         <ColorSelector
           color={element.style.backgroundColor ?? ''}
@@ -128,17 +125,11 @@ export function CodeSettings({ element }: Props) {
           {t('webview.sidebar-element-settings.codeSettings.resetColors')}
         </Button>
       )}
-      {element.data.output !== undefined && (
+      {element.data.lastOutput !== undefined && (
         <Button
           className="mt-2"
           appearance="secondary"
-          onClick={() =>
-            messages.send({
-              type: 'updateElement',
-              id: element.id,
-              changes: { data: { ...element.data, output: undefined } },
-            })
-          }
+          onClick={() => messages.send({ type: 'codeblockResetOutput', elementId: element.id })}
         >
           {t('webview.sidebar-element-settings.codeSettings.resetOutput')}
         </Button>

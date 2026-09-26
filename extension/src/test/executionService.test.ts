@@ -8,7 +8,12 @@ const service = new ExecutionService();
 function makeDocument(overrides: Partial<BoardDocument> = {}): BoardDocument {
   return {
     manifest: { title: 'test', createdAt: 0, modifiedAt: 0, version: '1' },
-    content: { selectedElementId: null, elements: [], codeClasses: [] },
+    content: {
+      selectedElementIds: [],
+      primarySelectedElementId: null,
+      elements: [],
+      codeClasses: [],
+    },
     sources: [],
     assets: [],
     ...overrides,
@@ -33,29 +38,31 @@ function makeCodeElement(
 
 describe('ExecutionService', function () {
   it('returns error for non-existent element id', async function () {
-    const result = await service.execute(makeDocument(), 'does-not-exist');
-    assert.equal(result.success, false);
-    assert.ok(result.error?.includes('does-not-exist'));
+    const result = await service.start(makeDocument(), 'does-not-exist');
+    assert.equal(result.ok, false);
+    assert.ok(!result.ok && result.error.includes('does-not-exist'));
   });
 
   it('returns error when source file not in document', async function () {
     const doc = makeDocument({
       content: {
-        selectedElementId: null,
+        selectedElementIds: [],
+        primarySelectedElementId: null,
         codeClasses: [],
         elements: [makeCodeElement({ className: 'Student', language: 'java' })],
       },
       sources: [],
     });
-    const result = await service.execute(doc, 'element-1');
-    assert.equal(result.success, false);
-    assert.ok(result.error?.includes('Student.java'));
+    const result = await service.start(doc, 'element-1');
+    assert.equal(result.ok, false);
+    assert.ok(!result.ok && result.error.includes('Student.java'));
   });
 
   it('returns error when language has no runner', async function () {
     const doc = makeDocument({
       content: {
-        selectedElementId: null,
+        selectedElementIds: [],
+        primarySelectedElementId: null,
         codeClasses: [],
         elements: [makeCodeElement({ className: 'script', language: 'ruby' })],
       },
@@ -63,8 +70,8 @@ describe('ExecutionService', function () {
         { name: 'script.rb', language: 'ruby', code: 'puts "hello"', createdAt: 0, modifiedAt: 0 },
       ],
     });
-    const result = await service.execute(doc, 'element-1');
-    assert.equal(result.success, false);
-    assert.ok(result.error?.includes('ruby'));
+    const result = await service.start(doc, 'element-1');
+    assert.equal(result.ok, false);
+    assert.ok(!result.ok && result.error.includes('ruby'));
   });
 });

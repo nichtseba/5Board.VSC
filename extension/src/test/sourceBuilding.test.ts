@@ -15,6 +15,12 @@ describe('getLanguageSupport', function () {
     assert.equal(getLanguageSupport('java')?.id, 'java');
   });
 
+  it('provides python without a named-class model', function () {
+    const support = getLanguageSupport('python');
+    assert.equal(support?.id, 'python');
+    assert.equal(support?.namedClasses, undefined);
+  });
+
   it('returns undefined for unsupported languages', function () {
     assert.equal(getLanguageSupport('ruby'), undefined);
   });
@@ -105,7 +111,7 @@ describe('buildSource round-trip', function () {
     assert.equal(extracted, code);
   });
 
-  it('produces valid class structure with mainWrap', function () {
+  it('produces a compact source file with mainWrap', function () {
     const source = buildSource({
       elementId: 'el-5',
       className: 'Main',
@@ -113,8 +119,23 @@ describe('buildSource round-trip', function () {
       code: 'int x = 1;',
       mainWrap: true,
     });
-    assert.ok(source.includes('public class Main {'));
-    assert.ok(source.includes('public static void main(String[] args) {'));
+    // Compact source files (JEP 512) have no class declaration — the class is implicit and
+    // named after the file, so the class name must not leak into the source.
+    assert.ok(source.includes('void main() {'));
+    assert.ok(!source.includes('class'));
+    assert.ok(!source.includes('Main'));
+  });
+
+  it('indents a runnable block at one level', function () {
+    const source = buildSource({
+      elementId: 'el-5b',
+      className: 'Main',
+      language: 'java',
+      code: 'int x = 1;',
+      mainWrap: true,
+    });
+    assert.ok(source.includes('    // <block id="el-5b">'));
+    assert.ok(source.includes('    int x = 1;'));
   });
 
   it('produces valid class structure without mainWrap', function () {
@@ -127,6 +148,45 @@ describe('buildSource round-trip', function () {
     });
     assert.ok(source.includes('public class Student {'));
     assert.ok(!source.includes('public static void main'));
+  });
+
+  it('round-trips a python block, which needs no wrapper', function () {
+    const code = 'name = input("Name: ")\nprint(f"hi {name}")';
+    const source = buildSource({
+      elementId: 'el-py',
+      className: 'ElPy',
+      language: 'python',
+      code,
+      mainWrap: true,
+    });
+
+    assert.ok(source.startsWith('# <block id="el-py">'));
+    assert.equal(extractBlock(source, 'el-py', '#'), code);
+  });
+
+  it('round-trips an indented python block', function () {
+    const code = 'for i in range(3):\n    print(i)';
+    const source = buildSource({
+      elementId: 'el-py2',
+      className: 'ElPy2',
+      language: 'python',
+      code,
+      mainWrap: true,
+    });
+
+    assert.equal(extractBlock(source, 'el-py2', '#'), code);
+  });
+
+  it('throws for a named class in a language without them', function () {
+    assert.throws(() =>
+      buildSource({
+        elementId: 'el-py3',
+        className: 'Student',
+        language: 'python',
+        code: 'pass',
+        mainWrap: false,
+      }),
+    );
   });
 
   it('throws for unsupported languages', function () {
@@ -151,7 +211,7 @@ describe('insertBlockIntoClass', function () {
       code: 'private String name;',
       mainWrap: false,
     });
-    source = insertBlockIntoClass(source, 'b', 'private int age;', '//');
+    source = insertBlockIntoClass(source, 'b', 'private int age;', '//', 4);
 
     assert.equal(extractBlock(source, 'a', '//'), 'private String name;');
     assert.equal(extractBlock(source, 'b', '//'), 'private int age;');
@@ -168,7 +228,7 @@ describe('insertBlockIntoClass', function () {
       mainWrap: false,
     });
     const code = 'void greet() {\n    System.out.println(name);\n}';
-    source = insertBlockIntoClass(source, 'b', code, '//');
+    source = insertBlockIntoClass(source, 'b', code, '//', 4);
     assert.equal(extractBlock(source, 'b', '//'), code);
   });
 });
@@ -182,7 +242,7 @@ describe('removeBlock', function () {
       code: 'private String name;',
       mainWrap: false,
     });
-    source = insertBlockIntoClass(source, 'b', 'private int age;', '//');
+    source = insertBlockIntoClass(source, 'b', 'private int age;', '//', 4);
 
     source = removeBlock(source, 'a', '//');
 

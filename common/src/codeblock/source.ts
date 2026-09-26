@@ -1,8 +1,13 @@
-import { FILE_EXTENSION_BY_LANGUAGE, getLanguageSupport, sanitizeClassName } from './language.js';
+import {
+  commentPrefixFor,
+  fileExtensionFor,
+  getLanguageSupport,
+  sanitizeClassName,
+} from './language.js';
+import { markBlock } from './markers.js';
 
 export function fileNameFromClassName(className: string, language: string): string {
-  const extension = FILE_EXTENSION_BY_LANGUAGE[language] ?? 'txt';
-  return `${className}.${extension}`;
+  return `${className}.${fileExtensionFor(language)}`;
 }
 
 export function isDefaultClassName(className: string, elementId: string): boolean {
@@ -24,10 +29,12 @@ export function buildSource(opts: BuildSourceOptions): string {
     throw new Error(`Cannot build a source for unsupported language "${language}".`);
   }
 
-  const prefix = support.commentPrefix;
-  const markedBlock = `${prefix} <block id="${elementId}">\n${code}\n${prefix} </block>`;
-
-  return mainWrap
-    ? support.wrapRunnable(className, markedBlock)
-    : support.wrapClassBody(className, markedBlock);
+  const markedBlock = markBlock(elementId, code, commentPrefixFor(language));
+  if (mainWrap) {
+    return support.wrapRunnable(className, markedBlock);
+  }
+  if (!support.namedClasses) {
+    throw new Error(`Language "${language}" has no named classes.`);
+  }
+  return support.namedClasses.wrapClassBody(className, markedBlock);
 }
