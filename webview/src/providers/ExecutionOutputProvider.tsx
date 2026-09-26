@@ -8,6 +8,8 @@ export type BlockExecutionState = {
   exit?: { exitCode: number | null; success: boolean; truncated: boolean };
   // Only reliable signal for a new run: a restart while running never changes `running`.
   runId: number;
+  // Projector only; the editor keeps the input line in local state.
+  draft?: string;
 };
 
 // Live runs only. Finished runs are stored on the element (`lastOutput`), see useExecutionOutput.
@@ -57,6 +59,7 @@ export function ExecutionOutputProvider({
           [msg.elementId]: {
             ...current,
             running: false,
+            draft: undefined,
             exit: {
               exitCode: msg.exitCode,
               success: msg.success,
@@ -64,6 +67,13 @@ export function ExecutionOutputProvider({
             },
           },
         };
+      });
+    }
+    if (msg.type === 'codeblockInputDraft' && readOnly) {
+      setOutputs((prev) => {
+        const current = prev[msg.elementId];
+        if (!current?.running) return prev;
+        return { ...prev, [msg.elementId]: { ...current, draft: msg.text } };
       });
     }
     if (msg.type === 'codeblockOutputCleared') {
@@ -78,6 +88,7 @@ export function ExecutionOutputProvider({
           transcript: msg.transcript,
           running: msg.running,
           runId: (prev[msg.elementId]?.runId ?? 0) + 1,
+          draft: readOnly ? msg.draft : undefined,
         },
       }));
     }

@@ -28,6 +28,8 @@ export class CodeblockController {
     () => void this.document.saveDocument(),
     CODE_SAVE_INTERVAL_MS,
   );
+  // Kept for webviews that open mid-run.
+  private readonly inputDrafts = new Map<string, string>();
 
   constructor(private readonly document: BoardCustomDocument) {}
 
@@ -41,6 +43,11 @@ export class CodeblockController {
       messages.on('openSource', (msg) => this.openSource(msg.elementId)),
       messages.on('executeCodeblock', (msg) => void this.executeBlock(msg.elementId)),
       messages.on('codeblockInput', (msg) => this.sessions.input(msg.elementId, msg.text)),
+      messages.on('codeblockInputDraft', (msg) => {
+        if (!this.sessions.isRunning(msg.elementId)) return;
+        this.inputDrafts.set(msg.elementId, msg.text);
+        messages.send(msg);
+      }),
       messages.on('codeblockEndInput', (msg) => this.sessions.endInput(msg.elementId)),
       messages.on('codeblockStop', (msg) => this.sessions.stop(msg.elementId)),
       messages.on('codeblockSetOutputCollapsed', (msg) => {
@@ -55,6 +62,7 @@ export class CodeblockController {
               elementId: block.elementId,
               transcript: block.transcript,
               running: true,
+              draft: this.inputDrafts.get(block.elementId),
             },
             sender,
           );
@@ -126,6 +134,7 @@ export class CodeblockController {
     const messages = this.document.messageService;
     switch (event.kind) {
       case 'started':
+        this.inputDrafts.delete(elementId);
         messages.send({ type: 'codeblockStarted', elementId });
         this.editAndSave((document) => setOutputCollapsed(document, elementId, false));
         return;
@@ -133,6 +142,7 @@ export class CodeblockController {
         messages.send({ type: 'codeblockChunk', elementId, segment: event.segment });
         return;
       case 'exited':
+        this.inputDrafts.delete(elementId);
         messages.send({
           type: 'codeblockExited',
           elementId,

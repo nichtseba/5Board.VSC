@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { EditorElement, EditorElementType, EditorToolId } from '5board.vsc-common';
 import type React from 'react';
 import { TextElement } from './elements/TextElement';
@@ -16,6 +16,8 @@ export type EditorElementProps<T extends EditorElementType> = {
   selected?: boolean;
   onSelect?: () => void;
   targetRef?: React.RefObject<HTMLDivElement>;
+  /** Smallest resizable height in px. Only code blocks report one. */
+  onMinHeightChange?: (minHeight: number) => void;
 };
 
 /**
@@ -29,6 +31,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
   selected,
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
+  const [minHeight, setMinHeight] = useState<number>();
   const ElementComponent =
     (ELEMENT_COMPONENTS[element.type] as React.ComponentType<EditorElementProps<ElementType>>) ??
     UnknownElement;
@@ -72,10 +75,16 @@ export default function EditorElement<ElementType extends EditorElementType>({
           targetRef={targetRef}
           selected={selected}
           onSelect={() => handleSelectElement(element.id)}
+          onMinHeightChange={setMinHeight}
         />
       </div>
       {activeToolId === EditorToolId.POINTER && (
-        <ElementInteractionController element={element} selected={selected} targetRef={targetRef} />
+        <ElementInteractionController
+          element={element}
+          selected={selected}
+          targetRef={targetRef}
+          minHeight={minHeight}
+        />
       )}
     </>
   );

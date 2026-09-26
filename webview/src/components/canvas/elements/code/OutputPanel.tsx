@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import { formatMessage, parseOutputColors } from '5board.vsc-common';
 import type { TranscriptSegment } from '5board.vsc-common';
 import { Icons } from '../../../Icons';
@@ -55,11 +55,16 @@ function renderSegment(segment: TranscriptSegment, index: number) {
   return <span key={index}>{renderColoredOutput(segment.text)}</span>;
 }
 
+export function hasOutput(state: BlockExecutionState | undefined): boolean {
+  return (state?.transcript.length ?? 0) > 0 || (state?.running ?? false);
+}
+
 type OutputPanelProps = {
   elementId: string;
   state: BlockExecutionState | undefined;
   readOnly: boolean;
   collapsed: boolean;
+  actionBarRef: RefObject<HTMLDivElement>;
   onRun: () => void;
   onOpenSource: () => void;
 };
@@ -69,6 +74,7 @@ export function OutputPanel({
   state,
   readOnly,
   collapsed,
+  actionBarRef,
   onRun,
   onOpenSource,
 }: OutputPanelProps) {
@@ -78,21 +84,14 @@ export function OutputPanel({
   const outputVisible = !collapsed;
   // Also the input's minimum width, so keep the translations short.
   const inputPlaceholder = t('webview.codeblock.inputPlaceholder');
-  const consoleRef = useRef<HTMLPreElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const running = state?.running ?? false;
   const transcript = state?.transcript ?? [];
-  const hasOutput = transcript.length > 0 || running;
+  const outputPresent = hasOutput(state);
   const showInput = running && !readOnly;
-  const canToggle = hasOutput && !readOnly;
-
-  useLayoutEffect(() => {
-    const element = consoleRef.current;
-    if (element && outputVisible) {
-      element.scrollTop = element.scrollHeight;
-    }
-  }, [transcript, outputVisible]);
+  const showDraft = running && readOnly;
+  const canToggle = outputPresent && !readOnly;
 
   useEffect(() => {
     if (showInput && outputVisible) {
@@ -105,24 +104,32 @@ export function OutputPanel({
     setInput('');
   }, [state?.runId]);
 
+  const changeInput = (text: string) => {
+    setInput(text);
+    messages.send({ type: 'codeblockInputDraft', elementId, text });
+  };
+
   const sendInput = () => {
     messages.send({ type: 'codeblockInput', elementId, text: `${input}\n` });
-    setInput('');
+    changeInput('');
   };
 
   return (
-    <div className="border-t border-editor-widget-border">
-      <div className="px-3 py-1 font-sans text-base bg-panel-background flex items-center gap-2">
+    <div className="flex-1 min-h-0 flex flex-col">
+      <div
+        ref={actionBarRef}
+        className="flex-none border-t border-editor-widget-border px-3 py-1 font-sans text-base bg-panel-background flex items-center gap-2"
+      >
         <ActionButton
           variant="title"
           disabled={!canToggle}
-          dimmed={!hasOutput}
+          dimmed={!outputPresent}
           onClick={() =>
             messages.send({ type: 'codeblockSetOutputCollapsed', elementId, collapsed: !collapsed })
           }
         >
           <span>{t('webview.codeblock.output')}</span>
-          <Icons name={outputVisible && hasOutput ? 'chevron-up' : 'chevron-down'} />
+          <Icons name={outputVisible && outputPresent ? 'chevron-up' : 'chevron-down'} />
         </ActionButton>
         <ActionButton
           title={t('webview.codeblock.copyOutput')}
@@ -163,48 +170,56 @@ export function OutputPanel({
         </div>
       </div>
 
-      {hasOutput && outputVisible && (
+      {outputPresent && outputVisible && (
+        // Bottom-aligned and clipped at the top, so it shows the last lines that fit.
         <pre
-          ref={consoleRef}
           onClick={() => showInput && inputRef.current?.focus()}
-          className="m-0 px-3 py-2 font-mono text-editor leading-relaxed overflow-auto max-h-[calc(10lh+1rem)] text-terminal-foreground"
+          className="m-0 flex-1 min-h-0 flex flex-col justify-end px-3 py-2 font-mono text-editor leading-relaxed overflow-x-auto overflow-y-hidden text-terminal-foreground"
         >
-          {transcript.map(renderSegment)}
-          {showInput && (
-            <input
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  sendInput();
-                  return;
+          <div>
+            {transcript.map(renderSegment)}
+            {showInput && (
+              <input
+                ref={inputRef}
+                value={input}
+                onChange={(e) => changeInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    sendInput();
+                    return;
+                  }
+                  // Ctrl+D on an empty line sends EOF, like in a terminal.
+                  if (e.key === 'd' && e.ctrlKey && input === '') {
+                    e.preventDefault();
+                    messages.send({ type: 'codeblockEndInput', elementId });
+                  }
+                }}
+                placeholder={inputPlaceholder}
+                // Grows with the input so neither placeholder nor long lines get clipped.
+                style={{ width: `${Math.max(inputPlaceholder.length, input.length) + 1}ch` }}
+                className="bg-transparent border-none outline-none p-0 font-mono text-editor text-terminal-foreground placeholder:text-disabledForeground placeholder:opacity-60"
+              />
+            )}
+            {showDraft && (
+              <span className="italic opacity-80">
+                {state?.draft}
+                <span className="inline-block w-[1ch] h-[1lh] align-bottom bg-terminal-foreground opacity-60 animate-pulse" />
+              </span>
+            )}
+            {state?.exit && (
+              <span
+                className={
+                  state.exit.success ? 'text-terminal-ansiBrightBlack' : 'text-terminal-ansiRed'
                 }
-                // Ctrl+D on an empty line sends EOF, like in a terminal.
-                if (e.key === 'd' && e.ctrlKey && input === '') {
-                  e.preventDefault();
-                  messages.send({ type: 'codeblockEndInput', elementId });
-                }
-              }}
-              placeholder={inputPlaceholder}
-              // Grows with the input so neither placeholder nor long lines get clipped.
-              style={{ width: `${Math.max(inputPlaceholder.length, input.length) + 1}ch` }}
-              className="bg-transparent border-none outline-none p-0 font-mono text-editor text-terminal-foreground placeholder:text-disabledForeground placeholder:opacity-60"
-            />
-          )}
-          {state?.exit && (
-            <span
-              className={
-                state.exit.success ? 'text-terminal-ansiBrightBlack' : 'text-terminal-ansiRed'
-              }
-            >
-              {'\n' +
-                formatMessage(t('webview.codeblock.exitCode'), {
-                  code: state.exit.exitCode ?? t('webview.codeblock.exitCodeNone'),
-                })}
-            </span>
-          )}
+              >
+                {'\n' +
+                  formatMessage(t('webview.codeblock.exitCode'), {
+                    code: state.exit.exitCode ?? t('webview.codeblock.exitCodeNone'),
+                  })}
+              </span>
+            )}
+          </div>
         </pre>
       )}
     </div>

@@ -25,7 +25,7 @@ export const ELEMENT_INTERACTION_CONFIG = {
   [EditorElementType.Code]: {
     draggable: true,
     dragDirection: 'vertical',
-    resizable: false,
+    resizable: true,
     rotatable: false,
   },
   [EditorElementType.Image]: {

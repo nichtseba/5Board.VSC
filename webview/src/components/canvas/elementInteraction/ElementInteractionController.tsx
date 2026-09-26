@@ -9,12 +9,14 @@ type Props<T extends EditorElementType> = {
   element: EditorElement<T>;
   selected: boolean | undefined;
   targetRef: React.RefObject<HTMLDivElement>;
+  minHeight?: number;
 };
 
 export default function ElementInteractionController<ElementType extends EditorElementType>({
   element,
   selected,
   targetRef,
+  minHeight,
 }: Props<ElementType>) {
   const moveableRef = useRef<Moveable | null>(null);
   const { cellSize } = useGrid();
@@ -76,7 +78,8 @@ export default function ElementInteractionController<ElementType extends EditorE
     const width = lastEvent.width;
     const height = lastEvent.height;
     const newWidth = Math.max(1, Math.round(width / cellSize.width));
-    const newHeight = Math.max(1, Math.round(height / cellSize.height));
+    const minRows = minHeight === undefined ? 1 : Math.ceil(minHeight / cellSize.height);
+    const newHeight = Math.max(minRows, Math.round(height / cellSize.height));
 
     if (newWidth !== element.layout.width || newHeight !== element.layout.height) {
       pendingPositionUpdate.current = true;
@@ -106,6 +109,9 @@ export default function ElementInteractionController<ElementType extends EditorE
       snapGridWidth={cellSize.width}
       snapGridHeight={cellSize.height}
       snapThreshold={cellSize.width / 2}
+      onResizeStart={({ setMin }) => {
+        if (minHeight !== undefined) setMin([0, minHeight]);
+      }}
       onDrag={({ target, beforeTranslate }) => {
         const [x, y] = beforeTranslate;
 

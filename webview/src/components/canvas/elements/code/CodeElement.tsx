@@ -16,16 +16,20 @@ import {
   useExecutionOutput,
   useExecutionReadOnly,
 } from '../../../../providers/ExecutionOutputProvider';
-import { OutputPanel } from './OutputPanel';
+import { OutputPanel, hasOutput } from './OutputPanel';
 import { useMonacoTheme } from './useMonacoTheme';
-import { useEditorAutoHeight, MIN_HEIGHT } from './useEditorAutoHeight';
+import { useEditorAutoHeight } from './useEditorAutoHeight';
+import { useCodeBlockMinHeight } from './useCodeBlockMinHeight';
 import { useBlockCodeSync } from './useBlockCodeSync';
 import { useMonacoClipboard } from './useMonacoClipboard';
 import { Icons } from '../../../Icons';
 
 loader.config({ monaco });
 
-export function CodeElement({ element }: EditorElementProps<EditorElementType.Code>) {
+export function CodeElement({
+  element,
+  onMinHeightChange,
+}: EditorElementProps<EditorElementType.Code>) {
   const messages = useMessageService();
   const sources = useSources();
   const { t } = useLocalization();
@@ -43,6 +47,14 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
   const monacoTheme = useMonacoTheme();
   const { wrapperRef, handleMount } = useEditorAutoHeight();
   const registerClipboard = useMonacoClipboard();
+  const { surfaceRef, editorAreaRef, actionBarRef } = useCodeBlockMinHeight(
+    element,
+    source !== undefined,
+    !readOnly,
+    onMinHeightChange,
+  );
+  // Without a console the surface ends at the actionbar and the rest of the element stays empty.
+  const consoleVisible = !(outputCollapsed ?? false) && hasOutput(executionState);
 
   // Per-block overrides from the settings sidebar; undefined falls back to the theme classes.
   const surfaceStyle = {
@@ -63,59 +75,69 @@ export function CodeElement({ element }: EditorElementProps<EditorElementType.Co
   }
 
   return (
-    <div
-      className="border border-focus-border rounded-sm overflow-hidden bg-editor-widget-background relative"
-      style={surfaceStyle}
-    >
-      {!isDefaultClassName(className, element.id) && (
-        <div className="flex items-center gap-2 px-2 py-0.5 border-b border-editor-widget-border bg-editorGroupHeader-tabsBackground">
-          <span className="font-sans text-sm font-normal text-tab-activeForeground flex items-center gap-1 select-none">
-            <Icons name="symbol-class" className="text-symbolIcon-classForeground" />
-            {className}
-          </span>
-        </div>
-      )}
+    <div className="h-full flex flex-col">
+      <div
+        ref={surfaceRef}
+        className={`border border-focus-border rounded-sm overflow-hidden bg-editor-widget-background relative flex flex-col ${
+          consoleVisible ? 'flex-1 min-h-0' : 'flex-none'
+        }`}
+        style={surfaceStyle}
+      >
+        <div ref={editorAreaRef} className="flex-none">
+          {!isDefaultClassName(className, element.id) && (
+            <div className="flex items-center gap-2 px-2 py-0.5 border-b border-editor-widget-border bg-editorGroupHeader-tabsBackground">
+              <span className="font-sans text-sm font-normal text-tab-activeForeground flex items-center gap-1 select-none">
+                <Icons name="symbol-class" className="text-symbolIcon-classForeground" />
+                {className}
+              </span>
+            </div>
+          )}
 
-      <div ref={wrapperRef} style={{ height: MIN_HEIGHT }} data-code-id={element.id}>
-        {hasCustomBg && (
-          <style>{`[data-code-id="${element.id}"] .monaco-editor, [data-code-id="${element.id}"] .monaco-editor-background, [data-code-id="${element.id}"] .monaco-editor .margin { background-color: transparent !important; }`}</style>
-        )}
-        <MonacoEditor
-          height="100%"
-          width="100%"
-          value={code}
-          language={language}
-          theme={monacoTheme}
-          onMount={(editor) => {
-            handleMount(editor);
-            // Opening the Command Palette blurs Monaco, so Ctrl+Shift+E runs fresh code.
-            editor.onDidBlurEditorText(flush);
-            registerClipboard(editor);
-          }}
-          onChange={(value) => change(value ?? '')}
-          options={{
-            minimap: { enabled: false },
-            padding: { top: 8, bottom: 8 },
-            scrollBeyondLastLine: false,
-            lineNumbers: 'on',
-            renderLineHighlight: 'none',
-            overviewRulerLanes: 0,
-            automaticLayout: true,
+          <div ref={wrapperRef} data-code-id={element.id}>
+            {hasCustomBg && (
+              <style>{`[data-code-id="${element.id}"] .monaco-editor, [data-code-id="${element.id}"] .monaco-editor-background, [data-code-id="${element.id}"] .monaco-editor .margin { background-color: transparent !important; }`}</style>
+            )}
+            <MonacoEditor
+              height="100%"
+              width="100%"
+              value={code}
+              language={language}
+              theme={monacoTheme}
+              onMount={(editor) => {
+                handleMount(editor);
+                // Opening the Command Palette blurs Monaco, so Ctrl+Shift+E runs fresh code.
+                editor.onDidBlurEditorText(flush);
+                registerClipboard(editor);
+              }}
+              onChange={(value) => change(value ?? '')}
+              options={{
+                minimap: { enabled: false },
+                padding: { top: 8, bottom: 8 },
+                scrollBeyondLastLine: false,
+                // The editor is as tall as its content, so the wheel belongs to the canvas.
+                scrollbar: { vertical: 'hidden', alwaysConsumeMouseWheel: false },
+                lineNumbers: 'on',
+                renderLineHighlight: 'none',
+                overviewRulerLanes: 0,
+                automaticLayout: true,
+              }}
+            />
+          </div>
+        </div>
+
+        <OutputPanel
+          elementId={element.id}
+          state={executionState}
+          readOnly={readOnly}
+          collapsed={outputCollapsed ?? false}
+          actionBarRef={actionBarRef}
+          onOpenSource={() => messages.send({ type: 'openSource', elementId: element.id })}
+          onRun={() => {
+            flush();
+            messages.send({ type: 'executeCodeblock', elementId: element.id });
           }}
         />
       </div>
-
-      <OutputPanel
-        elementId={element.id}
-        state={executionState}
-        readOnly={readOnly}
-        collapsed={outputCollapsed ?? false}
-        onOpenSource={() => messages.send({ type: 'openSource', elementId: element.id })}
-        onRun={() => {
-          flush();
-          messages.send({ type: 'executeCodeblock', elementId: element.id });
-        }}
-      />
     </div>
   );
 }

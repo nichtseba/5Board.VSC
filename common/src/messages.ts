@@ -50,8 +50,11 @@ type AllExtensionToWebviewMessage =
       elementId: string;
       transcript: TranscriptSegment[];
       running: boolean;
+      draft?: string;
     }
   | { type: 'codeblockOutputCleared'; elementId: string }
+  // What is typed into the input line but not sent yet, mirrored to the projector.
+  | { type: 'codeblockInputDraft'; elementId: string; text: string }
   | { type: 'goToElement'; elementId: string }
   | { type: 'clipboardContent'; text: string };
 
@@ -85,6 +88,7 @@ type AllWebviewToExtensionMessage =
     }
   | { type: 'executeCodeblock'; elementId: string }
   | { type: 'codeblockInput'; elementId: string; text: string }
+  | { type: 'codeblockInputDraft'; elementId: string; text: string }
   | { type: 'codeblockEndInput'; elementId: string }
   | { type: 'codeblockStop'; elementId: string }
   | { type: 'codeblockResetOutput'; elementId: string }
