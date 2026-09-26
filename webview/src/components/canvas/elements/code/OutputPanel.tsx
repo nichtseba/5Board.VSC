@@ -115,7 +115,8 @@ export function OutputPanel({
   };
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col">
+    // Double-clicking Run or the console must not start editing the code.
+    <div className="flex-1 min-h-0 flex flex-col" onDoubleClick={(e) => e.stopPropagation()}>
       <div
         ref={actionBarRef}
         className="flex-none border-t border-editor-widget-border px-3 py-1 font-sans text-base bg-panel-background flex items-center gap-2"

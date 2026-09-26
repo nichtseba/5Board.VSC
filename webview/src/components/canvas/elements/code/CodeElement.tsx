@@ -22,12 +22,16 @@ import { useEditorAutoHeight } from './useEditorAutoHeight';
 import { useCodeBlockMinHeight } from './useCodeBlockMinHeight';
 import { useBlockCodeSync } from './useBlockCodeSync';
 import { useMonacoClipboard } from './useMonacoClipboard';
+import { useMonacoEditing } from './useMonacoEditing';
 import { Icons } from '../../../Icons';
 
 loader.config({ monaco });
 
 export function CodeElement({
   element,
+  editing = false,
+  editingPosition,
+  onStopEditing,
   onMinHeightChange,
 }: EditorElementProps<EditorElementType.Code>) {
   const messages = useMessageService();
@@ -47,6 +51,7 @@ export function CodeElement({
   const monacoTheme = useMonacoTheme();
   const { wrapperRef, handleMount } = useEditorAutoHeight();
   const registerClipboard = useMonacoClipboard();
+  const registerEditing = useMonacoEditing(editing, editingPosition, onStopEditing);
   const { surfaceRef, editorAreaRef, actionBarRef } = useCodeBlockMinHeight(
     element,
     source !== undefined,
@@ -66,7 +71,7 @@ export function CodeElement({
   if (!source) {
     return (
       <div
-        className="border border-focus-border rounded-sm p-3 bg-editor-widget-background text-errorForeground"
+        className="pointer-events-auto border border-focus-border rounded-sm p-3 bg-editor-widget-background text-errorForeground"
         style={surfaceStyle}
       >
         {formatMessage(t('webview.codeblock.sourceNotFound'), { fileName })}
@@ -78,7 +83,7 @@ export function CodeElement({
     <div className="h-full flex flex-col">
       <div
         ref={surfaceRef}
-        className={`border border-focus-border rounded-sm overflow-hidden bg-editor-widget-background relative flex flex-col ${
+        className={`pointer-events-auto border border-focus-border rounded-sm overflow-hidden bg-editor-widget-background relative flex flex-col ${
           consoleVisible ? 'flex-1 min-h-0' : 'flex-none'
         }`}
         style={surfaceStyle}
@@ -93,7 +98,11 @@ export function CodeElement({
             </div>
           )}
 
-          <div ref={wrapperRef} data-code-id={element.id}>
+          <div
+            ref={wrapperRef}
+            data-code-id={element.id}
+            className={editing ? '' : 'pointer-events-none'}
+          >
             {hasCustomBg && (
               <style>{`[data-code-id="${element.id}"] .monaco-editor, [data-code-id="${element.id}"] .monaco-editor-background, [data-code-id="${element.id}"] .monaco-editor .margin { background-color: transparent !important; }`}</style>
             )}
@@ -108,10 +117,12 @@ export function CodeElement({
                 // Opening the Command Palette blurs Monaco, so Ctrl+Shift+E runs fresh code.
                 editor.onDidBlurEditorText(flush);
                 registerClipboard(editor);
+                registerEditing(editor);
               }}
               onChange={(value) => change(value ?? '')}
               options={{
                 minimap: { enabled: false },
+                readOnly: !editing,
                 padding: { top: 8, bottom: 8 },
                 scrollBeyondLastLine: false,
                 // The editor is as tall as its content, so the wheel belongs to the canvas.

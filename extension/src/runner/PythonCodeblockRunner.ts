@@ -10,7 +10,7 @@ import {
 } from '5board.vsc-common';
 import { ProcessSession, startProcess, writeSources } from './runnerUtils';
 import { resolvePythonToolchain } from './pythonToolchain';
-import { describePythonFailure } from './pythonToolchainMessages';
+import { describePythonFailure, formatPythonToolchainReport } from './pythonToolchainMessages';
 
 // Over pipes Python buffers stdout, so a prompt would only appear once the program ends, and it
 // falls back to the platform encoding; `-X utf8` is the counterpart to the Java runner's flags.
@@ -27,6 +27,10 @@ export class PythonCodeblockRunner implements CodeblockRunner {
       return { available: false, error: describePythonFailure(result.failure) };
     }
     return { available: true, toolPaths: { python: result.toolchain.pythonPath } };
+  }
+
+  async toolchainReport(config?: ToolchainConfig): Promise<string> {
+    return formatPythonToolchainReport(await resolvePythonToolchain(config?.home), config?.home);
   }
 
   async start(request: CodeblockExecutionRequest): Promise<ExecutionStartResult> {

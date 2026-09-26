@@ -11,7 +11,7 @@ import {
 } from '5board.vsc-common';
 import { ProcessSession, runCommand, startProcess, writeSources } from './runnerUtils';
 import { resolveJavaToolchain } from './javaToolchain';
-import { describeToolchainFailure } from './javaToolchainMessages';
+import { describeToolchainFailure, formatToolchainReport } from './javaToolchainMessages';
 import { t } from '../localization';
 
 const COMPILE_TIMEOUT_MS = 30_000;
@@ -46,6 +46,10 @@ export class JavaCodeblockRunner implements CodeblockRunner {
       available: true,
       toolPaths: { java: toolchain.javaPath, javac: toolchain.javacPath },
     };
+  }
+
+  async toolchainReport(config?: ToolchainConfig): Promise<string> {
+    return formatToolchainReport(await resolveJavaToolchain(config?.home), config?.home);
   }
 
   async start(request: CodeblockExecutionRequest): Promise<ExecutionStartResult> {

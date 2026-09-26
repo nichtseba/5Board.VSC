@@ -15,18 +15,18 @@ import {
   DEFAULT_TOOL_ID,
   EditorState,
   ProjectorPointerStyle,
+  SUPPORTED_LANGUAGES,
 } from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
 import { ProjectorProvider } from './providers/ProjectorProvider';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
-import { resolveJavaToolchain } from './runner/javaToolchain';
-import { formatToolchainReport } from './runner/javaToolchainMessages';
-import { getConfiguredHome } from './config';
+import { getRunner } from './runner';
+import { getConfiguredHome, watchToolchainSettings } from './config';
 import { SettingsService } from './SettingsService';
 import { createDefaultElement } from './board/addElement/createDefaultElement';
-import { updateBlockCode } from './board/CodeblockSourceService';
+import { findCodeElement, updateBlockCode } from './board/CodeblockSourceService';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
@@ -93,7 +93,7 @@ export class FiveBoardExtension extends ExtensionBase {
 
   public activate(context: vscode.ExtensionContext): void {
     super.activate(context);
-    context.subscriptions.push(this.settingsService);
+    context.subscriptions.push(this.settingsService, watchToolchainSettings());
     new EditorEditorProvider(context, this.packageManager).register();
     new ProjectorProvider(context).register();
     context.subscriptions.push(new SidebarManager(context, this.messages));
@@ -283,20 +283,39 @@ export class FiveBoardExtension extends ExtensionBase {
   }
 
   /**
-   * Reports which JDK the fallback chain settled on and what every stage saw. Written to an
+   * Reports which toolchain a language's lookup settled on and what it checked. Written to an
    * output channel rather than a notification so the text can be copied when asking for help.
    */
-  @Command('5board-vsc.showJavaToolchain')
-  public async showJavaToolchain(): Promise<void> {
-    const configuredHome = getConfiguredHome('java');
-    const result = await resolveJavaToolchain(configuredHome);
+  @Command('5board-vsc.showToolchain')
+  public async showToolchain(): Promise<void> {
+    const language = await this.pickToolchainLanguage();
+    const runner = language ? getRunner(language) : undefined;
+    if (!language || !runner) return;
 
+    const report = await runner.toolchainReport({ home: getConfiguredHome(language) });
     this.toolchainOutput ??= vscode.window.createOutputChannel(
-      t('extension.codeblock.toolchain.report.title'),
+      t('extension.codeblock.toolchainChannel'),
     );
     this.toolchainOutput.clear();
-    this.toolchainOutput.appendLine(formatToolchainReport(result, configuredHome));
+    this.toolchainOutput.appendLine(report);
     this.toolchainOutput.show(true);
+  }
+
+  // The selected code block's language, otherwise the user picks one.
+  private async pickToolchainLanguage(): Promise<string | undefined> {
+    const document = this.activeEditorDocument?.boardPackage.document;
+    const selectedId = document?.content.primarySelectedElementId;
+    const selected = document && selectedId ? findCodeElement(document, selectedId) : undefined;
+    if (selected) return selected.data.language;
+
+    const choice = await vscode.window.showQuickPick(
+      SUPPORTED_LANGUAGES.filter((language) => getRunner(language.id)).map((language) => ({
+        label: language.displayName,
+        id: language.id,
+      })),
+      { placeHolder: t('extension.codeblock.toolchainPick') },
+    );
+    return choice?.id;
   }
 
   @Command('5board-vsc.goToElement')

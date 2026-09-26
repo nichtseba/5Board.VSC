@@ -25,6 +25,8 @@
       "resetAllConfirm": "Reset the output of all code blocks in this document?",
       "resetAllConfirmButton": "Reset",
       "noOutputsToReset": "There is no output to reset.",
+      "toolchainPick": "Show the toolchain of which language?",
+      "toolchainChannel": "5Board — Toolchain",
       "execution": {
         "notACodeblock": "Element \"{elementId}\" is not a code block.",
         "noRunner": "No runner available for language: {language}",
@@ -83,7 +85,9 @@
         "configUnusable": "The configured Python path \"{path}\" holds no usable interpreter.",
         "notFound": "No Python {required} or newer found. Tried: {tried}.",
         "foundOlder": "Found: Python {found}.",
-        "storeStubHint": "One entry reported no version — on Windows that is usually the Microsoft Store placeholder. Install Python from python.org or turn off the store alias under \"App execution aliases\"."
+        "storeStubHint": "One entry reported no version — on Windows that is usually the Microsoft Store placeholder. Install Python from python.org or turn off the store alias under \"App execution aliases\".",
+        "reportTitle": "5Board — Python toolchain",
+        "outcomeNoVersion": "reported no version"
       }
     },
     "goToElement": "Go to Element"
@@ -111,7 +115,8 @@
       "exitCodeNone": "none",
       "sourceNotFound": "Source not found: {fileName}",
       "cut": "Cut",
-      "paste": "Paste"
+      "paste": "Paste",
+      "stopEditing": "Stop Editing"
     },
     "sidebar": {
       "title": "5Board Sidebar",

@@ -11,6 +11,7 @@ import {
   sanitizeClassName,
 } from '5board.vsc-common';
 import { addImageAsset } from './addImageToDocument';
+import { nextCodeBlockId } from '../CodeblockSourceService';
 
 export function createDefaultElement<T extends EditorElementType>(
   type: T,
@@ -18,7 +19,7 @@ export function createDefaultElement<T extends EditorElementType>(
   defaults: AddElementDefaults<T> | undefined,
   document: BoardDocument,
 ): EditorElement<T> {
-  const id = crypto.randomUUID();
+  const id = type === EditorElementType.Code ? nextCodeBlockId(document) : crypto.randomUUID();
   const profile = DEFAULT_ELEMENT_PROFILES[type];
   const data = {
     ...structuredClone(profile.data),

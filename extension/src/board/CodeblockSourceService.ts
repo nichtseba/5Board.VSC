@@ -48,6 +48,24 @@ export function codeElements(document: BoardDocument): CodeElement[] {
   );
 }
 
+/**
+ * The smallest free `CodeN`. A block's id is also its default class and file name, so it must
+ * not match another element, a registered class or an existing source (case-insensitive, since
+ * the runners write sources into one directory).
+ */
+export function nextCodeBlockId(document: BoardDocument): string {
+  const taken = new Set(
+    [
+      ...document.content.elements.map((element) => element.id),
+      ...document.content.codeClasses.map((codeClass) => codeClass.name),
+      ...document.sources.map((source) => source.name.replace(/\.[^.]+$/, '')),
+    ].map((name) => name.toLowerCase()),
+  );
+  let n = 1;
+  while (taken.has(`code${n}`)) n++;
+  return `Code${n}`;
+}
+
 export function moveBlock(document: BoardDocument, elementId: string, target: BlockTarget): void {
   const element = findCodeElement(document, elementId);
   if (!element) return;

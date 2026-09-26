@@ -41,5 +41,7 @@ export type ExecutionStartResult =
 export interface CodeblockRunner {
   canHandle(language: string): boolean;
   checkTools(config?: ToolchainConfig): Promise<ToolCheckResult>;
+  /** Which toolchain the lookup settled on and everything it checked, as plain text. */
+  toolchainReport(config?: ToolchainConfig): Promise<string>;
   start(request: CodeblockExecutionRequest): Promise<ExecutionStartResult>;
 }

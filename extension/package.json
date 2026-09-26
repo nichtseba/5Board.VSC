@@ -132,8 +132,8 @@
         "title": "%commands.goToElement%"
       },
       {
-        "command": "5board-vsc.showJavaToolchain",
-        "title": "%commands.showJavaToolchain%",
+        "command": "5board-vsc.showToolchain",
+        "title": "%commands.showToolchain%",
         "category": "5Board"
       },
       {
@@ -191,6 +191,13 @@
           "scope": "machine",
           "order": 10,
           "description": "%configuration.java.home.description%"
+        },
+        "5board-vsc.python.path": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "order": 11,
+          "description": "%configuration.python.path.description%"
         },
         "5board-vsc.presets.directoryPath": {
           "type": "string",

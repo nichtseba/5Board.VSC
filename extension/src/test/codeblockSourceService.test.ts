@@ -6,6 +6,7 @@ import {
   deleteClass,
   deriveCodeClasses,
   moveBlock,
+  nextCodeBlockId,
   renameClass,
   updateBlockCode,
   updateClass,
@@ -291,6 +292,28 @@ describe('CodeblockSourceService', function () {
         updateClass(doc, 'Student', 'java', { newName: 'Student', newLanguage: 'java' }),
         'unchanged',
       );
+    });
+  });
+
+  describe('nextCodeBlockId', function () {
+    it('starts at Code1 and fills the smallest gap', function () {
+      assert.equal(nextCodeBlockId(makeDocument([])), 'Code1');
+      const doc = makeDocument([makeCodeElement('Code1'), makeCodeElement('Code3')]);
+      assert.equal(nextCodeBlockId(doc), 'Code2');
+    });
+
+    it('skips names taken by a registered class or a leftover source, ignoring case', function () {
+      const doc = makeDocument([makeCodeElement('code1')]);
+      createClass(doc, 'Code2', 'java');
+      doc.sources.push({
+        name: 'Code3.py',
+        language: 'python',
+        code: '',
+        createdAt: 0,
+        modifiedAt: 0,
+      });
+
+      assert.equal(nextCodeBlockId(doc), 'Code4');
     });
   });
 

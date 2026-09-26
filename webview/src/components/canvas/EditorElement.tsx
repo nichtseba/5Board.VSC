@@ -16,6 +16,10 @@ import { useLocalization } from '../../providers/LocalizationProvider';
 import { RectangleElement } from './elements/RectangleElement';
 import { CircleElement } from './elements/CircleElement';
 import { maxZIndex, minZIndex } from './logic/zIndex';
+import {
+  ELEMENT_INTERACTION_CONFIG,
+  type ElementInteractionProfile,
+} from './elementInteraction/InteractionConfig';
 
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
@@ -64,6 +68,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
   const { t } = useLocalization();
   const activeToolId = useEditorState()?.tool.type;
   const allElements = useBoardDocument()?.content.elements ?? [];
+  const profile: ElementInteractionProfile = ELEMENT_INTERACTION_CONFIG[element.type];
 
   const handleSelectElement = (id: string, event?: React.MouseEvent) => {
     if (activeToolId !== EditorToolId.POINTER) return;
@@ -114,7 +119,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
   });
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (element.type !== EditorElementType.Text) {
+    if (!profile.editable) {
       return;
     }
     setEditingPosition({
@@ -146,6 +151,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
         onContextMenu={handleContextMenu}
         className={`
           box-border 
+          ${profile.clickThroughEmptyArea ? 'pointer-events-none' : ''}
           ${element.type === EditorElementType.Line ? '' : 'overflow-hidden'}
           ${activeToolId === EditorToolId.POINTER ? 'cursor-pointer' : ''}
           ${
