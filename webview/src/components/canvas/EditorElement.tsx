@@ -1,21 +1,35 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { EditorElement, EditorElementType, EditorToolId } from '5board.vsc-common';
 import type React from 'react';
 import { TextElement } from './elements/TextElement';
 import { HeadingElement } from './elements/HeadingElement';
 import ElementInteractionController from './elementInteraction/ElementInteractionController';
+import ElementContextMenu from './elementInteraction/ElementContextMenu';
 import { CodeElement } from './elements/code/CodeElement';
 import { ImageElement } from './elements/ImageElement';
-import { ShapeElement } from './elements/ShapeElement';
-import { ArrowElement } from './elements/ArrowElement';
+import { LineElement } from './elements/LineElement';
+import { FreehandElement } from './elements/FreehandElement';
 import { useEditorState } from '../../providers/EditorStateProvider';
 import { useMessageService } from '../../services/MessageService';
+import { useBoardDocument } from '../../providers/BoardDocumentProvider';
+import { useLocalization } from '../../providers/LocalizationProvider';
+import { RectangleElement } from './elements/RectangleElement';
+import { CircleElement } from './elements/CircleElement';
+import { maxZIndex, minZIndex } from './logic/zIndex';
 
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
   selected?: boolean;
-  onSelect?: () => void;
+  onSelect?: (event?: React.MouseEvent) => void;
+  editing?: boolean;
+  editingPosition?: {
+    x: number;
+    y: number;
+  } | null;
+  onStopEditing?: () => void;
   targetRef?: React.RefObject<HTMLDivElement>;
+  assetUrls?: Record<string, string>;
+  preview?: boolean;
   /** Smallest resizable height in px. Only code blocks report one. */
   onMinHeightChange?: (minHeight: number) => void;
 };
@@ -29,31 +43,110 @@ export type EditorElementProps<T extends EditorElementType> = {
 export default function EditorElement<ElementType extends EditorElementType>({
   element,
   selected,
+  assetUrls,
+  preview,
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
+  const [editing, setEditing] = useState(false);
+  const [editingPosition, setEditingPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
+  const [contextMenuPosition, setContextMenuPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const [minHeight, setMinHeight] = useState<number>();
   const ElementComponent =
     (ELEMENT_COMPONENTS[element.type] as React.ComponentType<EditorElementProps<ElementType>>) ??
     UnknownElement;
-  const activeToolId = useEditorState()?.tool.type;
   const messages = useMessageService();
+  const { t } = useLocalization();
+  const activeToolId = useEditorState()?.tool.type;
+  const allElements = useBoardDocument()?.content.elements ?? [];
 
-  const handleSelectElement = (id: string) => {
+  const handleSelectElement = (id: string, event?: React.MouseEvent) => {
     if (activeToolId !== EditorToolId.POINTER) return;
 
-    messages.send({
-      type: 'selectElement',
-      id,
-    });
+    if (event?.shiftKey) {
+      messages.send({ type: 'toggleElementSelection', ids: [id] });
+      return;
+    }
+
+    messages.send({ type: 'selectElements', ids: [id] });
   };
+
+  const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (activeToolId !== EditorToolId.POINTER) return;
+    event.preventDefault();
+    if (!selected) handleSelectElement(element.id);
+    setContextMenuPosition({ x: event.clientX, y: event.clientY });
+  };
+
+  const setZIndex = (zIndex: number) => {
+    messages.send({
+      type: 'updateElement',
+      id: element.id,
+      changes: { layout: { ...element.layout, zIndex } },
+    });
+    setContextMenuPosition(null);
+  };
+
+  useEffect(() => {
+    const listener = (event: KeyboardEvent) => {
+      if (event.key !== 'Delete') {
+        return;
+      }
+
+      if (!selected) {
+        return;
+      }
+
+      messages.send({
+        type: 'deleteElement',
+        id: element.id,
+      });
+    };
+
+    window.addEventListener('keydown', listener);
+
+    return () => window.removeEventListener('keydown', listener);
+  });
+
+  const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (element.type !== EditorElementType.Text) {
+      return;
+    }
+    setEditingPosition({
+      x: event.clientX,
+      y: event.clientY,
+    });
+    setEditing(true);
+  };
+
+  const handleStopEditing = () => {
+    setEditing(false);
+    setEditingPosition(null);
+  };
+
+  useEffect(() => {
+    if (!selected) {
+      setEditing(false);
+      setEditingPosition(null);
+    }
+  }, [selected]);
 
   return (
     <>
       <div
         id={element.id}
-        onClick={() => handleSelectElement(element.id)}
+        data-editor-element
+        onClick={(event) => handleSelectElement(element.id, event)}
+        onDoubleClick={handleDoubleClick}
+        onContextMenu={handleContextMenu}
         className={`
-          box-border
+          box-border 
+          ${element.type === EditorElementType.Line ? '' : 'overflow-hidden'}
           ${activeToolId === EditorToolId.POINTER ? 'cursor-pointer' : ''}
           ${
             activeToolId === EditorToolId.POINTER && !selected
@@ -68,22 +161,48 @@ export default function EditorElement<ElementType extends EditorElementType>({
           gridRowEnd: `span ${element.layout.height}`,
           gridColumnStart: element.layout.xPos + 1,
           gridColumnEnd: `span ${element.layout.width}`,
+          transform: `rotate(${element.layout.rotation ?? 0}deg)`,
+          transformOrigin: 'center center',
+          zIndex: element.layout.zIndex,
         }}
       >
         <ElementComponent
           element={element}
           targetRef={targetRef}
           selected={selected}
-          onSelect={() => handleSelectElement(element.id)}
+          onSelect={(event) => handleSelectElement(element.id, event)}
+          editing={editing}
+          editingPosition={editingPosition}
+          assetUrls={assetUrls}
+          preview={preview}
+          onStopEditing={handleStopEditing}
           onMinHeightChange={setMinHeight}
         />
       </div>
       {activeToolId === EditorToolId.POINTER && (
         <ElementInteractionController
           element={element}
-          selected={selected}
+          selected={selected && !editing}
           targetRef={targetRef}
           minHeight={minHeight}
+        />
+      )}
+      {contextMenuPosition && (
+        <ElementContextMenu
+          position={contextMenuPosition}
+          onClose={() => setContextMenuPosition(null)}
+          items={[
+            {
+              label: t('webview.canvas.contextMenu.bringToFront'),
+              icon: 'arrow-up',
+              onClick: () => setZIndex(maxZIndex(allElements) + 1),
+            },
+            {
+              label: t('webview.canvas.contextMenu.sendToBack'),
+              icon: 'arrow-down',
+              onClick: () => setZIndex(minZIndex(allElements) - 1),
+            },
+          ]}
         />
       )}
     </>
@@ -98,8 +217,10 @@ const ELEMENT_COMPONENTS = {
   [EditorElementType.Text]: TextElement,
   [EditorElementType.Code]: CodeElement,
   [EditorElementType.Image]: ImageElement,
-  [EditorElementType.Shape]: ShapeElement,
-  [EditorElementType.Arrow]: ArrowElement,
+  [EditorElementType.Rectangle]: RectangleElement,
+  [EditorElementType.Circle]: CircleElement,
+  [EditorElementType.Line]: LineElement,
+  [EditorElementType.Freehand]: FreehandElement,
 } as const satisfies {
   [ElementType in EditorElementType]: React.ComponentType<EditorElementProps<ElementType>>;
 };

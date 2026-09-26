@@ -1,7 +1,7 @@
 import { Label } from 'vscrui';
 
 type Props = {
-  label: string;
+  label?: string;
   children: React.ReactNode;
   inline?: boolean;
 };
@@ -19,7 +19,7 @@ export default function SettingsField({ label, children, inline = false }: Props
 
   return (
     <div className="flex flex-col gap-2 mb-4">
-      <Label>{label}</Label>
+      {label && <Label>{label}</Label>}
 
       {children}
     </div>

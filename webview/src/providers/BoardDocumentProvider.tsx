@@ -14,7 +14,7 @@ export function BoardDocumentProvider({ children }: { children: React.ReactNode 
   const [document, setDocument] = useState<BoardDocument | null>(null);
 
   useOnMessage((msg) => {
-    if (msg.type === 'updateDocument' || msg.type === 'init') {
+    if (msg.type === 'updateDocument' || msg.type === 'init' || msg.type === 'initSidebar') {
       setDocument(msg.document);
     }
   });

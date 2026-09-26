@@ -5,7 +5,17 @@ import {
   HeadingNumberingStyle,
 } from './board/headingSettings.js';
 import { Language } from './localization/index.js';
-import { EditorElement, EditorState, EditorTool, ElementLayout } from './main.js';
+import {
+  EditorElement,
+  EditorElementType,
+  EditorState,
+  EditorTool,
+  ElementLayout,
+  AddElementDefaults,
+  LineStyle,
+  TextEditorCommand,
+  WebviewSettings,
+} from './main.js';
 import { ProjectorPointerStyle } from './projector.js';
 import { TranscriptSegment } from './board/element.js';
 
@@ -23,18 +33,33 @@ export type ExtensionToWebviewMessageType = AllExtensionToWebviewMessage['type']
 type AllExtensionToWebviewMessage =
   | { type: 'updateDocument'; document: BoardDocument }
   | { type: 'init'; document: BoardDocument; editorState: EditorState; language: Language }
+  | { type: 'initSidebar'; document: BoardDocument; editorState: EditorState }
+  | { type: 'updateEditorState'; editorState: EditorState }
+  | { type: 'textEditorCommand'; command: TextEditorCommand }
   | { type: 'cursorMove'; x: number; y: number }
   | { type: 'cursorHide' }
   | { type: 'cursorTrackingChanged'; enabled: boolean }
-  | { type: 'projectorStateChanged'; active: boolean; open: boolean }
+  | { type: 'projectorStateChanged'; active: boolean; open: boolean; paused: boolean }
   | { type: 'projectorPointerChanged'; style: ProjectorPointerStyle }
   | { type: 'scroll'; top: number; left: number }
   | { type: 'selectElement'; elementId: string | null }
+  // Live preview of an in-progress freehand stroke, mirrored to the projector.
+  // Points are normalized (0–1) to the canvas, like the cursor position.
+  | {
+      type: 'freehandPreview';
+      points: { x: number; y: number }[];
+      color: string;
+      width: number;
+      opacity: number;
+      lineStyle: LineStyle;
+      dashScale: number;
+      straight: boolean;
+    }
+  | { type: 'freehandPreviewEnd' }
   | {
       type: 'viewportUpdate';
       viewport: { top: number; left: number; height: number; width: number };
     }
-  | { type: 'updateEditorState'; editorState: EditorState }
   | { type: 'codeblockStarted'; elementId: string }
   | { type: 'codeblockChunk'; elementId: string; segment: TranscriptSegment }
   | {
@@ -56,8 +81,8 @@ type AllExtensionToWebviewMessage =
   // What is typed into the input line but not sent yet, mirrored to the projector.
   | { type: 'codeblockInputDraft'; elementId: string; text: string }
   | { type: 'goToElement'; elementId: string }
-  | { type: 'clipboardContent'; text: string };
-
+  | { type: 'clipboardContent'; text: string }
+  | { type: 'settingsChanged'; settings: WebviewSettings };
 /**
  * Messages from the webviews to the extension
  * This is a utility type that allows specifing the type of the message and getting the corresponding content type
@@ -75,13 +100,39 @@ type AllWebviewToExtensionMessage =
   | { type: 'cursorMove'; x: number; y: number }
   | { type: 'cursorLeave' }
   | { type: 'scroll'; top: number; left: number }
-  | { type: 'selectElement'; id: string | null }
+  | { type: 'selectElements'; ids: string[] }
+  | { type: 'toggleElementSelection'; ids: string[] }
   | { type: 'selectTool'; tool: EditorTool }
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
-  | { type: 'updateElementLayout'; id: string; changes: Partial<ElementLayout> } // Update the Layout when Element was moved or resized
+  | AddElementMessage
+  | { type: 'deleteElement'; id: string }
+  | {
+      type: 'updateElementLayout';
+      id: string;
+      changes: Partial<ElementLayout>;
+      aspectRatio?: number;
+    } // Update the Layout when Element was moved or resized
   | { type: 'updateElement'; id: string; changes: Partial<EditorElement> } // Update element with it's settings
+  | { type: 'textEditorCommand'; command: TextEditorCommand }
+  | { type: 'addImageFromFile' }
+  | { type: 'addImageFromBytes'; name: string; bytes: number[] }
   | { type: 'toggleCursorTracking' }
+  | { type: 'toggleProjectorPaused' }
   | { type: 'updateProjectorPointer'; style: ProjectorPointerStyle }
+  // Sent by the editor after drawing a new element (e.g. a freehand stroke).
+  | { type: 'addFreehandElement'; element: EditorElement }
+  // Live preview of the stroke the editor is currently drawing (normalized 0–1).
+  | {
+      type: 'freehandPreview';
+      points: { x: number; y: number }[];
+      color: string;
+      width: number;
+      opacity: number;
+      lineStyle: LineStyle;
+      dashScale: number;
+      straight: boolean;
+    }
+  | { type: 'freehandPreviewEnd' }
   | {
       type: 'updateViewport';
       viewport: { top: number; left: number; height: number; width: number };
@@ -117,3 +168,12 @@ type AllWebviewToExtensionMessage =
       level?: HeadingLevel;
       numberingFormat?: HeadingNumberingStyle;
     };
+
+type AddElementMessage = {
+  [T in EditorElementType]: {
+    type: 'addElement';
+    elementType: T;
+    elementPosition: ElementLayout;
+    defaults?: AddElementDefaults;
+  };
+}[EditorElementType];

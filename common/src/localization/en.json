@@ -1,6 +1,8 @@
 {
   "extension": {
-    "openCustomEditorCommand": { "title": "5Boardz – Custom Page" },
+    "openCustomEditorCommand": {
+      "title": "5Boardz – Custom Page"
+    },
     "new5boardCommand": {
       "defaultFileName": "Lecture",
       "packageFilter": "5Boardz Package",
@@ -11,7 +13,9 @@
       "startPresentation": "Start Presentation",
       "title": "Projector",
       "noFileOpen": "Please open a .5boardz file in the editor before starting the projector view.",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "live": "Live",
+      "paused": "Paused"
     },
     "codeblock": {
       "noActiveDocument": "No active 5Board document.",
@@ -85,10 +89,16 @@
     "goToElement": "Go to Element"
   },
   "webview": {
-    "customEditor": { "Test": "Test the translation." },
+    "customEditor": {
+      "Test": "Test the translation."
+    },
     "canvas": {
       "spacerLabel": "Spacer",
-      "rows": "rows"
+      "rows": "rows",
+      "contextMenu": {
+        "bringToFront": "Bring to front",
+        "sendToBack": "Send to back"
+      }
     },
     "codeblock": {
       "output": "Output",
@@ -109,35 +119,75 @@
         "pointer": "Pointer",
         "spacer": "Spacer Tool",
         "freehand": "Freehand Tool",
-        "addElement": "Add Element",
-        "text": "Text",
-        "heading": "Heading",
-        "link": "Link",
-        "code": "Code",
-        "image": "Image"
+        "addElement": "Add Element"
       },
       "elementType": {
         "heading": "Heading",
         "text": "Text",
         "code": "Code",
         "image": "Image",
-        "shape": "Shape",
-        "arrow": "Arrow"
+        "rectangle": "Rectangle",
+        "circle": "Circle",
+        "line": "Line",
+        "freehand": "Freehand"
       },
       "projectorSettings": {
         "title": "Projector Settings",
         "cursorTracking": "Cursor Tracking",
         "pointerColor": "Pointer Color",
-        "customColor": "Custom",
+        "customColor": "Custom color",
         "pointerShape": "Pointer Shape",
         "shapes": {
           "dot": "Dot",
           "ring": "Ring",
           "rectangle": "Rectangle",
           "duck": "Duck"
+        },
+        "pause": "Pause",
+        "resume": "Resume",
+        "statusLive": "Live",
+        "statusPaused": "Paused",
+        "statusClosed": "Ended",
+        "colors": {
+          "red": "Red",
+          "orange": "Orange",
+          "yellow": "Yellow",
+          "green": "Green",
+          "blue": "Blue",
+          "purple": "Purple",
+          "black": "Black",
+          "white": "White"
         }
       },
-      "goToElement": "Go to Element"
+      "goToElement": "Go to element",
+      "freehand": {
+        "title": "Freehand Options",
+        "color": "Color",
+        "customColor": "Custom color",
+        "width": "Thickness",
+        "opacity": "Opacity",
+        "lineStyle": "Line style",
+        "dashScale": "Dash size",
+        "colors": {
+          "red": "Red",
+          "orange": "Orange",
+          "yellow": "Yellow",
+          "green": "Green",
+          "blue": "Blue",
+          "purple": "Purple",
+          "black": "Black",
+          "white": "White"
+        },
+        "lineStyles": {
+          "solid": "Solid",
+          "dashed": "Dashed",
+          "dotted": "Dotted",
+          "custom": "Custom"
+        },
+        "addSettings": "Add Settings for "
+      },
+      "addElement": "Add Element",
+      "addCustomElement": "Add Custom Element"
     },
     "sidebar-element-settings": {
       "noElementSelected": "No element selected",
@@ -180,7 +230,43 @@
         "borderLabel": "Border color",
         "resetColors": "Reset to theme colors",
         "resetOutput": "Reset output"
-      }
+      },
+      "layer": "Layer",
+      "textSettings": {
+        "title": "Text",
+        "textColor": "Text Color",
+        "highlightColor": "Highligt Color",
+        "backgroundColor": "Background Color",
+        "fontSize": "Font size"
+      },
+      "imageSettings": {
+        "title": "Image"
+      },
+      "freehandSettings": {
+        "title": "Freehand"
+      },
+      "rectangleSettings": {
+        "title": "Rectangle"
+      },
+      "circleSettings": {
+        "title": "Circle"
+      },
+      "lineSettings": {
+        "title": "Line",
+        "symbols": "Symbols",
+        "borderColor": "Border color",
+        "borderWidth": "Border width",
+        "borderStyle": "Border style",
+        "startHead": "Start head",
+        "endHead": "End head",
+        "headSize": "Head size",
+        "headFill": "Fill heads",
+        "headNone": "None",
+        "headArrow": "Arrow",
+        "headCircle": "Circle",
+        "headSquare": "Square"
+      },
+      "delete": "Delete"
     },
     "sidebar-class-settings": {
       "title": "Code Classes",

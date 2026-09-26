@@ -8,7 +8,12 @@ const service = new ExecutionService();
 function makeDocument(overrides: Partial<BoardDocument> = {}): BoardDocument {
   return {
     manifest: { title: 'test', createdAt: 0, modifiedAt: 0, version: '1' },
-    content: { selectedElementId: null, elements: [], codeClasses: [] },
+    content: {
+      selectedElementIds: [],
+      primarySelectedElementId: null,
+      elements: [],
+      codeClasses: [],
+    },
     sources: [],
     assets: [],
     ...overrides,
@@ -41,7 +46,8 @@ describe('ExecutionService', function () {
   it('returns error when source file not in document', async function () {
     const doc = makeDocument({
       content: {
-        selectedElementId: null,
+        selectedElementIds: [],
+        primarySelectedElementId: null,
         codeClasses: [],
         elements: [makeCodeElement({ className: 'Student', language: 'java' })],
       },
@@ -55,7 +61,8 @@ describe('ExecutionService', function () {
   it('returns error when language has no runner', async function () {
     const doc = makeDocument({
       content: {
-        selectedElementId: null,
+        selectedElementIds: [],
+        primarySelectedElementId: null,
         codeClasses: [],
         elements: [makeCodeElement({ className: 'script', language: 'ruby' })],
       },

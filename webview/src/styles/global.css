@@ -22,7 +22,7 @@
   /* Editor System */
   --spacing-editor: 1rem;
   --editor-grid-size: 1rem;
-  --editor-columns: 40;
+  --editor-columns: 50;
 
   /* Colors */
   --color-foreground: var(--vscode-foreground);
@@ -811,4 +811,19 @@
   --color-gitDecoration-conflictingResourceForeground: var(--vscode-gitDecoration-conflictingResourceForeground);
   --color-gitDecoration-submoduleResourceForeground: var(--vscode-gitDecoration-submoduleResourceForeground);
   --color-git-blame-editorDecorationForeground: var(--vscode-git-blame\.editorDecorationForeground);
+}
+
+/* Tiptap text editor */
+.tiptap ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+
+.tiptap ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+}
+
+.tiptap li {
+  display: list-item;
 }

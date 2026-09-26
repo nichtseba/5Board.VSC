@@ -4,4 +4,6 @@ export * from './localization/index.js';
 export * from './editortool.js';
 export * from './codeblock/index.js';
 export * from './outputFormat.js';
+export * from './text.js';
 export * from './projector.js';
+export * from './settings.js';

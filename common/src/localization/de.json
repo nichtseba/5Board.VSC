@@ -1,6 +1,8 @@
 {
   "extension": {
-    "openCustomEditorCommand": { "title": "5Boardz – Custom Seite" },
+    "openCustomEditorCommand": {
+      "title": "5Boardz – Custom Seite"
+    },
     "new5boardCommand": {
       "defaultFileName": "Vorlesung",
       "packageFilter": "5Boardz Paket",
@@ -11,7 +13,9 @@
       "startPresentation": "Beameransicht starten",
       "title": "Beameransicht",
       "noFileOpen": "Bitte öffne zuerst eine .5boardz Datei im Editor, bevor du die Beameransicht startest.",
-      "loading": "Lade…"
+      "loading": "Lade…",
+      "live": "Live",
+      "paused": "Pausiert"
     },
     "codeblock": {
       "noActiveDocument": "Kein aktives 5Board-Dokument.",
@@ -85,10 +89,16 @@
     "goToElement": "Gehe zu Element"
   },
   "webview": {
-    "customEditor": { "Test": "Testen der Übersetzung" },
+    "customEditor": {
+      "Test": "Testen der Übersetzung"
+    },
     "canvas": {
       "spacerLabel": "Abstand",
-      "rows": "Zeilen"
+      "rows": "Zeilen",
+      "contextMenu": {
+        "bringToFront": "Nach vorne bringen",
+        "sendToBack": "Nach hinten schicken"
+      }
     },
     "codeblock": {
       "output": "Ausgabe",
@@ -109,35 +119,75 @@
         "pointer": "Zeiger",
         "spacer": "Abstand-Tool",
         "freehand": "Freihand-Tool",
-        "addElement": "Element hinzufügen",
-        "text": "Text",
-        "heading": "Überschrift",
-        "link": "Link",
-        "code": "Code",
-        "image": "Bild"
+        "addElement": "Element hinzufügen"
       },
       "elementType": {
         "heading": "Überschrift",
         "text": "Text",
         "code": "Code",
         "image": "Bild",
-        "shape": "Form",
-        "arrow": "Pfeil"
+        "rectangle": "Rechteck",
+        "circle": "Kreis",
+        "line": "Linie",
+        "freehand": "Freihand"
       },
       "projectorSettings": {
         "title": "Beameransicht-Einstellungen",
         "cursorTracking": "Mauszeiger-Tracking",
         "pointerColor": "Zeiger-Farbe",
-        "customColor": "Eigene",
+        "customColor": "Eigene Farbe",
         "pointerShape": "Zeiger-Form",
         "shapes": {
           "dot": "Punkt",
           "ring": "Ring",
           "rectangle": "Rechteck",
           "duck": "Ente"
+        },
+        "pause": "Pausieren",
+        "resume": "Fortsetzen",
+        "statusLive": "Live",
+        "statusPaused": "Pausiert",
+        "statusClosed": "Beendet",
+        "colors": {
+          "red": "Rot",
+          "orange": "Orange",
+          "yellow": "Gelb",
+          "green": "Grün",
+          "blue": "Blau",
+          "purple": "Lila",
+          "black": "Schwarz",
+          "white": "Weiß"
         }
       },
-      "goToElement": "Gehe zu Element"
+      "goToElement": "Gehe zu Element",
+      "freehand": {
+        "title": "Freihand-Optionen",
+        "color": "Farbe",
+        "customColor": "Eigene Farbe",
+        "width": "Dicke",
+        "opacity": "Deckkraft",
+        "lineStyle": "Linienstil",
+        "dashScale": "Strichgröße",
+        "colors": {
+          "red": "Rot",
+          "orange": "Orange",
+          "yellow": "Gelb",
+          "green": "Grün",
+          "blue": "Blau",
+          "purple": "Lila",
+          "black": "Schwarz",
+          "white": "Weiß"
+        },
+        "lineStyles": {
+          "solid": "Durchgezogen",
+          "dashed": "Gestrichelt",
+          "dotted": "Gepunktet",
+          "custom": "Eigene"
+        },
+        "addSettings": "Einstellungen hinzufügen für "
+      },
+      "addElement": "Element hinzufügen",
+      "addCustomElement": "Custom Element hinzufügen"
     },
     "sidebar-element-settings": {
       "noElementSelected": "Kein Element ausgewählt",
@@ -180,7 +230,43 @@
         "borderLabel": "Rahmenfarbe",
         "resetColors": "Auf Theme-Farben zurücksetzen",
         "resetOutput": "Ausgabe zurücksetzen"
-      }
+      },
+      "layer": "Ebene",
+      "textSettings": {
+        "title": "Text",
+        "textColor": "Textfarbe",
+        "highlightColor": "Textmarker",
+        "backgroundColor": "Hintergrundfarbe",
+        "fontSize": "Schriftgröße"
+      },
+      "imageSettings": {
+        "title": "Bild"
+      },
+      "freehandSettings": {
+        "title": "Freihand"
+      },
+      "rectangleSettings": {
+        "title": "Rechteck"
+      },
+      "circleSettings": {
+        "title": "Kreis"
+      },
+      "lineSettings": {
+        "title": "Linie",
+        "symbols": "Symbole",
+        "borderColor": "Rahmenfarbe",
+        "borderWidth": "Rahmenbreite",
+        "borderStyle": "Rahmenstil",
+        "startHead": "Startsymbol",
+        "endHead": "Endsymbol",
+        "headSize": "Symbolgröße",
+        "headFill": "Symbole ausfüllen",
+        "headNone": "Keine",
+        "headArrow": "Pfeil",
+        "headCircle": "Kreis",
+        "headSquare": "Quadrat"
+      },
+      "delete": "Löschen"
     },
     "sidebar-class-settings": {
       "title": "Code-Klassen",

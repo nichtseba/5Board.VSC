@@ -1,3 +1,4 @@
+import { GridSettings } from '../settings.js';
 import { BoardElement } from './element.js';
 import { HeadingSettings } from './headingSettings.js';
 
@@ -43,9 +44,11 @@ export interface CodeClass {
  * Should be equivalent to the content.json within the .5boardz zip file
  */
 export interface BoardContent {
-  selectedElementId: string | null;
+  selectedElementIds: string[];
+  primarySelectedElementId: string | null;
   elements: BoardElement[];
   codeClasses: CodeClass[];
+  grid?: GridSettings;
   background?: string;
   snapAngle?: number;
   revealOrder?: number;
@@ -58,7 +61,7 @@ export interface BoardContent {
  */
 export interface Asset {
   name: string;
-  mime: string;
+  mime?: string;
   bytes: Uint8Array;
   // timestamp of creation, should be set when the asset is first created and never modified afterwards
   createdAt: number;

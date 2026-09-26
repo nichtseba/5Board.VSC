@@ -22,7 +22,7 @@ export function makeCodeElement(id: string, data: Partial<CodeElementData> = {})
 export function makeDocument(elements: EditorElement[]): BoardDocument {
   return {
     manifest: { title: 'test', createdAt: 0, modifiedAt: 0, version: '1' },
-    content: { selectedElementId: null, elements, codeClasses: [] },
+    content: { selectedElementIds: [], primarySelectedElementId: null, elements, codeClasses: [] },
     sources: [],
     assets: [],
   };
