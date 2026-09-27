@@ -79,7 +79,7 @@ type AllWebviewToExtensionMessage =
   | { type: 'selectTool'; tool: EditorTool }
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
   | AddElementMessage
-  | { type: 'deleteElement'; id: string }
+  | { type: 'deleteElements'; ids: string[] }
   | {
       type: 'updateElementsLayout';
       changes: {

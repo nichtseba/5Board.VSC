@@ -8,7 +8,6 @@ import { useLocalization } from '../providers/LocalizationProvider';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
 import { Button, Icon } from 'vscrui';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
-import { BoardElement } from '5board.vsc-common';
 
 export default function ElementSettingsSidebar() {
   const messages = useMessageService();
@@ -39,10 +38,10 @@ export default function ElementSettingsSidebar() {
     content = <ElementSettings elements={selectedElements} />;
   }
 
-  const handleDelete = (selectedElement: BoardElement) => {
+  const handleDelete = () => {
     messages.send({
-      type: 'deleteElement',
-      id: selectedElement.id,
+      type: 'deleteElements',
+      ids: selectedElementIds,
     });
   };
 
@@ -54,7 +53,7 @@ export default function ElementSettingsSidebar() {
         <Button
           appearance="secondary"
           className="justify-center gap-2"
-          onClick={() => handleDelete(primarySelectedElement)}
+          onClick={() => handleDelete()}
         >
           <Icon name="trash" className="color-foreground-error" />
 

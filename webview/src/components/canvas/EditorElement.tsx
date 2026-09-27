@@ -104,8 +104,8 @@ export default function EditorElement<ElementType extends EditorElementType>({
       }
 
       messages.send({
-        type: 'deleteElement',
-        id: element.id,
+        type: 'deleteElements',
+        ids: [element.id],
       });
     };
 

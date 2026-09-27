@@ -55,8 +55,10 @@ export class DocumentMessageHandlers {
           tool: { type: EditorToolId.POINTER, parameters: undefined },
         };
       }),
-      this.document.messageService.on('deleteElement', (msg) => {
-        EXTENSION.deleteEditorElement(msg.id);
+      this.document.messageService.on('deleteElements', (msg) => {
+        msg.ids.forEach((id) => {
+          EXTENSION.deleteEditorElement(id);
+        });
       }),
 
       this.document.messageService.on('selectElements', (msg) => {
