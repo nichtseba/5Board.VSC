@@ -25,7 +25,11 @@
     "customEditor": { "Test": "Test the translation." },
     "canvas": {
       "spacerLabel": "Spacer",
-      "rows": "rows"
+      "rows": "rows",
+      "contextMenu": {
+        "bringToFront": "Bring to front",
+        "sendToBack": "Send to back"
+      }
     },
     "exportPreview": {
       "saveHtml": "Save HTML",
@@ -84,7 +88,7 @@
         "statusPaused": "Paused",
         "statusClosed": "Ended",
         "pointerColor": "Pointer Color",
-        "customColor": "Custom",
+        "customColor": "Custom color",
         "pointerShape": "Pointer Shape",
         "colors": {
           "red": "Red",
@@ -111,6 +115,7 @@
       "noElementSelected": "No element selected",
       "unsupportedElement": "Unsupported element type",
       "selectedElement": "Selected Element",
+      "layer": "Layer",
       "headingSettings": {
         "title": "Heading",
         "levelLabel": "Hierarchy level",

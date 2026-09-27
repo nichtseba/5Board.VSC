@@ -22,11 +22,13 @@ import { ProjectorProvider } from './providers/ProjectorProvider';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
+import { SettingsService } from './SettingsService';
 import { createDefaultElement } from './board/addElement/createDefaultElement';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
   public readonly packageManager = new PackageManager();
+  public readonly settingsService = new SettingsService();
   private openDocuments = new Map<string, BoardCustomDocument>();
 
   public registerDocument(document: BoardCustomDocument): void {
@@ -87,9 +89,22 @@ export class FiveBoardExtension extends ExtensionBase {
 
   public activate(context: vscode.ExtensionContext): void {
     super.activate(context);
+    context.subscriptions.push(this.settingsService);
     new EditorEditorProvider(context, this.packageManager).register();
     new ProjectorProvider(context).register();
     context.subscriptions.push(new SidebarManager(context, this.messages));
+    context.subscriptions.push(
+      this.settingsService.onDidChange((settings) => {
+        const message = {
+          type: 'settingsChanged' as const,
+          settings: {
+            colorPalette: settings.colorPalette,
+          },
+        };
+
+        this.messages.send(message);
+      }),
+    );
     new FiveBoardFileSystemProvider(this.packageManager).register(context);
     new ExportPreviewProvider(context, this.packageManager).register();
   }
@@ -110,7 +125,8 @@ export class FiveBoardExtension extends ExtensionBase {
       }
       // Todo: Maybe this should create an unsaved file
       const title = path.basename(targetUri.fsPath, path.extname(targetUri.fsPath));
-      await BoardPackage.createEmpty(title).write(targetUri);
+      const settings = this.settingsService.getSettings();
+      await BoardPackage.createEmpty(title, settings.grid).write(targetUri);
       await vscode.commands.executeCommand(
         'vscode.openWith',
         targetUri,
@@ -203,6 +219,13 @@ export class FiveBoardExtension extends ExtensionBase {
         },
       },
     };
+  }
+  @Command('5board-vsc.openSettings')
+  public async openSettingsCommand(): Promise<void> {
+    await vscode.commands.executeCommand(
+      'workbench.action.openSettings',
+      '@ext:undefined_publisher.5board-vsc',
+    );
   }
 
   @Command('5board-vsc.previewHtmlExport')
