@@ -25,7 +25,7 @@ import { useMessageService } from '../../../services/MessageService';
 import ColorSelector from '../components/ColorSelector';
 import { FontSizeInput } from './components/FontSizeInput';
 import { getCommonValue } from './utils/getCommonValue';
-import { CommonSettings } from './CommonSettings';
+// import { CommonSettings } from './CommonSettings';
 
 type Props = {
   elements: EditorElement<EditorElementType.Text>[];
@@ -57,10 +57,10 @@ export function TextSettings({ elements }: Props) {
         title={t('webview.sidebar-element-settings.textSettings.title')}
         icon="symbol-string"
       >
-        <SettingsField>
+        {/* <SettingsField>
           <CommonSettings elements={elements} />
         </SettingsField>
-        <Divider />
+        <Divider /> */}
         <SettingsField>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <FontFamilyDropdown

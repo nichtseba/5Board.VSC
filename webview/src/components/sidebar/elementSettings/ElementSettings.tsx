@@ -7,7 +7,7 @@ import { ImageSettings } from './ImageSettings';
 import { LineSettings } from './LineSettings';
 import { FreehandSettings } from './FreehandSettings';
 // import { useLocalization } from '../../../providers/LocalizationProvider';
-import { CommonSettings } from './CommonSettings';
+//import { CommonSettings } from './CommonSettings';
 import { RectangleSettings } from './RectangleSettings';
 import { CircleSettings } from './CircleSettings';
 
@@ -31,7 +31,7 @@ export default function ElementSettings<ElementType extends EditorElementType>({
   const type = getSelectionType(elements);
 
   if (type === 'mixed') {
-    return <CommonSettings elements={elements} />;
+    return; //<CommonSettings elements={elements} />;
   }
 
   const Component = SETTINGS_COMPONENTS[type] as React.ComponentType<SettingsProps<ElementType>>;
