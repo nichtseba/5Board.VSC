@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { EditorElementType } from '5board.vsc-common';
 import { EditorElementProps } from '../EditorElement';
 import { useEditor, EditorContent } from '@tiptap/react';
@@ -27,6 +27,7 @@ export function TextElement({
 }: EditorElementProps<EditorElementType.Text>) {
   const messages = useMessageService();
   const grid = useGrid();
+  const applyingExternalContent = useRef(false);
 
   const editor = useEditor({
     editable: editing,
@@ -62,6 +63,8 @@ export function TextElement({
     },
 
     onTransaction({ editor }) {
+      if (applyingExternalContent.current) return;
+
       const textAlign = editor.isActive({ textAlign: 'left' })
         ? 'left'
         : editor.isActive({ textAlign: 'center' })
@@ -120,6 +123,21 @@ export function TextElement({
       });
     },
   });
+
+  useEffect(() => {
+    if (!editor || editing) return;
+
+    const incomingContent = element.data.content;
+    if (JSON.stringify(editor.getJSON()) === JSON.stringify(incomingContent)) return;
+
+    applyingExternalContent.current = true;
+    try {
+      editor.commands.setContent(incomingContent, { emitUpdate: false });
+    } finally {
+      applyingExternalContent.current = false;
+    }
+  }, [editor, element.data.content]);
+
   useEffect(() => {
     if (!editor) {
       return;
