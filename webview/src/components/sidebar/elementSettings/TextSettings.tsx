@@ -102,7 +102,7 @@ export function TextSettings({ element }: Props) {
                 type: 'textEditorCommand',
                 command: {
                   type: 'setTextColor',
-                  color,
+                  color: color!,
                 },
               });
             }}
@@ -112,7 +112,8 @@ export function TextSettings({ element }: Props) {
           />
 
           <ColorSelector
-            color={element.data.tiptap?.marks?.textStyle?.backgroundColor}
+            color={element.data.tiptap?.marks?.textStyle?.backgroundColor ?? undefined}
+            allowNone
             onChange={(color) => {
               messages.send({
                 type: 'textEditorCommand',
@@ -129,6 +130,7 @@ export function TextSettings({ element }: Props) {
 
           <ColorSelector
             color={element.style.backgroundColor}
+            allowNone
             onChange={(color) => {
               messages.send({
                 type: 'updateElement',

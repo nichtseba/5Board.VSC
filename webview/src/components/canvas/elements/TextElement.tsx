@@ -100,11 +100,11 @@ export function TextElement({
                 strike: editor.isActive('strike'),
                 underline: editor.isActive('underline'),
                 textStyle: {
-                  fontFamily: editor.getAttributes('textStyle').fontFamily,
-                  fontSize: editor.getAttributes('textStyle').fontSize,
-                  lineHeight: editor.getAttributes('textStyle').lineHeight,
-                  color: editor.getAttributes('textStyle').color,
-                  backgroundColor: editor.getAttributes('textStyle').backgroundColor,
+                  fontFamily: editor.getAttributes('textStyle').fontFamily ?? undefined,
+                  fontSize: editor.getAttributes('textStyle').fontSize ?? undefined,
+                  lineHeight: editor.getAttributes('textStyle').lineHeight ?? undefined,
+                  color: editor.getAttributes('textStyle').color ?? undefined,
+                  backgroundColor: editor.getAttributes('textStyle').backgroundColor ?? undefined,
                 },
               },
               nodes: {
@@ -201,10 +201,15 @@ export function TextElement({
 
       case 'setTextColor':
         editor.chain().focus().setColor(msg.command.color).run();
+
         break;
 
       case 'setBackgroundColor':
-        editor.chain().focus().setBackgroundColor(msg.command.color).run();
+        if (msg.command.color === undefined) {
+          editor.chain().focus().unsetBackgroundColor().run();
+        } else {
+          editor.chain().focus().setBackgroundColor(msg.command.color).run();
+        }
         break;
 
       case 'toggleBulletList':

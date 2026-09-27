@@ -6,16 +6,30 @@ export type ColorPreset = {
 
 type ColorPresetsProps = {
   color?: string;
-  onChange: (color: string) => void;
+  onChange: (color: string | undefined) => void;
   presets: readonly (string | ColorPreset)[];
+  allowNone?: boolean;
 };
 
 // Just the row of preset swatches; the label is shown on hover.
-export function ColorPresets({ color, onChange, presets }: ColorPresetsProps) {
+export function ColorPresets({ color, onChange, presets, allowNone = false }: ColorPresetsProps) {
   const colorSelected = (preset: string) => color?.toLowerCase() === preset.toLowerCase();
 
   return (
     <div className="flex flex-wrap items-center gap-2">
+      {allowNone && (
+        <button
+          type="button"
+          title="Keine Farbe"
+          aria-label="Keine Farbe"
+          aria-pressed={color === undefined}
+          onClick={() => onChange(undefined)}
+          className={`relative h-6 w-6 overflow-hidden rounded-full border border-foreground-description ${color === undefined ? 'ring-2 ring-focus-border border-transparent' : ''}`}
+        >
+          <span className="absolute left-1/2 top-1/2 h-0.5 w-8 -translate-x-1/2 -translate-y-1/2 rotate-135 bg-activity-error-badge-background" />
+        </button>
+      )}
+
       {presets.map((preset) => {
         const value = typeof preset === 'string' ? preset : preset.value;
         const label = typeof preset === 'string' ? preset : (preset.label ?? preset.value);

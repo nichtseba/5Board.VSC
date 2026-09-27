@@ -135,7 +135,9 @@ export class SidebarManager implements vscode.Disposable {
           ...element.style,
           ...msg.changes.style,
         };
-
+        if (msg.changes.style?.backgroundColor === undefined) {
+          delete nextStyle.backgroundColor;
+        }
         if (
           deepEquals(nextData, element.data) &&
           deepEquals(nextLayout, element.layout) &&
@@ -160,10 +162,7 @@ export class SidebarManager implements vscode.Disposable {
               ...el.data,
               ...msg.changes.data,
             } as typeof el.data,
-            style: {
-              ...el.style,
-              ...msg.changes.style,
-            },
+            style: nextStyle,
           };
         });
         return true;
@@ -184,18 +183,25 @@ export class SidebarManager implements vscode.Disposable {
         const levels = headingSettings.levels ?? {};
         const currentLevelSettings = levels[msg.level] ?? {};
 
+        const nextLevelSettings = {
+          ...currentLevelSettings,
+          ...msg.changes,
+          textDecoration: {
+            ...currentLevelSettings.textDecoration,
+            ...msg.changes.textDecoration,
+          },
+        };
+
+        const cleanedLevelSettings =
+          msg.changes.backgroundColor === undefined
+            ? removeBackgroundColor(nextLevelSettings)
+            : nextLevelSettings;
+
         document.content.headingSettings = {
           ...headingSettings,
           levels: {
             ...levels,
-            [msg.level]: {
-              ...currentLevelSettings,
-              ...msg.changes,
-              textDecoration: {
-                ...currentLevelSettings.textDecoration,
-                ...msg.changes.textDecoration,
-              },
-            },
+            [msg.level]: cleanedLevelSettings,
           },
         };
       });
@@ -240,4 +246,12 @@ export class SidebarManager implements vscode.Disposable {
     this.sync.dispose();
     this.projectorDocumentListener.dispose();
   }
+}
+
+function removeBackgroundColor<T extends { backgroundColor?: string }>(
+  value: T,
+): Omit<T, 'backgroundColor'> {
+  return Object.fromEntries(
+    Object.entries(value).filter(([key]) => key !== 'backgroundColor'),
+  ) as Omit<T, 'backgroundColor'>;
 }

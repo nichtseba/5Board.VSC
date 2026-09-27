@@ -212,7 +212,7 @@ export function HeadingSettings({ element }: Props) {
         </SettingsField>
         <SettingsField label={t('webview.sidebar-element-settings.headingSettings.color')}>
           <ColorField
-            value={levelSettings.color ?? ''}
+            value={levelSettings.color}
             onChange={(color) => handleLevelSettingsChange({ color })}
           />
         </SettingsField>
@@ -220,8 +220,9 @@ export function HeadingSettings({ element }: Props) {
           label={t('webview.sidebar-element-settings.headingSettings.backgroundColor')}
         >
           <ColorField
-            value={levelSettings.backgroundColor ?? ''}
+            value={levelSettings.backgroundColor}
             onChange={(backgroundColor) => handleLevelSettingsChange({ backgroundColor })}
+            allowNone
           />
         </SettingsField>
       </SettingsPanel>
@@ -229,11 +230,20 @@ export function HeadingSettings({ element }: Props) {
   );
 }
 
-function ColorField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+function ColorField({
+  value,
+  onChange,
+  allowNone,
+}: {
+  value?: string;
+  onChange: (value: string | undefined) => void;
+  allowNone?: boolean;
+}) {
   const { t } = useLocalization();
   return (
     <ColorSelector
       color={value}
+      allowNone={allowNone}
       onChange={onChange}
       themePresets={PROJECTOR_POINTER_PRESET_COLORS}
       customColorLabel={t('webview.sidebar.projectorSettings.customColor')}

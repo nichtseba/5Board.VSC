@@ -142,7 +142,9 @@ export class DocumentMessageHandlers {
             ...element.style,
             ...msg.changes.style,
           };
-
+          if (msg.changes.style?.backgroundColor === undefined) {
+            delete nextStyle.backgroundColor;
+          }
           if (
             deepEquals(nextData, element.data) &&
             deepEquals(nextLayout, element.layout) &&
@@ -167,10 +169,7 @@ export class DocumentMessageHandlers {
                 ...el.data,
                 ...msg.changes.data,
               } as typeof el.data,
-              style: {
-                ...el.style,
-                ...msg.changes.style,
-              },
+              style: nextStyle,
             };
           });
           return true;
