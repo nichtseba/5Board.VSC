@@ -155,7 +155,16 @@ export class BoardCustomDocument implements vscode.CustomDocument {
 
     await vscode.workspace.fs.writeFile(targetUri, new TextEncoder().encode(exportHtml));
 
-    vscode.window.showInformationMessage(`${t('extension.htmlExport.saved')} ${targetUri.fsPath}`);
+    const openFolderLabel = t('extension.htmlExport.openContainingFolder');
+
+    const selection = await vscode.window.showInformationMessage(
+      `${t('extension.htmlExport.saved')} ${targetUri.fsPath}`,
+      openFolderLabel,
+    );
+
+    if (selection === openFolderLabel) {
+      await vscode.commands.executeCommand('revealFileInOS', targetUri);
+    }
   }
 
   public applyEdit(edit: (document: BoardDocument) => void): void {
@@ -182,8 +191,14 @@ function createHtmlExport(html: string, backgroundColor: string): string {
       <meta charset="utf-8">
       <title>5Board Export</title>
       <style>
-        html, 
+        @page {
+          size: A4 portrait;
+          margin: 0;
+        }
+
+        html,
         body {
+          margin: 0;
           background: ${backgroundColor};
         }
       </style>

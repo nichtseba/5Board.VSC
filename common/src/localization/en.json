@@ -10,7 +10,8 @@
     "htmlExport": {
       "noActiveBoard": "Open a .5boardz file or save current file.",
       "saveLabel": "Save HTML Export",
-      "saved": "HTML export saved:"
+      "saved": "HTML export saved:",
+      "openContainingFolder": "Open in file system"
     },
     "projector": {
       "startPresentation": "Start Presentation",

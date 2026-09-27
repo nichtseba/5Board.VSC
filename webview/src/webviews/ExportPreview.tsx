@@ -8,6 +8,7 @@ import { createExportCanvasHtml } from '../exportUtils';
 import { Button } from 'vscrui';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
 import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
+import '../styles/ExportPreview.css';
 
 export default function ExportPreview() {
   const messages = useMessageService();
@@ -25,9 +26,10 @@ export default function ExportPreview() {
       </Button>
 
       {document ? (
-        <div style={{ pointerEvents: 'none' }}>
+        <div className="export-preview-pages">
+          <div className="export-preview-page-guides" />
           <CanvasEventsProvider>
-            <EditorCanvas />
+            <EditorCanvas readOnly />
           </CanvasEventsProvider>
         </div>
       ) : (

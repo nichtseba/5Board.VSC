@@ -19,7 +19,6 @@
   "commands.openSettings": "Open 5Board Settings",
   "configuration.title": "5board",
   "configuration.java.home.description": "Path to Java Development Kit directory. Leave empty to use Java from PATH.",
-  "configuration.presets.directoryPath.description": "Path to directory containing preset files.",
   "configuration.grid.cellSize.description": "Default grid cell size in pixels for new documents.",
   "configuration.grid.columnCount.description": "Default number of grid columns for new documents.",
   "configuration.colorPalette.customColors.description": "Add up to three custom colors to the color picker using RGB values, e.g. rgb(255, 0, 0)"

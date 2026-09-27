@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { PackageManager } from '../PackageManager';
 import { BoardCustomDocument } from '../board/BoardCustomDocument';
 import { setExportPreviewWebviewHtml } from '../board/webview';
+import { EXTENSION } from '../extension';
 
 export class ExportPreviewProvider implements vscode.CustomReadonlyEditorProvider<BoardCustomDocument> {
   public static readonly VIEW_TYPE = '5board-vsc.exportPreview';
@@ -30,11 +31,10 @@ export class ExportPreviewProvider implements vscode.CustomReadonlyEditorProvide
     panel: vscode.WebviewPanel,
     _token: vscode.CancellationToken,
   ): Promise<void> {
-    const messages = document.messageService;
-
-    messages.registerPanel(panel);
-
     panel.webview.options = { enableScripts: true };
+    const editorDocument = EXTENSION.getDocumentForUri(document.uri);
+    const messages = editorDocument?.messageService ?? document.messageService;
+    messages.registerPanel(panel);
     setExportPreviewWebviewHtml(this.context, panel.webview);
   }
 

@@ -125,7 +125,7 @@
       {
         "command": "5board-vsc.previewHtmlExport",
         "title": "%commands.previewHtmlExport%",
-        "icon": "$(preview)"
+        "icon": "$(file-code)"
       },
       {
         "command": "5board-vsc.addImageFromFile",
@@ -157,14 +157,19 @@
           "group": "navigation@1"
         },
         {
-          "command": "5board-vsc.newBoard",
+          "command": "5board-vsc.previewHtmlExport",
           "when": "view == 5board-vsc.sidebar-tool-view",
           "group": "navigation@2"
         },
         {
-          "command": "5board-vsc.startPresentation",
+          "command": "5board-vsc.newBoard",
           "when": "view == 5board-vsc.sidebar-tool-view",
           "group": "navigation@3"
+        },
+        {
+          "command": "5board-vsc.startPresentation",
+          "when": "view == 5board-vsc.sidebar-tool-view",
+          "group": "navigation@4"
         }
       ]
     },
@@ -178,13 +183,6 @@
           "scope": "machine",
           "order": 10,
           "description": "%configuration.java.home.description%"
-        },
-        "5board-vsc.presets.directoryPath": {
-          "type": "string",
-          "default": "",
-          "scope": "machine",
-          "order": 20,
-          "description": "%configuration.presets.directoryPath.description%"
         },
         "5board-vsc.grid.cellSize": {
           "type": "integer",
