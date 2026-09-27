@@ -30,32 +30,24 @@ export function FreehandSettings({ elements }: Props) {
   const messages = useMessageService();
 
   const firstStrokes = elements.map((element) => element.data.strokes[0]);
-  //const firstStroke = element.data.strokes[0];
-  const color =
-    getCommonValue(
-      firstStrokes.map((stroke) => stroke?.color ?? DEFAULT_FREEHAND_PARAMETERS.color),
-    ) ?? DEFAULT_FREEHAND_PARAMETERS.color;
-  //const color = firstStroke?.color ?? DEFAULT_FREEHAND_PARAMETERS.color;
+
+  const color = getCommonValue(firstStrokes.map((stroke) => stroke?.color));
   const width =
     getCommonValue(
       firstStrokes.map((stroke) => stroke?.width ?? DEFAULT_FREEHAND_PARAMETERS.width),
     ) ?? DEFAULT_FREEHAND_PARAMETERS.width;
-  //const width = firstStroke?.width ?? DEFAULT_FREEHAND_PARAMETERS.width;
   const lineStyle =
     getCommonValue(
       firstStrokes.map((stroke) => stroke?.lineStyle ?? DEFAULT_FREEHAND_PARAMETERS.lineStyle),
     ) ?? DEFAULT_FREEHAND_PARAMETERS.lineStyle;
-  //const lineStyle = firstStroke?.lineStyle ?? DEFAULT_FREEHAND_PARAMETERS.lineStyle;
   const dashScale =
     getCommonValue(
       firstStrokes.map((stroke) => stroke?.dashScale ?? DEFAULT_FREEHAND_PARAMETERS.dashScale),
     ) ?? DEFAULT_FREEHAND_PARAMETERS.dashScale;
-  //const dashScale = firstStroke?.dashScale ?? DEFAULT_FREEHAND_PARAMETERS.dashScale;
   const opacity =
     getCommonValue(
       elements.map((element) => element.style.opacity ?? DEFAULT_FREEHAND_PARAMETERS.opacity),
     ) ?? DEFAULT_FREEHAND_PARAMETERS.opacity;
-  //const opacity = element.style.opacity ?? DEFAULT_FREEHAND_PARAMETERS.opacity;
 
   // Apply a stroke patch to all strokes and push the update.
   const patchStrokes = (patch: {
