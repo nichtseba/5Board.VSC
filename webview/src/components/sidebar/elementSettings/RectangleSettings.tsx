@@ -30,6 +30,7 @@ export function RectangleSettings({ element }: Props) {
       <ElementStyleSettings
         style={element.style}
         onChange={updateStyle}
+        allowNone
         editableProperties={[
           'backgroundColor',
           'opacity',

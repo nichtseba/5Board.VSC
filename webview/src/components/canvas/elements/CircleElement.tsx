@@ -19,7 +19,7 @@ export function CircleElement({ element }: EditorElementProps<EditorElementType.
         cy={height / 2}
         rx={width / 2 - strokeX / 2}
         ry={height / 2 - strokeY / 2}
-        fill={backgroundColor}
+        fill={backgroundColor ?? 'none'}
         stroke={border?.color}
         strokeWidth={strokeWidth}
         strokeDasharray={
