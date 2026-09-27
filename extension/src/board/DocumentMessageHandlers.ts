@@ -142,9 +142,7 @@ export class DocumentMessageHandlers {
             ...element.style,
             ...msg.changes.style,
           };
-          if (msg.changes.style?.backgroundColor === undefined) {
-            delete nextStyle.backgroundColor;
-          }
+
           if (
             deepEquals(nextData, element.data) &&
             deepEquals(nextLayout, element.layout) &&
