@@ -131,12 +131,13 @@ export function HeadingSettings({ elements }: Props) {
               { value: '6', label: 'H6' },
             ]}
             value={commonLevel !== undefined ? String(commonLevel) : ''}
+            placeholder={commonLevel === undefined ? '\u00A0' : undefined}
             onChange={handleLevelChange}
           />
         </SettingsField>
         <SettingsField
-          label={`${t('webview.sidebar-element-settings.headingSettings.numberingLabel')} H${
-            commonLevel
+          label={`${t('webview.sidebar-element-settings.headingSettings.numberingLabel')} ${
+            commonLevel !== undefined ? `H${commonLevel}` : ''
           }`}
         >
           <Dropdown
