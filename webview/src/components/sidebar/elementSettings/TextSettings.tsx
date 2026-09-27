@@ -24,6 +24,7 @@ import {
 import { useMessageService } from '../../../services/MessageService';
 import ColorSelector from '../components/ColorSelector';
 import { FontSizeInput } from './components/FontSizeInput';
+import { THEME_PRESET_COLORS } from '../components/ColorPresets';
 
 type Props = {
   element: EditorElement<EditorElementType.Text>;
@@ -106,7 +107,7 @@ export function TextSettings({ element }: Props) {
                 },
               });
             }}
-            presets={PROJECTOR_POINTER_PRESET_COLORS}
+            presets={THEME_PRESET_COLORS}
             label={t('webview.sidebar-element-settings.textSettings.textColor')}
             customColorLabel={t('webview.sidebar.projectorSettings.customColor')}
           />

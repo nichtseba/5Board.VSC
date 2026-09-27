@@ -1,4 +1,5 @@
 export type ColorPreset = {
+  id: string;
   value: string;
   label?: string;
   theme?: boolean;
@@ -32,7 +33,7 @@ export function ColorPresets({ color, onChange, presets, allowNone = false }: Co
 
       {presets.map((preset) => {
         const value = typeof preset === 'string' ? preset : preset.value;
-        const label = typeof preset === 'string' ? preset : (preset.label ?? preset.value);
+        const label = typeof preset === 'string' ? preset : (preset.label ?? preset.id);
         const title = typeof preset === 'string' || !preset.theme ? label : `Theme: ${label}`;
 
         return (
@@ -61,3 +62,13 @@ export function ColorPresets({ color, onChange, presets, allowNone = false }: Co
     </div>
   );
 }
+
+export const THEME_PRESET_COLORS = [
+  { id: 'foreground', value: 'var(--vscode-editor-foreground' },
+  { id: 'muted', value: 'var(--vscode-descriptionForeground)' },
+  { id: 'background', value: 'var(--vscode-editor-background)' },
+  { id: 'primary', value: 'var(--vscode-focusBorder)' },
+  { id: 'secondary', value: 'var(--vscode-progressBar-background)' },
+  { id: 'accent1', value: 'var(--vscode-editorBracketHighlight-foreground1)' },
+  { id: 'accent2', value: 'var(--vscode-symbolIcon-classForeground)' },
+] as const;

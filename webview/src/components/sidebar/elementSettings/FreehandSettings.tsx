@@ -36,7 +36,12 @@ export function FreehandSettings({ element }: Props) {
   const opacity = element.style.opacity ?? DEFAULT_FREEHAND_PARAMETERS.opacity;
 
   // Apply a stroke patch to all strokes and push the update.
-  const patchStrokes = (patch: { color?: string; width?: number; lineStyle?: LineStyle; dashScale?: number }) => {
+  const patchStrokes = (patch: {
+    color?: string;
+    width?: number;
+    lineStyle?: LineStyle;
+    dashScale?: number;
+  }) => {
     messages.send({
       type: 'updateElement',
       id: element.id,
@@ -53,12 +58,16 @@ export function FreehandSettings({ element }: Props) {
   };
 
   return (
-    <SettingsPanel title={t('webview.sidebar-element-settings.freehandSettings.title')} icon="pencil">
+    <SettingsPanel
+      title={t('webview.sidebar-element-settings.freehandSettings.title')}
+      icon="pencil"
+    >
       <div className="flex flex-col gap-4">
         <ColorSelector
           color={color}
           onChange={(c) => patchStrokes({ color: c })}
           presets={FREEHAND_COLORS.map((c) => ({
+            id: c.id,
             value: c.value,
             label: t(`webview.sidebar.freehand.colors.${c.id}` as TranslationKey),
           }))}
