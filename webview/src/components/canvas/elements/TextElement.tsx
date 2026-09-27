@@ -250,7 +250,7 @@ export function TextElement({
     >
       <EditorContent editor={editor} />
       {editing && (
-        <BubbleMenu editor={editor}>
+        <BubbleMenu editor={editor} appendTo={() => document.body} className="z-50">
           <BoldButton element={element} />
           <ItalicButton element={element} />
           <StrikeButton element={element} />
