@@ -10,6 +10,7 @@ import { StructureTreeProvider } from '../providers/StructureTreeProvider';
 import { EXTENSION } from '../extension';
 import deepEquals from 'deep-equal';
 import { FileTreeProvider } from '../providers/FileTreeProvider';
+import { EditorElement } from '5board.vsc-common';
 
 export class SidebarManager implements vscode.Disposable {
   private readonly sync: SidebarDocumentSync;
@@ -113,62 +114,27 @@ export class SidebarManager implements vscode.Disposable {
 
     // Todo: move to document handling
     this.messages.on('updateElements', (msg) => {
+      console.log('Updating elements from sidebar', msg);
       if (!EXTENSION.activeEditorDocument) {
+        console.log('No Active Editor Document returning early');
         return;
       }
       EXTENSION.activeEditorDocument.applyEdit((document) => {
         let changed = false;
 
         for (const update of msg.changes) {
-          const element = document.content.elements.find((e) => e.id === update.id);
+          const elementIndex = document.content.elements.findIndex((e) => e.id === update.id);
+          const element = document.content.elements[elementIndex];
           if (!element) {
-            continue;
+            continue; // Todo: Warn here, something has gone wrong
           }
-          const nextData = {
-            ...element.data,
-            ...update.changes.data,
-          };
+          const nextElement: EditorElement = Object.assign({}, element, update.changes);
 
-          const nextLayout = {
-            ...element.layout,
-            ...update.changes.layout,
-          };
-
-          const nextStyle = {
-            ...element.style,
-            ...update.changes.style,
-          };
-
-          if (
-            deepEquals(nextData, element.data) &&
-            deepEquals(nextLayout, element.layout) &&
-            deepEquals(nextStyle, element.style)
-          ) {
+          if (deepEquals(nextElement, element)) {
             //Skipping updateElement message because the data hasn't changed
             continue;
           }
-
-          document.content.elements = document.content.elements.map((el) => {
-            if (el.id !== update.id) {
-              return el;
-            }
-
-            return {
-              ...el,
-              layout: {
-                ...el.layout,
-                ...update.changes.layout,
-              },
-              data: {
-                ...el.data,
-                ...update.changes.data,
-              } as typeof el.data,
-              style: {
-                ...el.style,
-                ...update.changes.style,
-              },
-            };
-          });
+          document.content.elements[elementIndex] = nextElement;
           changed = true;
         }
         return changed;
