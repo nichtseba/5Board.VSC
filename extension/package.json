@@ -122,6 +122,18 @@
         "title": "%commands.goToElement%"
       },
       {
+        "command": "5board-vsc.copy",
+        "title": "%commands.copy%"
+      },
+      {
+        "command": "5board-vsc.paste",
+        "title": "%commands.paste%"
+      },
+      {
+        "command": "5board-vsc.duplicate",
+        "title": "%commands.duplicate%"
+      },
+      {
         "command": "5board-vsc.openSettings",
         "title": "%commands.openSettings%",
         "icon": "$(gear)"

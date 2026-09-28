@@ -23,12 +23,16 @@ import { PackageManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
 import { SettingsService } from './SettingsService';
 import { createDefaultElement } from './board/addElement/createDefaultElement';
+import { ElementClipboardService } from './ElementClipboardService';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
   public readonly packageManager = new PackageManager();
   public readonly settingsService = new SettingsService();
   private openDocuments = new Map<string, BoardCustomDocument>();
+  private readonly elementClipboard = new ElementClipboardService((uri) =>
+    this.getDocumentForUri(uri),
+  );
 
   public registerDocument(document: BoardCustomDocument): void {
     if (!this.openDocuments.has(document.uri.toString())) {
@@ -164,6 +168,33 @@ export class FiveBoardExtension extends ExtensionBase {
     this.applyEditToActiveDocument((document) => {
       document.content.elements = document.content.elements.filter((e) => e.id !== id);
     });
+  }
+
+  @Command('5board-vsc.copy')
+  async copyEditorElements(): Promise<void> {
+    const document = this.activeEditorDocument;
+    if (!document) {
+      return;
+    }
+    await this.elementClipboard.copy(document);
+  }
+
+  @Command('5board-vsc.paste')
+  async pasteEditorElements(): Promise<void> {
+    const document = this.activeEditorDocument;
+    if (!document) {
+      return;
+    }
+    await this.elementClipboard.paste(document);
+  }
+
+  @Command('5board-vsc.duplicate')
+  duplicateEditorElements(): void {
+    const document = this.activeEditorDocument;
+    if (!document) {
+      return;
+    }
+    this.elementClipboard.duplicate(document);
   }
 
   @Command('5board-vsc.addNewEditorElement')
