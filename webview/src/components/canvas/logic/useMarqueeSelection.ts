@@ -134,11 +134,6 @@ export function useMarqueeSelection({
         return;
       }
 
-      const moveableControl = target.closest('.moveable-control-box');
-      if (moveableControl) {
-        return;
-      }
-
       const point = toCanvasPoint(event);
 
       if (!point) {
