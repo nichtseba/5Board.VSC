@@ -108,8 +108,8 @@ export default function EditorElement<ElementType extends EditorElementType>({
     }
   }, [selected]);
   const viewType = useViewType();
-  const hideInProjector = element.display.speakerNote || !element.display.visible;
-  const hideInExport = element.display.speakerNote || element.display.excludeFromExport;
+  const hideInProjector = preview || element.display.speakerNote || !element.display.visible;
+  const hideInExport = preview || element.display.speakerNote || element.display.excludeFromExport;
   if ((viewType === 'projector' && hideInProjector) || (viewType === 'export' && hideInExport)) {
     return null;
   }
