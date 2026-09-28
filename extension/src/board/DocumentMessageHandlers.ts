@@ -35,10 +35,10 @@ export class DocumentMessageHandlers {
         }
       }),
       this.document.messageService.on('copyElements', () => {
-        void EXTENSION.copyEditorElements();
+        EXTENSION.copyEditorElements();
       }),
       this.document.messageService.on('pasteElements', () => {
-        void EXTENSION.pasteEditorElements();
+        EXTENSION.pasteEditorElements();
       }),
       this.document.messageService.on('duplicateElements', () => {
         EXTENSION.duplicateEditorElements();

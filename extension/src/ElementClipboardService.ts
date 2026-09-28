@@ -43,9 +43,7 @@ export class ElementClipboardService {
       const imageAssets = await this.getImageAssetsForPaste(payload, document);
       this.insertClonedElements(document, payload.elements, imageAssets);
     } catch (error) {
-      void vscode.window.showErrorMessage(
-        `Image could not be inserted: ${error instanceof Error ? error.message : String(error)}`,
-      );
+      void vscode.window.showErrorMessage(`Image could not be inserted: ${String(error)}`);
     }
   }
 
