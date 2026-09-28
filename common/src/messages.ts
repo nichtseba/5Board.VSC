@@ -30,7 +30,7 @@ type AllExtensionToWebviewMessage =
   | { type: 'init'; document: BoardDocument; editorState: EditorState; language: Language }
   | { type: 'initSidebar'; document: BoardDocument; editorState: EditorState }
   | { type: 'updateEditorState'; editorState: EditorState }
-  | { type: 'textEditorCommand'; ids: string[]; command: TextEditorCommand }
+  | { type: 'textEditorCommand'; command: TextEditorCommand }
   | { type: 'cursorMove'; x: number; y: number }
   | { type: 'cursorHide' }
   | { type: 'cursorTrackingChanged'; enabled: boolean }
@@ -78,8 +78,6 @@ type AllWebviewToExtensionMessage =
   | { type: 'toggleElementSelection'; ids: string[] }
   | { type: 'selectTool'; tool: EditorTool }
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
-  | AddElementMessage
-  | { type: 'deleteElements'; ids: string[] }
   | {
       type: 'updateElementsLayout';
       changes: {
@@ -88,14 +86,10 @@ type AllWebviewToExtensionMessage =
         aspectRatio?: number;
       }[];
     } // Update the Layout when Element was moved or resized, array can handle one or more elements
-  | {
-      type: 'updateElements';
-      changes: {
-        id: string;
-        changes: Partial<EditorElement>;
-      }[];
-    } // Update element with it's settings, array can handle one or more elements
-  | { type: 'textEditorCommand'; ids: string[]; command: TextEditorCommand }
+  | AddElementMessage
+  | { type: 'deleteElement'; id: string }
+  | { type: 'updateElement'; id: string; changes: Partial<EditorElement> } // Update element with it's settings
+  | { type: 'textEditorCommand'; command: TextEditorCommand }
   | { type: 'addImageFromFile' }
   | { type: 'addImageFromBytes'; name: string; bytes: number[] }
   | { type: 'toggleCursorTracking' }

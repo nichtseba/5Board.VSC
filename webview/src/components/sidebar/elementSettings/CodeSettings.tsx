@@ -1,10 +1,9 @@
 import { EditorElement, EditorElementType } from '5board.vsc-common';
 
 type Props = {
-  elements: EditorElement<EditorElementType.Code>[];
+  element: EditorElement<EditorElementType.Code>;
 };
 
-export function CodeSettings({ elements }: Props) {
-  const selectedElementIds = elements.map((element) => element.id);
-  return <div>Add CodeSettings for {selectedElementIds.join(', ')}</div>;
+export function CodeSettings({ element }: Props) {
+  return <div>Add settings for {element.id}</div>;
 }
