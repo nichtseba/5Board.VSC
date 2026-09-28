@@ -192,10 +192,13 @@ export class SidebarManager implements vscode.Disposable {
           },
         };
 
-        const cleanedLevelSettings =
-          msg.changes.backgroundColor === undefined
-            ? removeBackgroundColor(nextLevelSettings)
-            : nextLevelSettings;
+        const clearsBackgroundColor =
+          Object.prototype.hasOwnProperty.call(msg.changes, 'backgroundColor') &&
+          msg.changes.backgroundColor === undefined;
+
+        const cleanedLevelSettings = clearsBackgroundColor
+          ? removeBackgroundColor(nextLevelSettings)
+          : nextLevelSettings;
 
         document.content.headingSettings = {
           ...headingSettings,
