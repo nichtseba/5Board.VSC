@@ -167,8 +167,9 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     }
   }
 
-  public applyEdit(edit: (document: BoardDocument) => void): void {
-    edit(this.boardPackage.document);
+  public applyEdit(edit: (document: BoardDocument) => unknown): void {
+    const changed = edit(this.boardPackage.document);
+    if (changed === false) return;
     this.documentChange.fire(this.boardPackage.document);
   }
 

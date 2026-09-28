@@ -9,6 +9,7 @@ import { CodeElement } from './elements/CodeElement';
 import { ImageElement } from './elements/ImageElement';
 import { LineElement } from './elements/LineElement';
 import { FreehandElement } from './elements/FreehandElement';
+import { TableOfContentsElement } from './elements/TableOfContentsElement';
 import { useEditorState } from '../../providers/EditorStateProvider';
 import { useMessageService } from '../../services/MessageService';
 import { useBoardDocument } from '../../providers/BoardDocumentProvider';
@@ -21,6 +22,7 @@ export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
   selected?: boolean;
   onSelect?: (event?: React.MouseEvent) => void;
+  grouped?: boolean;
   editing?: boolean;
   editingPosition?: {
     x: number;
@@ -41,6 +43,7 @@ export type EditorElementProps<T extends EditorElementType> = {
 export default function EditorElement<ElementType extends EditorElementType>({
   element,
   selected,
+  grouped,
   assetUrls,
   preview,
 }: EditorElementProps<ElementType>) {
@@ -82,9 +85,13 @@ export default function EditorElement<ElementType extends EditorElementType>({
 
   const setZIndex = (zIndex: number) => {
     messages.send({
-      type: 'updateElement',
-      id: element.id,
-      changes: { layout: { ...element.layout, zIndex } },
+      type: 'updateElements',
+      changes: [
+        {
+          id: element.id,
+          changes: { layout: { ...element.layout, zIndex } },
+        },
+      ],
     });
     setContextMenuPosition(null);
   };
@@ -100,8 +107,8 @@ export default function EditorElement<ElementType extends EditorElementType>({
       }
 
       messages.send({
-        type: 'deleteElement',
-        id: element.id,
+        type: 'deleteElements',
+        ids: [element.id],
       });
     };
 
@@ -175,7 +182,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
           onStopEditing={handleStopEditing}
         />
       </div>
-      {activeToolId === EditorToolId.POINTER && (
+      {activeToolId === EditorToolId.POINTER && !grouped && (
         <ElementInteractionController
           element={element}
           selected={selected && !editing}
@@ -216,6 +223,7 @@ const ELEMENT_COMPONENTS = {
   [EditorElementType.Circle]: CircleElement,
   [EditorElementType.Line]: LineElement,
   [EditorElementType.Freehand]: FreehandElement,
+  [EditorElementType.TableOfContents]: TableOfContentsElement,
 } as const satisfies {
   [ElementType in EditorElementType]: React.ComponentType<EditorElementProps<ElementType>>;
 };

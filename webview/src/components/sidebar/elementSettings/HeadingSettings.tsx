@@ -17,22 +17,30 @@ import { useMessageService } from '../../../services/MessageService';
 import { useBoardDocument } from '../../../providers/BoardDocumentProvider';
 import ColorSelector from '../components/ColorSelector';
 import { FontSizeInput } from './components/FontSizeInput';
+import { getCommonHeadingLevelSettings } from './utils/getCommonHeadingLevelSettings';
+import { getCommonValue } from './utils/getCommonValue';
 
 type Props = {
-  element: EditorElement<EditorElementType.Heading>;
+  elements: EditorElement<EditorElementType.Heading>[];
 };
-export function HeadingSettings({ element }: Props) {
+export function HeadingSettings({ elements }: Props) {
   const { t } = useLocalization();
   const messages = useMessageService();
   const document = useBoardDocument();
-  const levelSettings = getHeadingLevelSettings(
-    document?.content.headingSettings,
-    element.data.level,
+
+  const commonLevel = getCommonValue(elements.map((element) => element.data.level));
+
+  const commonLevelSettings = getCommonHeadingLevelSettings(
+    elements.map((element) =>
+      getHeadingLevelSettings(document?.content.headingSettings, element.data.level),
+    ),
   );
+
   const numberingEnabled = getHeadingNumberingEnabled(document?.content.headingSettings);
-  const numberingFormat = getHeadingNumberingStyle(
-    document?.content.headingSettings,
-    element.data.level,
+  const commonNumberingFormat = getCommonValue(
+    elements.map((element) =>
+      getHeadingNumberingStyle(document?.content.headingSettings, element.data.level),
+    ),
   );
 
   const handleLevelChange = (value: string | DropdownOption | undefined) => {
@@ -43,14 +51,16 @@ export function HeadingSettings({ element }: Props) {
     const level = parseInt(newLevel, 10) as 1 | 2 | 3 | 4 | 5 | 6;
 
     messages.send({
-      type: 'updateElement',
-      id: element.id,
-      changes: {
-        data: {
-          ...element.data,
-          level,
+      type: 'updateElements',
+      changes: elements.map((element) => ({
+        id: element.id,
+        changes: {
+          data: {
+            ...element.data,
+            level,
+          },
         },
-      },
+      })),
     });
   };
 
@@ -69,20 +79,27 @@ export function HeadingSettings({ element }: Props) {
       return;
     }
 
-    messages.send({
-      type: 'updateHeadingNumbering',
-      enabled: true,
-      level: element.data.level,
-      numberingFormat: nextFormat as HeadingNumberingStyle,
-    });
+    const levels = [...new Set(elements.map((element) => element.data.level))];
+    for (const level of levels) {
+      messages.send({
+        type: 'updateHeadingNumbering',
+        enabled: true,
+        level,
+        numberingFormat: nextFormat as HeadingNumberingStyle,
+      });
+    }
   };
 
   const handleLevelSettingsChange = (changes: HeadingLevelSettings) => {
-    messages.send({
-      type: 'updateHeadingLevelSettings',
-      level: element.data.level,
-      changes,
-    });
+    const levels = [...new Set(elements.map((element) => element.data.level))];
+
+    for (const level of levels) {
+      messages.send({
+        type: 'updateHeadingLevelSettings',
+        level,
+        changes,
+      });
+    }
   };
 
   const handleFontSizeChange = (value: string) => {
@@ -113,13 +130,14 @@ export function HeadingSettings({ element }: Props) {
               { value: '5', label: 'H5' },
               { value: '6', label: 'H6' },
             ]}
-            value={String(element.data.level)}
+            value={commonLevel !== undefined ? String(commonLevel) : ''}
+            placeholder={commonLevel === undefined ? '\u00A0' : undefined}
             onChange={handleLevelChange}
           />
         </SettingsField>
         <SettingsField
-          label={`${t('webview.sidebar-element-settings.headingSettings.numberingLabel')} H${
-            element.data.level
+          label={`${t('webview.sidebar-element-settings.headingSettings.numberingLabel')} ${
+            commonLevel !== undefined ? `H${commonLevel}` : ''
           }`}
         >
           <Dropdown
@@ -149,13 +167,13 @@ export function HeadingSettings({ element }: Props) {
                 label: 'I, II, III',
               },
             ]}
-            value={numberingEnabled ? numberingFormat : 'none'}
+            value={numberingEnabled ? (commonNumberingFormat ?? 'none') : 'none'}
             onChange={handleNumberingChange}
           />
         </SettingsField>
         <SettingsField label={t('webview.sidebar-element-settings.headingSettings.fontFamily')}>
           <TextField
-            value={levelSettings.fontFamily ?? ''}
+            value={commonLevelSettings.fontFamily ?? ''}
             placeholder={t(
               'webview.sidebar-element-settings.headingSettings.fontFamilyPlaceholder',
             )}
@@ -166,7 +184,10 @@ export function HeadingSettings({ element }: Props) {
           label={t('webview.sidebar-element-settings.headingSettings.fontSize')}
           inline
         >
-          <FontSizeInput value={levelSettings.fontSize ?? ''} onChange={handleFontSizeChange} />
+          <FontSizeInput
+            value={commonLevelSettings.fontSize ?? ''}
+            onChange={handleFontSizeChange}
+          />
         </SettingsField>
         <SettingsField
           label={t('webview.sidebar-element-settings.headingSettings.textStyle')}
@@ -174,34 +195,34 @@ export function HeadingSettings({ element }: Props) {
         >
           <div className="flex gap-2">
             <Button
-              appearance={levelSettings.fontWeight === 'bold' ? 'primary' : 'secondary'}
+              appearance={commonLevelSettings.fontWeight === 'bold' ? 'primary' : 'secondary'}
               title={t('webview.sidebar-element-settings.headingSettings.bold')}
               onClick={() =>
                 handleLevelSettingsChange({
-                  fontWeight: levelSettings.fontWeight === 'bold' ? 'normal' : 'bold',
+                  fontWeight: commonLevelSettings.fontWeight === 'bold' ? 'normal' : 'bold',
                 })
               }
             >
               <span className="codicon codicon-bold" />
             </Button>
             <Button
-              appearance={levelSettings.fontStyle === 'italic' ? 'primary' : 'secondary'}
+              appearance={commonLevelSettings.fontStyle === 'italic' ? 'primary' : 'secondary'}
               title={t('webview.sidebar-element-settings.headingSettings.italic')}
               onClick={() =>
                 handleLevelSettingsChange({
-                  fontStyle: levelSettings.fontStyle === 'italic' ? 'normal' : 'italic',
+                  fontStyle: commonLevelSettings.fontStyle === 'italic' ? 'normal' : 'italic',
                 })
               }
             >
               <span className="codicon codicon-italic" />
             </Button>
             <Button
-              appearance={levelSettings.textDecoration?.underline ? 'primary' : 'secondary'}
+              appearance={commonLevelSettings.textDecoration?.underline ? 'primary' : 'secondary'}
               title={t('webview.sidebar-element-settings.headingSettings.underline')}
               onClick={() =>
                 handleLevelSettingsChange({
                   textDecoration: {
-                    underline: !levelSettings.textDecoration?.underline,
+                    underline: !commonLevelSettings.textDecoration?.underline,
                   },
                 })
               }
@@ -212,7 +233,7 @@ export function HeadingSettings({ element }: Props) {
         </SettingsField>
         <SettingsField label={t('webview.sidebar-element-settings.headingSettings.color')}>
           <ColorField
-            value={levelSettings.color ?? ''}
+            value={commonLevelSettings.color}
             onChange={(color) => handleLevelSettingsChange({ color })}
           />
         </SettingsField>
@@ -220,8 +241,9 @@ export function HeadingSettings({ element }: Props) {
           label={t('webview.sidebar-element-settings.headingSettings.backgroundColor')}
         >
           <ColorField
-            value={levelSettings.backgroundColor ?? ''}
+            value={commonLevelSettings.backgroundColor}
             onChange={(backgroundColor) => handleLevelSettingsChange({ backgroundColor })}
+            allowNone
           />
         </SettingsField>
       </SettingsPanel>
@@ -229,11 +251,20 @@ export function HeadingSettings({ element }: Props) {
   );
 }
 
-function ColorField({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+function ColorField({
+  value,
+  onChange,
+  allowNone,
+}: {
+  value?: string;
+  onChange: (value: string | undefined) => void;
+  allowNone?: boolean;
+}) {
   const { t } = useLocalization();
   return (
     <ColorSelector
       color={value}
+      allowNone={allowNone}
       onChange={onChange}
       themePresets={PROJECTOR_POINTER_PRESET_COLORS}
       customColorLabel={t('webview.sidebar.projectorSettings.customColor')}

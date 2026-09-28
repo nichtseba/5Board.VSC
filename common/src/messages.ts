@@ -30,7 +30,7 @@ type AllExtensionToWebviewMessage =
   | { type: 'init'; document: BoardDocument; editorState: EditorState; language: Language }
   | { type: 'initSidebar'; document: BoardDocument; editorState: EditorState }
   | { type: 'updateEditorState'; editorState: EditorState }
-  | { type: 'textEditorCommand'; command: TextEditorCommand }
+  | { type: 'textEditorCommand'; ids: string[]; command: TextEditorCommand }
   | { type: 'cursorMove'; x: number; y: number }
   | { type: 'cursorHide' }
   | { type: 'cursorTrackingChanged'; enabled: boolean }
@@ -71,6 +71,9 @@ export type WebviewToExtensionMessageType = AllWebviewToExtensionMessage['type']
 type AllWebviewToExtensionMessage =
   | { type: 'ready' }
   | { type: 'focus'; focus: boolean }
+  | { type: 'copyElements' }
+  | { type: 'pasteElements' }
+  | { type: 'duplicateElements' }
   | { type: 'cursorMove'; x: number; y: number }
   | { type: 'cursorLeave' }
   | { type: 'scroll'; top: number; left: number }
@@ -78,16 +81,24 @@ type AllWebviewToExtensionMessage =
   | { type: 'toggleElementSelection'; ids: string[] }
   | { type: 'selectTool'; tool: EditorTool }
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
-  | AddElementMessage
-  | { type: 'deleteElement'; id: string }
   | {
-      type: 'updateElementLayout';
-      id: string;
-      changes: Partial<ElementLayout>;
-      aspectRatio?: number;
-    } // Update the Layout when Element was moved or resized
-  | { type: 'updateElement'; id: string; changes: Partial<EditorElement> } // Update element with it's settings
-  | { type: 'textEditorCommand'; command: TextEditorCommand }
+      type: 'updateElementsLayout';
+      changes: {
+        id: string;
+        changes: Partial<ElementLayout>;
+        aspectRatio?: number;
+      }[];
+    } // Update the Layout when Element was moved or resized, array can handle one or more elements
+  | AddElementMessage
+  | { type: 'deleteElements'; ids: string[] }
+  | {
+      type: 'updateElements';
+      changes: {
+        id: string;
+        changes: Partial<EditorElement>;
+      }[];
+    } // Update element with it's settings, array can handle one or more elements
+  | { type: 'textEditorCommand'; ids: string[]; command: TextEditorCommand }
   | { type: 'addImageFromFile' }
   | { type: 'addImageFromBytes'; name: string; bytes: number[] }
   | { type: 'toggleCursorTracking' }

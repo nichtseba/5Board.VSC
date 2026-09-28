@@ -17,48 +17,106 @@ import SliderInput from '../components/SliderInput';
 import LineStyleSelect from '../components/LineStyleSelect';
 import { useLocalization } from '../../../providers/LocalizationProvider';
 import { useMessageService } from '../../../services/MessageService';
+import { getCommonValue } from './utils/getCommonValue';
 
 type Props = {
-  element: EditorElement<EditorElementType.Freehand>;
+  elements: EditorElement<EditorElementType.Freehand>[];
 };
 
 // Settings for a drawn freehand element. Color/width live per stroke,
 // opacity on the element style. Each change pushes an 'updateElement'.
-export function FreehandSettings({ element }: Props) {
+export function FreehandSettings({ elements }: Props) {
   const { t } = useLocalization();
   const messages = useMessageService();
 
-  const firstStroke = element.data.strokes[0];
-  const color = firstStroke?.color ?? DEFAULT_FREEHAND_PARAMETERS.color;
-  const width = firstStroke?.width ?? DEFAULT_FREEHAND_PARAMETERS.width;
-  const lineStyle = firstStroke?.lineStyle ?? DEFAULT_FREEHAND_PARAMETERS.lineStyle;
-  const dashScale = firstStroke?.dashScale ?? DEFAULT_FREEHAND_PARAMETERS.dashScale;
-  const opacity = element.style.opacity ?? DEFAULT_FREEHAND_PARAMETERS.opacity;
+  const firstStrokes = elements.map((element) => element.data.strokes[0]);
+
+  const color = getCommonValue(firstStrokes.map((stroke) => stroke?.color));
+  const width =
+    getCommonValue(
+      firstStrokes.map((stroke) => stroke?.width ?? DEFAULT_FREEHAND_PARAMETERS.width),
+    ) ?? DEFAULT_FREEHAND_PARAMETERS.width;
+  const lineStyle =
+    getCommonValue(
+      firstStrokes.map((stroke) => stroke?.lineStyle ?? DEFAULT_FREEHAND_PARAMETERS.lineStyle),
+    ) ?? DEFAULT_FREEHAND_PARAMETERS.lineStyle;
+  const dashScale =
+    getCommonValue(
+      firstStrokes.map((stroke) => stroke?.dashScale ?? DEFAULT_FREEHAND_PARAMETERS.dashScale),
+    ) ?? DEFAULT_FREEHAND_PARAMETERS.dashScale;
+  const opacity =
+    getCommonValue(
+      elements.map((element) => element.style.opacity ?? DEFAULT_FREEHAND_PARAMETERS.opacity),
+    ) ?? DEFAULT_FREEHAND_PARAMETERS.opacity;
 
   // Apply a stroke patch to all strokes and push the update.
-  const patchStrokes = (patch: { color?: string; width?: number; lineStyle?: LineStyle; dashScale?: number }) => {
+  const patchStrokes = (patch: {
+    color?: string;
+    width?: number;
+    lineStyle?: LineStyle;
+    dashScale?: number;
+  }) => {
     messages.send({
-      type: 'updateElement',
-      id: element.id,
-      changes: { data: { strokes: element.data.strokes.map((s) => ({ ...s, ...patch })) } },
+      type: 'updateElements',
+      changes: elements.map((element) => ({
+        id: element.id,
+        changes: {
+          data: {
+            strokes: element.data.strokes.map((stroke) => ({
+              ...stroke,
+              ...patch,
+            })),
+          },
+        },
+      })),
     });
   };
+  // const patchStrokes = (patch: {
+  //   color?: string;
+  //   width?: number;
+  //   lineStyle?: LineStyle;
+  //   dashScale?: number;
+  // }) => {
+  //   messages.send({
+  //     type: 'updateElement',
+  //     id: element.id,
+  //     changes: { data: { strokes: element.data.strokes.map((s) => ({ ...s, ...patch })) } },
+  //   });
+  // };
 
   const handleOpacity = (value: number) => {
     messages.send({
-      type: 'updateElement',
-      id: element.id,
-      changes: { style: { ...element.style, opacity: value } },
+      type: 'updateElements',
+      changes: elements.map((element) => ({
+        id: element.id,
+        changes: {
+          style: {
+            ...element.style,
+            opacity: value,
+          },
+        },
+      })),
     });
   };
+  // const handleOpacity = (value: number) => {
+  //   messages.send({
+  //     type: 'updateElement',
+  //     id: element.id,
+  //     changes: { style: { ...element.style, opacity: value } },
+  //   });
+  // };
 
   return (
-    <SettingsPanel title={t('webview.sidebar-element-settings.freehandSettings.title')} icon="pencil">
+    <SettingsPanel
+      title={t('webview.sidebar-element-settings.freehandSettings.title')}
+      icon="pencil"
+    >
       <div className="flex flex-col gap-4">
         <ColorSelector
           color={color}
           onChange={(c) => patchStrokes({ color: c })}
           presets={FREEHAND_COLORS.map((c) => ({
+            id: c.id,
             value: c.value,
             label: t(`webview.sidebar.freehand.colors.${c.id}` as TranslationKey),
           }))}

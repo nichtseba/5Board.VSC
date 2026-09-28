@@ -17,11 +17,13 @@ import { useImageImport } from './logic/useImageImport';
 import { CanvasTools } from './tools/CanvasTools';
 import FreehandPreviewOverlay, { FreehandPreview } from './tools/FreehandPreviewOverlay';
 import { useBoardDocument } from '../../providers/BoardDocumentProvider';
+import GroupInteractionController from './elementInteraction/GroupInteractionController';
 import { useCanvasPointer } from './logic/useCanvasPointer';
 import { useMarqueeSelection } from './logic/useMarqueeSelection';
 import { MarqueeOverlay } from './logic/MarqueeOverlay';
 
 export type EditorCanvasProps = {
+  enableKeyboardShortcuts?: boolean;
   // Normalized (0–1) cursor position to display as a live overlay.
   // Only the projector passes this to mirror the editor's pointer position.
   cursor?: ProjectorCursor | null;
@@ -33,10 +35,11 @@ export type EditorCanvasProps = {
 };
 
 export default function EditorCanvas({
+  readOnly = false,
+  enableKeyboardShortcuts = false,
   cursor,
   pointerStyle,
   freehandPreview,
-  readOnly = false,
 }: EditorCanvasProps) {
   // All pointer handling lives in one hook.
   const pointerHandlers = useCanvasPointer();
@@ -60,6 +63,42 @@ export default function EditorCanvas({
       setGridElement(null);
     };
   }, [setGridElement]);
+
+  useEffect(() => {
+    if (!enableKeyboardShortcuts) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target;
+
+      if (
+        target instanceof HTMLElement &&
+        (target.isContentEditable || ['INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName))
+      ) {
+        return;
+      }
+
+      const modifierPressed = event.metaKey || event.ctrlKey;
+
+      if (modifierPressed && event.key.toLowerCase() === 'c') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        messages.send({ type: 'copyElements' });
+      } else if (modifierPressed && event.key.toLowerCase() === 'v') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        messages.send({ type: 'pasteElements' });
+      } else if (modifierPressed && event.key.toLowerCase() === 'd') {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        messages.send({ type: 'duplicateElements' });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [enableKeyboardShortcuts, messages]);
 
   useEffect(() => {
     if (
@@ -120,9 +159,14 @@ export default function EditorCanvas({
             key={element.id}
             element={element}
             selected={!readOnly && selectedElementIds.includes(element.id)}
+            grouped={selectedElementIds.length > 1}
             assetUrls={assetUrls}
           />
         ))}
+
+        {activeToolId === EditorToolId.POINTER && selectedElementIds.length > 1 && (
+          <GroupInteractionController elements={elements} selectedElementIds={selectedElementIds} />
+        )}
 
         {/* Cursor overlay — only rendered in the projector via the cursor prop */}
         <ProjectorMouse cursor={cursor ?? null} style={pointerStyle} />

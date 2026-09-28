@@ -52,7 +52,8 @@
         "rectangle": "Rectangle",
         "circle": "Circle",
         "line": "Line",
-        "freehand": "Freehand"
+        "freehand": "Freehand",
+        "tableOfContents": "Table of Contents"
       },
       "freehand": {
         "title": "Freehand Options",
@@ -110,7 +111,8 @@
       },
       "goToElement": "Go to element",
       "addElement": "Add Element",
-      "addCustomElement": "Add Custom Element"
+      "addCustomElement": "Add Custom Element",
+      "tableOfContentsAlreadyExists": "A table of contents already exists."
     },
     "sidebar-element-settings": {
       "noElementSelected": "No element selected",
@@ -141,6 +143,9 @@
         "colorTheme": "Theme",
         "customColor": "Custom color",
         "backgroundColor": "Background color"
+      },
+      "tableOfContentsSettings": {
+        "title": "Table of Contents"
       },
       "textSettings": {
         "title": "Text",

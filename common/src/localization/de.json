@@ -78,7 +78,8 @@
         "rectangle": "Rechteck",
         "circle": "Kreis",
         "line": "Linie",
-        "freehand": "Freihand"
+        "freehand": "Freihand",
+        "tableOfContents": "Inhaltsverzeichnis"
       },
       "projectorSettings": {
         "title": "Beameransicht-Einstellungen",
@@ -110,7 +111,8 @@
       },
       "goToElement": "Gehe zu Element",
       "addElement": "Element hinzufügen",
-      "addCustomElement": "Custom Element hinzufügen"
+      "addCustomElement": "Custom Element hinzufügen",
+      "tableOfContentsAlreadyExists": "Es existiert bereits ein Inhaltsverzeichnis."
     },
     "sidebar-element-settings": {
       "noElementSelected": "Kein Element ausgewählt",
@@ -141,6 +143,9 @@
         "colorTheme": "Theme",
         "customColor": "Eigene Farbe",
         "backgroundColor": "Hintergrundfarbe"
+      },
+      "tableOfContentsSettings": {
+        "title": "Inhaltsverzeichnis"
       },
       "textSettings": {
         "title": "Text",
