@@ -3,12 +3,13 @@ import SettingsPanel from '../layout/SettingsPanel';
 import SettingsField from '../layout/SettingsField';
 import { useLocalization } from '../../../providers/LocalizationProvider';
 import { useMessageService } from '../../../services/MessageService';
+import { getCommonValue } from './utils/getCommonValue';
 
 type Props = {
-  element: EditorElement<EditorElementType.TableOfContents>;
+  elements: EditorElement<EditorElementType.TableOfContents>[];
 };
 
-export function TableOfContentsSettings({ element }: Props) {
+export function TableOfContentsSettings({ elements }: Props) {
   const { t } = useLocalization();
   const messages = useMessageService();
 
@@ -17,11 +18,13 @@ export function TableOfContentsSettings({ element }: Props) {
     if (!Number.isFinite(fontSize) || fontSize <= 0) return;
 
     messages.send({
-      type: 'updateElement',
-      id: element.id,
-      changes: {
-        data: { ...element.data, fontSize },
-      },
+      type: 'updateElements',
+      changes: elements.map((element) => ({
+        id: element.id,
+        changes: {
+          data: { ...element.data, fontSize },
+        },
+      })),
     });
   };
 
@@ -34,7 +37,7 @@ export function TableOfContentsSettings({ element }: Props) {
         <input
           type="number"
           min={1}
-          value={element.data.fontSize ?? 14}
+          value={getCommonValue(elements.map((element) => element.data.fontSize)) ?? 14}
           onChange={(e) => handleFontSizeChange(e.target.value)}
           className="w-20 rounded-xs border border-dropdown-border bg-input-background px-2 py-[3px] text-input-foreground [color-scheme:light_dark] focus:border-focus-border focus:outline-none"
         />

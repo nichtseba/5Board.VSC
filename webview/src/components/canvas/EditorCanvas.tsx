@@ -17,6 +17,7 @@ import { useImageImport } from './logic/useImageImport';
 import { CanvasTools } from './tools/CanvasTools';
 import FreehandPreviewOverlay, { FreehandPreview } from './tools/FreehandPreviewOverlay';
 import { useBoardDocument } from '../../providers/BoardDocumentProvider';
+import GroupInteractionController from './elementInteraction/GroupInteractionController';
 import { useCanvasPointer } from './logic/useCanvasPointer';
 import { useMarqueeSelection } from './logic/useMarqueeSelection';
 import { MarqueeOverlay } from './logic/MarqueeOverlay';
@@ -95,7 +96,7 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
     <HeadingNumberingProvider value={headingNumbers}>
       <div
         ref={canvasRef}
-        className={`editor-canvas bg-editor-background ${activeToolId === EditorToolId.SPACER ? 'cursor-row-resize' : ''}`}
+        className={`editor-canvas bg-editor-background select-none ${activeToolId === EditorToolId.SPACER ? 'cursor-row-resize' : ''}`}
         style={
           {
             position: 'relative',
@@ -113,9 +114,14 @@ export default function EditorCanvas({ cursor, pointerStyle, freehandPreview }: 
             key={element.id}
             element={element}
             selected={selectedElementIds.includes(element.id)}
+            grouped={selectedElementIds.length > 1}
             assetUrls={assetUrls}
           />
         ))}
+
+        {activeToolId === EditorToolId.POINTER && selectedElementIds.length > 1 && (
+          <GroupInteractionController elements={elements} selectedElementIds={selectedElementIds} />
+        )}
 
         {/* Cursor overlay — only rendered in the projector via the cursor prop */}
         <ProjectorMouse cursor={cursor ?? null} style={pointerStyle} />

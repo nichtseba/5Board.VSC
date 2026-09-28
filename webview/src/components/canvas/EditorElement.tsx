@@ -22,6 +22,7 @@ export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
   selected?: boolean;
   onSelect?: (event?: React.MouseEvent) => void;
+  grouped?: boolean;
   editing?: boolean;
   editingPosition?: {
     x: number;
@@ -42,6 +43,7 @@ export type EditorElementProps<T extends EditorElementType> = {
 export default function EditorElement<ElementType extends EditorElementType>({
   element,
   selected,
+  grouped,
   assetUrls,
   preview,
 }: EditorElementProps<ElementType>) {
@@ -83,9 +85,13 @@ export default function EditorElement<ElementType extends EditorElementType>({
 
   const setZIndex = (zIndex: number) => {
     messages.send({
-      type: 'updateElement',
-      id: element.id,
-      changes: { layout: { ...element.layout, zIndex } },
+      type: 'updateElements',
+      changes: [
+        {
+          id: element.id,
+          changes: { layout: { ...element.layout, zIndex } },
+        },
+      ],
     });
     setContextMenuPosition(null);
   };
@@ -101,8 +107,8 @@ export default function EditorElement<ElementType extends EditorElementType>({
       }
 
       messages.send({
-        type: 'deleteElement',
-        id: element.id,
+        type: 'deleteElements',
+        ids: [element.id],
       });
     };
 
@@ -176,7 +182,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
           onStopEditing={handleStopEditing}
         />
       </div>
-      {activeToolId === EditorToolId.POINTER && (
+      {activeToolId === EditorToolId.POINTER && !grouped && (
         <ElementInteractionController
           element={element}
           selected={selected && !editing}
