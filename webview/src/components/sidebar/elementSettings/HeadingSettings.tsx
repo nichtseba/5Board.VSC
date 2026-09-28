@@ -4,6 +4,7 @@ import {
   HeadingLevelSettings,
   HeadingNumberingFormat,
   HeadingNumberingStyle,
+  PROJECTOR_POINTER_PRESET_COLORS,
   getHeadingLevelSettings,
   getHeadingNumberingEnabled,
   getHeadingNumberingStyle,
@@ -16,7 +17,6 @@ import { useMessageService } from '../../../services/MessageService';
 import { useBoardDocument } from '../../../providers/BoardDocumentProvider';
 import ColorSelector from '../components/ColorSelector';
 import { FontSizeInput } from './components/FontSizeInput';
-import { THEME_PRESET_COLORS } from '../components/ColorPresets';
 import { getCommonHeadingLevelSettings } from './utils/getCommonHeadingLevelSettings';
 import { getCommonValue } from './utils/getCommonValue';
 
@@ -266,7 +266,7 @@ function ColorField({
       color={value}
       allowNone={allowNone}
       onChange={onChange}
-      themePresets={THEME_PRESET_COLORS}
+      themePresets={PROJECTOR_POINTER_PRESET_COLORS}
       customColorLabel={t('webview.sidebar.projectorSettings.customColor')}
     />
   );

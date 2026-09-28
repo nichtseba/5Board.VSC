@@ -62,13 +62,3 @@ export function ColorPresets({ color, onChange, presets, allowNone = false }: Co
     </div>
   );
 }
-
-export const THEME_PRESET_COLORS = [
-  { id: 'foreground', value: 'var(--vscode-editor-foreground)' },
-  { id: 'muted', value: 'var(--vscode-descriptionForeground)' },
-  { id: 'background', value: 'var(--vscode-editor-background)' },
-  { id: 'primary', value: 'var(--vscode-progressBar-background)' },
-  { id: 'secondary', value: 'var(--vscode-modernUI-shellBackground)' },
-  { id: 'accent1', value: 'var(--vscode-editorBracketHighlight-foreground1)' },
-  { id: 'accent2', value: 'var(--vscode-symbolIcon-classForeground)' },
-] as const;
