@@ -56,7 +56,14 @@ export function TextElement({
             return true;
           }
 
-          event.stopPropagation();
+          const key = event.key.toLowerCase();
+          const isClipboardShortcut =
+            (event.metaKey || event.ctrlKey) && (key === 'c' || key === 'v');
+
+          if (!isClipboardShortcut) {
+            event.stopPropagation();
+          }
+
           return false;
         },
       },
