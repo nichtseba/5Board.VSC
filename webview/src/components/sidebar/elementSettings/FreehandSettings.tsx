@@ -116,6 +116,7 @@ export function FreehandSettings({ elements }: Props) {
           color={color}
           onChange={(c) => patchStrokes({ color: c })}
           presets={FREEHAND_COLORS.map((c) => ({
+            id: c.id,
             value: c.value,
             label: t(`webview.sidebar.freehand.colors.${c.id}` as TranslationKey),
           }))}

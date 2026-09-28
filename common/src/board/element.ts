@@ -281,6 +281,10 @@ export const DEFAULT_ELEMENT_PROFILES = {
     layout: { width: 20, height: 10 },
     style: {
       visible: true,
+      backgroundColor: 'var(--vscode-foreground)',
+      border: {
+        width: 2,
+      },
     },
     data: undefined,
   },
@@ -288,6 +292,10 @@ export const DEFAULT_ELEMENT_PROFILES = {
     layout: { width: 20, height: 10 },
     style: {
       visible: true,
+      backgroundColor: 'var(--vscode-foreground)',
+      border: {
+        width: 2,
+      },
     },
     data: undefined,
   },
@@ -297,7 +305,7 @@ export const DEFAULT_ELEMENT_PROFILES = {
       visible: true,
       opacity: 1,
       border: {
-        color: '#f14c4c',
+        color: 'var(--vscode-foreground)',
         width: 2,
         style: 'solid',
       },

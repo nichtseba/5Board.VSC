@@ -12,7 +12,7 @@ export function RectangleElement({ element }: EditorElementProps<EditorElementTy
         y={0}
         width={width}
         height={height}
-        fill={backgroundColor}
+        fill={backgroundColor ?? 'none'}
         stroke={border?.color}
         strokeWidth={border?.width}
         rx={border?.radius}

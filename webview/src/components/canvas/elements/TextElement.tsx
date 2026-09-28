@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { EditorElementType } from '5board.vsc-common';
 import { EditorElementProps } from '../EditorElement';
 import { useEditor, EditorContent } from '@tiptap/react';
@@ -27,6 +27,7 @@ export function TextElement({
 }: EditorElementProps<EditorElementType.Text>) {
   const messages = useMessageService();
   const grid = useGrid();
+  const applyingExternalContent = useRef(false);
 
   const editor = useEditor({
     editable: editing,
@@ -55,13 +56,22 @@ export function TextElement({
             return true;
           }
 
-          event.stopPropagation();
+          const key = event.key.toLowerCase();
+          const isClipboardShortcut =
+            (event.metaKey || event.ctrlKey) && (key === 'c' || key === 'v');
+
+          if (!isClipboardShortcut) {
+            event.stopPropagation();
+          }
+
           return false;
         },
       },
     },
 
     onTransaction({ editor }) {
+      if (applyingExternalContent.current) return;
+
       const textAlign = editor.isActive({ textAlign: 'left' })
         ? 'left'
         : editor.isActive({ textAlign: 'center' })
@@ -102,11 +112,12 @@ export function TextElement({
                     strike: editor.isActive('strike'),
                     underline: editor.isActive('underline'),
                     textStyle: {
-                      fontFamily: editor.getAttributes('textStyle').fontFamily,
-                      fontSize: editor.getAttributes('textStyle').fontSize,
-                      lineHeight: editor.getAttributes('textStyle').lineHeight,
-                      color: editor.getAttributes('textStyle').color,
-                      backgroundColor: editor.getAttributes('textStyle').backgroundColor,
+                      fontFamily: editor.getAttributes('textStyle').fontFamily ?? undefined,
+                      fontSize: editor.getAttributes('textStyle').fontSize ?? undefined,
+                      lineHeight: editor.getAttributes('textStyle').lineHeight ?? undefined,
+                      color: editor.getAttributes('textStyle').color ?? undefined,
+                      backgroundColor:
+                        editor.getAttributes('textStyle').backgroundColor ?? undefined,
                     },
                   },
                   nodes: {
@@ -124,6 +135,21 @@ export function TextElement({
       });
     },
   });
+
+  useEffect(() => {
+    if (!editor || editing) return;
+
+    const incomingContent = element.data.content;
+    if (JSON.stringify(editor.getJSON()) === JSON.stringify(incomingContent)) return;
+
+    applyingExternalContent.current = true;
+    try {
+      editor.commands.setContent(incomingContent, { emitUpdate: false });
+    } finally {
+      applyingExternalContent.current = false;
+    }
+  }, [editor, element.data.content]);
+
   useEffect(() => {
     if (!editor) {
       return;
@@ -217,7 +243,12 @@ export function TextElement({
         break;
 
       case 'setBackgroundColor':
-        chain.setBackgroundColor(msg.command.color).run();
+        if (msg.command.color === undefined) {
+          chain.unsetBackgroundColor().run();
+        } else {
+          chain.setBackgroundColor(msg.command.color).run();
+        }
+
         break;
 
       case 'toggleBulletList':
@@ -240,7 +271,7 @@ export function TextElement({
     >
       <EditorContent editor={editor} />
       {editing && (
-        <BubbleMenu editor={editor}>
+        <BubbleMenu editor={editor} appendTo={() => document.body} className="z-50">
           <BoldButton elements={[element]} />
           <ItalicButton elements={[element]} />
           <StrikeButton elements={[element]} />
