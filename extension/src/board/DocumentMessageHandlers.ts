@@ -104,9 +104,6 @@ export class DocumentMessageHandlers {
           return true;
         });
       }),
-      this.document.messageService.on('updateElement', (msg) => {
-        this.document.updateElement(msg.id, msg.changes);
-      }),
       //#endregion "General"
 
       //#region "EditorTools"
