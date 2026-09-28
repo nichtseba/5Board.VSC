@@ -80,7 +80,7 @@ export class PresetProvider {
         preset.asset.fileName,
       );
       const bytes = await vscode.workspace.fs.readFile(file);
-      return { ...preset, asset: { ...preset.asset, bytes: Array.from(bytes) } };
+      return { ...preset, asset: { ...preset.asset, bytes } };
     } catch (error) {
       vscode.window.showWarningMessage(`Failed to load preset image: ${String(error)}`);
       return undefined;

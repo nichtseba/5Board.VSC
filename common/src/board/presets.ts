@@ -9,7 +9,7 @@ export type Preset = {
 };
 export type PresetAsset = {
   fileName: string;
-  bytes?: number[];
+  bytes?: Uint8Array;
 };
 export type PresetSettings = {
   keepStyle: boolean;
