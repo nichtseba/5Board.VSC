@@ -116,6 +116,26 @@ export default function ElementInteractionController<ElementType extends EditorE
 
     if (xDelta !== 0 || yDelta !== 0) {
       pendingPositionUpdate.current = true;
+      switch (profile.dragDirection) {
+        case 'vertical':
+          xDelta = 0;
+          break;
+        case 'horizontal':
+          yDelta = 0;
+          break;
+      }
+      messages.send({
+        type: 'updateElementsLayout',
+        changes: [
+          {
+            id: element.id,
+            changes: {
+              xPos: element.layout.xPos + xDelta,
+              yPos: element.layout.yPos + yDelta,
+            },
+          },
+        ],
+      });
     }
     messages.send({
       type: 'updateElementsLayout',
