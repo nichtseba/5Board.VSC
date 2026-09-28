@@ -3,19 +3,19 @@ import SettingsPanel from '../layout/SettingsPanel';
 import { useLocalization } from '../../../providers/LocalizationProvider';
 
 type Props = {
-  element: EditorElement<EditorElementType.Image>;
+  elements: EditorElement<EditorElementType.Image>[];
 };
 
-export function ImageSettings({ element }: Props) {
+export function ImageSettings({ elements }: Props) {
   const { t } = useLocalization();
-
+  const selectedElementIds = elements.map((element) => element.id);
   return (
     <SettingsPanel
       title={t('webview.sidebar-element-settings.imageSettings.title')}
       icon="file-media"
     >
       <>
-        <div>{element.id}</div>
+        <div>Add ImageSettings for{selectedElementIds.join(', ')}</div>
       </>
     </SettingsPanel>
   );
