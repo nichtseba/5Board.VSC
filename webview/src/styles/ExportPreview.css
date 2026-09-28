@@ -1,0 +1,38 @@
+/* Displays non-exported A4 page boundaries in ExportPreview. */
+
+.export-preview-pages {
+  position: relative;
+  width: max-content;
+  pointer-events: none;
+}
+
+.export-preview-page-guides {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+
+  width: 210mm;
+  pointer-events: none;
+
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      var(--vscode-editorWarning-foreground) 0,
+      var(--vscode-editorWarning-foreground) 1px,
+      transparent 1px,
+      transparent 297mm
+    ),
+    linear-gradient(
+      to right,
+      var(--vscode-editorWarning-foreground) 0,
+      var(--vscode-editorWarning-foreground) 1px,
+      transparent 1px,
+      transparent calc(210mm - 1px),
+      var(--vscode-editorWarning-foreground) calc(210mm - 1px),
+      var(--vscode-editorWarning-foreground) 210mm
+    );
+
+  background-repeat: repeat-y, no-repeat;
+}

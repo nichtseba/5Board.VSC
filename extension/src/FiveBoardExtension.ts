@@ -17,6 +17,7 @@ import {
   ProjectorPointerStyle,
 } from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
+import { ExportPreviewProvider } from './providers/ExportPreviewProvider';
 import { ProjectorProvider } from './providers/ProjectorProvider';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { PackageManager } from './PackageManager';
@@ -109,6 +110,7 @@ export class FiveBoardExtension extends ExtensionBase {
       }),
     );
     new FiveBoardFileSystemProvider(this.packageManager).register(context);
+    new ExportPreviewProvider(context, this.packageManager).register();
   }
 
   @Command('5board-vsc.newBoard')
@@ -254,6 +256,23 @@ export class FiveBoardExtension extends ExtensionBase {
     await vscode.commands.executeCommand(
       'workbench.action.openSettings',
       '@ext:undefined_publisher.5board-vsc',
+    );
+  }
+
+  @Command('5board-vsc.previewHtmlExport')
+  async previewHtmlExportCommand(): Promise<void> {
+    const uri = this.activeEditorDocument?.uri;
+
+    if (!uri) {
+      vscode.window.showErrorMessage(t('extension.htmlExport.noActiveBoard'));
+      return;
+    }
+
+    await vscode.commands.executeCommand(
+      'vscode.openWith',
+      uri,
+      ExportPreviewProvider.VIEW_TYPE,
+      vscode.ViewColumn.Beside,
     );
   }
 

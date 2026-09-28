@@ -7,6 +7,12 @@
       "createFile": "Erstelle 5Board Datei",
       "createFileFailed": "Fehler beim Erstellen der 5Board Datei:"
     },
+    "htmlExport": {
+      "noActiveBoard": "Öffne eine .5boardz-Datei oder speichere die aktuelle Datei.",
+      "saveLabel": "HTML-Export speichern",
+      "saved": "HTML-Export gespeichert:",
+      "openContainingFolder": "Im Ordner anzeigen"
+    },
     "projector": {
       "startPresentation": "Beameransicht starten",
       "title": "Beameransicht",
@@ -25,6 +31,10 @@
         "bringToFront": "Nach vorne bringen",
         "sendToBack": "Nach hinten schicken"
       }
+    },
+    "exportPreview": {
+      "saveHtml": "HTML speichern",
+      "loading": "Vorschau wird geladen..."
     },
     "sidebar": {
       "title": "5Board Seitenleiste",

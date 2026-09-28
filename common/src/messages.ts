@@ -132,7 +132,8 @@ type AllWebviewToExtensionMessage =
       enabled?: boolean;
       level?: HeadingLevel;
       numberingFormat?: HeadingNumberingStyle;
-    };
+    }
+  | { type: 'saveHtmlExport'; html: string; backgroundColor: string };
 
 type AddElementMessage = {
   [T in EditorElementType]: {
