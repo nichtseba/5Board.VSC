@@ -14,9 +14,13 @@ export function LayerSettings({ element }: Props) {
 
   const updateZIndex = (zIndex: number) => {
     messages.send({
-      type: 'updateElement',
-      id: element.id,
-      changes: { layout: { ...element.layout, zIndex } },
+      type: 'updateElements',
+      changes: [
+        {
+          id: element.id,
+          changes: { layout: { ...element.layout, zIndex } },
+        },
+      ],
     });
   };
 
