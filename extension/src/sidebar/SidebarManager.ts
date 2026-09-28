@@ -42,8 +42,10 @@ export class SidebarManager implements vscode.Disposable {
       };
     });
 
-    this.messages.on('deleteElement', (msg) => {
-      EXTENSION.deleteEditorElement(msg.id);
+    this.messages.on('deleteElements', (msg) => {
+      msg.ids.forEach((id) => {
+        EXTENSION.deleteEditorElement(id);
+      });
     });
     this.messages.on('textEditorCommand', (msg) => {
       if (!EXTENSION.activeEditorDocument) {
@@ -110,63 +112,66 @@ export class SidebarManager implements vscode.Disposable {
     });
 
     // Todo: move to document handling
-    this.messages.on('updateElement', (msg) => {
+    this.messages.on('updateElements', (msg) => {
       if (!EXTENSION.activeEditorDocument) {
         return;
       }
       EXTENSION.activeEditorDocument.applyEdit((document) => {
-        const element = document.content.elements.find((e) => e.id === msg.id);
-        if (!element) {
-          throw new Error(
-            `Tried to update element with id ${msg.id}, but it does not exist in the document`,
-          );
-        }
-        const nextData = {
-          ...element.data,
-          ...msg.changes.data,
-        };
+        let changed = false;
 
-        const nextLayout = {
-          ...element.layout,
-          ...msg.changes.layout,
-        };
+        for (const update of msg.changes) {
+          const element = document.content.elements.find((e) => e.id === update.id);
+          if (!element) {
+            continue;
+          }
+          const nextData = {
+            ...element.data,
+            ...update.changes.data,
+          };
 
-        const nextStyle = {
-          ...element.style,
-          ...msg.changes.style,
-        };
+          const nextLayout = {
+            ...element.layout,
+            ...update.changes.layout,
+          };
 
-        if (
-          deepEquals(nextData, element.data) &&
-          deepEquals(nextLayout, element.layout) &&
-          deepEquals(nextStyle, element.style)
-        ) {
-          //Skipping updateElement message because the data hasn't changed
-          return false;
-        }
+          const nextStyle = {
+            ...element.style,
+            ...update.changes.style,
+          };
 
-        document.content.elements = document.content.elements.map((el) => {
-          if (el.id !== msg.id) {
-            return el;
+          if (
+            deepEquals(nextData, element.data) &&
+            deepEquals(nextLayout, element.layout) &&
+            deepEquals(nextStyle, element.style)
+          ) {
+            //Skipping updateElement message because the data hasn't changed
+            continue;
           }
 
-          return {
-            ...el,
-            layout: {
-              ...el.layout,
-              ...msg.changes.layout,
-            },
-            data: {
-              ...el.data,
-              ...msg.changes.data,
-            } as typeof el.data,
-            style: {
-              ...el.style,
-              ...msg.changes.style,
-            },
-          };
-        });
-        return true;
+          document.content.elements = document.content.elements.map((el) => {
+            if (el.id !== update.id) {
+              return el;
+            }
+
+            return {
+              ...el,
+              layout: {
+                ...el.layout,
+                ...update.changes.layout,
+              },
+              data: {
+                ...el.data,
+                ...update.changes.data,
+              } as typeof el.data,
+              style: {
+                ...el.style,
+                ...update.changes.style,
+              },
+            };
+          });
+          changed = true;
+        }
+        return changed;
       });
     });
 
