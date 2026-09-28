@@ -14,18 +14,16 @@ import {
   StrikethroughIcon,
   UnderlineIcon,
 } from '@heroicons/react/24/outline';
-import { getCommonValue } from '../utils/getCommonValue';
 
 type IconType = React.ComponentType<{ className?: string }>;
 
 type TextSettingsButtonProps = {
   active: boolean | undefined;
   command: TextEditorCommand;
-  elements: EditorElement<EditorElementType.Text>[];
   Icon: IconType;
 };
 
-export function TextSettingsButton({ active, command, elements, Icon }: TextSettingsButtonProps) {
+export function TextSettingsButton({ active, command, Icon }: TextSettingsButtonProps) {
   const messages = useMessageService();
   return (
     <Button
@@ -34,7 +32,6 @@ export function TextSettingsButton({ active, command, elements, Icon }: TextSett
       onClick={() =>
         messages.send({
           type: 'textEditorCommand',
-          ids: elements.map((element) => element.id),
           command,
         })
       }
@@ -45,150 +42,114 @@ export function TextSettingsButton({ active, command, elements, Icon }: TextSett
 }
 
 type Props = {
-  elements: EditorElement<EditorElementType.Text>[];
+  element: EditorElement<EditorElementType.Text>;
 };
 
-export function BoldButton({ elements }: Props) {
-  const bold = getCommonValue(elements.map((element) => element.data.tiptap?.marks?.bold));
+export function BoldButton({ element }: Props) {
   return (
     <TextSettingsButton
-      active={bold}
+      active={element.data.tiptap?.marks?.bold}
       command={{ type: 'toggleBold' }}
-      elements={elements}
       Icon={BoldIcon}
     />
   );
 }
 
-export function ItalicButton({ elements }: Props) {
-  const italic = getCommonValue(elements.map((element) => element.data.tiptap?.marks?.italic));
+export function ItalicButton({ element }: Props) {
   return (
     <TextSettingsButton
-      active={italic}
+      active={element.data.tiptap?.marks?.italic}
       command={{ type: 'toggleItalic' }}
-      elements={elements}
       Icon={ItalicIcon}
     />
   );
 }
 
-export function StrikeButton({ elements }: Props) {
-  const strike = getCommonValue(elements.map((element) => element.data.tiptap?.marks?.strike));
+export function StrikeButton({ element }: Props) {
   return (
     <TextSettingsButton
-      active={strike}
+      active={element.data.tiptap?.marks?.strike}
       command={{ type: 'toggleStrike' }}
-      elements={elements}
       Icon={StrikethroughIcon}
     />
   );
 }
 
-export function UnderlineButton({ elements }: Props) {
-  const underline = getCommonValue(
-    elements.map((element) => element.data.tiptap?.marks?.underline),
-  );
+export function UnderlineButton({ element }: Props) {
   return (
     <TextSettingsButton
-      active={underline}
+      active={element.data.tiptap?.marks?.underline}
       command={{ type: 'toggleUnderline' }}
-      elements={elements}
       Icon={UnderlineIcon}
     />
   );
 }
 
-export function CodeButton({ elements }: Props) {
-  const code = getCommonValue(elements.map((element) => element.data.tiptap?.marks?.code));
+export function CodeButton({ element }: Props) {
   return (
     <TextSettingsButton
-      active={code}
+      active={element.data.tiptap?.marks?.code}
       command={{ type: 'toggleCode' }}
-      elements={elements}
       Icon={CodeBracketIcon}
     />
   );
 }
 
-export function AlignLeftButton({ elements }: Props) {
-  const alignLeft = getCommonValue(
-    elements.map((element) => element.data.tiptap?.nodes?.attributes?.textAlign === 'left'),
-  );
+export function AlignLeftButton({ element }: Props) {
   return (
     <TextSettingsButton
-      active={alignLeft}
+      active={element.data.tiptap?.nodes?.attributes?.textAlign === 'left'}
       command={{ type: 'setTextAlign', value: 'left' }}
-      elements={elements}
       Icon={Bars3BottomLeftIcon}
     />
   );
 }
 
-export function AlignCenterButton({ elements }: Props) {
-  const alignCenter = getCommonValue(
-    elements.map((element) => element.data.tiptap?.nodes?.attributes?.textAlign === 'center'),
-  );
+export function AlignCenterButton({ element }: Props) {
   return (
     <TextSettingsButton
-      active={alignCenter}
+      active={element.data.tiptap?.nodes?.attributes?.textAlign === 'center'}
       command={{ type: 'setTextAlign', value: 'center' }}
-      elements={elements}
       Icon={Bars3Icon}
     />
   );
 }
 
-export function AlignRightButton({ elements }: Props) {
-  const alignRight = getCommonValue(
-    elements.map((element) => element.data.tiptap?.nodes?.attributes?.textAlign === 'right'),
-  );
+export function AlignRightButton({ element }: Props) {
   return (
     <TextSettingsButton
-      active={alignRight}
+      active={element.data.tiptap?.nodes?.attributes?.textAlign === 'right'}
       command={{ type: 'setTextAlign', value: 'right' }}
-      elements={elements}
       Icon={Bars3BottomRightIcon}
     />
   );
 }
 
-export function AlignJustifyButton({ elements }: Props) {
-  const alignJustify = getCommonValue(
-    elements.map((element) => element.data.tiptap?.nodes?.attributes?.textAlign === 'justify'),
-  );
+export function AlignJustifyButton({ element }: Props) {
   return (
     <TextSettingsButton
-      active={alignJustify}
+      active={element.data.tiptap?.nodes?.attributes?.textAlign === 'justify'}
       command={{ type: 'setTextAlign', value: 'justify' }}
-      elements={elements}
       Icon={Bars4Icon}
     />
   );
 }
 
-export function BulletListButton({ elements }: Props) {
-  const bulletList = getCommonValue(
-    elements.map((element) => element.data.tiptap?.nodes?.bulletList),
-  );
+export function BulletListButton({ element }: Props) {
   return (
     <TextSettingsButton
-      active={bulletList}
+      active={element.data.tiptap?.nodes?.bulletList}
       command={{ type: 'toggleBulletList' }}
-      elements={elements}
       Icon={ListBulletIcon}
     />
   );
 }
 
-export function OrderedListButton({ elements }: Props) {
-  const orderedList = getCommonValue(
-    elements.map((element) => element.data.tiptap?.nodes?.orderedList),
-  );
+export function OrderedListButton({ element }: Props) {
   return (
     <TextSettingsButton
-      active={orderedList}
+      active={element.data.tiptap?.nodes?.orderedList}
       command={{ type: 'toggleOrderedList' }}
-      elements={elements}
       Icon={NumberedListIcon}
     />
   );

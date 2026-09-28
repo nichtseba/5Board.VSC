@@ -3,26 +3,22 @@ import { useLocalization } from '../../../providers/LocalizationProvider';
 import { useMessageService } from '../../../services/MessageService';
 import SettingsPanel from '../layout/SettingsPanel';
 import ElementStyleSettings from '../components/ElementStyleSettings';
-import { getCommonElementStyle } from './utils/getCommonElementStyle';
 
 type Props = {
-  elements: EditorElement<EditorElementType.Circle>[];
+  element: EditorElement<EditorElementType.Circle>;
 };
 
-export function CircleSettings({ elements }: Props) {
+export function CircleSettings({ element }: Props) {
   const { t } = useLocalization();
   const messages = useMessageService();
-  const commonElementStyle = getCommonElementStyle(elements);
 
-  const updateStyle = (changes: Partial<(typeof elements)[number]['style']>) => {
+  const updateStyle = (changes: Partial<typeof element.style>) => {
     messages.send({
-      type: 'updateElements',
-      changes: elements.map((element) => ({
-        id: element.id,
-        changes: {
-          style: { ...element.style, ...changes },
-        },
-      })),
+      type: 'updateElement',
+      id: element.id,
+      changes: {
+        style: { ...element.style, ...changes },
+      },
     });
   };
 
@@ -32,7 +28,7 @@ export function CircleSettings({ elements }: Props) {
       icon="symbol-color"
     >
       <ElementStyleSettings
-        style={commonElementStyle}
+        style={element.style}
         onChange={updateStyle}
         editableProperties={[
           'backgroundColor',
