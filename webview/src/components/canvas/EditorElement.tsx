@@ -9,6 +9,7 @@ import { CodeElement } from './elements/CodeElement';
 import { ImageElement } from './elements/ImageElement';
 import { LineElement } from './elements/LineElement';
 import { FreehandElement } from './elements/FreehandElement';
+import { TableOfContentsElement } from './elements/TableOfContentsElement';
 import { useEditorState } from '../../providers/EditorStateProvider';
 import { useMessageService } from '../../services/MessageService';
 import { useBoardDocument } from '../../providers/BoardDocumentProvider';
@@ -84,9 +85,13 @@ export default function EditorElement<ElementType extends EditorElementType>({
 
   const setZIndex = (zIndex: number) => {
     messages.send({
-      type: 'updateElement',
-      id: element.id,
-      changes: { layout: { ...element.layout, zIndex } },
+      type: 'updateElements',
+      changes: [
+        {
+          id: element.id,
+          changes: { layout: { ...element.layout, zIndex } },
+        },
+      ],
     });
     setContextMenuPosition(null);
   };
@@ -102,8 +107,8 @@ export default function EditorElement<ElementType extends EditorElementType>({
       }
 
       messages.send({
-        type: 'deleteElement',
-        id: element.id,
+        type: 'deleteElements',
+        ids: [element.id],
       });
     };
 
@@ -218,6 +223,7 @@ const ELEMENT_COMPONENTS = {
   [EditorElementType.Circle]: CircleElement,
   [EditorElementType.Line]: LineElement,
   [EditorElementType.Freehand]: FreehandElement,
+  [EditorElementType.TableOfContents]: TableOfContentsElement,
 } as const satisfies {
   [ElementType in EditorElementType]: React.ComponentType<EditorElementProps<ElementType>>;
 };

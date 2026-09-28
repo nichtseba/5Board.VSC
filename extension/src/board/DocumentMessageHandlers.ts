@@ -59,13 +59,23 @@ export class DocumentMessageHandlers {
         });
       }),
       this.document.messageService.on('addElement', (msg) => {
-        EXTENSION.addNewEditorElement(msg.elementType, msg.elementPosition, msg.defaults);
+        const tocAlreadyExists =
+          msg.elementType === EditorElementType.TableOfContents &&
+          this.document.boardPackage.document.content.elements.some(
+            (element) => element.type === EditorElementType.TableOfContents,
+          );
+
+        if (!tocAlreadyExists) {
+          EXTENSION.addNewEditorElement(msg.elementType, msg.elementPosition, msg.defaults);
+        }
         EXTENSION.editorState = {
           tool: { type: EditorToolId.POINTER, parameters: undefined },
         };
       }),
-      this.document.messageService.on('deleteElement', (msg) => {
-        EXTENSION.deleteEditorElement(msg.id);
+      this.document.messageService.on('deleteElements', (msg) => {
+        msg.ids.forEach((id) => {
+          EXTENSION.deleteEditorElement(id);
+        });
       }),
 
       this.document.messageService.on('selectElements', (msg) => {
@@ -135,60 +145,63 @@ export class DocumentMessageHandlers {
         }
         EXTENSION.activeEditorDocument.messageService.send(msg);
       }),
-      this.document.messageService.on('updateElement', (msg) => {
+      this.document.messageService.on('updateElements', (msg) => {
         this.document.applyEdit((document) => {
-          const element = document.content.elements.find((e) => e.id === msg.id);
-          if (!element) {
-            throw new Error(
-              `Tried to update element with id ${msg.id}, but it does not exist in the document`,
-            );
-          }
-          const nextData = {
-            ...element.data,
-            ...msg.changes.data,
-          };
+          let changed = false;
 
-          const nextLayout = {
-            ...element.layout,
-            ...msg.changes.layout,
-          };
+          for (const update of msg.changes) {
+            const element = document.content.elements.find((e) => e.id === update.id);
+            if (!element) {
+              continue;
+            }
+            const nextData = {
+              ...element.data,
+              ...update.changes.data,
+            };
 
-          const nextStyle = {
-            ...element.style,
-            ...msg.changes.style,
-          };
+            const nextLayout = {
+              ...element.layout,
+              ...update.changes.layout,
+            };
 
-          if (
-            deepEquals(nextData, element.data) &&
-            deepEquals(nextLayout, element.layout) &&
-            deepEquals(nextStyle, element.style)
-          ) {
-            //Skipping updateElement message because the data hasn't changed
-            return false;
-          }
+            const nextStyle = {
+              ...element.style,
+              ...update.changes.style,
+            };
 
-          document.content.elements = document.content.elements.map((el) => {
-            if (el.id !== msg.id) {
-              return el;
+            if (
+              deepEquals(nextData, element.data) &&
+              deepEquals(nextLayout, element.layout) &&
+              deepEquals(nextStyle, element.style)
+            ) {
+              //Skipping updateElement message because the data hasn't changed
+              continue;
             }
 
-            return {
-              ...el,
-              layout: {
-                ...el.layout,
-                ...msg.changes.layout,
-              },
-              data: {
-                ...el.data,
-                ...msg.changes.data,
-              } as typeof el.data,
-              style: {
-                ...el.style,
-                ...msg.changes.style,
-              },
-            };
-          });
-          return true;
+            document.content.elements = document.content.elements.map((el) => {
+              if (el.id !== update.id) {
+                return el;
+              }
+
+              return {
+                ...el,
+                layout: {
+                  ...el.layout,
+                  ...update.changes.layout,
+                },
+                data: {
+                  ...el.data,
+                  ...update.changes.data,
+                } as typeof el.data,
+                style: {
+                  ...el.style,
+                  ...update.changes.style,
+                },
+              };
+            });
+            changed = true;
+          }
+          return changed;
         });
       }),
 
