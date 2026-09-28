@@ -4,7 +4,7 @@ import { useMessageService } from '../services/MessageService';
 import EditorCanvas from '../components/canvas/EditorCanvas';
 import { useLocalization } from '../providers/LocalizationProvider';
 import type { MessageService } from '../services/MessageService';
-import { createExportCanvasHtml } from '../exportUtils';
+import { createExportCanvasHtml } from '../components/canvas/logic/exportUtils';
 import { Button } from 'vscrui';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
 import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
