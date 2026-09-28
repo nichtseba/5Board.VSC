@@ -7,27 +7,43 @@ import { ImageSettings } from './ImageSettings';
 import { LineSettings } from './LineSettings';
 import { FreehandSettings } from './FreehandSettings';
 import { useLocalization } from '../../../providers/LocalizationProvider';
+import { CommonSettings } from './CommonSettings';
 import { RectangleSettings } from './RectangleSettings';
 import { CircleSettings } from './CircleSettings';
 import GenericElementSettings from './GenericElementSettings';
 
 type SettingsProps<T extends EditorElementType> = {
-  element: EditorElement<T>;
+  elements: EditorElement<T>[];
 };
 
+type SelectionType = EditorElementType | 'mixed';
+
+function getSelectionType(elements: EditorElement[]): SelectionType {
+  const type = elements[0].type;
+
+  return elements.every((element) => element.type === type) ? type : 'mixed';
+}
+
 export default function ElementSettings<ElementType extends EditorElementType>({
-  element,
+  elements,
 }: {
-  element: EditorElement<ElementType>;
+  elements: EditorElement<ElementType>[];
 }) {
+  const type = getSelectionType(elements);
+
+  if (type === 'mixed') {
+    return <CommonSettings elements={elements} />;
+  }
+
   const Component =
-    (SETTINGS_COMPONENTS[element.type] as React.ComponentType<SettingsProps<ElementType>>) ??
+    (SETTINGS_COMPONENTS[type] as React.ComponentType<SettingsProps<ElementType>>) ??
     UnsupportedElementSettings;
 
   return (
     <>
-      <GenericElementSettings element={element} />
-      <Component element={element} />
+      <CommonSettings elements={elements} />
+      {elements.length === 1 && <GenericElementSettings element={elements[0]} />}
+      <Component elements={elements} />
     </>
   );
 }

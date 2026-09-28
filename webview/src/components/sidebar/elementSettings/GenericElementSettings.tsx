@@ -10,19 +10,22 @@ export default function GenericElementSettings({ element }: { element: EditorEle
   const updateElementDisplay = useCallback(
     (changes: Partial<ElementDisplay>) => {
       messages.send({
-        type: 'updateElement',
-        id: element.id,
-        changes: { display: { ...element.display, ...changes } },
+        type: 'updateElements',
+        changes: [
+          {
+            id: element.id,
+            changes: { display: { ...element.display, ...changes } },
+          },
+        ],
       });
     },
-    [element.id, messages],
+    [element.id, element.display, messages],
   );
   const updateElementName = useCallback(
     (name: string) => {
       messages.send({
-        type: 'updateElement',
-        id: element.id,
-        changes: { name },
+        type: 'updateElements',
+        changes: [{ id: element.id, changes: { name } }],
       });
     },
     [element.id, messages],
