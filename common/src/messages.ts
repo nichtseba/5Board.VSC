@@ -89,14 +89,6 @@ type AllWebviewToExtensionMessage =
   | AddElementMessage
   | { type: 'deleteElements'; ids: string[] }
   | {
-      type: 'updateElementsLayout';
-      changes: {
-        id: string;
-        changes: Partial<ElementLayout>;
-        aspectRatio?: number;
-      }[];
-    } // Update the Layout when Element was moved or resized, array can handle one or more elements
-  | {
       type: 'updateElements';
       changes: {
         id: string;
