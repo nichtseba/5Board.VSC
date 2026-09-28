@@ -112,7 +112,7 @@ export class ElementClipboardService {
         (asset) => asset.name === imageElement.data.src,
       );
       if (!sourceAsset) {
-        throw new Error(`Asset "${imageElement.data.src}" fehlt im Quelldokument`);
+        throw new Error(`Asset "${imageElement.data.src}" missing in the source document`);
       }
       imageAssets.set(imageElement.data.src, sourceAsset.bytes);
     }
