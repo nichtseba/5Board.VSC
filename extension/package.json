@@ -47,6 +47,16 @@
         ]
       },
       {
+        "viewType": "5board-vsc.exportPreview",
+        "displayName": "%customEditors.exportPreview%",
+        "selector": [
+          {
+            "filenamePattern": "*.5boardz"
+          }
+        ],
+        "priority": "option"
+      },
+      {
         "viewType": "5board-vsc.projector",
         "displayName": "%customEditors.projector%",
         "selector": [
@@ -113,6 +123,11 @@
         "icon": "$(play)"
       },
       {
+        "command": "5board-vsc.previewHtmlExport",
+        "title": "%commands.previewHtmlExport%",
+        "icon": "$(file-code)"
+      },
+      {
         "command": "5board-vsc.addImageFromFile",
         "title": "%commands.addImageFromFile%",
         "icon": "$(file-media)"
@@ -135,6 +150,23 @@
         "command": "5board-vsc.revealPresetsFile",
         "title": "%commands.revealPresetsFile%",
         "icon": "$(folder-opened)"
+      },
+      {
+        "command": "5board-vsc.copy",
+        "title": "%commands.copy%"
+      },
+      {
+        "command": "5board-vsc.paste",
+        "title": "%commands.paste%"
+      },
+      {
+        "command": "5board-vsc.duplicate",
+        "title": "%commands.duplicate%"
+      },
+      {
+        "command": "5board-vsc.openSettings",
+        "title": "%commands.openSettings%",
+        "icon": "$(gear)"
       }
     ],
     "menus": {
@@ -147,14 +179,24 @@
       ],
       "view/title": [
         {
+          "command": "5board-vsc.openSettings",
+          "when": "view == 5board-vsc.sidebar-tool-view",
+          "group": "navigation@1"
+        },
+        {
+          "command": "5board-vsc.previewHtmlExport",
+          "when": "view == 5board-vsc.sidebar-tool-view",
+          "group": "navigation@2"
+        },
+        {
           "command": "5board-vsc.newBoard",
           "when": "view == 5board-vsc.sidebar-tool-view",
-          "group": "navigation"
+          "group": "navigation@3"
         },
         {
           "command": "5board-vsc.startPresentation",
           "when": "view == 5board-vsc.sidebar-tool-view",
-          "group": "navigation"
+          "group": "navigation@4"
         },
         {
           "command": "5board-vsc.savePreset",
@@ -162,6 +204,47 @@
           "group": "navigation"
         }
       ]
+    },
+    "configuration": {
+      "title": "5board",
+      "type": "object",
+      "properties": {
+        "5board-vsc.java.home": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "order": 10,
+          "description": "%configuration.java.home.description%"
+        },
+        "5board-vsc.grid.cellSize": {
+          "type": "integer",
+          "default": 16,
+          "minimum": 1,
+          "scope": "window",
+          "order": 30,
+          "description": "%configuration.grid.cellSize.description%"
+        },
+        "5board-vsc.grid.columnCount": {
+          "type": "integer",
+          "default": 40,
+          "minimum": 1,
+          "scope": "window",
+          "order": 40,
+          "description": "%configuration.grid.columnCount.description%"
+        },
+        "5board-vsc.colorPalette.customColors": {
+          "type": "array",
+          "default": [],
+          "maxItems": 3,
+          "uniqueItems": true,
+          "scope": "window",
+          "items": {
+            "type": "string",
+            "pattern": "^rgb\\(\\s*(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\s*,\\s*(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\s*,\\s*(?:25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\s*\\)$"
+          },
+          "description": "%configuration.colorPalette.customColors.description%"
+        }
+      }
     }
   },
   "scripts": {

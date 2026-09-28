@@ -57,10 +57,14 @@ export function HeadingElement({ element }: EditorElementProps<EditorElementType
     setIsEditing(false);
     const newContent = contentRef.current?.textContent ?? '';
     if (newContent !== element.data.content) {
-      const message: WebviewToExtensionMessage<'updateElement'> = {
-        type: 'updateElement',
-        id: element.id,
-        changes: { data: { ...element.data, content: newContent } },
+      const message: WebviewToExtensionMessage<'updateElements'> = {
+        type: 'updateElements',
+        changes: [
+          {
+            id: element.id,
+            changes: { data: { ...element.data, content: newContent } },
+          },
+        ],
       };
       vscodeApi.postMessage(message);
     }

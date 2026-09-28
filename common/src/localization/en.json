@@ -7,6 +7,12 @@
       "createFile": "Create 5Board file",
       "createFileFailed": "Failed to create 5Board file:"
     },
+    "htmlExport": {
+      "noActiveBoard": "Open a .5boardz file or save current file.",
+      "saveLabel": "Save HTML Export",
+      "saved": "HTML export saved:",
+      "openContainingFolder": "Open in file system"
+    },
     "projector": {
       "startPresentation": "Start Presentation",
       "title": "Projector",
@@ -34,7 +40,15 @@
     "customEditor": { "Test": "Test the translation." },
     "canvas": {
       "spacerLabel": "Spacer",
-      "rows": "rows"
+      "rows": "rows",
+      "contextMenu": {
+        "bringToFront": "Bring to front",
+        "sendToBack": "Send to back"
+      }
+    },
+    "exportPreview": {
+      "saveHtml": "Save HTML",
+      "loading": "Loading preview..."
     },
     "sidebar": {
       "title": "5Board Sidebar",
@@ -52,7 +66,8 @@
         "rectangle": "Rectangle",
         "circle": "Circle",
         "line": "Line",
-        "freehand": "Freehand"
+        "freehand": "Freehand",
+        "tableOfContents": "Table of Contents"
       },
       "freehand": {
         "title": "Freehand Options",
@@ -89,7 +104,7 @@
         "statusPaused": "Paused",
         "statusClosed": "Ended",
         "pointerColor": "Pointer Color",
-        "customColor": "Custom",
+        "customColor": "Custom color",
         "pointerShape": "Pointer Shape",
         "colors": {
           "red": "Red",
@@ -121,12 +136,14 @@
           "content": "content"
         },
         "openPresetFile": "Open Preset File"
-      }
+      },
+      "tableOfContentsAlreadyExists": "A table of contents already exists."
     },
     "sidebar-element-settings": {
       "noElementSelected": "No element selected",
       "unsupportedElement": "Unsupported element type",
       "selectedElement": "Selected Element",
+      "layer": "Layer",
       "headingSettings": {
         "title": "Heading",
         "levelLabel": "Hierarchy level",
@@ -151,6 +168,9 @@
         "colorTheme": "Theme",
         "customColor": "Custom color",
         "backgroundColor": "Background color"
+      },
+      "tableOfContentsSettings": {
+        "title": "Table of Contents"
       },
       "textSettings": {
         "title": "Text",

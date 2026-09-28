@@ -12,6 +12,7 @@ export enum EditorElementType {
   Circle = 'circle',
   Line = 'line',
   Freehand = 'freehand',
+  TableOfContents = 'tableOfContents',
 }
 
 /**
@@ -35,7 +36,7 @@ export type ElementLayout = {
   width: number;
 
   rotation?: number;
-  //z-index?: number;
+  zIndex?: number;
 };
 
 export type ElementStyle = {
@@ -66,6 +67,7 @@ export type EditorElementDataMap = {
   [EditorElementType.Circle]: undefined; // No need for extra data
   [EditorElementType.Line]: LineElementData;
   [EditorElementType.Freehand]: FreehandElementData;
+  [EditorElementType.TableOfContents]: TableOfContentsElementData;
 };
 
 export type HeadingElementData = {
@@ -198,6 +200,11 @@ export type LineElementData = {
   points: { x: number; y: number }[]; // Start and end points for the line
 };
 
+type TableOfContentsElementData = {
+  title?: string;
+  fontSize?: number;
+};
+
 /**
  * All Editor Element Defaults when creating a new element
  */
@@ -272,6 +279,10 @@ export const DEFAULT_ELEMENT_PROFILES = {
     layout: { width: 20, height: 10 },
     style: {
       visible: true,
+      backgroundColor: 'var(--vscode-foreground)',
+      border: {
+        width: 2,
+      },
     },
     data: undefined,
   },
@@ -279,6 +290,10 @@ export const DEFAULT_ELEMENT_PROFILES = {
     layout: { width: 20, height: 10 },
     style: {
       visible: true,
+      backgroundColor: 'var(--vscode-foreground)',
+      border: {
+        width: 2,
+      },
     },
     data: undefined,
   },
@@ -288,7 +303,7 @@ export const DEFAULT_ELEMENT_PROFILES = {
       visible: true,
       opacity: 1,
       border: {
-        color: '#f14c4c',
+        color: 'var(--vscode-foreground)',
         width: 2,
         style: 'solid',
       },
@@ -307,6 +322,13 @@ export const DEFAULT_ELEMENT_PROFILES = {
       visible: true,
     },
     data: { strokes: [] },
+  },
+  [EditorElementType.TableOfContents]: {
+    layout: { width: 40, height: 10 },
+    style: {
+      visible: true,
+    },
+    data: {},
   },
 } satisfies {
   [K in EditorElementType]: {
@@ -365,6 +387,12 @@ export const ELEMENT_TYPE_DEFINITIONS = {
     icon: 'pencil',
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Freehand],
+  },
+  [EditorElementType.TableOfContents]: {
+    label: 'webview.sidebar.elementType.tableOfContents',
+    icon: 'list-unordered',
+    placement: 'free',
+    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.TableOfContents],
   },
 } as const satisfies {
   [K in EditorElementType]: ElementTypeDefinition<K>;

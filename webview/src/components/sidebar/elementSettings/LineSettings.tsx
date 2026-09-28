@@ -6,40 +6,49 @@ import SettingsPanel from '../layout/SettingsPanel';
 import SettingsField from '../layout/SettingsField';
 import SliderInput from '../components/SliderInput';
 import ElementStyleSettings from '../components/ElementStyleSettings';
+import { getCommonElementStyle } from './utils/getCommonElementStyle';
+import { getCommonLineData } from './utils/getCommonLineData';
 
 type Props = {
-  element: EditorElement<EditorElementType.Line>;
+  elements: EditorElement<EditorElementType.Line>[];
 };
 
 /**
  * Settings panel for Line elements
  * Allows configuration of stroke properties and arrow heads.
  */
-export function LineSettings({ element }: Props) {
+export function LineSettings({ elements }: Props) {
   const messages = useMessageService();
   const { t } = useLocalization();
 
-  const data = element.data as LineElementData;
+  const commonElementStyle = getCommonElementStyle(elements);
+  const commonLineData = getCommonLineData(elements);
+
   const hasHead =
-    (data.headTypeStart ?? 'none') !== 'none' || (data.headTypeEnd ?? 'none') !== 'none';
+    (commonLineData.headTypeStart ?? 'none') !== 'none' ||
+    (commonLineData.headTypeEnd ?? 'none') !== 'none';
 
   const updateData = (updates: Partial<LineElementData>) => {
     messages.send({
-      type: 'updateElement',
-      id: element.id,
-      changes: {
-        data: { ...data, ...updates },
-      },
+      type: 'updateElements',
+      changes: elements.map((element) => ({
+        id: element.id,
+        changes: {
+          data: { ...element.data, ...updates },
+        },
+      })),
     });
   };
 
-  const updateStyle = (changes: Partial<typeof element.style>) => {
+  const updateStyle = (changes: Partial<(typeof elements)[number]['style']>) => {
     messages.send({
-      type: 'updateElement',
-      id: element.id,
-      changes: {
-        style: { ...element.style, ...changes },
-      },
+      type: 'updateElements',
+      changes: elements.map((element) => ({
+        id: element.id,
+        changes: {
+          style: { ...element.style, ...changes },
+        },
+      })),
     });
   };
 
@@ -60,7 +69,7 @@ export function LineSettings({ element }: Props) {
       icon="symbol-line"
     >
       <ElementStyleSettings
-        style={element.style}
+        style={commonElementStyle}
         onChange={updateStyle}
         editableProperties={['opacity', 'borderColor', 'borderWidth', 'borderStyle']}
       />
@@ -70,14 +79,14 @@ export function LineSettings({ element }: Props) {
           <SettingsField label={t('webview.sidebar-element-settings.lineSettings.startHead')}>
             <Dropdown
               options={headOptions(t)}
-              value={data.headTypeStart ?? 'none'}
+              value={commonLineData.headTypeStart ?? 'none'}
               onChange={(value) => updateHeadType('headTypeStart', value)}
             />
           </SettingsField>
           <SettingsField label={t('webview.sidebar-element-settings.lineSettings.endHead')}>
             <Dropdown
               options={headOptions(t)}
-              value={data.headTypeEnd ?? 'none'}
+              value={commonLineData.headTypeEnd ?? 'none'}
               onChange={(value) => updateHeadType('headTypeEnd', value)}
             />
           </SettingsField>
@@ -86,14 +95,14 @@ export function LineSettings({ element }: Props) {
           <>
             <SliderInput
               label={t('webview.sidebar-element-settings.lineSettings.headSize')}
-              value={data.headSize ?? 6}
+              value={commonLineData.headSize ?? 6}
               min={1}
               max={20}
               unit="px"
               onChange={(value) => updateData({ headSize: value })}
             />
             <Checkbox
-              checked={data.headFill ?? true}
+              checked={commonLineData.headFill ?? true}
               onChange={(checked) => updateData({ headFill: checked })}
             >
               {t('webview.sidebar-element-settings.lineSettings.headFill')}

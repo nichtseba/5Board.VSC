@@ -2,53 +2,59 @@ import type React from 'react';
 import { init } from '../app/init';
 import { useEffect } from 'react';
 import ElementSettings from '../components/sidebar/elementSettings/ElementSettings';
+import { LayerSettings } from '../components/sidebar/elementSettings/LayerSettings';
 import { useMessageService } from '../services/MessageService';
 import { useLocalization } from '../providers/LocalizationProvider';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
 import { Button, Icon } from 'vscrui';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
-import { BoardElement } from '5board.vsc-common';
 
 export default function ElementSettingsSidebar() {
   const messages = useMessageService();
   const { t } = useLocalization();
   const document = useBoardDocument();
 
-  const primarySelectedElement =
-    document?.content.elements.find((e) => document.content.primarySelectedElementId === e.id) ??
-    null;
-
   useEffect(() => {
     messages.send({ type: 'ready' });
   }, []);
 
+  const selectedElementIds = document?.content.selectedElementIds ?? [];
+
+  const selectedElements =
+    document?.content.elements.filter((element) => selectedElementIds.includes(element.id)) ?? [];
+
+  const primarySelectedElement =
+    document?.content.elements.find((e) => document.content.primarySelectedElementId === e.id) ??
+    null;
+
   let content: React.ReactNode;
-  if (!primarySelectedElement) {
+  if (selectedElements.length === 0) {
     content = (
       <div>
         <p>{t('webview.sidebar-element-settings.noElementSelected')}</p>
       </div>
     );
   } else {
-    content = <ElementSettings element={primarySelectedElement} />;
+    content = <ElementSettings elements={selectedElements} />;
   }
 
-  const handleDelete = (selectedElement: BoardElement) => {
+  const handleDelete = () => {
     messages.send({
-      type: 'deleteElement',
-      id: selectedElement.id,
+      type: 'deleteElements',
+      ids: selectedElementIds,
     });
   };
 
   return (
     <SidebarShell>
       {content}
+      {primarySelectedElement && <LayerSettings element={primarySelectedElement} />}
       {primarySelectedElement && (
         <Button
           appearance="secondary"
           className="justify-center gap-2"
           title={t('webview.sidebar-element-settings.deleteTooltip')}
-          onClick={() => handleDelete(primarySelectedElement)}
+          onClick={() => handleDelete()}
         >
           <Icon name="trash" className="color-foreground-error" />
 

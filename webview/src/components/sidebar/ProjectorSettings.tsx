@@ -143,6 +143,7 @@ export default function ProjectorSettings() {
           color={style.color}
           onChange={(color) => update({ color })}
           themePresets={PROJECTOR_POINTER_PRESET_COLORS.map((c) => ({
+            id: c.id,
             value: c.value,
             label: t(`webview.sidebar.projectorSettings.colors.${c.id}` as TranslationKey),
           }))}

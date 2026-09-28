@@ -12,6 +12,7 @@ const VIEWS = [
   'ProjectorSettingsSidebar',
   'ElementSettingsSidebar',
   'Projector',
+  'ExportPreview',
 ];
 
 //@ts-check
