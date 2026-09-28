@@ -8,7 +8,7 @@ import {
   ElementLayout,
   ImageElementData,
 } from '5board.vsc-common';
-import { addImageAsset } from './addImageToDocument';
+import { addImageAsset } from './addImageAsset';
 
 export function createDefaultElement<T extends EditorElementType>(
   type: T,

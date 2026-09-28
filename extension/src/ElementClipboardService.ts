@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
 import { BoardPackage } from './board/package';
-import { addImageAsset } from './board/addElement/addImageToDocument';
+import { addImageAsset } from './board/addElement/addImageAsset';
 import { EditorElement, EditorElementType } from '5board.vsc-common';
 
 const ELEMENT_CLIPBOARD_MARKER = '5board-vsc.elements';

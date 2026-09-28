@@ -2,7 +2,6 @@ import { EditorElement, EditorElementType, EditorToolId } from '5board.vsc-commo
 import { EXTENSION } from '../extension';
 import { BoardCustomDocument } from './BoardCustomDocument';
 import deepEquals from 'deep-equal';
-import { addImageToDocument } from './addElement/addImageToDocument';
 
 export class DocumentMessageHandlers {
   constructor(private readonly document: BoardCustomDocument) {}
@@ -206,10 +205,22 @@ export class DocumentMessageHandlers {
       }),
 
       this.document.messageService.on('addImageFromBytes', (msg) => {
-        const bytes = new Uint8Array(msg.bytes);
-        this.document.applyEdit((document) => {
-          addImageToDocument(document, msg.name, bytes);
-        });
+        EXTENSION.activeEditorDocument = this.document;
+        EXTENSION.editorState = {
+          tool: {
+            type: EditorToolId.AddElement,
+            parameters: {
+              type: EditorElementType.Image,
+              placementMode: 'free',
+              defaults: {
+                asset: {
+                  name: msg.name,
+                  bytes: msg.bytes,
+                },
+              },
+            },
+          },
+        };
       }),
 
       // The editor sends a freshly drawn element (e.g. a freehand stroke).
