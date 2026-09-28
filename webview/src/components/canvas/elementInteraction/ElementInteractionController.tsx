@@ -125,16 +125,12 @@ export default function ElementInteractionController<ElementType extends EditorE
           break;
       }
       messages.send({
-        type: 'updateElementsLayout',
-        changes: [
-          {
-            id: element.id,
-            changes: {
-              xPos: element.layout.xPos + xDelta,
-              yPos: element.layout.yPos + yDelta,
-            },
-          },
-        ],
+        type: 'updateElementLayout',
+        id: element.id,
+        changes: {
+          xPos: element.layout.xPos + xDelta,
+          yPos: element.layout.yPos + yDelta,
+        },
       });
     }
 
@@ -185,15 +181,11 @@ export default function ElementInteractionController<ElementType extends EditorE
 
     if (rotation !== (element.layout.rotation ?? 0)) {
       messages.send({
-        type: 'updateElementsLayout',
-        changes: [
-          {
-            id: element.id,
-            changes: {
-              rotation,
-            },
-          },
-        ],
+        type: 'updateElementLayout',
+        id: element.id,
+        changes: {
+          rotation,
+        },
       });
     }
 
@@ -231,18 +223,14 @@ export default function ElementInteractionController<ElementType extends EditorE
       pendingPositionUpdate.current = true;
 
       messages.send({
-        type: 'updateElementsLayout',
-        changes: [
-          {
-            id: element.id,
-            changes: {
-              width: newWidth,
-              height: newHeight,
-              xPos: element.layout.xPos + xDelta,
-              yPos: element.layout.yPos + yDelta,
-            },
-          },
-        ],
+        type: 'updateElementLayout',
+        id: element.id,
+        changes: {
+          width: newWidth,
+          height: newHeight,
+          xPos: element.layout.xPos + xDelta,
+          yPos: element.layout.yPos + yDelta,
+        },
       });
     }
 

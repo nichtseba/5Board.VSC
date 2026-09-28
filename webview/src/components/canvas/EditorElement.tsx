@@ -82,13 +82,9 @@ export default function EditorElement<ElementType extends EditorElementType>({
 
   const setZIndex = (zIndex: number) => {
     messages.send({
-      type: 'updateElements',
-      changes: [
-        {
-          id: element.id,
-          changes: { layout: { ...element.layout, zIndex } },
-        },
-      ],
+      type: 'updateElement',
+      id: element.id,
+      changes: { layout: { ...element.layout, zIndex } },
     });
     setContextMenuPosition(null);
   };
@@ -104,8 +100,8 @@ export default function EditorElement<ElementType extends EditorElementType>({
       }
 
       messages.send({
-        type: 'deleteElements',
-        ids: [element.id],
+        type: 'deleteElement',
+        id: element.id,
       });
     };
 

@@ -55,10 +55,8 @@ export class DocumentMessageHandlers {
           tool: { type: EditorToolId.POINTER, parameters: undefined },
         };
       }),
-      this.document.messageService.on('deleteElements', (msg) => {
-        msg.ids.forEach((id) => {
-          EXTENSION.deleteEditorElement(id);
-        });
+      this.document.messageService.on('deleteElement', (msg) => {
+        EXTENSION.deleteEditorElement(msg.id);
       }),
 
       this.document.messageService.on('selectElements', (msg) => {
@@ -68,40 +66,34 @@ export class DocumentMessageHandlers {
         });
       }),
 
-      this.document.messageService.on('updateElementsLayout', (msg) => {
+      this.document.messageService.on('updateElementLayout', (msg) => {
         this.document.applyEdit((document) => {
-          let changed = false;
+          const element = document.content.elements.find((e) => e.id === msg.id);
 
-          for (const update of msg.changes) {
-            const element = document.content.elements.find((element) => element.id === update.id);
-
-            if (!element) {
-              continue;
-            }
-
-            if (deepEquals(update.changes, element.layout)) {
-              continue;
-            }
-
-            element.layout = {
-              ...element.layout,
-              ...update.changes,
-            };
-
-            if (element.type === EditorElementType.Image) {
-              const imageElement = element as EditorElement<EditorElementType.Image>;
-
-              imageElement.data = {
-                ...imageElement.data,
-                configuredWidth: true,
-                aspectRatio: update.aspectRatio ?? imageElement.data.aspectRatio,
-              };
-            }
-
-            changed = true;
+          if (!element) {
+            throw new Error(
+              `Tried to update layout of element with id ${msg.id}, but it does not exist in the document`,
+            );
           }
+          if (deepEquals(msg.changes, element.layout)) {
+            //Skipping updateElementLayout message because the layout hasn't changed
+            return false;
+          }
+          element.layout = {
+            ...element.layout,
+            ...msg.changes,
+          };
 
-          return changed;
+          if (element.type === EditorElementType.Image) {
+            const imageElement = element as EditorElement<EditorElementType.Image>;
+
+            imageElement.data = {
+              ...imageElement.data,
+              configuredWidth: true,
+              aspectRatio: msg.aspectRatio ?? imageElement.data.aspectRatio,
+            };
+          }
+          return true;
         });
       }),
       //#endregion "General"
@@ -128,63 +120,60 @@ export class DocumentMessageHandlers {
         }
         EXTENSION.activeEditorDocument.messageService.send(msg);
       }),
-      this.document.messageService.on('updateElements', (msg) => {
+      this.document.messageService.on('updateElement', (msg) => {
         this.document.applyEdit((document) => {
-          let changed = false;
-
-          for (const update of msg.changes) {
-            const element = document.content.elements.find((e) => e.id === update.id);
-            if (!element) {
-              continue;
-            }
-            const nextData = {
-              ...element.data,
-              ...update.changes.data,
-            };
-
-            const nextLayout = {
-              ...element.layout,
-              ...update.changes.layout,
-            };
-
-            const nextStyle = {
-              ...element.style,
-              ...update.changes.style,
-            };
-
-            if (
-              deepEquals(nextData, element.data) &&
-              deepEquals(nextLayout, element.layout) &&
-              deepEquals(nextStyle, element.style)
-            ) {
-              //Skipping updateElement message because the data hasn't changed
-              continue;
-            }
-
-            document.content.elements = document.content.elements.map((el) => {
-              if (el.id !== update.id) {
-                return el;
-              }
-
-              return {
-                ...el,
-                layout: {
-                  ...el.layout,
-                  ...update.changes.layout,
-                },
-                data: {
-                  ...el.data,
-                  ...update.changes.data,
-                } as typeof el.data,
-                style: {
-                  ...el.style,
-                  ...update.changes.style,
-                },
-              };
-            });
-            changed = true;
+          const element = document.content.elements.find((e) => e.id === msg.id);
+          if (!element) {
+            throw new Error(
+              `Tried to update element with id ${msg.id}, but it does not exist in the document`,
+            );
           }
-          return changed;
+          const nextData = {
+            ...element.data,
+            ...msg.changes.data,
+          };
+
+          const nextLayout = {
+            ...element.layout,
+            ...msg.changes.layout,
+          };
+
+          const nextStyle = {
+            ...element.style,
+            ...msg.changes.style,
+          };
+
+          if (
+            deepEquals(nextData, element.data) &&
+            deepEquals(nextLayout, element.layout) &&
+            deepEquals(nextStyle, element.style)
+          ) {
+            //Skipping updateElement message because the data hasn't changed
+            return false;
+          }
+
+          document.content.elements = document.content.elements.map((el) => {
+            if (el.id !== msg.id) {
+              return el;
+            }
+
+            return {
+              ...el,
+              layout: {
+                ...el.layout,
+                ...msg.changes.layout,
+              },
+              data: {
+                ...el.data,
+                ...msg.changes.data,
+              } as typeof el.data,
+              style: {
+                ...el.style,
+                ...msg.changes.style,
+              },
+            };
+          });
+          return true;
         });
       }),
 

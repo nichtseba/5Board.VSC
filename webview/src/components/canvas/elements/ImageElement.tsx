@@ -42,17 +42,13 @@ export function ImageElement({
     const aspectRatio = img.naturalWidth / img.naturalHeight;
 
     messages.send({
-      type: 'updateElementsLayout',
-      changes: [
-        {
-          id: element.id,
-          changes: {
-            width,
-            height,
-          },
-          aspectRatio,
-        },
-      ],
+      type: 'updateElementLayout',
+      id: element.id,
+      changes: {
+        width,
+        height,
+      },
+      aspectRatio,
     });
   };
 
