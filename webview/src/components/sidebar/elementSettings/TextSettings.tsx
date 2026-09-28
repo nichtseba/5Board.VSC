@@ -25,28 +25,51 @@ import { useMessageService } from '../../../services/MessageService';
 import ColorSelector from '../components/ColorSelector';
 import { FontSizeInput } from './components/FontSizeInput';
 import { THEME_PRESET_COLORS } from '../components/ColorPresets';
+import { getCommonValue } from './utils/getCommonValue';
+// import { CommonSettings } from './CommonSettings';
 
 type Props = {
-  element: EditorElement<EditorElementType.Text>;
+  elements: EditorElement<EditorElementType.Text>[];
 };
-export function TextSettings({ element }: Props) {
+export function TextSettings({ elements }: Props) {
   const { t } = useLocalization();
   const messages = useMessageService();
-  const fontSize = element.data.tiptap?.marks?.textStyle?.fontSize;
+
+  const fontFamily = getCommonValue(
+    elements.map((element) => element.data.tiptap?.marks?.textStyle?.fontFamily ?? 'default'),
+  );
+  const fontSize = getCommonValue(
+    elements.map((element) => element.data.tiptap?.marks?.textStyle?.fontSize),
+  );
   const fontSizeValue = fontSize ? parseInt(fontSize, 10) : '';
+  const lineHeight = getCommonValue(
+    elements.map((element) => element.data.tiptap?.marks?.textStyle?.lineHeight ?? '1.0'),
+  );
+  const textColor = getCommonValue(
+    elements.map((element) => element.data.tiptap?.marks?.textStyle?.color),
+  );
+  const highlightColor = getCommonValue(
+    elements.map((element) => element.data.tiptap?.marks?.textStyle?.backgroundColor),
+  );
+  const backgroundColor = getCommonValue(elements.map((element) => element.style.backgroundColor));
   return (
     <>
       <SettingsPanel
         title={t('webview.sidebar-element-settings.textSettings.title')}
         icon="symbol-string"
       >
+        {/* <SettingsField>
+          <CommonSettings elements={elements} />
+        </SettingsField>
+        <Divider /> */}
         <SettingsField>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <FontFamilyDropdown
-              value={element.data.tiptap?.marks?.textStyle?.fontFamily ?? 'default'}
+              value={fontFamily}
               onChange={(font) => {
                 messages.send({
                   type: 'textEditorCommand',
+                  ids: elements.map((element) => element.id),
                   command: {
                     type: 'setFontFamily',
                     font,
@@ -60,6 +83,7 @@ export function TextSettings({ element }: Props) {
               onChange={(size) => {
                 messages.send({
                   type: 'textEditorCommand',
+                  ids: elements.map((element) => element.id),
                   command: {
                     type: 'setFontSize',
                     size,
@@ -69,6 +93,7 @@ export function TextSettings({ element }: Props) {
               onConfirm={() => {
                 messages.send({
                   type: 'textEditorCommand',
+                  ids: elements.map((element) => element.id),
                   command: {
                     type: 'focus',
                   },
@@ -80,11 +105,12 @@ export function TextSettings({ element }: Props) {
               title="Line Height"
               options={['1.0', '1.15', '1.5', '2.0', '2.5', '3.0']}
               className="w-max!"
-              value={element.data.tiptap?.marks?.textStyle?.lineHeight ?? '1.0'}
+              value={lineHeight}
               onChange={(height) => {
                 if (typeof height !== 'string') return;
                 messages.send({
                   type: 'textEditorCommand',
+                  ids: elements.map((element) => element.id),
                   command: {
                     type: 'setLineHeight',
                     height,
@@ -97,10 +123,11 @@ export function TextSettings({ element }: Props) {
         <Divider />
         <SettingsField>
           <ColorSelector
-            color={element.data.tiptap?.marks?.textStyle?.color}
+            color={textColor}
             onChange={(color) => {
               messages.send({
                 type: 'textEditorCommand',
+                ids: elements.map((element) => element.id),
                 command: {
                   type: 'setTextColor',
                   color: color!,
@@ -113,11 +140,12 @@ export function TextSettings({ element }: Props) {
           />
 
           <ColorSelector
-            color={element.data.tiptap?.marks?.textStyle?.backgroundColor ?? undefined}
+            color={highlightColor}
             allowNone
             onChange={(color) => {
               messages.send({
                 type: 'textEditorCommand',
+                ids: elements.map((element) => element.id),
                 command: {
                   type: 'setBackgroundColor',
                   color,
@@ -130,13 +158,15 @@ export function TextSettings({ element }: Props) {
           />
 
           <ColorSelector
-            color={element.style.backgroundColor}
+            color={backgroundColor}
             allowNone
             onChange={(color) => {
               messages.send({
-                type: 'updateElement',
-                id: element.id,
-                changes: { style: { ...element.style, backgroundColor: color } },
+                type: 'updateElements',
+                changes: elements.map((element) => ({
+                  id: element.id,
+                  changes: { style: { ...element.style, backgroundColor: color } },
+                })),
               });
             }}
             presets={PROJECTOR_POINTER_PRESET_COLORS}
@@ -147,27 +177,27 @@ export function TextSettings({ element }: Props) {
         <Divider />
         <SettingsField>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3 mt-4">
-            <BoldButton element={element} />
-            <ItalicButton element={element} />
-            <StrikeButton element={element} />
-            <UnderlineButton element={element} />
-            <CodeButton element={element} />
+            <BoldButton elements={elements} />
+            <ItalicButton elements={elements} />
+            <StrikeButton elements={elements} />
+            <UnderlineButton elements={elements} />
+            <CodeButton elements={elements} />
           </div>
         </SettingsField>
         <Divider />
         <SettingsField>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3 mt-4">
-            <BulletListButton element={element} />
-            <OrderedListButton element={element} />
+            <BulletListButton elements={elements} />
+            <OrderedListButton elements={elements} />
           </div>
         </SettingsField>
         <Divider />
         <SettingsField>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3 mt-4">
-            <AlignLeftButton element={element} />
-            <AlignCenterButton element={element} />
-            <AlignRightButton element={element} />
-            <AlignJustifyButton element={element} />
+            <AlignLeftButton elements={elements} />
+            <AlignCenterButton elements={elements} />
+            <AlignRightButton elements={elements} />
+            <AlignJustifyButton elements={elements} />
           </div>
         </SettingsField>
       </SettingsPanel>

@@ -55,8 +55,10 @@ export class DocumentMessageHandlers {
           tool: { type: EditorToolId.POINTER, parameters: undefined },
         };
       }),
-      this.document.messageService.on('deleteElement', (msg) => {
-        EXTENSION.deleteEditorElement(msg.id);
+      this.document.messageService.on('deleteElements', (msg) => {
+        msg.ids.forEach((id) => {
+          EXTENSION.deleteEditorElement(id);
+        });
       }),
 
       this.document.messageService.on('selectElements', (msg) => {
@@ -66,34 +68,40 @@ export class DocumentMessageHandlers {
         });
       }),
 
-      this.document.messageService.on('updateElementLayout', (msg) => {
+      this.document.messageService.on('updateElementsLayout', (msg) => {
         this.document.applyEdit((document) => {
-          const element = document.content.elements.find((e) => e.id === msg.id);
+          let changed = false;
 
-          if (!element) {
-            throw new Error(
-              `Tried to update layout of element with id ${msg.id}, but it does not exist in the document`,
-            );
-          }
-          if (deepEquals(msg.changes, element.layout)) {
-            //Skipping updateElementLayout message because the layout hasn't changed
-            return false;
-          }
-          element.layout = {
-            ...element.layout,
-            ...msg.changes,
-          };
+          for (const update of msg.changes) {
+            const element = document.content.elements.find((element) => element.id === update.id);
 
-          if (element.type === EditorElementType.Image) {
-            const imageElement = element as EditorElement<EditorElementType.Image>;
+            if (!element) {
+              continue;
+            }
 
-            imageElement.data = {
-              ...imageElement.data,
-              configuredWidth: true,
-              aspectRatio: msg.aspectRatio ?? imageElement.data.aspectRatio,
+            if (deepEquals(update.changes, element.layout)) {
+              continue;
+            }
+
+            element.layout = {
+              ...element.layout,
+              ...update.changes,
             };
+
+            if (element.type === EditorElementType.Image) {
+              const imageElement = element as EditorElement<EditorElementType.Image>;
+
+              imageElement.data = {
+                ...imageElement.data,
+                configuredWidth: true,
+                aspectRatio: update.aspectRatio ?? imageElement.data.aspectRatio,
+              };
+            }
+
+            changed = true;
           }
-          return true;
+
+          return changed;
         });
       }),
       //#endregion "General"
@@ -120,57 +128,63 @@ export class DocumentMessageHandlers {
         }
         EXTENSION.activeEditorDocument.messageService.send(msg);
       }),
-      this.document.messageService.on('updateElement', (msg) => {
+      this.document.messageService.on('updateElements', (msg) => {
         this.document.applyEdit((document) => {
-          const element = document.content.elements.find((e) => e.id === msg.id);
-          if (!element) {
-            throw new Error(
-              `Tried to update element with id ${msg.id}, but it does not exist in the document`,
-            );
-          }
-          const nextData = {
-            ...element.data,
-            ...msg.changes.data,
-          };
+          let changed = false;
 
-          const nextLayout = {
-            ...element.layout,
-            ...msg.changes.layout,
-          };
+          for (const update of msg.changes) {
+            const element = document.content.elements.find((e) => e.id === update.id);
+            if (!element) {
+              continue;
+            }
+            const nextData = {
+              ...element.data,
+              ...update.changes.data,
+            };
 
-          const nextStyle = {
-            ...element.style,
-            ...msg.changes.style,
-          };
+            const nextLayout = {
+              ...element.layout,
+              ...update.changes.layout,
+            };
 
-          if (
-            deepEquals(nextData, element.data) &&
-            deepEquals(nextLayout, element.layout) &&
-            deepEquals(nextStyle, element.style)
-          ) {
-            //Skipping updateElement message because the data hasn't changed
-            return false;
-          }
+            const nextStyle = {
+              ...element.style,
+              ...update.changes.style,
+            };
 
-          document.content.elements = document.content.elements.map((el) => {
-            if (el.id !== msg.id) {
-              return el;
+            if (
+              deepEquals(nextData, element.data) &&
+              deepEquals(nextLayout, element.layout) &&
+              deepEquals(nextStyle, element.style)
+            ) {
+              //Skipping updateElement message because the data hasn't changed
+              continue;
             }
 
-            return {
-              ...el,
-              layout: {
-                ...el.layout,
-                ...msg.changes.layout,
-              },
-              data: {
-                ...el.data,
-                ...msg.changes.data,
-              } as typeof el.data,
-              style: nextStyle,
-            };
-          });
-          return true;
+            document.content.elements = document.content.elements.map((el) => {
+              if (el.id !== update.id) {
+                return el;
+              }
+
+              return {
+                ...el,
+                layout: {
+                  ...el.layout,
+                  ...update.changes.layout,
+                },
+                data: {
+                  ...el.data,
+                  ...update.changes.data,
+                } as typeof el.data,
+                style: {
+                  ...el.style,
+                  ...update.changes.style,
+                },
+              };
+            });
+            changed = true;
+          }
+          return changed;
         });
       }),
 
