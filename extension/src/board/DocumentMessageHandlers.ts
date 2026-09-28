@@ -66,34 +66,40 @@ export class DocumentMessageHandlers {
         });
       }),
 
-      this.document.messageService.on('updateElementLayout', (msg) => {
+      this.document.messageService.on('updateElementsLayout', (msg) => {
         this.document.applyEdit((document) => {
-          const element = document.content.elements.find((e) => e.id === msg.id);
+          let changed = false;
 
-          if (!element) {
-            throw new Error(
-              `Tried to update layout of element with id ${msg.id}, but it does not exist in the document`,
-            );
-          }
-          if (deepEquals(msg.changes, element.layout)) {
-            //Skipping updateElementLayout message because the layout hasn't changed
-            return false;
-          }
-          element.layout = {
-            ...element.layout,
-            ...msg.changes,
-          };
+          for (const update of msg.changes) {
+            const element = document.content.elements.find((element) => element.id === update.id);
 
-          if (element.type === EditorElementType.Image) {
-            const imageElement = element as EditorElement<EditorElementType.Image>;
+            if (!element) {
+              continue;
+            }
 
-            imageElement.data = {
-              ...imageElement.data,
-              configuredWidth: true,
-              aspectRatio: msg.aspectRatio ?? imageElement.data.aspectRatio,
+            if (deepEquals(update.changes, element.layout)) {
+              continue;
+            }
+
+            element.layout = {
+              ...element.layout,
+              ...update.changes,
             };
+
+            if (element.type === EditorElementType.Image) {
+              const imageElement = element as EditorElement<EditorElementType.Image>;
+
+              imageElement.data = {
+                ...imageElement.data,
+                configuredWidth: true,
+                aspectRatio: update.aspectRatio ?? imageElement.data.aspectRatio,
+              };
+            }
+
+            changed = true;
           }
-          return true;
+
+          return changed;
         });
       }),
       //#endregion "General"
