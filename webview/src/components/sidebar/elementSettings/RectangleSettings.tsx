@@ -3,22 +3,26 @@ import { useLocalization } from '../../../providers/LocalizationProvider';
 import { useMessageService } from '../../../services/MessageService';
 import SettingsPanel from '../layout/SettingsPanel';
 import ElementStyleSettings from '../components/ElementStyleSettings';
+import { getCommonElementStyle } from './utils/getCommonElementStyle';
 
 type Props = {
-  element: EditorElement<EditorElementType.Rectangle>;
+  elements: EditorElement<EditorElementType.Rectangle>[];
 };
 
-export function RectangleSettings({ element }: Props) {
+export function RectangleSettings({ elements }: Props) {
   const { t } = useLocalization();
   const messages = useMessageService();
+  const commonElementStyle = getCommonElementStyle(elements);
 
-  const updateStyle = (changes: Partial<typeof element.style>) => {
+  const updateStyle = (changes: Partial<(typeof elements)[number]['style']>) => {
     messages.send({
-      type: 'updateElement',
-      id: element.id,
-      changes: {
-        style: { ...element.style, ...changes },
-      },
+      type: 'updateElements',
+      changes: elements.map((element) => ({
+        id: element.id,
+        changes: {
+          style: { ...element.style, ...changes },
+        },
+      })),
     });
   };
 
@@ -28,7 +32,7 @@ export function RectangleSettings({ element }: Props) {
       icon="symbol-color"
     >
       <ElementStyleSettings
-        style={element.style}
+        style={commonElementStyle}
         onChange={updateStyle}
         editableProperties={[
           'backgroundColor',
