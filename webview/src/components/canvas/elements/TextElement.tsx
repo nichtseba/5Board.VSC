@@ -80,47 +80,43 @@ export function TextElement({
       }
 
       messages.send({
-        type: 'updateElements',
-        changes: [
-          {
-            id: element.id,
-            changes: {
-              layout: {
-                height: elementHeight,
-                width: element.layout.width,
-                yPos: element.layout.yPos,
-                xPos: element.layout.xPos,
+        type: 'updateElement',
+        id: element.id,
+        changes: {
+          layout: {
+            height: elementHeight,
+            width: element.layout.width,
+            yPos: element.layout.yPos,
+            xPos: element.layout.xPos,
+          },
+          data: {
+            content: editor.getJSON(),
+            tiptap: {
+              marks: {
+                bold: editor.isActive('bold'),
+                code: editor.isActive('code'),
+                italic: editor.isActive('italic'),
+                link: editor.isActive('link'),
+                strike: editor.isActive('strike'),
+                underline: editor.isActive('underline'),
+                textStyle: {
+                  fontFamily: editor.getAttributes('textStyle').fontFamily,
+                  fontSize: editor.getAttributes('textStyle').fontSize,
+                  lineHeight: editor.getAttributes('textStyle').lineHeight,
+                  color: editor.getAttributes('textStyle').color,
+                  backgroundColor: editor.getAttributes('textStyle').backgroundColor,
+                },
               },
-              data: {
-                content: editor.getJSON(),
-                tiptap: {
-                  marks: {
-                    bold: editor.isActive('bold'),
-                    code: editor.isActive('code'),
-                    italic: editor.isActive('italic'),
-                    link: editor.isActive('link'),
-                    strike: editor.isActive('strike'),
-                    underline: editor.isActive('underline'),
-                    textStyle: {
-                      fontFamily: editor.getAttributes('textStyle').fontFamily,
-                      fontSize: editor.getAttributes('textStyle').fontSize,
-                      lineHeight: editor.getAttributes('textStyle').lineHeight,
-                      color: editor.getAttributes('textStyle').color,
-                      backgroundColor: editor.getAttributes('textStyle').backgroundColor,
-                    },
-                  },
-                  nodes: {
-                    bulletList: editor.isActive('bulletList'),
-                    orderedList: editor.isActive('orderedList'),
-                    attributes: {
-                      textAlign,
-                    },
-                  },
+              nodes: {
+                bulletList: editor.isActive('bulletList'),
+                orderedList: editor.isActive('orderedList'),
+                attributes: {
+                  textAlign,
                 },
               },
             },
           },
-        ],
+        },
       });
     },
   });
@@ -159,77 +155,68 @@ export function TextElement({
       return;
     }
 
-    if (!msg.ids.includes(element.id)) {
-      return;
-    }
-
-    const chain = editor.chain();
-
-    if (editing) {
-      chain.focus();
-    } else {
-      chain.selectAll();
-    }
-
     switch (msg.command.type) {
       case 'toggleBold':
-        chain.toggleBold().run();
+        editor.chain().focus().toggleBold().run();
         break;
 
       case 'toggleItalic':
-        chain.toggleItalic().run();
+        editor.chain().focus().toggleItalic().run();
         break;
 
       case 'toggleStrike':
-        chain.toggleStrike().run();
+        editor.chain().focus().toggleStrike().run();
         break;
 
       case 'toggleUnderline':
-        chain.toggleUnderline().run();
+        editor.chain().focus().toggleUnderline().run();
         break;
 
       case 'toggleCode':
-        chain.toggleCode().run();
+        editor.chain().focus().toggleCode().run();
         break;
 
       case 'setTextAlign':
-        chain.setTextAlign(msg.command.value).run();
+        editor.chain().focus().setTextAlign(msg.command.value).run();
         break;
 
       case 'setFontFamily':
         if (msg.command.font === 'default') {
-          chain.unsetFontFamily().run();
+          editor.chain().focus().unsetFontFamily().run();
         } else {
-          chain.setFontFamily(msg.command.font).run();
+          editor.chain().focus().setFontFamily(msg.command.font).run();
         }
         break;
 
       case 'setFontSize':
-        chain.setFontSize(msg.command.size + 'px').run();
+        editor
+          .chain()
+          .setFontSize(msg.command.size + 'px')
+          .run();
         break;
 
       case 'setLineHeight':
-        chain.setLineHeight(msg.command.height).run();
+        editor.chain().focus().setLineHeight(msg.command.height).run();
         break;
 
       case 'setTextColor':
-        chain.setColor(msg.command.color).run();
+        editor.chain().focus().setColor(msg.command.color).run();
         break;
 
       case 'setBackgroundColor':
-        chain.setBackgroundColor(msg.command.color).run();
+        editor.chain().focus().setBackgroundColor(msg.command.color).run();
         break;
 
       case 'toggleBulletList':
-        chain.toggleBulletList().run();
+        editor.chain().focus().toggleBulletList().run();
         break;
 
       case 'toggleOrderedList':
-        chain.toggleOrderedList().run();
+        editor.chain().focus().toggleOrderedList().run();
         break;
 
       case 'focus':
-        chain.focus().run();
+        editor.chain().focus().run();
     }
   });
 
@@ -241,11 +228,11 @@ export function TextElement({
       <EditorContent editor={editor} />
       {editing && (
         <BubbleMenu editor={editor}>
-          <BoldButton elements={[element]} />
-          <ItalicButton elements={[element]} />
-          <StrikeButton elements={[element]} />
-          <UnderlineButton elements={[element]} />
-          <CodeButton elements={[element]} />
+          <BoldButton element={element} />
+          <ItalicButton element={element} />
+          <StrikeButton element={element} />
+          <UnderlineButton element={element} />
+          <CodeButton element={element} />
         </BubbleMenu>
       )}
     </div>
