@@ -12,6 +12,7 @@ import {
   TextEditorCommand,
 } from './main';
 import { ProjectorPointerStyle } from './projector';
+import { WebviewSettings } from './main';
 
 /**
  * Messages from the extension to webviews
@@ -54,8 +55,8 @@ type AllExtensionToWebviewMessage =
       type: 'viewportUpdate';
       viewport: { top: number; left: number; height: number; width: number };
     }
-  | { type: 'goToElement'; elementId: string };
-
+  | { type: 'goToElement'; elementId: string }
+  | { type: 'settingsChanged'; settings: WebviewSettings };
 /**
  * Messages from the webviews to the extension
  * This is a utility type that allows specifing the type of the message and getting the corresponding content type
@@ -80,14 +81,16 @@ type AllWebviewToExtensionMessage =
   | { type: 'toggleElementSelection'; ids: string[] }
   | { type: 'selectTool'; tool: EditorTool }
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
+  | {
+      type: 'updateElementsLayout';
+      changes: {
+        id: string;
+        changes: Partial<ElementLayout>;
+        aspectRatio?: number;
+      }[];
+    } // Update the Layout when Element was moved or resized, array can handle one or more elements
   | AddElementMessage
   | { type: 'deleteElement'; id: string }
-  | {
-      type: 'updateElementLayout';
-      id: string;
-      changes: Partial<ElementLayout>;
-      aspectRatio?: number;
-    } // Update the Layout when Element was moved or resized
   | { type: 'updateElement'; id: string; changes: Partial<EditorElement> } // Update element with it's settings
   | { type: 'textEditorCommand'; command: TextEditorCommand }
   | { type: 'addImageFromFile' }

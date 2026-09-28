@@ -1,5 +1,6 @@
 .editor-canvas {
   position: relative;
+  isolation: isolate;
   width: calc(var(--spacing-editor) * var(--editor-columns));
   display: grid;
   grid-template-columns: repeat(var(--editor-columns), var(--spacing-editor));

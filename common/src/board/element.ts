@@ -35,7 +35,7 @@ export type ElementLayout = {
   width: number;
 
   rotation?: number;
-  //z-index?: number;
+  zIndex?: number;
 };
 
 export type ElementStyle = {

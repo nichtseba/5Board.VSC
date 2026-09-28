@@ -1,5 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { EditorToolId, ProjectorPointerStyle, computeHeadingNumbers } from '5board.vsc-common';
+import {
+  DEFAULT_GRID_SETTINGS,
+  EditorToolId,
+  ProjectorPointerStyle,
+  computeHeadingNumbers,
+} from '5board.vsc-common';
+import { useEffect, useMemo, useRef, type CSSProperties, useState } from 'react';
 import EditorElement from './EditorElement';
 import { HeadingNumberingProvider } from '../../providers/HeadingNumberingContext';
 import ProjectorMouse, { ProjectorCursor } from '../projector/ProjectorMouse';
@@ -12,6 +17,7 @@ import { useImageImport } from './logic/useImageImport';
 import { CanvasTools } from './tools/CanvasTools';
 import FreehandPreviewOverlay, { FreehandPreview } from './tools/FreehandPreviewOverlay';
 import { useBoardDocument } from '../../providers/BoardDocumentProvider';
+import GroupInteractionController from './elementInteraction/GroupInteractionController';
 import { useCanvasPointer } from './logic/useCanvasPointer';
 import { useMarqueeSelection } from './logic/useMarqueeSelection';
 import { MarqueeOverlay } from './logic/MarqueeOverlay';
@@ -37,6 +43,7 @@ export default function EditorCanvas({
   const pointerHandlers = useCanvasPointer();
 
   const document = useBoardDocument();
+  const grid = document?.content.grid ?? DEFAULT_GRID_SETTINGS;
   const editorState = useEditorState();
 
   const elements = document?.content.elements ?? [];
@@ -131,13 +138,14 @@ export default function EditorCanvas({
     <HeadingNumberingProvider value={headingNumbers}>
       <div
         ref={canvasRef}
-        className={`
-          editor-canvas
-           bg-editor-background 
-           select-none
-           ${activeToolId === EditorToolId.SPACER ? 'cursor-row-resize' : ''} 
-           `}
-        style={{ position: 'relative' }}
+        className={`editor-canvas bg-editor-background select-none ${activeToolId === EditorToolId.SPACER ? 'cursor-row-resize' : ''}`}
+        style={
+          {
+            position: 'relative',
+            '--spacing-editor': `${grid.cellSize}px`,
+            '--editor-columns': String(grid.columnCount),
+          } as CSSProperties
+        }
         {...pointerHandlers}
         {...imageImportHandlers}
       >
@@ -148,9 +156,14 @@ export default function EditorCanvas({
             key={element.id}
             element={element}
             selected={selectedElementIds.includes(element.id)}
+            grouped={selectedElementIds.length > 1}
             assetUrls={assetUrls}
           />
         ))}
+
+        {activeToolId === EditorToolId.POINTER && selectedElementIds.length > 1 && (
+          <GroupInteractionController elements={elements} selectedElementIds={selectedElementIds} />
+        )}
 
         {/* Cursor overlay — only rendered in the projector via the cursor prop */}
         <ProjectorMouse cursor={cursor ?? null} style={pointerStyle} />
