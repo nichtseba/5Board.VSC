@@ -9,6 +9,7 @@ import { CodeElement } from './elements/CodeElement';
 import { ImageElement } from './elements/ImageElement';
 import { LineElement } from './elements/LineElement';
 import { FreehandElement } from './elements/FreehandElement';
+import { TableOfContentsElement } from './elements/TableOfContentsElement';
 import { useEditorState } from '../../providers/EditorStateProvider';
 import { useMessageService } from '../../services/MessageService';
 import { useBoardDocument } from '../../providers/BoardDocumentProvider';
@@ -222,6 +223,7 @@ const ELEMENT_COMPONENTS = {
   [EditorElementType.Circle]: CircleElement,
   [EditorElementType.Line]: LineElement,
   [EditorElementType.Freehand]: FreehandElement,
+  [EditorElementType.TableOfContents]: TableOfContentsElement,
 } as const satisfies {
   [ElementType in EditorElementType]: React.ComponentType<EditorElementProps<ElementType>>;
 };
