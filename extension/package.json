@@ -206,7 +206,7 @@
         },
         "5board-vsc.grid.columnCount": {
           "type": "integer",
-          "default": 40,
+          "default": 50,
           "minimum": 1,
           "scope": "window",
           "order": 40,
@@ -215,7 +215,6 @@
         "5board-vsc.colorPalette.customColors": {
           "type": "array",
           "default": [],
-          "maxItems": 3,
           "uniqueItems": true,
           "scope": "window",
           "items": {

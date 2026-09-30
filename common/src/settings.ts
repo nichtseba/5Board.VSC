@@ -5,7 +5,7 @@ export interface GridSettings {
 
 export const DEFAULT_GRID_SETTINGS: GridSettings = {
   cellSize: 16,
-  columnCount: 40,
+  columnCount: 50,
 };
 
 export interface ColorPaletteSettings {
