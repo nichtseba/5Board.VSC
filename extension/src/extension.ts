@@ -3,7 +3,7 @@ import { FiveBoardExtension } from './FiveBoardExtension';
 
 export const EXTENSION = new FiveBoardExtension();
 
-export function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext): void {
   EXTENSION.activate(context);
 }
 

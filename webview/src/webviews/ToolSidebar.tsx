@@ -25,7 +25,7 @@ import LineStyleSelect from '../components/sidebar/components/LineStyleSelect';
 import { useMessageService } from '../services/MessageService';
 import { useEditorState } from '../providers/EditorStateProvider';
 import { NewElements } from '../components/sidebar/newElements/NewElements';
-import { NewCustomElements } from '../components/sidebar/newElements/NewCustomElements';
+import { PresetElements } from '../components/sidebar/newElements/PresetElements';
 
 export default function ToolSidebar() {
   const { t } = useLocalization();
@@ -46,9 +46,25 @@ export default function ToolSidebar() {
   const handleToolClick = (tool: EditorTool) => {
     if (tool.type === selectedTool?.type) {
       if (tool.type === EditorToolId.AddElement) {
+        const nextParameters = tool.parameters as AddElementToolParameters;
+        const selectedParameters = selectedTool.parameters as AddElementToolParameters;
+
         if (
-          (tool.parameters as AddElementToolParameters).type ===
-          (selectedTool.parameters as AddElementToolParameters).type
+          nextParameters.type === selectedParameters.type &&
+          nextParameters.presetId === selectedParameters.presetId
+        ) {
+          return;
+        }
+      } else if (tool.type === EditorToolId.FREEHAND) {
+        const nextParameters = tool.parameters as FreehandToolParameters;
+        const selectedParameters = selectedTool.parameters as FreehandToolParameters;
+
+        if (
+          nextParameters?.color === selectedParameters?.color &&
+          nextParameters?.width === selectedParameters?.width &&
+          nextParameters?.opacity === selectedParameters?.opacity &&
+          nextParameters?.lineStyle === selectedParameters?.lineStyle &&
+          nextParameters?.dashScale === selectedParameters?.dashScale
         ) {
           return;
         }
@@ -57,9 +73,17 @@ export default function ToolSidebar() {
       }
     }
 
-    if (tool.type === EditorToolId.FREEHAND) tool.parameters = freehandParams;
+    if (tool.type === EditorToolId.FREEHAND && !tool.parameters) {
+      tool.parameters = freehandParams;
+    }
     messages.send({ type: 'selectTool', tool });
   };
+
+  useEffect(() => {
+    if (selectedTool?.type === EditorToolId.FREEHAND && selectedTool.parameters) {
+      setFreehandParams(selectedTool.parameters as FreehandToolParameters);
+    }
+  }, [selectedTool]);
 
   // Patch freehand params and, while the tool is active, re-send it live.
   const updateFreehand = (patch: Partial<FreehandToolParameters>) => {
@@ -92,8 +116,6 @@ export default function ToolSidebar() {
               </Button>
             ))}
         </div>
-        <NewElements handleToolClick={handleToolClick} />
-        <NewCustomElements handleToolClick={handleToolClick} />
         {/* Freehand options — only shown while the freehand tool is active */}
         {freehandSelected && (
           <section className="mt-6 flex flex-col gap-2">
@@ -169,6 +191,8 @@ export default function ToolSidebar() {
             )}
           </section>
         )}
+        <NewElements handleToolClick={handleToolClick} />
+        <PresetElements handleToolClick={handleToolClick} />
       </SidebarShell>
     </>
   );

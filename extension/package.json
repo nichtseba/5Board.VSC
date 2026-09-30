@@ -72,7 +72,7 @@
         {
           "id": "5board-vsc-activitybar",
           "title": "5Board",
-          "icon": "./media/sidebar-icon.png"
+          "icon": "./media/logo.png"
         }
       ]
     },
@@ -137,6 +137,21 @@
         "title": "%commands.goToElement%"
       },
       {
+        "command": "5board-vsc.savePreset",
+        "title": "%commands.savePreset%",
+        "icon": "$(save)"
+      },
+      {
+        "command": "5board-vsc.deletePreset",
+        "title": "%commands.deletePreset%",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "5board-vsc.revealPresetsFile",
+        "title": "%commands.revealPresetsFile%",
+        "icon": "$(folder-opened)"
+      },
+      {
         "command": "5board-vsc.copy",
         "title": "%commands.copy%"
       },
@@ -182,6 +197,11 @@
           "command": "5board-vsc.startPresentation",
           "when": "view == 5board-vsc.sidebar-tool-view",
           "group": "navigation@4"
+        },
+        {
+          "command": "5board-vsc.savePreset",
+          "when": "view == 5board-vsc.sidebar-element-settings-view",
+          "group": "navigation"
         }
       ]
     },

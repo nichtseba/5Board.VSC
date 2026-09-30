@@ -1,4 +1,4 @@
-import { EditorElement, EditorElementType, ElementLayout } from '5board.vsc-common';
+import { EditorElement, EditorElementType, ElementLayout, ElementStyle } from '5board.vsc-common';
 import { RectangleElement } from '../../elements/RectangleElement';
 import { CircleElement } from '../../elements/CircleElement';
 import { LineElement } from '../../elements/LineElement';
@@ -8,18 +8,25 @@ type ClickOverlayProps = {
   layout: ElementLayout;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;
+  style?: Partial<ElementStyle>;
   cellSize: {
     width: number;
     height: number;
   };
 };
 
-export default function ClickOverlay({ elementType, layout, data, cellSize }: ClickOverlayProps) {
+export default function ClickOverlay({
+  elementType,
+  layout,
+  data,
+  style,
+  cellSize,
+}: ClickOverlayProps) {
   const element = {
     id: '__click-preview__',
     type: elementType,
     layout,
-    style: {
+    style: style ?? {
       visible: true,
       opacity: 0.4,
       color: '#AAAAAA',

@@ -33,7 +33,7 @@ export function createDefaultElement<T extends EditorElementType>(
       src: assetName,
       title: imageData.title ?? assetName,
       altText: imageData.altText ?? assetName,
-      configuredWidth: false,
+      configuredWidth: true,
     });
   }
 

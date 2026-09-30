@@ -33,8 +33,14 @@ export function NewElements({ handleToolClick }: newElementProps) {
   useEffect(() => {
     if (editorState?.tool.type !== EditorToolId.AddElement) {
       setSelectedElement(undefined);
+    } else if (
+      editorState?.tool.type === EditorToolId.AddElement &&
+      editorState?.tool?.parameters &&
+      'type' in editorState?.tool?.parameters
+    ) {
+      setSelectedElement(editorState?.tool?.parameters?.type as EditorElementType);
     }
-  }, [editorState?.tool.type]);
+  }, [editorState?.tool.type, editorState?.tool?.parameters]);
 
   useEffect(() => {
     if (!showTocNotice) return;
@@ -43,9 +49,7 @@ export function NewElements({ handleToolClick }: newElementProps) {
     return () => window.clearTimeout(timer);
   }, [showTocNotice]);
 
-  const addableElements = Object.entries(ELEMENT_TYPE_DEFINITIONS).filter(
-    ([, definition]) => definition.category === 'basic',
-  );
+  const addableElements = Object.entries(ELEMENT_TYPE_DEFINITIONS);
 
   const handleElementClick = (
     elementType: EditorElementType,
