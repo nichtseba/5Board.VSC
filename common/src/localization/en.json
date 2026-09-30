@@ -196,6 +196,7 @@
         "symbols": "Symbols",
         "borderColor": "Border color",
         "borderWidth": "Border width",
+        "borderRadius": "Border radius",
         "borderStyle": "Border style",
         "startHead": "Start head",
         "endHead": "End head",

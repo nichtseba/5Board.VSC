@@ -196,6 +196,7 @@
         "symbols": "Symbole",
         "borderColor": "Rahmenfarbe",
         "borderWidth": "Rahmenbreite",
+        "borderRadius": "Rahmenradius",
         "borderStyle": "Rahmenstil",
         "startHead": "Startsymbol",
         "endHead": "Endsymbol",
