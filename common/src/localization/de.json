@@ -9,6 +9,12 @@
       "createFile": "Erstelle 5Board Datei",
       "createFileFailed": "Fehler beim Erstellen der 5Board Datei:"
     },
+    "htmlExport": {
+      "noActiveBoard": "Öffne eine .5boardz-Datei oder speichere die aktuelle Datei.",
+      "saveLabel": "HTML-Export speichern",
+      "saved": "HTML-Export gespeichert:",
+      "openContainingFolder": "Im Ordner anzeigen"
+    },
     "projector": {
       "startPresentation": "Beameransicht starten",
       "title": "Beameransicht",
@@ -118,6 +124,10 @@
       "paste": "Einfügen",
       "stopEditing": "Bearbeiten beenden"
     },
+    "exportPreview": {
+      "saveHtml": "HTML speichern",
+      "loading": "Vorschau wird geladen..."
+    },
     "sidebar": {
       "title": "5Board Seitenleiste",
       "tools": {
@@ -134,7 +144,8 @@
         "rectangle": "Rechteck",
         "circle": "Kreis",
         "line": "Linie",
-        "freehand": "Freihand"
+        "freehand": "Freihand",
+        "tableOfContents": "Inhaltsverzeichnis"
       },
       "projectorSettings": {
         "title": "Beameransicht-Einstellungen",
@@ -192,7 +203,8 @@
         "addSettings": "Einstellungen hinzufügen für "
       },
       "addElement": "Element hinzufügen",
-      "addCustomElement": "Custom Element hinzufügen"
+      "addCustomElement": "Custom Element hinzufügen",
+      "tableOfContentsAlreadyExists": "Es existiert bereits ein Inhaltsverzeichnis."
     },
     "sidebar-element-settings": {
       "noElementSelected": "Kein Element ausgewählt",
@@ -237,6 +249,9 @@
         "resetOutput": "Ausgabe zurücksetzen"
       },
       "layer": "Ebene",
+      "tableOfContentsSettings": {
+        "title": "Inhaltsverzeichnis"
+      },
       "textSettings": {
         "title": "Text",
         "textColor": "Textfarbe",

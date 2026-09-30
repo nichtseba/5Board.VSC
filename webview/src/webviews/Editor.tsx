@@ -27,7 +27,7 @@ export default function Editor() {
           <ExecutionOutputProvider>
             <SourcesProvider value={boardDocument.sources}>
               <CanvasEventsProvider>
-                <EditorCanvas />
+                <EditorCanvas enableKeyboardShortcuts />
                 <ProjectorCursorMirror />
                 <ProjectorScrollMirror />
               </CanvasEventsProvider>

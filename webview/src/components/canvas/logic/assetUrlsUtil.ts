@@ -1,23 +1,20 @@
 import { Asset } from '5board.vsc-common';
 
-// Creates temporary blob URLs for assets so image elements can render images from assets folder
+// Converts asset bytes to Base64 data URLs so image elements can render embedded assets
 export function createAssetUrls(assets: Asset[]): Record<string, string> {
   return Object.fromEntries(
     assets.map((asset) => {
       const bytes = toUint8Array(asset.bytes);
-      const blob = new Blob([
-        bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer,
-      ]);
-      const url = URL.createObjectURL(blob);
+      let binary = '';
+      const chunkSize = 0x8000;
 
-      return [asset.name, url];
+      for (let index = 0; index < bytes.length; index += chunkSize) {
+        binary += String.fromCharCode(...bytes.subarray(index, index + chunkSize));
+      }
+
+      return [asset.name, `data:;base64,${btoa(binary)}`];
     }),
   );
-}
-
-// Releases previously created blob URLs to avoid keeping unused asset data in memory
-export function revokeAssetUrls(assetUrls: Record<string, string>): void {
-  Object.values(assetUrls).forEach((url) => URL.revokeObjectURL(url));
 }
 
 // Normalizes asset bytes after they crossed the extension/webview message boundary

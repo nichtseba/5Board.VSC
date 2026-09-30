@@ -166,6 +166,7 @@ export default function Projector() {
             <SourcesProvider value={boardDocument.sources}>
               <CanvasEventsProvider>
                 <EditorCanvas
+                  enableKeyboardShortcuts={false}
                   cursor={cursor}
                   pointerStyle={pointerStyle}
                   freehandPreview={freehandPreview}

@@ -9,6 +9,12 @@
       "createFile": "Create 5Board file",
       "createFileFailed": "Failed to create 5Board file:"
     },
+    "htmlExport": {
+      "noActiveBoard": "Open a .5boardz file or save current file.",
+      "saveLabel": "Save HTML Export",
+      "saved": "HTML export saved:",
+      "openContainingFolder": "Open in file system"
+    },
     "projector": {
       "startPresentation": "Start Presentation",
       "title": "Projector",
@@ -118,6 +124,10 @@
       "paste": "Paste",
       "stopEditing": "Stop Editing"
     },
+    "exportPreview": {
+      "saveHtml": "Save HTML",
+      "loading": "Loading preview..."
+    },
     "sidebar": {
       "title": "5Board Sidebar",
       "tools": {
@@ -134,7 +144,8 @@
         "rectangle": "Rectangle",
         "circle": "Circle",
         "line": "Line",
-        "freehand": "Freehand"
+        "freehand": "Freehand",
+        "tableOfContents": "Table of Contents"
       },
       "projectorSettings": {
         "title": "Projector Settings",
@@ -192,7 +203,8 @@
         "addSettings": "Add Settings for "
       },
       "addElement": "Add Element",
-      "addCustomElement": "Add Custom Element"
+      "addCustomElement": "Add Custom Element",
+      "tableOfContentsAlreadyExists": "A table of contents already exists."
     },
     "sidebar-element-settings": {
       "noElementSelected": "No element selected",
@@ -237,6 +249,9 @@
         "resetOutput": "Reset output"
       },
       "layer": "Layer",
+      "tableOfContentsSettings": {
+        "title": "Table of Contents"
+      },
       "textSettings": {
         "title": "Text",
         "textColor": "Text Color",

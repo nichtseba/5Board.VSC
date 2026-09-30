@@ -47,6 +47,16 @@
         ]
       },
       {
+        "viewType": "5board-vsc.exportPreview",
+        "displayName": "%customEditors.exportPreview%",
+        "selector": [
+          {
+            "filenamePattern": "*.5boardz"
+          }
+        ],
+        "priority": "option"
+      },
+      {
         "viewType": "5board-vsc.projector",
         "displayName": "%customEditors.projector%",
         "selector": [
@@ -128,6 +138,11 @@
         "category": "5Board"
       },
       {
+        "command": "5board-vsc.previewHtmlExport",
+        "title": "%commands.previewHtmlExport%",
+        "icon": "$(file-code)"
+      },
+      {
         "command": "5board-vsc.goToElement",
         "title": "%commands.goToElement%"
       },
@@ -140,6 +155,18 @@
         "command": "5board-vsc.addImageFromFile",
         "title": "%commands.addImageFromFile%",
         "icon": "$(file-media)"
+      },
+      {
+        "command": "5board-vsc.copy",
+        "title": "%commands.copy%"
+      },
+      {
+        "command": "5board-vsc.paste",
+        "title": "%commands.paste%"
+      },
+      {
+        "command": "5board-vsc.duplicate",
+        "title": "%commands.duplicate%"
       },
       {
         "command": "5board-vsc.openSettings",
@@ -170,14 +197,19 @@
           "group": "navigation@1"
         },
         {
-          "command": "5board-vsc.newBoard",
+          "command": "5board-vsc.previewHtmlExport",
           "when": "view == 5board-vsc.sidebar-tool-view",
           "group": "navigation@2"
         },
         {
-          "command": "5board-vsc.startPresentation",
+          "command": "5board-vsc.newBoard",
           "when": "view == 5board-vsc.sidebar-tool-view",
           "group": "navigation@3"
+        },
+        {
+          "command": "5board-vsc.startPresentation",
+          "when": "view == 5board-vsc.sidebar-tool-view",
+          "group": "navigation@4"
         }
       ]
     },
@@ -198,13 +230,6 @@
           "scope": "machine",
           "order": 11,
           "description": "%configuration.python.path.description%"
-        },
-        "5board-vsc.presets.directoryPath": {
-          "type": "string",
-          "default": "",
-          "scope": "machine",
-          "order": 20,
-          "description": "%configuration.presets.directoryPath.description%"
         },
         "5board-vsc.grid.cellSize": {
           "type": "integer",

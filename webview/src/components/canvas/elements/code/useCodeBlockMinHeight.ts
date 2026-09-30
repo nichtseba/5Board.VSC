@@ -42,7 +42,10 @@ export function useCodeBlockMinHeight(
     if (!canGrow || cellSize.height <= 1) return;
     const minRows = Math.ceil(minHeight / cellSize.height);
     if (minRows > layout.height) {
-      messages.send({ type: 'updateElementLayout', id, changes: { height: minRows } });
+      messages.send({
+        type: 'updateElementsLayout',
+        changes: [{ id, changes: { height: minRows } }],
+      });
     }
   }, [minHeight, cellSize.height, layout.height, canGrow, id, messages, onMinHeightChange]);
 

@@ -18,6 +18,7 @@ import {
   SUPPORTED_LANGUAGES,
 } from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
+import { ExportPreviewProvider } from './providers/ExportPreviewProvider';
 import { ProjectorProvider } from './providers/ProjectorProvider';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { PackageManager } from './PackageManager';
@@ -27,6 +28,7 @@ import { getConfiguredHome, watchToolchainSettings } from './config';
 import { SettingsService } from './SettingsService';
 import { createDefaultElement } from './board/addElement/createDefaultElement';
 import { findCodeElement, updateBlockCode } from './board/CodeblockSourceService';
+import { ElementClipboardService } from './ElementClipboardService';
 
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
@@ -34,6 +36,9 @@ export class FiveBoardExtension extends ExtensionBase {
   public readonly settingsService = new SettingsService();
   private openDocuments = new Map<string, BoardCustomDocument>();
   private toolchainOutput?: vscode.OutputChannel;
+  private readonly elementClipboard = new ElementClipboardService((uri) =>
+    this.getDocumentForUri(uri),
+  );
 
   public registerDocument(document: BoardCustomDocument): void {
     if (!this.openDocuments.has(document.uri.toString())) {
@@ -110,6 +115,7 @@ export class FiveBoardExtension extends ExtensionBase {
       }),
     );
     new FiveBoardFileSystemProvider(this.packageManager).register(context);
+    new ExportPreviewProvider(context, this.packageManager).register();
   }
 
   @Command('5board-vsc.newBoard')
@@ -211,6 +217,33 @@ export class FiveBoardExtension extends ExtensionBase {
     });
   }
 
+  @Command('5board-vsc.copy')
+  async copyEditorElements(): Promise<void> {
+    const document = this.activeEditorDocument;
+    if (!document) {
+      return;
+    }
+    await this.elementClipboard.copy(document);
+  }
+
+  @Command('5board-vsc.paste')
+  async pasteEditorElements(): Promise<void> {
+    const document = this.activeEditorDocument;
+    if (!document) {
+      return;
+    }
+    await this.elementClipboard.paste(document);
+  }
+
+  @Command('5board-vsc.duplicate')
+  duplicateEditorElements(): void {
+    const document = this.activeEditorDocument;
+    if (!document) {
+      return;
+    }
+    this.elementClipboard.duplicate(document);
+  }
+
   @Command('5board-vsc.addNewEditorElement')
   addNewEditorElement(
     type: EditorElementType,
@@ -271,6 +304,23 @@ export class FiveBoardExtension extends ExtensionBase {
     await vscode.commands.executeCommand(
       'workbench.action.openSettings',
       '@ext:undefined_publisher.5board-vsc',
+    );
+  }
+
+  @Command('5board-vsc.previewHtmlExport')
+  async previewHtmlExportCommand(): Promise<void> {
+    const uri = this.activeEditorDocument?.uri;
+
+    if (!uri) {
+      vscode.window.showErrorMessage(t('extension.htmlExport.noActiveBoard'));
+      return;
+    }
+
+    await vscode.commands.executeCommand(
+      'vscode.openWith',
+      uri,
+      ExportPreviewProvider.VIEW_TYPE,
+      vscode.ViewColumn.Beside,
     );
   }
 

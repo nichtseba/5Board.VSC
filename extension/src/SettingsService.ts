@@ -9,13 +9,8 @@ export interface JavaSettings {
   home: string;
 }
 
-export interface PresetSettings {
-  directoryPath: string;
-}
-
 export interface FiveBoardSettings {
   java: JavaSettings;
-  presets: PresetSettings;
   grid: GridSettings;
   colorPalette: ColorPaletteSettings;
 }
@@ -41,9 +36,6 @@ export class SettingsService implements vscode.Disposable {
     return {
       java: {
         home: configuration.get<string>('java.home', ''),
-      },
-      presets: {
-        directoryPath: configuration.get<string>('presets.directoryPath', ''),
       },
       grid: {
         cellSize: configuration.get<number>('grid.cellSize', DEFAULT_GRID_SETTINGS.cellSize),

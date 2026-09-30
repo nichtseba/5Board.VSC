@@ -15,12 +15,18 @@ import { useLocalization } from '../../../providers/LocalizationProvider';
 import { useMessageService } from '../../../services/MessageService';
 
 type Props = {
-  element: EditorElement<EditorElementType.Code>;
+  elements: EditorElement<EditorElementType.Code>[];
 };
 
 const NONE = '';
 
-export function CodeSettings({ element }: Props) {
+export function CodeSettings({ elements }: Props) {
+  // Class, language and output are per block, so settings only apply to a single selection.
+  if (elements.length !== 1) return null;
+  return <SingleCodeSettings element={elements[0]} />;
+}
+
+function SingleCodeSettings({ element }: { element: EditorElement<EditorElementType.Code> }) {
   const { t } = useLocalization();
   const messages = useMessageService();
   const document = useBoardDocument();
@@ -60,12 +66,11 @@ export function CodeSettings({ element }: Props) {
     messages.send({ type: 'moveBlock', elementId: element.id, language: selected });
   };
 
-  // updateElement merges shallowly, so always send the whole style object.
+  // updateElements merges shallowly, so always send the whole style object.
   const updateStyle = (patch: Partial<ElementStyle>) => {
     messages.send({
-      type: 'updateElement',
-      id: element.id,
-      changes: { style: { ...element.style, ...patch } },
+      type: 'updateElements',
+      changes: [{ id: element.id, changes: { style: { ...element.style, ...patch } } }],
     });
   };
   const hasColorOverride =

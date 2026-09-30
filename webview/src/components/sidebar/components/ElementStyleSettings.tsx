@@ -15,6 +15,7 @@ import { useLocalization } from '../../../providers/LocalizationProvider';
 type Props = {
   style: ElementStyle;
   onChange: (changes: Partial<ElementStyle>) => void;
+  allowNone?: boolean;
   /** Controls which individual style controls are displayed. Defaults to all. */
   editableProperties?: readonly ElementStyleEditableProperty[];
 };
@@ -29,12 +30,17 @@ export type ElementStyleEditableProperty =
 
 const BORDER_LINE_STYLES = FREEHAND_LINE_STYLES.filter(({ id }) => id !== 'custom');
 
-export default function ElementStyleSettings({ style, onChange, editableProperties }: Props) {
+export default function ElementStyleSettings({
+  style,
+  onChange,
+  allowNone = false,
+  editableProperties,
+}: Props) {
   const { t } = useLocalization();
-  const color = style.color ?? FREEHAND_COLORS[0].value;
-  const backgroundColor = style.backgroundColor ?? color;
+  const color = style.color;
+  const backgroundColor = style.backgroundColor;
   const border = style.border ?? {};
-  const borderColor = border.color ?? color;
+  const borderColor = border.color;
   const borderWidth = border.width ?? 2;
   const borderStyle = border.style ?? 'solid';
   const opacity = style.opacity ?? 1;
@@ -45,6 +51,7 @@ export default function ElementStyleSettings({ style, onChange, editableProperti
     onChange({ border: { ...border, ...changes } });
 
   const colorPresets = FREEHAND_COLORS.map((preset) => ({
+    id: preset.id,
     value: preset.value,
     label: t(`webview.sidebar.freehand.colors.${preset.id}` as TranslationKey),
   }));
@@ -64,6 +71,7 @@ export default function ElementStyleSettings({ style, onChange, editableProperti
       {isEditable('backgroundColor') && (
         <ColorSelector
           color={backgroundColor}
+          allowNone={allowNone}
           onChange={(value) => onChange({ backgroundColor: value })}
           presets={colorPresets}
           label={t('webview.sidebar-element-settings.headingSettings.backgroundColor')}
@@ -86,6 +94,7 @@ export default function ElementStyleSettings({ style, onChange, editableProperti
       {isEditable('borderColor') && (
         <ColorSelector
           color={borderColor}
+          allowNone={allowNone}
           onChange={(value) => updateBorder({ color: value })}
           presets={colorPresets}
           label={t('webview.sidebar-element-settings.lineSettings.borderColor')}

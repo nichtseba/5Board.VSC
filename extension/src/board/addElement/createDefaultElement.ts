@@ -10,7 +10,7 @@ import {
   ImageElementData,
   sanitizeClassName,
 } from '5board.vsc-common';
-import { addImageAsset } from './addImageToDocument';
+import { addImageAsset } from './addImageAsset';
 import { nextCodeBlockId } from '../CodeblockSourceService';
 
 export function createDefaultElement<T extends EditorElementType>(
