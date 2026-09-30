@@ -14,6 +14,7 @@ import {
 } from '5board.vsc-common';
 import AddOverlay from './AddOverlay';
 import { useEditorState } from '../../../../providers/EditorStateProvider';
+import { useBoardDocument } from '../../../../providers/BoardDocumentProvider';
 /**
  * DragAddTool
  *
@@ -25,6 +26,7 @@ export function DragAddTool() {
   const messages = useMessageService();
   const { cellSize, metrics } = useGrid();
   const editorState = useEditorState();
+  const boardDocument = useBoardDocument();
 
   const elementType = (editorState.tool as EditorTool<EditorToolId.AddElement>).parameters?.type;
   const defaults = (editorState.tool as EditorTool<EditorToolId.AddElement>).parameters?.defaults;
@@ -86,11 +88,15 @@ export function DragAddTool() {
     };
   }, [previewImageUrl]);
 
-  const elementWidth = elementType
-    ? (defaults?.layout?.width ??
-      imageSize?.width ??
-      DEFAULT_ELEMENT_PROFILES[elementType].layout.width)
-    : 1;
+  const elementWidth =
+    elementType === EditorElementType.Heading
+      ? (boardDocument?.content.grid?.columnCount ??
+        DEFAULT_ELEMENT_PROFILES[EditorElementType.Heading].layout.width)
+      : elementType
+        ? (defaults?.layout?.width ??
+          imageSize?.width ??
+          DEFAULT_ELEMENT_PROFILES[elementType].layout.width)
+        : 1;
   const elementHeight = elementType
     ? (defaults?.layout?.height ??
       imageSize?.height ??
