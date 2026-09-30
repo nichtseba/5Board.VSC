@@ -11,7 +11,7 @@ import Moveable, {
   OnRotateEnd,
 } from 'react-moveable';
 import { useMessageService } from '../../../services/MessageService';
-import { snapTranslationToGrid } from './interactionUtils';
+import { constrainTranslation, snapTranslationToGrid } from './interactionUtils';
 
 type Props<T extends EditorElementType> = {
   element: EditorElement<T>;
@@ -109,7 +109,8 @@ export default function ElementInteractionController<ElementType extends EditorE
 
   const handleDragEnd = ({ target, lastEvent }: OnDragEnd) => {
     if (!lastEvent || !target) return;
-    const [dx, dy] = lastEvent.beforeTranslate;
+    const [rawX, rawY] = lastEvent.beforeTranslate;
+    const [dx, dy] = constrainTranslation(element.type, rawX, rawY);
     const [rawXDelta, yDelta] = snapTranslationToGrid(dx, dy, cellSize);
     const xPos = clampHorizontalPosition(element.layout.xPos + rawXDelta, element.layout.width);
     const xDelta = xPos - element.layout.xPos;
