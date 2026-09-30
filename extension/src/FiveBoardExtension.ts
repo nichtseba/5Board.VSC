@@ -33,6 +33,7 @@ import { ElementClipboardService } from './ElementClipboardService';
 export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
   private presetProvider!: PresetProvider;
+  private presetsReady = Promise.resolve();
   public readonly packageManager = new PackageManager();
   public readonly settingsService = new SettingsService();
   private openDocuments = new Map<string, BoardCustomDocument>();
@@ -99,13 +100,12 @@ export class FiveBoardExtension extends ExtensionBase {
     super();
   }
 
-  public async activate(context: vscode.ExtensionContext): Promise<void> {
+  public activate(context: vscode.ExtensionContext): void {
     super.activate(context);
     this.presetProvider = new PresetProvider(context.globalStorageUri);
-    this.editorState_ = {
-      tool: { type: DEFAULT_TOOL_ID, parameters: undefined },
-      presets: await this.presetProvider.loadPresets(),
-    };
+    this.presetsReady = this.presetProvider.loadPresets().then((presets) => {
+      this.editorState = { presets };
+    });
     context.subscriptions.push(this.settingsService);
     new EditorEditorProvider(context, this.packageManager).register();
     new ProjectorProvider(context).register();
@@ -180,6 +180,7 @@ export class FiveBoardExtension extends ExtensionBase {
 
   @Command('5board-vsc.savePreset')
   async savePresetCommand(): Promise<void> {
+    await this.presetsReady;
     const activeDocument = this.activeEditorDocument;
     if (!activeDocument) {
       vscode.window.showWarningMessage(t('extension.presets.noElementSelected'));
@@ -255,6 +256,7 @@ export class FiveBoardExtension extends ExtensionBase {
 
   @Command('5board-vsc.deletePreset')
   async deletePreset(id?: string): Promise<void> {
+    await this.presetsReady;
     let presetId = id;
     if (!presetId) {
       const presets = this.editorState.presets;
@@ -279,6 +281,7 @@ export class FiveBoardExtension extends ExtensionBase {
   }
 
   async loadPresetAsset(id: string): Promise<void> {
+    await this.presetsReady;
     const preset = this.editorState.presets.find((candidate) => candidate.id === id);
     if (!preset) {
       return;
@@ -294,6 +297,7 @@ export class FiveBoardExtension extends ExtensionBase {
 
   @Command('5board-vsc.revealPresetsFile')
   async revealPresetsFile(): Promise<void> {
+    await this.presetsReady;
     await this.presetProvider.revealPresetsFile(this.editorState.presets);
   }
 
