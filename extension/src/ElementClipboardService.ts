@@ -41,7 +41,11 @@ export class ElementClipboardService {
 
     try {
       const imageAssets = await this.getImageAssetsForPaste(payload, document);
-      this.insertClonedElements(document, payload.elements, imageAssets);
+      const pastedElementIds = this.insertClonedElements(document, payload.elements, imageAssets);
+      document.messageService.send({
+        type: 'goToElement',
+        elementId: pastedElementIds[0],
+      });
     } catch (error) {
       void vscode.window.showErrorMessage(`Image could not be inserted: ${String(error)}`);
     }
@@ -122,7 +126,7 @@ export class ElementClipboardService {
     document: BoardCustomDocument,
     elements: EditorElement[],
     imageAssets?: Map<string, Uint8Array>,
-  ): void {
+  ): string[] {
     const clones = structuredClone(elements).map((element) => ({
       ...element,
       id: crypto.randomUUID(),
@@ -150,5 +154,6 @@ export class ElementClipboardService {
       boardDocument.content.selectedElementIds = cloneIds;
       boardDocument.content.primarySelectedElementId = cloneIds[0] ?? null;
     });
+    return cloneIds;
   }
 }
