@@ -10,6 +10,7 @@ import { StructureTreeProvider } from '../providers/StructureTreeProvider';
 import { EXTENSION } from '../extension';
 import deepEquals from 'deep-equal';
 import { FileTreeProvider } from '../providers/FileTreeProvider';
+import { getElementSectionMap, reconcileElementRevealOrder } from '5board.vsc-common';
 
 export class SidebarManager implements vscode.Disposable {
   private readonly sync: SidebarDocumentSync;
@@ -126,6 +127,7 @@ export class SidebarManager implements vscode.Disposable {
         return;
       }
       EXTENSION.activeEditorDocument.applyEdit((document) => {
+        const previousSections = getElementSectionMap(document.content.elements);
         let changed = false;
 
         for (const update of msg.changes) {
@@ -184,6 +186,12 @@ export class SidebarManager implements vscode.Disposable {
             };
           });
           changed = true;
+        }
+        if (changed) {
+          document.content.elements = reconcileElementRevealOrder(
+            document.content.elements,
+            previousSections,
+          );
         }
         return changed;
       });

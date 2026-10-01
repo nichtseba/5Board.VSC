@@ -8,6 +8,7 @@ import {
   GridSettings,
   Source,
   create5boardzManifest,
+  normalizeElementRevealOrder,
 } from '5board.vsc-common';
 
 export const MANIFEST_PATH = 'manifest.json';
@@ -59,7 +60,9 @@ export class BoardPackage {
     return new BoardPackage(document);
   }
 
-  constructor(public document: BoardDocument) {}
+  constructor(public document: BoardDocument) {
+    document.content.elements = normalizeElementRevealOrder(document.content.elements);
+  }
 
   public async write(uri: vscode.Uri): Promise<void> {
     const zip = new JSZip();
