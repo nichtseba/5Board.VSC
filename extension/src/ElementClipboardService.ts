@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
 import { BoardPackage } from './board/package';
 import { addImageAsset } from './board/addElement/addImageAsset';
-import { EditorElement, EditorElementType } from '5board.vsc-common';
+import { EditorElement, EditorElementType, normalizeElementRevealOrder } from '5board.vsc-common';
 
 const ELEMENT_CLIPBOARD_MARKER = '5board-vsc.elements';
 
@@ -151,6 +151,7 @@ export class ElementClipboardService {
         };
       }
       boardDocument.content.elements.push(...clones);
+      boardDocument.content.elements = normalizeElementRevealOrder(boardDocument.content.elements);
       boardDocument.content.selectedElementIds = cloneIds;
       boardDocument.content.primarySelectedElementId = cloneIds[0] ?? null;
     });

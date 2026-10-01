@@ -18,6 +18,7 @@ import {
   Preset,
   ProjectorPointerStyle,
   createAddElementToolFromPreset,
+  normalizeElementRevealOrder,
 } from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
 import { ExportPreviewProvider } from './providers/ExportPreviewProvider';
@@ -344,6 +345,7 @@ export class FiveBoardExtension extends ExtensionBase {
     this.applyEditToActiveDocument((document) => {
       const element = createDefaultElement(type, position, defaults, document);
       document.content.elements.push(element);
+      document.content.elements = normalizeElementRevealOrder(document.content.elements);
     });
   }
 
