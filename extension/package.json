@@ -137,6 +137,14 @@
         "title": "%commands.goToElement%"
       },
       {
+        "command": "5board-vsc.renameStructureItem",
+        "title": "%commands.renameStructureItem%"
+      },
+      {
+        "command": "5board-vsc.revealNext",
+        "title": "%commands.revealNext%"
+      },
+      {
         "command": "5board-vsc.savePreset",
         "title": "%commands.savePreset%",
         "icon": "$(save)"
@@ -175,6 +183,12 @@
           "command": "5board-vsc.openBoardFile",
           "when": "resourceExtname == .5board || resourceExtname == .5boardz",
           "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "5board-vsc.renameStructureItem",
+          "when": "view == 5board-vsc.sidebar-structure-view && viewItem == structureElement"
         }
       ],
       "view/title": [

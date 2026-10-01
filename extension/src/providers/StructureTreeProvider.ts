@@ -80,6 +80,9 @@ class StructureNode extends vscode.TreeItem {
     }
     super(label, state);
     this.id = element.id;
+    if (!isHeadingElement(element)) {
+      this.contextValue = 'structureElement';
+    }
     this.command = {
       title: t('webview.sidebar.goToElement'),
       command: '5board-vsc.goToElement',

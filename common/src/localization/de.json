@@ -124,6 +124,7 @@
         }
       },
       "goToElement": "Gehe zu Element",
+      "renameElement": "Element umbenennen",
       "addElement": "Element hinzufügen",
       "presets": {
         "addCustomElement": "Preset auswählen",
