@@ -38,7 +38,26 @@ export class BoardPackage {
       assets,
     };
 
+    BoardPackage.applyFixes(document);
+
     return new BoardPackage(document);
+  }
+
+  private static applyFixes(document: BoardDocument): void {
+    // Implement any necessary fixes or adjustments to the document here
+    BoardPackage.fixDisplay(document);
+  }
+
+  private static fixDisplay(document: BoardDocument): void {
+    for (const element of document.content.elements) {
+      if (element.display === undefined) {
+        element.display = {
+          visible: true,
+          speakerNote: false,
+          excludeFromExport: false,
+        };
+      }
+    }
   }
 
   public static createEmpty(title: string, grid: GridSettings): BoardPackage {
