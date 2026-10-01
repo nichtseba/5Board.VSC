@@ -8,8 +8,8 @@ import { createExportCanvasHtml } from '../components/canvas/logic/exportUtils';
 import { Button } from 'vscrui';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
 import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
-import '../styles/ExportPreview.css';
 import { ViewTypeProvider } from '../providers/ViewTypeProvider';
+import '../styles/ExportPreview.css';
 
 export default function ExportPreview() {
   const messages = useMessageService();

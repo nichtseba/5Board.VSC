@@ -124,6 +124,7 @@
         }
       },
       "goToElement": "Go to element",
+      "renameElement": "Rename element",
       "addElement": "Add Element",
       "presets": {
         "presets": "Select Preset",

@@ -41,6 +41,9 @@ export interface BoardManifest {
 export interface BoardContent {
   selectedElementIds: string[];
   primarySelectedElementId: string | null;
+  /**
+   * The list of elements contained within the board document in reveal order.
+   */
   elements: BoardElement[];
   grid?: GridSettings;
   background?: string;

@@ -18,6 +18,7 @@ import {
   Preset,
   ProjectorPointerStyle,
   createAddElementToolFromPreset,
+  normalizeElementRevealOrder,
 } from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
 import { ExportPreviewProvider } from './providers/ExportPreviewProvider';
@@ -344,6 +345,7 @@ export class FiveBoardExtension extends ExtensionBase {
     this.applyEditToActiveDocument((document) => {
       const element = createDefaultElement(type, position, defaults, document);
       document.content.elements.push(element);
+      document.content.elements = normalizeElementRevealOrder(document.content.elements);
     });
   }
 
@@ -444,5 +446,59 @@ export class FiveBoardExtension extends ExtensionBase {
       return;
     }
     this.activeEditorDocument.messageService.send({ type: 'goToElement', elementId }, undefined);
+  }
+
+  @Command('5board-vsc.renameStructureItem')
+  public async renameStructureItem(item?: vscode.TreeItem): Promise<void> {
+    const activeDocument = this.activeEditorDocument;
+    const elementId = item?.id;
+    if (!activeDocument || !elementId) {
+      return;
+    }
+
+    const element = activeDocument.boardPackage.document.content.elements.find(
+      (candidate) => candidate.id === elementId,
+    );
+    if (!element || element.type === EditorElementType.Heading) {
+      return;
+    }
+
+    const name = await vscode.window.showInputBox({
+      title: t('webview.sidebar.renameElement'),
+      value: element.name ?? '',
+    });
+    if (name === undefined || this.activeEditorDocument !== activeDocument) {
+      return;
+    }
+
+    const currentElement = activeDocument.boardPackage.document.content.elements.find(
+      (candidate) => candidate.id === elementId,
+    );
+    if (
+      !currentElement ||
+      currentElement.type === EditorElementType.Heading ||
+      (name === '' ? currentElement.name === undefined : name === currentElement.name)
+    ) {
+      return;
+    }
+
+    this.applyEditToActiveDocument((document) => {
+      const target = document.content.elements.find((candidate) => candidate.id === elementId);
+      if (target && target.type !== EditorElementType.Heading) {
+        target.name = name || undefined;
+      }
+    });
+  }
+
+  @Command('5board-vsc.revealNext')
+  public revealNextCommand(): void {
+    this.applyEditToActiveDocument((document) => {
+      for (const element of document.content.elements) {
+        if (!element.display.visible && !element.display.speakerNote) {
+          element.display.visible = true;
+          break;
+        }
+      }
+    });
   }
 }
