@@ -78,25 +78,29 @@ export class CodeblockController {
     await this.sessions.start(this.document.boardPackage.document, elementId);
   }
 
-  /** A running block is skipped: its transcript still belongs to the process writing it. */
-  public resetOutput(elementId: string): void {
-    if (this.sessions.isRunning(elementId)) return;
-    if (this.editAndSave((document) => resetOutput(document, elementId))) {
-      this.broadcastCleared([elementId]);
-    }
+  /** Returns whether there was anything to reset, so the caller can say so otherwise. */
+  public resetOutput(elementId: string): boolean {
+    const stored = this.editAndSave((document) => resetOutput(document, elementId));
+    if (!stored && !this.sessions.isActive(elementId)) return false;
+    this.clearShownOutputs([elementId]);
+    return true;
   }
 
   public resetAllOutputs(): void {
-    let cleared: string[] = [];
+    let stored: string[] = [];
     this.editAndSave((document) => {
-      cleared = resetAllOutputs(document, (id) => this.sessions.isRunning(id));
-      return cleared.length > 0;
+      stored = resetAllOutputs(document);
+      return stored.length > 0;
     });
-    this.broadcastCleared(cleared);
+    this.clearShownOutputs([...new Set([...stored, ...this.sessions.activeBlockIds()])]);
   }
 
-  public hasStoredOutputs(): boolean {
-    return hasStoredOutputs(this.document.boardPackage.document);
+  /** Stored or live: a running block counts even before its first run has stored anything. */
+  public hasOutputs(): boolean {
+    return (
+      hasStoredOutputs(this.document.boardPackage.document) ||
+      this.sessions.activeBlockIds().length > 0
+    );
   }
 
   private openSource(elementId: string): void {
@@ -112,10 +116,26 @@ export class CodeblockController {
   }
 
   // Live state wins over the stored one in the webviews, so they have to drop it explicitly.
-  private broadcastCleared(elementIds: string[]): void {
+  private clearShownOutputs(elementIds: string[]): void {
     for (const elementId of elementIds) {
-      this.document.messageService.send({ type: 'codeblockOutputCleared', elementId });
+      if (this.sessions.isActive(elementId)) {
+        this.clearRunningOutput(elementId);
+      } else {
+        this.document.messageService.send({ type: 'codeblockOutputCleared', elementId });
+      }
     }
+  }
+
+  /**
+   * The one place that decides what a reset does to a running block: empty the console and let
+   * the program keep running, so its exit stores only what came after the reset.
+   *
+   * To stop the program instead, it has to be dropped without reporting its exit (like a restart
+   * does), not via `stop()`: the exit would arrive afterwards and store the transcript again.
+   */
+  private clearRunningOutput(elementId: string): void {
+    this.sessions.clearTranscript(elementId);
+    this.document.messageService.send({ type: 'codeblockTranscriptCleared', elementId });
   }
 
   /** Saves only when `edit` reports a change. Typing goes through the scheduler instead. */

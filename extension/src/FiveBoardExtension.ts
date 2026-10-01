@@ -195,7 +195,7 @@ export class FiveBoardExtension extends ExtensionBase {
       vscode.window.showWarningMessage(t('extension.codeblock.noActiveDocument'));
       return;
     }
-    if (!document.codeblock.hasStoredOutputs()) {
+    if (!document.codeblock.hasOutputs()) {
       vscode.window.showInformationMessage(t('extension.codeblock.noOutputsToReset'));
       return;
     }

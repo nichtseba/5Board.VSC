@@ -37,31 +37,25 @@ describe('CodeblockOutputService', function () {
   });
 
   describe('resetAllOutputs', function () {
-    it('clears every stored transcript except the skipped ones', function () {
+    it('clears every stored transcript and returns only the blocks that had one', function () {
       const doc = makeDocument([
         makeCodeElement('el-1'),
         makeCodeElement('el-2'),
         makeCodeElement('el-3'),
       ]);
-      for (const id of ['el-1', 'el-2', 'el-3']) {
+      for (const id of ['el-1', 'el-3']) {
         data(doc, id).lastOutput = { transcript: [], success: true, exitCode: 0 };
       }
 
-      assert.deepEqual(
-        resetAllOutputs(doc, (id: string) => id === 'el-3'),
-        ['el-1', 'el-2'],
-      );
+      assert.deepEqual(resetAllOutputs(doc), ['el-1', 'el-3']);
       assert.equal(data(doc, 'el-1').lastOutput, undefined);
-      assert.ok(data(doc, 'el-3').lastOutput);
+      assert.equal(data(doc, 'el-3').lastOutput, undefined);
     });
 
     it('returns nothing when no block has output', function () {
       const doc = makeDocument([makeCodeElement('el-1')]);
 
-      assert.deepEqual(
-        resetAllOutputs(doc, () => false),
-        [],
-      );
+      assert.deepEqual(resetAllOutputs(doc), []);
     });
   });
 

@@ -219,6 +219,58 @@ describe('ExecutionSessionManager', function () {
     });
   });
 
+  it('keeps the program running after its transcript is cleared and reports only what followed', async function () {
+    const { events, starter, manager } = setup();
+    await manager.start(document, 'a');
+    const session = starter.sessions[0];
+
+    session.emit({ kind: 'out', text: 'before\n' });
+    manager.clearTranscript('a');
+
+    assert.equal(session.killed, false);
+    assert.equal(manager.isRunning('a'), true);
+
+    session.emit({ kind: 'out', text: 'after\n' });
+    session.emit({ kind: 'exited', exitCode: 0, success: true });
+
+    assert.deepEqual(exitEvent(events).transcript, [{ kind: 'out', text: 'after\n' }]);
+  });
+
+  it('counts the output limit from the clear on', async function () {
+    const { starter, manager } = setup();
+    await manager.start(document, 'a');
+    const session = starter.sessions[0];
+
+    session.emit({ kind: 'out', text: 'x'.repeat(MAX_OUTPUT_CHARS - 10) });
+    manager.clearTranscript('a');
+    session.emit({ kind: 'out', text: 'x'.repeat(100) });
+
+    assert.equal(session.killed, false);
+  });
+
+  it('treats a block as active while it is still compiling', async function () {
+    const { manager } = setup();
+    const starting = manager.start(document, 'a');
+
+    assert.equal(manager.isActive('a'), true);
+    assert.equal(manager.isRunning('a'), false);
+    assert.deepEqual(manager.activeBlockIds(), ['a']);
+
+    await starting;
+    assert.equal(manager.isActive('a'), true);
+    assert.equal(manager.isRunning('a'), true);
+  });
+
+  it('is no longer active once a failed start has been reported', async function () {
+    const { starter, manager } = setup();
+    starter.failure = { error: 'Compilation failed.' };
+
+    await manager.start(document, 'a');
+
+    assert.equal(manager.isActive('a'), false);
+    assert.deepEqual(manager.activeBlockIds(), []);
+  });
+
   it('passes end of input on to the running process', async function () {
     const { starter, manager } = setup();
     await manager.start(document, 'a');

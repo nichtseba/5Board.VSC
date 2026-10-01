@@ -130,15 +130,21 @@ function SingleCodeSettings({ element }: { element: EditorElement<EditorElementT
           {t('webview.sidebar-element-settings.codeSettings.resetColors')}
         </Button>
       )}
-      {element.data.lastOutput !== undefined && (
+      {/* Always available: only the extension knows whether a block is running with live output. */}
+      <div className="mt-2 flex flex-col gap-2">
         <Button
-          className="mt-2"
           appearance="secondary"
           onClick={() => messages.send({ type: 'codeblockResetOutput', elementId: element.id })}
         >
           {t('webview.sidebar-element-settings.codeSettings.resetOutput')}
         </Button>
-      )}
+        <Button
+          appearance="secondary"
+          onClick={() => messages.send({ type: 'codeblockResetAllOutputs' })}
+        >
+          {t('webview.sidebar-element-settings.codeSettings.resetAllOutputs')}
+        </Button>
+      </div>
     </SettingsPanel>
   );
 }

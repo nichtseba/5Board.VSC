@@ -20,7 +20,15 @@ export function registerCodeblockSidebarHandlers(messages: MessageService): void
   });
 
   messages.on('codeblockResetOutput', (msg) => {
-    EXTENSION.activeEditorDocument?.codeblock.resetOutput(msg.elementId);
+    const document = EXTENSION.activeEditorDocument;
+    if (document && !document.codeblock.resetOutput(msg.elementId)) {
+      vscode.window.showInformationMessage(t('extension.codeblock.noOutputsToReset'));
+    }
+  });
+
+  // Through the command, so the button gets the same confirmation dialog.
+  messages.on('codeblockResetAllOutputs', () => {
+    void vscode.commands.executeCommand('5board-vsc.resetAllOutputs');
   });
 
   messages.on('manageCodeClass', (msg) => {

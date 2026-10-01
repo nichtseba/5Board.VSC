@@ -40,6 +40,8 @@ export class ExecutionSessionManager {
   private readonly blocks = new Map<string, RunningBlock>();
   // Starting compiles first, so two starts can overlap; only the newest may register its session.
   private readonly startTokens = new Map<string, number>();
+  // Between `started` and the session existing (javac); the webviews already show it as running.
+  private readonly starting = new Set<string>();
 
   constructor(
     private readonly onEvent: (elementId: string, event: SessionEvent) => void,
@@ -51,6 +53,7 @@ export class ExecutionSessionManager {
 
     const token = (this.startTokens.get(elementId) ?? 0) + 1;
     this.startTokens.set(elementId, token);
+    this.starting.add(elementId);
 
     // Emitted before compiling, so the block shows as running while javac works.
     this.onEvent(elementId, { kind: 'started' });
@@ -63,6 +66,7 @@ export class ExecutionSessionManager {
       }
       return;
     }
+    this.starting.delete(elementId);
 
     if (!result.ok) {
       // Compiler output is the user's error; anything else means the program never got to run.
@@ -130,10 +134,31 @@ export class ExecutionSessionManager {
       this.startTokens.delete(elementId);
     }
     this.blocks.clear();
+    this.starting.clear();
   }
 
   isRunning(elementId: string): boolean {
     return this.blocks.has(elementId);
+  }
+
+  /** Running or still compiling: what the webviews show as running. */
+  isActive(elementId: string): boolean {
+    return this.starting.has(elementId) || this.blocks.has(elementId);
+  }
+
+  activeBlockIds(): string[] {
+    return [...new Set([...this.starting, ...this.blocks.keys()])];
+  }
+
+  /**
+   * Empties the transcript of a running block; the process keeps running and what it writes from
+   * now on is all its exit reports. A block that is still compiling has nothing to empty yet.
+   */
+  clearTranscript(elementId: string): void {
+    const block = this.blocks.get(elementId);
+    if (!block) return;
+    block.transcript = [];
+    block.chars = 0;
   }
 
   runningBlocks(): { elementId: string; transcript: TranscriptSegment[] }[] {

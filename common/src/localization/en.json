@@ -247,7 +247,8 @@
         "backgroundLabel": "Background color",
         "borderLabel": "Border color",
         "resetColors": "Reset to theme colors",
-        "resetOutput": "Reset output"
+        "resetOutput": "Reset output",
+        "resetAllOutputs": "Reset all outputs"
       },
       "layer": "Layer",
       "tableOfContentsSettings": {

@@ -78,6 +78,8 @@ type AllExtensionToWebviewMessage =
       draft?: string;
     }
   | { type: 'codeblockOutputCleared'; elementId: string }
+  // Reset of a running block: only the transcript goes, the run and its input line stay.
+  | { type: 'codeblockTranscriptCleared'; elementId: string }
   // What is typed into the input line but not sent yet, mirrored to the projector.
   | { type: 'codeblockInputDraft'; elementId: string; text: string }
   | { type: 'goToElement'; elementId: string }
@@ -154,6 +156,7 @@ type AllWebviewToExtensionMessage =
   | { type: 'codeblockEndInput'; elementId: string }
   | { type: 'codeblockStop'; elementId: string }
   | { type: 'codeblockResetOutput'; elementId: string }
+  | { type: 'codeblockResetAllOutputs' }
   | { type: 'codeblockSetOutputCollapsed'; elementId: string; collapsed: boolean }
   | { type: 'updateBlockCode'; elementId: string; code: string }
   | { type: 'openSource'; elementId: string }

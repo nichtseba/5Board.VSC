@@ -81,6 +81,14 @@ export function ExecutionOutputProvider({
         Object.fromEntries(Object.entries(prev).filter(([id]) => id !== msg.elementId)),
       );
     }
+    if (msg.type === 'codeblockTranscriptCleared') {
+      setOutputs((prev) => {
+        const current = prev[msg.elementId];
+        if (!current) return prev;
+        // runId stays, otherwise the input line would lose what is typed into it.
+        return { ...prev, [msg.elementId]: { ...current, transcript: [] } };
+      });
+    }
     if (msg.type === 'codeblockSync') {
       setOutputs((prev) => ({
         ...prev,

@@ -10,13 +10,10 @@ export function resetOutput(document: BoardDocument, elementId: string): boolean
   return true;
 }
 
-/** Resets every block not matched by `skip` and returns the ids that were actually cleared. */
-export function resetAllOutputs(
-  document: BoardDocument,
-  skip: (elementId: string) => boolean,
-): string[] {
+/** Returns the ids that were actually cleared. */
+export function resetAllOutputs(document: BoardDocument): string[] {
   return codeElements(document)
-    .filter((element) => !skip(element.id) && resetOutput(document, element.id))
+    .filter((element) => resetOutput(document, element.id))
     .map((element) => element.id);
 }
 
