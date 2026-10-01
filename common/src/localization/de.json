@@ -155,7 +155,9 @@
         "fontSize": "Schriftgröße"
       },
       "imageSettings": {
-        "title": "Bild"
+        "title": "Bild",
+        "hideInExport": "Im Export durch Platzhalter ersetzen",
+        "exportPlaceholder": "Bild nicht im Export enthalten"
       },
       "freehandSettings": {
         "title": "Freihand"

@@ -155,7 +155,9 @@
         "fontSize": "Font size"
       },
       "imageSettings": {
-        "title": "Image"
+        "title": "Image",
+        "hideInExport": "Replace with placeholder in export",
+        "exportPlaceholder": "Image not included in export"
       },
       "freehandSettings": {
         "title": "Freehand"
