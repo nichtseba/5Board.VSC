@@ -15,6 +15,8 @@
   "commands.startPresentation": "Präsentation starten",
   "commands.previewHtmlExport": "HTML-Export Vorschau anzeigen",
   "commands.goToElement": "Gehe zu Element",
+  "commands.renameStructureItem": "Umbenennen",
+  "commands.revealNext": "Nächstes einblenden",
   "commands.addImageFromFile": "Bild aus Datei hinzufügen",
   "commands.savePreset": "Speichere als Voreinstellung",
   "commands.deletePreset": "Voreinstellung löschen",
