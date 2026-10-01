@@ -114,9 +114,7 @@ export class SidebarManager implements vscode.Disposable {
 
     // Todo: move to document handling
     this.messages.on('updateElements', (msg) => {
-      console.log('Updating elements from sidebar', msg);
       if (!EXTENSION.activeEditorDocument) {
-        console.log('No Active Editor Document returning early');
         return;
       }
       EXTENSION.activeEditorDocument.applyEdit((document) => {
