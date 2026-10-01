@@ -12,6 +12,7 @@ export function makeCodeElement(id: string, data: Partial<CodeElementData> = {})
     type: EditorElementType.Code,
     layout: { xPos: 0, yPos: 0, width: 100, height: 100 },
     style: { visible: true },
+    display: { visible: true, excludeFromExport: false, speakerNote: false },
     data: {
       className: data.className ?? sanitizeClassName(id),
       language: data.language ?? 'java',

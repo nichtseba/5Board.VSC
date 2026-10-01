@@ -1,5 +1,12 @@
 import * as vscode from 'vscode';
-import { EditorElement, EditorElementType, EditorToolId } from '5board.vsc-common';
+import {
+  EditorElement,
+  EditorElementType,
+  EditorToolId,
+  getElementSectionMap,
+  normalizeElementRevealOrder,
+  reconcileElementRevealOrder,
+} from '5board.vsc-common';
 import { EXTENSION } from '../extension';
 import { BoardCustomDocument } from './BoardCustomDocument';
 import deepEquals from 'deep-equal';
@@ -87,6 +94,7 @@ export class DocumentMessageHandlers {
 
       this.document.messageService.on('updateElementsLayout', (msg) => {
         this.document.applyEdit((document) => {
+          const previousSections = getElementSectionMap(document.content.elements);
           let changed = false;
 
           for (const update of msg.changes) {
@@ -118,6 +126,12 @@ export class DocumentMessageHandlers {
             changed = true;
           }
 
+          if (changed) {
+            document.content.elements = reconcileElementRevealOrder(
+              document.content.elements,
+              previousSections,
+            );
+          }
           return changed;
         });
       }),
@@ -126,6 +140,7 @@ export class DocumentMessageHandlers {
       //#region "EditorTools"
       this.document.messageService.on('insertSpacerRows', (msg) => {
         this.document.applyEdit((document) => {
+          const previousSections = getElementSectionMap(document.content.elements);
           let changed = false;
           for (const element of document.content.elements) {
             if (element.layout.yPos >= msg.startRow) {
@@ -135,6 +150,12 @@ export class DocumentMessageHandlers {
               };
               changed = true;
             }
+          }
+          if (changed) {
+            document.content.elements = reconcileElementRevealOrder(
+              document.content.elements,
+              previousSections,
+            );
           }
           return changed;
         });
@@ -155,6 +176,7 @@ export class DocumentMessageHandlers {
       }),
       this.document.messageService.on('updateElements', (msg) => {
         this.document.applyEdit((document) => {
+          const previousSections = getElementSectionMap(document.content.elements);
           let changed = false;
 
           for (const update of msg.changes) {
@@ -209,6 +231,12 @@ export class DocumentMessageHandlers {
             });
             changed = true;
           }
+          if (changed) {
+            document.content.elements = reconcileElementRevealOrder(
+              document.content.elements,
+              previousSections,
+            );
+          }
           return changed;
         });
       }),
@@ -237,6 +265,7 @@ export class DocumentMessageHandlers {
       this.document.messageService.on('addFreehandElement', (msg) => {
         this.document.applyEdit((document) => {
           document.content.elements.push(msg.element);
+          document.content.elements = normalizeElementRevealOrder(document.content.elements);
         });
       }),
 

@@ -8,8 +8,6 @@ export type ElementInteractionProfile = {
   scalable?: boolean; // TODO for future use
   keepRatio?: boolean;
   clipable?: boolean; // TODO for future use
-  /** Double-click enters editing mode. */
-  editable?: boolean;
   /** Only the element's content takes clicks; empty space inside it passes them through. */
   clickThroughEmptyArea?: boolean;
 };
@@ -26,14 +24,12 @@ export const ELEMENT_INTERACTION_CONFIG = {
     dragDirection: 'free',
     resizable: true,
     rotatable: false,
-    editable: true,
   },
   [EditorElementType.Code]: {
     draggable: true,
     dragDirection: 'vertical',
     resizable: true,
     rotatable: false,
-    editable: true,
     clickThroughEmptyArea: true,
   },
   [EditorElementType.Image]: {

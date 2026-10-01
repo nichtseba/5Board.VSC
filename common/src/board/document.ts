@@ -46,6 +46,9 @@ export interface CodeClass {
 export interface BoardContent {
   selectedElementIds: string[];
   primarySelectedElementId: string | null;
+  /**
+   * The list of elements contained within the board document in reveal order.
+   */
   elements: BoardElement[];
   codeClasses: CodeClass[];
   grid?: GridSettings;

@@ -2,9 +2,14 @@ import {
   AddElementDefaults,
   AddElementPlacementMode,
   EditorElementType,
+  DEFAULT_ELEMENT_PROFILES,
   TranslationKey,
   LineStyle,
+  ELEMENT_TYPE_DEFINITIONS,
+  ImageElementData,
+  FreehandElementData,
 } from './main.js';
+import type { Preset } from './board/presets.js';
 
 export enum EditorToolId {
   POINTER = 'pointer',
@@ -97,6 +102,8 @@ export type AddElementToolParameters<T extends EditorElementType = EditorElement
   type: T;
   placementMode?: AddElementPlacementMode;
   defaults?: AddElementDefaults<T>;
+  fixedXPosition?: number;
+  presetId?: string;
 };
 
 export function createAddElementTool<T extends EditorElementType>(
@@ -112,10 +119,82 @@ export function createAddElementTool<T extends EditorElementType>(
     },
   };
 }
+const SHAPE_EXCEPTIONS = new Set([
+  EditorElementType.Circle,
+  EditorElementType.Rectangle,
+  EditorElementType.Line,
+]);
+
+function getPresetPlacementMode(preset: Preset): AddElementPlacementMode {
+  const { keepContent, keepXPosition } = preset.settings;
+  const type = preset.element.type;
+  if ((keepContent || keepXPosition) && SHAPE_EXCEPTIONS.has(type)) {
+    // When not just style is part of the preset the element will be placed with the free mode
+    return 'free';
+  }
+  const placement = ELEMENT_TYPE_DEFINITIONS[type]?.placement;
+  return placement;
+}
+
+export function createAddElementToolFromPreset(
+  preset: Preset,
+): EditorTool<EditorToolId.AddElement> {
+  const { element, settings } = preset;
+  const type = element.type;
+  const defaults = DEFAULT_ELEMENT_PROFILES[type];
+
+  return createAddElementTool(type, {
+    placementMode: getPresetPlacementMode(preset),
+    fixedXPosition: settings.keepXPosition ? element.layout.xPos : undefined,
+    presetId: preset.id,
+    defaults: {
+      layout: {
+        width: element.layout.width,
+        height: element.layout.height,
+      },
+      style: settings.keepStyle ? structuredClone(element.style) : structuredClone(defaults.style),
+      data: settings.keepContent ? structuredClone(element.data) : structuredClone(defaults.data),
+      ...(type === EditorElementType.Image && preset.asset?.bytes
+        ? {
+            asset: {
+              name: (element.data as ImageElementData).src,
+              bytes: [...preset.asset.bytes],
+            },
+          }
+        : {}),
+    } as AddElementDefaults<typeof type>,
+  });
+}
+
+export function createFreehandToolFromPreset(
+  preset: Preset,
+): EditorTool<EditorToolId.FREEHAND> | undefined {
+  if (
+    preset.element.type !== EditorElementType.Freehand ||
+    !preset.settings.keepStyle ||
+    preset.settings.keepContent ||
+    preset.settings.keepXPosition
+  ) {
+    return undefined;
+  }
+
+  const stroke = (preset.element.data as FreehandElementData).strokes[0];
+
+  return {
+    type: EditorToolId.FREEHAND,
+    parameters: {
+      color: stroke?.color ?? FREEHAND_COLORS[0].value,
+      width: stroke?.width ?? FREEHAND_DEFAULT_WIDTH,
+      opacity: preset.element.style.opacity ?? 1,
+      lineStyle: stroke?.lineStyle ?? 'solid',
+      dashScale: stroke?.dashScale ?? FREEHAND_DEFAULT_DASH,
+    },
+  };
+}
 
 export type EditorTool<EditorToolType extends EditorToolId = EditorToolId> = {
   type: EditorToolType;
   parameters: TYPE_TOOL_PARAMETERS[EditorToolType];
 };
 
-export type EditorState = { tool: EditorTool };
+export type EditorState = { tool: EditorTool; presets: Preset[] };

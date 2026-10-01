@@ -10,6 +10,7 @@ import ProjectorCursorMirror from '../components/projector/ProjectorCursorMirror
 import ProjectorScrollMirror from '../components/projector/ProjectorScrollMirror';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
 import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
+import { ViewTypeProvider } from '../providers/ViewTypeProvider';
 
 export default function Editor() {
   const messages = useMessageService();
@@ -21,7 +22,7 @@ export default function Editor() {
   }, []);
 
   return (
-    <>
+    <ViewTypeProvider value={'editor'}>
       <div className="relative">
         {boardDocument && (
           <ExecutionOutputProvider>
@@ -36,7 +37,7 @@ export default function Editor() {
         )}
         <ProjectorViewPort />
       </div>
-    </>
+    </ViewTypeProvider>
   );
 }
 

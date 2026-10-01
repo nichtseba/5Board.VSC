@@ -12,6 +12,7 @@ import { EXTENSION } from '../extension';
 import deepEquals from 'deep-equal';
 import { FileTreeProvider } from '../providers/FileTreeProvider';
 import { registerCodeblockSidebarHandlers } from './CodeblockSidebarHandlers';
+import { getElementSectionMap, reconcileElementRevealOrder } from '5board.vsc-common';
 
 export class SidebarManager implements vscode.Disposable {
   private readonly sync: SidebarDocumentSync;
@@ -49,6 +50,15 @@ export class SidebarManager implements vscode.Disposable {
       msg.ids.forEach((id) => {
         EXTENSION.deleteEditorElement(id);
       });
+    });
+    this.messages.on('deletePreset', async (msg) => {
+      await EXTENSION.deletePreset(msg.id);
+    });
+    this.messages.on('loadPresetAsset', async (msg) => {
+      await EXTENSION.loadPresetAsset(msg.id);
+    });
+    this.messages.on('revealPresetsFile', async () => {
+      await EXTENSION.revealPresetsFile();
     });
     this.messages.on('textEditorCommand', (msg) => {
       if (!EXTENSION.activeEditorDocument) {
@@ -120,26 +130,30 @@ export class SidebarManager implements vscode.Disposable {
         return;
       }
       EXTENSION.activeEditorDocument.applyEdit((document) => {
+        const previousSections = getElementSectionMap(document.content.elements);
         let changed = false;
 
         for (const update of msg.changes) {
-          const element = document.content.elements.find((e) => e.id === update.id);
+          const elementIndex = document.content.elements.findIndex((e) => e.id === update.id);
+          const element = document.content.elements[elementIndex];
           if (!element) {
-            continue;
+            continue; // Todo: Warn here, something has gone wrong
           }
           const nextData = {
             ...element.data,
             ...update.changes.data,
           };
-
           const nextLayout = {
             ...element.layout,
             ...update.changes.layout,
           };
-
           const nextStyle = {
             ...element.style,
             ...update.changes.style,
+          };
+          const nextDisplay = {
+            ...element.display,
+            ...update.changes.display,
           };
           if (update.changes.style?.backgroundColor === undefined) {
             delete nextStyle.backgroundColor;
@@ -148,7 +162,8 @@ export class SidebarManager implements vscode.Disposable {
           if (
             deepEquals(nextData, element.data) &&
             deepEquals(nextLayout, element.layout) &&
-            deepEquals(nextStyle, element.style)
+            deepEquals(nextStyle, element.style) &&
+            deepEquals(nextDisplay, element.display)
           ) {
             //Skipping updateElement message because the data hasn't changed
             continue;
@@ -170,9 +185,16 @@ export class SidebarManager implements vscode.Disposable {
                 ...update.changes.data,
               } as typeof el.data,
               style: nextStyle,
+              display: nextDisplay,
             };
           });
           changed = true;
+        }
+        if (changed) {
+          document.content.elements = reconcileElementRevealOrder(
+            document.content.elements,
+            previousSections,
+          );
         }
         return changed;
       });

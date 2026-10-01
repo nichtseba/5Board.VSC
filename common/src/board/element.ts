@@ -20,11 +20,12 @@ export enum EditorElementType {
  */
 export type EditorElement<T extends EditorElementType = EditorElementType> = {
   id: string;
+  name?: string;
   type: T;
 
   layout: ElementLayout;
   style: ElementStyle;
-
+  display: ElementDisplay;
   data: EditorElementDataMap[T];
 };
 
@@ -52,6 +53,12 @@ export type ElementStyle = {
     style?: LineStyle;
     radius?: number;
   };
+};
+
+export type ElementDisplay = {
+  visible: boolean;
+  speakerNote: boolean;
+  excludeFromExport: boolean;
 };
 
 /**
@@ -234,7 +241,6 @@ type TableOfContentsElementData = {
  * All Editor Element Defaults when creating a new element
  */
 export type AddElementPlacementMode = 'free' | 'fullRow' | 'fixed' | 'click';
-export type ElementCategory = 'basic' | 'custom';
 
 export type AddElementDefaults<T extends EditorElementType = EditorElementType> = {
   layout?: Partial<Omit<ElementLayout, 'xPos' | 'yPos'>>;
@@ -249,7 +255,6 @@ export type AddElementDefaults<T extends EditorElementType = EditorElementType> 
 export type ElementTypeDefinition<T extends EditorElementType = EditorElementType> = {
   label: TranslationKey;
   icon: string;
-  category: ElementCategory;
   placement: AddElementPlacementMode;
   profile: {
     layout: Omit<ElementLayout, 'xPos' | 'yPos'>;
@@ -259,7 +264,7 @@ export type ElementTypeDefinition<T extends EditorElementType = EditorElementTyp
 
 export const DEFAULT_ELEMENT_PROFILES = {
   [EditorElementType.Heading]: {
-    layout: { width: 40, height: 2 },
+    layout: { width: 40, height: 3 },
     style: {
       visible: true,
     },
@@ -301,7 +306,7 @@ export const DEFAULT_ELEMENT_PROFILES = {
     style: {
       visible: true,
     },
-    data: { src: '', content: '', altText: 'Image' },
+    data: { src: '', content: '', altText: 'Image', configuredWidth: true },
   },
   [EditorElementType.Rectangle]: {
     layout: { width: 20, height: 10 },
@@ -370,49 +375,42 @@ export const ELEMENT_TYPE_DEFINITIONS = {
   [EditorElementType.Heading]: {
     label: 'webview.sidebar.elementType.heading',
     icon: 'text-size',
-    category: 'basic',
     placement: 'fullRow',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Heading],
   },
   [EditorElementType.Text]: {
     label: 'webview.sidebar.elementType.text',
     icon: 'symbol-string',
-    category: 'basic',
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Text],
   },
   [EditorElementType.Code]: {
     label: 'webview.sidebar.elementType.code',
     icon: 'code',
-    category: 'basic',
     placement: 'fullRow',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Code],
   },
   [EditorElementType.Image]: {
     label: 'webview.sidebar.elementType.image',
     icon: 'file-media',
-    category: 'basic',
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Image],
   },
   [EditorElementType.Rectangle]: {
     label: 'webview.sidebar.elementType.rectangle',
     icon: 'primitive-square',
-    category: 'basic',
     placement: 'click',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Rectangle],
   },
   [EditorElementType.Circle]: {
     label: 'webview.sidebar.elementType.circle',
     icon: 'circle',
-    category: 'basic',
     placement: 'click',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Circle],
   },
   [EditorElementType.Line]: {
     label: 'webview.sidebar.elementType.line',
     icon: 'dash',
-    category: 'basic',
     placement: 'click',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Line],
   },
@@ -420,31 +418,21 @@ export const ELEMENT_TYPE_DEFINITIONS = {
   [EditorElementType.Freehand]: {
     label: 'webview.sidebar.elementType.freehand',
     icon: 'pencil',
-    category: 'basic',
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Freehand],
   },
   [EditorElementType.TableOfContents]: {
     label: 'webview.sidebar.elementType.tableOfContents',
     icon: 'list-unordered',
-    category: 'basic',
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.TableOfContents],
   },
 } as const satisfies {
   [K in EditorElementType]: ElementTypeDefinition<K>;
 };
-
 export function getElementTypeDefinition<T extends EditorElementType>(type: T) {
   return ELEMENT_TYPE_DEFINITIONS[type];
 }
-
-export function getBasicElementTypes() {
-  return Object.entries(ELEMENT_TYPE_DEFINITIONS).filter(
-    ([, definition]) => definition.category === 'basic',
-  ) as [EditorElementType, (typeof ELEMENT_TYPE_DEFINITIONS)[EditorElementType]][];
-}
-
 export function getCustomElementTypes(): [] {
   return [];
 }

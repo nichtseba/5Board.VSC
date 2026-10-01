@@ -1,4 +1,5 @@
 export * from './board/board.js';
+export * from './board/elementSections.js';
 export * from './messages.js';
 export * from './localization/index.js';
 export * from './editortool.js';
