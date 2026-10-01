@@ -3,6 +3,7 @@ import {
   EditorToolId,
   ProjectorPointerStyle,
   computeHeadingNumbers,
+  flattenBoardElements,
 } from '5board.vsc-common';
 import { useEffect, useMemo, useRef, type CSSProperties, useState } from 'react';
 import EditorElement from './EditorElement';
@@ -49,6 +50,7 @@ export default function EditorCanvas({
   const editorState = useEditorState();
 
   const elements = document?.content.elements ?? [];
+  const flatElements = useMemo(() => flattenBoardElements(elements), [elements]);
   const selectedElementIds = document?.content.selectedElementIds ?? [];
   const activeToolId = editorState?.tool.type;
 
@@ -121,13 +123,13 @@ export default function EditorCanvas({
     setAssetUrls(createAssetUrls(document.assets));
   }, [document]);
   const headingNumbers = useMemo(
-    () => computeHeadingNumbers(elements ?? [], document?.content.headingSettings),
+    () => computeHeadingNumbers(flatElements, document?.content.headingSettings),
     [elements, document?.content.headingSettings],
   );
 
   const { marqueeRect } = useMarqueeSelection({
     activeToolId,
-    elements,
+    elements: flatElements,
     messages,
   });
 
@@ -154,7 +156,7 @@ export default function EditorCanvas({
       >
         {!readOnly && <CanvasTools />}
 
-        {document?.content.elements.map((element) => (
+        {flatElements.map((element) => (
           <EditorElement
             key={element.id}
             element={element}
@@ -165,7 +167,10 @@ export default function EditorCanvas({
         ))}
 
         {activeToolId === EditorToolId.POINTER && selectedElementIds.length > 1 && (
-          <GroupInteractionController elements={elements} selectedElementIds={selectedElementIds} />
+          <GroupInteractionController
+            elements={flatElements}
+            selectedElementIds={selectedElementIds}
+          />
         )}
 
         {/* Cursor overlay — only rendered in the projector via the cursor prop */}

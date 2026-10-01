@@ -1,7 +1,7 @@
 import type { JSONContent } from '@tiptap/core';
 import { TranslationKey } from '../localization';
 
-export type BoardElement = EditorElement; // Todo: Replace with new Element type when we have it defined
+export type BoardElement = EditorElement | GroupElement; // Todo: Replace with new Element type when we have it defined
 // Todo: Add additional element types
 export enum EditorElementType {
   Heading = 'heading',
@@ -26,6 +26,14 @@ export type EditorElement<T extends EditorElementType = EditorElementType> = {
   style: ElementStyle;
 
   data: EditorElementDataMap[T];
+};
+
+export const GROUP_ELEMENT_TYPE = 'group' as const;
+
+export type GroupElement = {
+  id: string;
+  type: typeof GROUP_ELEMENT_TYPE;
+  data: { children: EditorElement[] };
 };
 
 export type ElementLayout = {

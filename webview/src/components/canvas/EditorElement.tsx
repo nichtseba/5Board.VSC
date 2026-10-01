@@ -1,5 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { EditorElement, EditorElementType, EditorToolId } from '5board.vsc-common';
+import {
+  EditorElement,
+  EditorElementType,
+  EditorToolId,
+  flattenBoardElements,
+  GroupElement,
+  isGroupElement,
+} from '5board.vsc-common';
 import type React from 'react';
 import { TextElement } from './elements/TextElement';
 import { HeadingElement } from './elements/HeadingElement';
@@ -63,17 +70,25 @@ export default function EditorElement<ElementType extends EditorElementType>({
   const messages = useMessageService();
   const { t } = useLocalization();
   const activeToolId = useEditorState()?.tool.type;
-  const allElements = useBoardDocument()?.content.elements ?? [];
+  const boardElements = useBoardDocument()?.content.elements ?? [];
+  const allElements = flattenBoardElements(boardElements);
 
   const handleSelectElement = (id: string, event?: React.MouseEvent) => {
     if (activeToolId !== EditorToolId.POINTER) return;
 
+    const group = boardElements.find(
+      (candidate): candidate is GroupElement =>
+        isGroupElement(candidate) && candidate.data.children.some((child) => child.id === id),
+    );
+
+    const ids = group ? group.data.children.map((child) => child.id) : [id];
+
     if (event?.shiftKey) {
-      messages.send({ type: 'toggleElementSelection', ids: [id] });
+      messages.send({ type: 'toggleElementSelection', ids });
       return;
     }
 
-    messages.send({ type: 'selectElements', ids: [id] });
+    messages.send({ type: 'selectElements', ids });
   };
 
   const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {

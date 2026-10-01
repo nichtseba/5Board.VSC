@@ -1,6 +1,6 @@
 import type React from 'react';
 import { init } from '../app/init';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import ElementSettings from '../components/sidebar/elementSettings/ElementSettings';
 import { LayerSettings } from '../components/sidebar/elementSettings/LayerSettings';
 import { useMessageService } from '../services/MessageService';
@@ -8,6 +8,7 @@ import { useLocalization } from '../providers/LocalizationProvider';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
 import { Button, Icon } from 'vscrui';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
+import { flattenBoardElements } from '5board.vsc-common';
 
 export default function ElementSettingsSidebar() {
   const messages = useMessageService();
@@ -20,12 +21,15 @@ export default function ElementSettingsSidebar() {
 
   const selectedElementIds = document?.content.selectedElementIds ?? [];
 
+  const flatElements = useMemo(
+    () => flattenBoardElements(document?.content.elements ?? []),
+    [document?.content.elements],
+  );
   const selectedElements =
-    document?.content.elements.filter((element) => selectedElementIds.includes(element.id)) ?? [];
+    flatElements.filter((element) => selectedElementIds.includes(element.id)) ?? [];
 
   const primarySelectedElement =
-    document?.content.elements.find((e) => document.content.primarySelectedElementId === e.id) ??
-    null;
+    flatElements.find((e) => document?.content.primarySelectedElementId === e.id) ?? null;
 
   let content: React.ReactNode;
   if (selectedElements.length === 0) {
@@ -49,6 +53,21 @@ export default function ElementSettingsSidebar() {
     <SidebarShell>
       {content}
       {primarySelectedElement && <LayerSettings element={primarySelectedElement} />}
+      {selectedElements.length >= 2 && (
+        <Button
+          appearance="secondary"
+          className="justify-center gap-2"
+          onClick={() =>
+            messages.send({
+              type: 'groupElements',
+              ids: selectedElementIds,
+            })
+          }
+        >
+          <Icon name="layers" />
+          {t('webview.sidebar-element-settings.group')}
+        </Button>
+      )}
       {primarySelectedElement && (
         <Button
           appearance="secondary"

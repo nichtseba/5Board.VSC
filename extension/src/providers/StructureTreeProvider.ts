@@ -1,4 +1,4 @@
-import { EditorElement, EditorElementType } from '5board.vsc-common';
+import { EditorElement, EditorElementType, flattenBoardElements } from '5board.vsc-common';
 import * as vscode from 'vscode';
 import { EXTENSION } from '../extension';
 import { t } from '../localization';
@@ -23,7 +23,9 @@ export class StructureTreeProvider implements vscode.TreeDataProvider<StructureN
     if (!EXTENSION.activeEditorDocument) {
       return [];
     }
-    const elements = EXTENSION.activeEditorDocument.boardPackage.document.content.elements.slice();
+    const elements = flattenBoardElements(
+      EXTENSION.activeEditorDocument.boardPackage.document.content.elements,
+    );
     elements.sort((a, b) => a.layout.yPos - b.layout.yPos);
     let startIdx;
     let minLevel;

@@ -10,6 +10,7 @@ import { StructureTreeProvider } from '../providers/StructureTreeProvider';
 import { EXTENSION } from '../extension';
 import deepEquals from 'deep-equal';
 import { FileTreeProvider } from '../providers/FileTreeProvider';
+import { findBoardElementById, groupElementsInDocument, isGroupElement } from '5board.vsc-common';
 
 export class SidebarManager implements vscode.Disposable {
   private readonly sync: SidebarDocumentSync;
@@ -120,10 +121,11 @@ export class SidebarManager implements vscode.Disposable {
         let changed = false;
 
         for (const update of msg.changes) {
-          const element = document.content.elements.find((e) => e.id === update.id);
-          if (!element) {
+          const element = findBoardElementById(document.content.elements, update.id);
+          if (!element || isGroupElement(element)) {
             continue;
           }
+
           const nextData = {
             ...element.data,
             ...update.changes.data,
@@ -151,24 +153,9 @@ export class SidebarManager implements vscode.Disposable {
             continue;
           }
 
-          document.content.elements = document.content.elements.map((el) => {
-            if (el.id !== update.id) {
-              return el;
-            }
-
-            return {
-              ...el,
-              layout: {
-                ...el.layout,
-                ...update.changes.layout,
-              },
-              data: {
-                ...el.data,
-                ...update.changes.data,
-              } as typeof el.data,
-              style: nextStyle,
-            };
-          });
+          element.layout = nextLayout;
+          element.data = nextData as typeof element.data;
+          element.style = nextStyle;
           changed = true;
         }
         return changed;
@@ -237,6 +224,13 @@ export class SidebarManager implements vscode.Disposable {
               : numberingFormats,
         };
       });
+    });
+    this.messages.on('groupElements', ({ ids }) => {
+      const activeDocument = EXTENSION.activeEditorDocument;
+      if (!activeDocument) {
+        return;
+      }
+      activeDocument.applyEdit((document) => groupElementsInDocument(document, ids));
     });
   }
 

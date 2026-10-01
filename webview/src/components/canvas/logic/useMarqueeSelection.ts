@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 
-import { BoardElement, EditorToolId } from '5board.vsc-common';
+import { EditorElement, EditorToolId } from '5board.vsc-common';
 
 import { useCanvasEvents, useCanvasPoint } from '../../../providers/CanvasEventsProvider';
 
@@ -27,7 +27,7 @@ export function useMarqueeSelection({
   messages,
 }: {
   activeToolId?: string;
-  elements: BoardElement[];
+  elements: EditorElement[];
   messages: MessageService;
 }) {
   /**
@@ -89,7 +89,7 @@ export function useMarqueeSelection({
    * element.layout and rect are both expressed
    * in grid units.
    */
-  const intersectsRect = (element: BoardElement, rect: MarqueeRect) => {
+  const intersectsRect = (element: EditorElement, rect: MarqueeRect) => {
     const ex = element.layout.xPos;
     const ey = element.layout.yPos;
     const ew = element.layout.width;

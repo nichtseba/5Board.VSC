@@ -1,4 +1,11 @@
-import { EditorElement, EditorElementType, EditorToolId } from '5board.vsc-common';
+import {
+  BoardElement,
+  EditorElement,
+  EditorElementType,
+  EditorToolId,
+  findBoardElementById,
+  isGroupElement,
+} from '5board.vsc-common';
 import { EXTENSION } from '../extension';
 import { BoardCustomDocument } from './BoardCustomDocument';
 import deepEquals from 'deep-equal';
@@ -89,9 +96,9 @@ export class DocumentMessageHandlers {
           let changed = false;
 
           for (const update of msg.changes) {
-            const element = document.content.elements.find((element) => element.id === update.id);
+            const element = findBoardElementById(document.content.elements, update.id);
 
-            if (!element) {
+            if (!element || isGroupElement(element)) {
               continue;
             }
 
@@ -120,13 +127,14 @@ export class DocumentMessageHandlers {
           return changed;
         });
       }),
+
       //#endregion "General"
 
       //#region "EditorTools"
       this.document.messageService.on('insertSpacerRows', (msg) => {
         this.document.applyEdit((document) => {
           let changed = false;
-          for (const element of document.content.elements) {
+          forEachEditorElement(document.content.elements, (element) => {
             if (element.layout.yPos >= msg.startRow) {
               element.layout = {
                 ...element.layout,
@@ -134,7 +142,7 @@ export class DocumentMessageHandlers {
               };
               changed = true;
             }
-          }
+          });
           return changed;
         });
       }),
@@ -149,10 +157,11 @@ export class DocumentMessageHandlers {
           let changed = false;
 
           for (const update of msg.changes) {
-            const element = document.content.elements.find((e) => e.id === update.id);
-            if (!element) {
+            const element = findBoardElementById(document.content.elements, update.id);
+            if (!element || isGroupElement(element)) {
               continue;
             }
+
             const nextData = {
               ...element.data,
               ...update.changes.data,
@@ -177,27 +186,9 @@ export class DocumentMessageHandlers {
               continue;
             }
 
-            document.content.elements = document.content.elements.map((el) => {
-              if (el.id !== update.id) {
-                return el;
-              }
-
-              return {
-                ...el,
-                layout: {
-                  ...el.layout,
-                  ...update.changes.layout,
-                },
-                data: {
-                  ...el.data,
-                  ...update.changes.data,
-                } as typeof el.data,
-                style: {
-                  ...el.style,
-                  ...update.changes.style,
-                },
-              };
-            });
+            element.layout = nextLayout;
+            element.data = nextData as typeof element.data;
+            element.style = nextStyle;
             changed = true;
           }
           return changed;
@@ -276,5 +267,18 @@ export class DocumentMessageHandlers {
       }),
       //#endregion "Projector"
     ];
+  }
+}
+
+function forEachEditorElement(
+  elements: readonly BoardElement[],
+  callback: (element: EditorElement) => void,
+): void {
+  for (const element of elements) {
+    if (isGroupElement(element)) {
+      forEachEditorElement(element.data.children, callback);
+    } else {
+      callback(element);
+    }
   }
 }

@@ -79,7 +79,8 @@
         "circle": "Kreis",
         "line": "Linie",
         "freehand": "Freihand",
-        "tableOfContents": "Inhaltsverzeichnis"
+        "tableOfContents": "Inhaltsverzeichnis",
+        "group": "Gruppe"
       },
       "projectorSettings": {
         "title": "Beameransicht-Einstellungen",
@@ -181,6 +182,7 @@
         "headCircle": "Kreis",
         "headSquare": "Quadrat"
       },
+      "group": "Gruppieren",
       "delete": "Löschen"
     }
   }

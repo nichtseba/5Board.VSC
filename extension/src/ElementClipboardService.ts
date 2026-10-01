@@ -2,14 +2,14 @@ import * as vscode from 'vscode';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
 import { BoardPackage } from './board/package';
 import { addImageAsset } from './board/addElement/addImageAsset';
-import { EditorElement, EditorElementType } from '5board.vsc-common';
+import { BoardElement, EditorElement, EditorElementType } from '5board.vsc-common';
 
 const ELEMENT_CLIPBOARD_MARKER = '5board-vsc.elements';
 
 type ElementClipboardPayload = {
   marker: typeof ELEMENT_CLIPBOARD_MARKER;
   sourceDocumentUri: string;
-  elements: EditorElement[];
+  elements: BoardElement[];
 };
 
 type DocumentResolver = (uri: vscode.Uri) => BoardCustomDocument | undefined;
@@ -57,7 +57,7 @@ export class ElementClipboardService {
     this.insertClonedElements(document, elements);
   }
 
-  private getSelectedElements(document: BoardCustomDocument): EditorElement[] {
+  private getSelectedElements(document: BoardCustomDocument): BoardElement[] {
     const selectedIds = new Set(document.boardPackage.document.content.selectedElementIds);
     return document.boardPackage.document.content.elements.filter((element) =>
       selectedIds.has(element.id),
@@ -120,7 +120,7 @@ export class ElementClipboardService {
 
   private insertClonedElements(
     document: BoardCustomDocument,
-    elements: EditorElement[],
+    elements: BoardElement[],
     imageAssets?: Map<string, Uint8Array>,
   ): void {
     const clones = structuredClone(elements).map((element) => ({
