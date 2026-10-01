@@ -65,6 +65,8 @@ export default function EditorElement<ElementType extends EditorElementType>({
   const { t } = useLocalization();
   const activeToolId = useEditorState()?.tool.type;
   const allElements = useBoardDocument()?.content.elements ?? [];
+  const viewType = useViewType();
+  const canEdit = viewType === 'editor' && !preview && activeToolId === EditorToolId.POINTER;
 
   const handleSelectElement = (id: string, event?: React.MouseEvent) => {
     if (activeToolId !== EditorToolId.POINTER) return;
@@ -103,7 +105,14 @@ export default function EditorElement<ElementType extends EditorElementType>({
         return;
       }
 
-      if (!selected) {
+      const target = event.target;
+      if (
+        !selected ||
+        editing ||
+        !canEdit ||
+        (target instanceof HTMLElement &&
+          (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)))
+      ) {
         return;
       }
 
@@ -119,7 +128,11 @@ export default function EditorElement<ElementType extends EditorElementType>({
   });
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (element.type !== EditorElementType.Text) {
+    if (
+      !canEdit ||
+      editing ||
+      (element.type !== EditorElementType.Text && element.type !== EditorElementType.Heading)
+    ) {
       return;
     }
     setEditingPosition({
@@ -135,12 +148,11 @@ export default function EditorElement<ElementType extends EditorElementType>({
   };
 
   useEffect(() => {
-    if (!selected) {
+    if (!selected || !canEdit) {
       setEditing(false);
       setEditingPosition(null);
     }
-  }, [selected]);
-  const viewType = useViewType();
+  }, [selected, canEdit]);
   const hidden =
     preview ||
     (viewType === 'projector' && (element.display.speakerNote || !element.display.visible)) ||
