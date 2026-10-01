@@ -208,6 +208,11 @@
         "headSquare": "Square"
       },
       "delete": "Delete",
+      "name": "Name",
+      "visibility": "Visibility",
+      "visible": "Visible",
+      "speakerNote": "Speaker Note",
+      "hideInExport": "Hide in Export",
       "deleteTooltip": "Delete (entf)"
     }
   }

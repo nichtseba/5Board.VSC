@@ -99,7 +99,7 @@ type AllWebviewToExtensionMessage =
       type: 'updateElements';
       changes: {
         id: string;
-        changes: Partial<EditorElement>;
+        changes: Omit<Partial<EditorElement>, 'id'>;
       }[];
     } // Update element with it's settings, array can handle one or more elements
   | { type: 'textEditorCommand'; ids: string[]; command: TextEditorCommand }

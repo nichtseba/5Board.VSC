@@ -129,23 +129,26 @@ export class SidebarManager implements vscode.Disposable {
         let changed = false;
 
         for (const update of msg.changes) {
-          const element = document.content.elements.find((e) => e.id === update.id);
+          const elementIndex = document.content.elements.findIndex((e) => e.id === update.id);
+          const element = document.content.elements[elementIndex];
           if (!element) {
-            continue;
+            continue; // Todo: Warn here, something has gone wrong
           }
           const nextData = {
             ...element.data,
             ...update.changes.data,
           };
-
           const nextLayout = {
             ...element.layout,
             ...update.changes.layout,
           };
-
           const nextStyle = {
             ...element.style,
             ...update.changes.style,
+          };
+          const nextDisplay = {
+            ...element.display,
+            ...update.changes.display,
           };
           if (update.changes.style?.backgroundColor === undefined) {
             delete nextStyle.backgroundColor;
@@ -154,7 +157,8 @@ export class SidebarManager implements vscode.Disposable {
           if (
             deepEquals(nextData, element.data) &&
             deepEquals(nextLayout, element.layout) &&
-            deepEquals(nextStyle, element.style)
+            deepEquals(nextStyle, element.style) &&
+            deepEquals(nextDisplay, element.display)
           ) {
             //Skipping updateElement message because the data hasn't changed
             continue;
@@ -176,6 +180,7 @@ export class SidebarManager implements vscode.Disposable {
                 ...update.changes.data,
               } as typeof el.data,
               style: nextStyle,
+              display: nextDisplay,
             };
           });
           changed = true;

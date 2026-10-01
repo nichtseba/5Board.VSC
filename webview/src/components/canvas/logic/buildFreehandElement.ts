@@ -36,6 +36,11 @@ export function buildFreehandElement(
     type: EditorElementType.Freehand,
     layout: { xPos, yPos, width, height },
     style: { visible: true, opacity: params.opacity },
+    display: {
+      visible: true,
+      excludeFromExport: false,
+      speakerNote: false,
+    },
     data: {
       strokes: [
         {

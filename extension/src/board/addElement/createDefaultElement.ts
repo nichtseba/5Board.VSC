@@ -55,6 +55,11 @@ export function createDefaultElement<T extends EditorElementType>(
       ...structuredClone(profile.style),
       ...defaults?.style,
     },
+    display: {
+      visible: true,
+      excludeFromExport: false,
+      speakerNote: false,
+    },
     data,
   };
 }
