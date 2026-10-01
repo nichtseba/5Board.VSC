@@ -24,7 +24,7 @@ export default function Editor() {
       <div className="relative">
         {boardDocument && (
           <CanvasEventsProvider>
-            <EditorCanvas />
+            <EditorCanvas enableKeyboardShortcuts />
             <ProjectorCursorMirror />
             <ProjectorScrollMirror />
           </CanvasEventsProvider>

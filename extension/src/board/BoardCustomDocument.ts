@@ -3,6 +3,7 @@ import { BoardPackage } from './package';
 import { BoardDocument, EditorElement } from '5board.vsc-common';
 import { MessageService } from '../MessageService';
 import { EXTENSION } from '../extension';
+import { t } from '../localization';
 import { DocumentMessageHandlers } from './DocumentMessageHandlers';
 
 export class BoardCustomDocument implements vscode.CustomDocument {
@@ -17,6 +18,26 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     public boardPackage: BoardPackage,
     public uri: vscode.Uri,
   ) {
+    this.messageService.on('ready', (_msg, sender) => {
+      this.messageService.send(
+        {
+          type: 'init',
+          document: this.boardPackage.document,
+          editorState: EXTENSION.editorState,
+          language: 'en',
+        },
+        sender,
+      );
+    });
+    this.messageService.on('focus', () => {
+      EXTENSION.activeEditorDocument = this;
+    });
+    this.messageService.on('saveHtmlExport', async (msg) => {
+      await this.saveHtmlExport(msg.html, msg.backgroundColor);
+    });
+    this.onDocumentChange((document) => {
+      this.messageService.send({ type: 'updateDocument', document });
+    });
     // Register in the global document registry so ProjectorProvider can
     // find this document and attach the projector panel to the same MessageService.
     EXTENSION.registerDocument(this);
@@ -113,8 +134,42 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     await this.boardPackage.write(targetUri ?? this.uri);
   }
 
-  public applyEdit(edit: (document: BoardDocument) => void): void {
-    edit(this.boardPackage.document);
+  public async saveHtmlExport(html: string, backgroundColor: string): Promise<void> {
+    const exportHtml = createHtmlExport(html, backgroundColor);
+
+    const defaultUri = this.uri.with({
+      path: this.uri.path.replace(/\.[^/.]+$/, '.html'),
+    });
+
+    const targetUri = await vscode.window.showSaveDialog({
+      defaultUri,
+      filters: {
+        HTML: ['html', 'htm'],
+      },
+      saveLabel: t('extension.htmlExport.saveLabel'),
+    });
+
+    if (!targetUri) {
+      return;
+    }
+
+    await vscode.workspace.fs.writeFile(targetUri, new TextEncoder().encode(exportHtml));
+
+    const openFolderLabel = t('extension.htmlExport.openContainingFolder');
+
+    const selection = await vscode.window.showInformationMessage(
+      `${t('extension.htmlExport.saved')} ${targetUri.fsPath}`,
+      openFolderLabel,
+    );
+
+    if (selection === openFolderLabel) {
+      await vscode.commands.executeCommand('revealFileInOS', targetUri);
+    }
+  }
+
+  public applyEdit(edit: (document: BoardDocument) => unknown): void {
+    const changed = edit(this.boardPackage.document);
+    if (changed === false) return;
     this.documentChange.fire(this.boardPackage.document);
   }
 
@@ -128,4 +183,29 @@ export class BoardCustomDocument implements vscode.CustomDocument {
       }
     });
   }
+}
+
+function createHtmlExport(html: string, backgroundColor: string): string {
+  return `<!doctype html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <title>5Board Export</title>
+      <style>
+        @page {
+          size: A4 portrait;
+          margin: 0;
+        }
+
+        html,
+        body {
+          margin: 0;
+          background: ${backgroundColor};
+        }
+      </style>
+    </head>
+    <body>
+    ${html}
+    </body>
+    </html>`;
 }

@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
-import type { ClipboardEvent, DragEvent } from 'react';
+import { useCallback, useEffect } from 'react';
+import type { DragEvent } from 'react';
 import { useMessageService } from '../../../services/MessageService';
 
 /*
@@ -22,10 +22,10 @@ export function useImageImport() {
     [messages],
   );
 
-  // Imports the first image file from a paste event
-  const handlePaste = useCallback(
-    (event: ClipboardEvent<HTMLDivElement>) => {
-      const files = Array.from(event.clipboardData.files);
+  useEffect(() => {
+    // Imports the first image file from a paste event
+    const handlePaste = (event: ClipboardEvent) => {
+      const files = Array.from(event.clipboardData?.files ?? []);
       const image = files.find((file) => file.type.startsWith('image/'));
 
       if (!image) {
@@ -34,14 +34,10 @@ export function useImageImport() {
 
       event.preventDefault();
       void importImageFile(image);
-    },
-    [importImageFile],
-  );
-
-  // Allows the canvas to accept dropped files
-  const handleDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-  }, []);
+    };
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, [importImageFile]);
 
   // Imports the first image file from a drop event
   const handleDrop = useCallback(
@@ -58,8 +54,6 @@ export function useImageImport() {
     [importImageFile],
   );
   return {
-    onPaste: handlePaste,
-    onDragOver: handleDragOver,
     onDrop: handleDrop,
   };
 }

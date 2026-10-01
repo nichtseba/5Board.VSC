@@ -1,43 +1,9 @@
-import { BoardDocument, EditorElementType } from '5board.vsc-common';
+import { BoardDocument } from '5board.vsc-common';
 import path from 'path';
 
 /*
- * Adds an image asset to the document and creates a matching image element for it
+ * Saves image file in board assets and returns its unique asset name
  */
-export function addImageToDocument(
-  document: BoardDocument,
-  requestedName: string,
-  bytes: Uint8Array,
-): void {
-  const assetName = addImageAsset(document, requestedName, bytes);
-
-  document.content.elements.push({
-    id: assetName,
-    type: EditorElementType.Image,
-    layout: {
-      xPos: 0,
-      yPos: 0,
-      width: 32,
-      height: 18,
-    },
-    style: {
-      visible: true,
-    },
-    display: {
-      visible: true,
-      excludeFromExport: false,
-      speakerNote: false,
-    },
-    data: {
-      src: assetName,
-      content: '',
-      title: assetName,
-      altText: assetName,
-      configuredWidth: false,
-    },
-  });
-}
-
 export function addImageAsset(
   document: BoardDocument,
   requestedName: string,

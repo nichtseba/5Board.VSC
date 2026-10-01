@@ -71,6 +71,9 @@ export type WebviewToExtensionMessageType = AllWebviewToExtensionMessage['type']
 type AllWebviewToExtensionMessage =
   | { type: 'ready' }
   | { type: 'focus'; focus: boolean }
+  | { type: 'copyElements' }
+  | { type: 'pasteElements' }
+  | { type: 'duplicateElements' }
   | { type: 'cursorMove'; x: number; y: number }
   | { type: 'cursorLeave' }
   | { type: 'scroll'; top: number; left: number }
@@ -78,6 +81,10 @@ type AllWebviewToExtensionMessage =
   | { type: 'toggleElementSelection'; ids: string[] }
   | { type: 'selectTool'; tool: EditorTool }
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
+  | AddElementMessage
+  | { type: 'deletePreset'; id: string }
+  | { type: 'loadPresetAsset'; id: string }
+  | { type: 'revealPresetsFile' }
   | {
       type: 'updateElementsLayout';
       changes: {
@@ -129,7 +136,8 @@ type AllWebviewToExtensionMessage =
       enabled?: boolean;
       level?: HeadingLevel;
       numberingFormat?: HeadingNumberingStyle;
-    };
+    }
+  | { type: 'saveHtmlExport'; html: string; backgroundColor: string };
 
 type AddElementMessage = {
   [T in EditorElementType]: {

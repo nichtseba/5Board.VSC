@@ -10,7 +10,6 @@ import { StructureTreeProvider } from '../providers/StructureTreeProvider';
 import { EXTENSION } from '../extension';
 import deepEquals from 'deep-equal';
 import { FileTreeProvider } from '../providers/FileTreeProvider';
-import { EditorElement } from '5board.vsc-common';
 
 export class SidebarManager implements vscode.Disposable {
   private readonly sync: SidebarDocumentSync;
@@ -47,6 +46,15 @@ export class SidebarManager implements vscode.Disposable {
       msg.ids.forEach((id) => {
         EXTENSION.deleteEditorElement(id);
       });
+    });
+    this.messages.on('deletePreset', async (msg) => {
+      await EXTENSION.deletePreset(msg.id);
+    });
+    this.messages.on('loadPresetAsset', async (msg) => {
+      await EXTENSION.loadPresetAsset(msg.id);
+    });
+    this.messages.on('revealPresetsFile', async () => {
+      await EXTENSION.revealPresetsFile();
     });
     this.messages.on('textEditorCommand', (msg) => {
       if (!EXTENSION.activeEditorDocument) {
@@ -126,13 +134,55 @@ export class SidebarManager implements vscode.Disposable {
           if (!element) {
             continue; // Todo: Warn here, something has gone wrong
           }
-          const nextElement: EditorElement = Object.assign({}, element, update.changes);
+          const nextData = {
+            ...element.data,
+            ...update.changes.data,
+          };
+          const nextLayout = {
+            ...element.layout,
+            ...update.changes.layout,
+          };
+          const nextStyle = {
+            ...element.style,
+            ...update.changes.style,
+          };
+          const nextDisplay = {
+            ...element.display,
+            ...update.changes.display,
+          };
+          if (update.changes.style?.backgroundColor === undefined) {
+            delete nextStyle.backgroundColor;
+          }
 
-          if (deepEquals(nextElement, element)) {
+          if (
+            deepEquals(nextData, element.data) &&
+            deepEquals(nextLayout, element.layout) &&
+            deepEquals(nextStyle, element.style) &&
+            deepEquals(nextDisplay, element.display)
+          ) {
             //Skipping updateElement message because the data hasn't changed
             continue;
           }
-          document.content.elements[elementIndex] = nextElement;
+
+          document.content.elements = document.content.elements.map((el) => {
+            if (el.id !== update.id) {
+              return el;
+            }
+
+            return {
+              ...el,
+              layout: {
+                ...el.layout,
+                ...update.changes.layout,
+              },
+              data: {
+                ...el.data,
+                ...update.changes.data,
+              } as typeof el.data,
+              style: nextStyle,
+              display: nextDisplay,
+            };
+          });
           changed = true;
         }
         return changed;
@@ -153,18 +203,28 @@ export class SidebarManager implements vscode.Disposable {
         const levels = headingSettings.levels ?? {};
         const currentLevelSettings = levels[msg.level] ?? {};
 
+        const nextLevelSettings = {
+          ...currentLevelSettings,
+          ...msg.changes,
+          textDecoration: {
+            ...currentLevelSettings.textDecoration,
+            ...msg.changes.textDecoration,
+          },
+        };
+
+        const clearsBackgroundColor =
+          Object.prototype.hasOwnProperty.call(msg.changes, 'backgroundColor') &&
+          msg.changes.backgroundColor === undefined;
+
+        const cleanedLevelSettings = clearsBackgroundColor
+          ? removeBackgroundColor(nextLevelSettings)
+          : nextLevelSettings;
+
         document.content.headingSettings = {
           ...headingSettings,
           levels: {
             ...levels,
-            [msg.level]: {
-              ...currentLevelSettings,
-              ...msg.changes,
-              textDecoration: {
-                ...currentLevelSettings.textDecoration,
-                ...msg.changes.textDecoration,
-              },
-            },
+            [msg.level]: cleanedLevelSettings,
           },
         };
       });
@@ -209,4 +269,12 @@ export class SidebarManager implements vscode.Disposable {
     this.sync.dispose();
     this.projectorDocumentListener.dispose();
   }
+}
+
+function removeBackgroundColor<T extends { backgroundColor?: string }>(
+  value: T,
+): Omit<T, 'backgroundColor'> {
+  return Object.fromEntries(
+    Object.entries(value).filter(([key]) => key !== 'backgroundColor'),
+  ) as Omit<T, 'backgroundColor'>;
 }

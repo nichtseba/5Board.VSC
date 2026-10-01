@@ -25,7 +25,6 @@ import { useMessageService } from '../../../services/MessageService';
 import ColorSelector from '../components/ColorSelector';
 import { FontSizeInput } from './components/FontSizeInput';
 import { getCommonValue } from './utils/getCommonValue';
-// import { CommonSettings } from './CommonSettings';
 
 type Props = {
   elements: EditorElement<EditorElementType.Text>[];
@@ -129,7 +128,7 @@ export function TextSettings({ elements }: Props) {
                 ids: elements.map((element) => element.id),
                 command: {
                   type: 'setTextColor',
-                  color,
+                  color: color!,
                 },
               });
             }}
@@ -140,6 +139,7 @@ export function TextSettings({ elements }: Props) {
 
           <ColorSelector
             color={highlightColor}
+            allowNone
             onChange={(color) => {
               messages.send({
                 type: 'textEditorCommand',
@@ -157,6 +157,7 @@ export function TextSettings({ elements }: Props) {
 
           <ColorSelector
             color={backgroundColor}
+            allowNone
             onChange={(color) => {
               messages.send({
                 type: 'updateElements',

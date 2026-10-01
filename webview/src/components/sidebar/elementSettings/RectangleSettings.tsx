@@ -34,11 +34,13 @@ export function RectangleSettings({ elements }: Props) {
       <ElementStyleSettings
         style={commonElementStyle}
         onChange={updateStyle}
+        allowNone
         editableProperties={[
           'backgroundColor',
           'opacity',
           'borderColor',
           'borderWidth',
+          'borderRadius',
           'borderStyle',
         ]}
       />

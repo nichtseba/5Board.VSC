@@ -9,6 +9,13 @@ export class SidebarDocumentSync implements vscode.Disposable {
 
   constructor(private readonly messages: MessageService) {
     messages.on('ready', (_msg, sender) => {
+      messages.send(
+        {
+          type: 'updateEditorState',
+          editorState: EXTENSION.editorState,
+        },
+        sender,
+      );
       const activeDocument = EXTENSION.activeEditorDocument;
       if (!activeDocument) return;
       messages.send(
