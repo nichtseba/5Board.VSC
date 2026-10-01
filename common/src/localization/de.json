@@ -120,6 +120,7 @@
       "exitCode": "[Exit-Code {code}]",
       "exitCodeNone": "keiner",
       "sourceNotFound": "Quelldatei nicht gefunden: {fileName}",
+      "copy": "Kopieren",
       "cut": "Ausschneiden",
       "paste": "Einfügen",
       "stopEditing": "Bearbeiten beenden"

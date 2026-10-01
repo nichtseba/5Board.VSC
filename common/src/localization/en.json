@@ -120,6 +120,7 @@
       "exitCode": "[Exit code {code}]",
       "exitCodeNone": "none",
       "sourceNotFound": "Source not found: {fileName}",
+      "copy": "Copy",
       "cut": "Cut",
       "paste": "Paste",
       "stopEditing": "Stop Editing"

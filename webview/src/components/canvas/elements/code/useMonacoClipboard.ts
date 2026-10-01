@@ -4,8 +4,10 @@ import { useMessageService, useOnMessage } from '../../../../services/MessageSer
 import { useLocalization } from '../../../../providers/LocalizationProvider';
 
 /**
- * Cut and paste for Monaco inside a webview, where the browser clipboard is not available:
- * both go through the extension. Returns a function to call from Monaco's `onMount`.
+ * Copy, cut and paste for Monaco inside a webview, where the browser clipboard is not available:
+ * all go through the extension. Copy needs its own action because Monaco binds `Ctrl+C` only in
+ * Electron; in a webview the key would reach the canvas shortcut and copy the element instead.
+ * Returns a function to call from Monaco's `onMount`.
  */
 export function useMonacoClipboard() {
   const messages = useMessageService();
@@ -22,11 +24,22 @@ export function useMonacoClipboard() {
   return useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       editor.addAction({
+        id: '5board-copy',
+        label: t('webview.codeblock.copy'),
+        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyC],
+        run: (ed) => {
+          const copied = collectSelection(ed);
+          if (!copied) return;
+          messages.send({ type: 'copyToClipboard', text: copied.text });
+        },
+      });
+
+      editor.addAction({
         id: '5board-cut',
         label: t('webview.codeblock.cut'),
         keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyX],
         run: (ed) => {
-          const cut = collectCut(ed);
+          const cut = collectSelection(ed);
           if (!cut) return;
           messages.send({ type: 'copyToClipboard', text: cut.text });
           ed.pushUndoStop();
@@ -53,8 +66,11 @@ export function useMonacoClipboard() {
   );
 }
 
-/** An empty selection cuts its whole line, like Monaco's own `emptySelectionClipboard`. */
-function collectCut(
+/**
+ * Text and ranges for copy/cut. An empty selection takes its whole line, like Monaco's own
+ * `emptySelectionClipboard`.
+ */
+function collectSelection(
   editor: monaco.editor.ICodeEditor,
 ): { text: string; ranges: monaco.IRange[] } | null {
   const model = editor.getModel();
