@@ -11,6 +11,7 @@ import { CommonSettings } from './CommonSettings';
 import { RectangleSettings } from './RectangleSettings';
 import { CircleSettings } from './CircleSettings';
 import GenericElementSettings from './GenericElementSettings';
+import { TableOfContentsSettings } from './ContentTableSettings';
 
 type SettingsProps<T extends EditorElementType> = {
   elements: EditorElement<T>[];
@@ -62,6 +63,7 @@ const SETTINGS_COMPONENTS: {
   [EditorElementType.Circle]: CircleSettings,
   [EditorElementType.Line]: LineSettings,
   [EditorElementType.Freehand]: FreehandSettings,
+  [EditorElementType.TableOfContents]: TableOfContentsSettings,
 };
 
 function UnsupportedElementSettings() {

@@ -78,8 +78,6 @@ type AllWebviewToExtensionMessage =
   | { type: 'toggleElementSelection'; ids: string[] }
   | { type: 'selectTool'; tool: EditorTool }
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
-  | AddElementMessage
-  | { type: 'deleteElements'; ids: string[] }
   | {
       type: 'updateElementsLayout';
       changes: {
@@ -88,6 +86,8 @@ type AllWebviewToExtensionMessage =
         aspectRatio?: number;
       }[];
     } // Update the Layout when Element was moved or resized, array can handle one or more elements
+  | AddElementMessage
+  | { type: 'deleteElements'; ids: string[] }
   | {
       type: 'updateElements';
       changes: {

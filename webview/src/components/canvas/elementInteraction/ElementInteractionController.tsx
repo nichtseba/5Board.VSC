@@ -11,6 +11,7 @@ import Moveable, {
   OnRotateEnd,
 } from 'react-moveable';
 import { useMessageService } from '../../../services/MessageService';
+import { snapTranslationToGrid } from './interactionUtils';
 
 type Props<T extends EditorElementType> = {
   element: EditorElement<T>;
@@ -109,36 +110,22 @@ export default function ElementInteractionController<ElementType extends EditorE
   const handleDragEnd = ({ target, lastEvent }: OnDragEnd) => {
     if (!lastEvent || !target) return;
     const [dx, dy] = lastEvent.beforeTranslate;
-    let xDelta = Math.round(dx / cellSize.width);
-    let yDelta = Math.round(dy / cellSize.height);
-    const xPos = clampHorizontalPosition(element.layout.xPos + xDelta, element.layout.width);
-    xDelta = xPos - element.layout.xPos;
+    const [rawXDelta, yDelta] = snapTranslationToGrid(dx, dy, cellSize);
+    const xPos = clampHorizontalPosition(element.layout.xPos + rawXDelta, element.layout.width);
+    const xDelta = xPos - element.layout.xPos;
 
     if (xDelta !== 0 || yDelta !== 0) {
       pendingPositionUpdate.current = true;
-      switch (profile.dragDirection) {
-        case 'vertical':
-          xDelta = 0;
-          break;
-        case 'horizontal':
-          yDelta = 0;
-          break;
-      }
-      messages.send({
-        type: 'updateElementsLayout',
-        changes: [
-          {
-            id: element.id,
-            changes: {
-              xPos: element.layout.xPos + xDelta,
-              yPos: element.layout.yPos + yDelta,
-            },
-          },
-        ],
-      });
     }
-
-    moveableRef.current?.updateRect();
+    messages.send({
+      type: 'updateElementsLayout',
+      changes: [
+        {
+          id: element.id,
+          changes: { xPos: element.layout.xPos + xDelta, yPos: element.layout.yPos + yDelta },
+        },
+      ],
+    });
   };
 
   const handleResize = ({ target, width, height, direction }: OnResize) => {
