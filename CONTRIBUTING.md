@@ -14,11 +14,6 @@ Dieses Dokument definiert die Coding-Standards, den Workflow und die Regeln für
 
 # 2. Git Workflow
 
-## Branching Strategy
-
-- `main`: immer stabil und deploybar
-- `dev`: Integrations-Branch
-
 ### Branch Naming
 
 - `feature/<issue-id>-<short-description>`
