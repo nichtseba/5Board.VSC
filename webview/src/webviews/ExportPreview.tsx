@@ -9,6 +9,7 @@ import { Button } from 'vscrui';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
 import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
 import '../styles/ExportPreview.css';
+import { ViewTypeProvider } from '../providers/ViewTypeProvider';
 
 export default function ExportPreview() {
   const messages = useMessageService();
@@ -20,22 +21,26 @@ export default function ExportPreview() {
   }, [messages]);
 
   return (
-    <div style={{ display: 'flex', height: '100vh', flexDirection: 'column', gap: 8, padding: 8 }}>
-      <Button appearance="primary" onClick={() => void exportDocument(messages)}>
-        {t('webview.exportPreview.saveHtml')}
-      </Button>
+    <ViewTypeProvider value="export">
+      <div
+        style={{ display: 'flex', height: '100vh', flexDirection: 'column', gap: 8, padding: 8 }}
+      >
+        <Button appearance="primary" onClick={() => void exportDocument(messages)}>
+          {t('webview.exportPreview.saveHtml')}
+        </Button>
 
-      {document ? (
-        <div className="export-preview-pages">
-          <div className="export-preview-page-guides" />
-          <CanvasEventsProvider>
-            <EditorCanvas exportMode />
-          </CanvasEventsProvider>
-        </div>
-      ) : (
-        <p>{t('webview.exportPreview.loading')}</p>
-      )}
-    </div>
+        {document ? (
+          <div className="export-preview-pages">
+            <div className="export-preview-page-guides" />
+            <CanvasEventsProvider>
+              <EditorCanvas exportMode />
+            </CanvasEventsProvider>
+          </div>
+        ) : (
+          <p>{t('webview.exportPreview.loading')}</p>
+        )}
+      </div>
+    </ViewTypeProvider>
   );
 }
 
