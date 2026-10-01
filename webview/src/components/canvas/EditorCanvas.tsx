@@ -10,7 +10,7 @@ import { HeadingNumberingProvider } from '../../providers/HeadingNumberingContex
 import ProjectorMouse, { ProjectorCursor } from '../projector/ProjectorMouse';
 import './EditorCanvas.css';
 import { useEditorState } from '../../providers/EditorStateProvider';
-import { useMessageService } from '../../services/MessageService';
+import { useMessageService, useOnMessage } from '../../services/MessageService';
 import { useGrid } from '../../providers/GridProvider';
 import { createAssetUrls } from './logic/assetUrlsUtil';
 import { useImageImport } from './logic/useImageImport';
@@ -54,6 +54,7 @@ export default function EditorCanvas({
 
   const messages = useMessageService();
   const canvasRef = useRef<HTMLDivElement | null>(null);
+  const [elementToScrollId, setElementToScrollId] = useState<string | null>(null);
   const imageImportHandlers = useImageImport();
   const { setGridElement } = useGrid();
 
@@ -63,6 +64,30 @@ export default function EditorCanvas({
       setGridElement(null);
     };
   }, [setGridElement]);
+
+  useOnMessage((msg) => {
+    if (msg.type === 'goToElement') {
+      setElementToScrollId(msg.elementId);
+    }
+  });
+
+  useEffect(() => {
+    if (!elementToScrollId || !elements.some((element) => element.id === elementToScrollId)) {
+      return;
+    }
+
+    const target = globalThis.document.getElementById(elementToScrollId);
+    if (!target) {
+      return;
+    }
+
+    target.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+      inline: 'center',
+    });
+    setElementToScrollId(null);
+  }, [elementToScrollId, elements]);
 
   useEffect(() => {
     if (!enableKeyboardShortcuts) {

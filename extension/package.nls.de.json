@@ -16,12 +16,15 @@
   "commands.previewHtmlExport": "HTML-Export Vorschau anzeigen",
   "commands.goToElement": "Gehe zu Element",
   "commands.addImageFromFile": "Bild aus Datei hinzufügen",
+  "commands.savePreset": "Speichere als Voreinstellung",
+  "commands.deletePreset": "Voreinstellung löschen",
+  "commands.revealPresetsFile": "Voreinstellungsdatei anzeigen",
   "commands.copy": "5Board-Elemente kopieren",
   "commands.paste": "5Board-Elemente einfuegen",
   "commands.duplicate": "5Board-Elemente duplizieren",
   "commands.openSettings": "5Board-Einstellungen öffnen",
   "configuration.java.home.description": "Pfad zur Verzeichnis des Java Development Kits. Leer lassen, um Java aus dem System-PATH zu verwenden.",
-  "configuration.grid.cellSize.description": "Standardgröße einer Rasterzelle in Pixeln für neue Dokumente.",
-  "configuration.grid.columnCount.description": "Standardanzahl der Rasterspalten für neue Dokumente.",
-  "configuration.colorPalette.customColors.description": "Füge bis zu drei eigene Farben zur Farbauswahl im RGB-Format hinzu, z.B. rgb(255, 0, 0)"
+  "configuration.grid.cellSize.description": "Änderungen an der Grid-Größe haben Auswirkung auf die Export Darstellung! \n\n Standardgröße einer Rasterzelle in Pixeln für neue Dokumente.",
+  "configuration.grid.columnCount.description": "Änderungen an der Grid-Größe haben Auswirkung auf die Export Darstellung! \n\n Standardanzahl der Rasterspalten für neue Dokumente.",
+  "configuration.colorPalette.customColors.description": "Füge eigene Farben zur Farbauswahl im RGB-Format hinzu, z.B. rgb(255, 0, 0)"
 }

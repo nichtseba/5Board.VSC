@@ -33,7 +33,7 @@ export function createDefaultElement<T extends EditorElementType>(
       src: assetName,
       title: imageData.title ?? assetName,
       altText: imageData.altText ?? assetName,
-      configuredWidth: false,
+      configuredWidth: true,
     });
   }
 
@@ -43,7 +43,11 @@ export function createDefaultElement<T extends EditorElementType>(
     layout: {
       ...profile.layout,
       ...position,
-      width: defaults?.layout?.width ?? profile.layout.width,
+      width:
+        defaults?.layout?.width ??
+        (type === EditorElementType.Heading
+          ? (document.content.grid?.columnCount ?? profile.layout.width)
+          : profile.layout.width),
       height: defaults?.layout?.height ?? profile.layout.height,
     },
 

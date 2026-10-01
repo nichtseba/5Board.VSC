@@ -20,6 +20,20 @@
       "loading": "Loading...",
       "live": "Live",
       "paused": "Paused"
+    },
+    "presets": {
+      "noElementSelected": "No element selected. Please select an element to save as a preset.",
+      "savePreset": "Save as Preset",
+      "presetNotSaved": "No preset was saved with the selected options",
+      "presetName": "Preset Name",
+      "presetNamePlaceholder": "Enter a name for the preset",
+      "keepStyle": "Keep Style",
+      "keepContent": "Keep Content",
+      "keepPosition": "Keep X-Position",
+      "presetOptions": "Preset Options",
+      "selectOptions": "Select Options",
+      "imageAssetMissing": "The selected image asset could not be found, so the preset was not saved.",
+      "presetSaved": "Preset saved successfully."
     }
   },
   "webview": {
@@ -111,7 +125,18 @@
       },
       "goToElement": "Go to element",
       "addElement": "Add Element",
-      "addCustomElement": "Add Custom Element",
+      "presets": {
+        "presets": "Select Preset",
+        "filtered": "Presets are filtered by the selected tool",
+        "deletePreset": "Delete Preset",
+        "noPresets": "No Presets Saved",
+        "settings": {
+          "keepStyle": "style",
+          "keepXPosition": "x-position",
+          "content": "content"
+        },
+        "openPresetFile": "Open Preset File"
+      },
       "tableOfContentsAlreadyExists": "A table of contents already exists."
     },
     "sidebar-element-settings": {
@@ -173,6 +198,7 @@
         "symbols": "Symbols",
         "borderColor": "Border color",
         "borderWidth": "Border width",
+        "borderRadius": "Border radius",
         "borderStyle": "Border style",
         "startHead": "Start head",
         "endHead": "End head",
@@ -183,7 +209,8 @@
         "headCircle": "Circle",
         "headSquare": "Square"
       },
-      "delete": "Delete"
+      "delete": "Delete",
+      "deleteTooltip": "Delete (entf)"
     }
   }
 }

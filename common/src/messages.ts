@@ -81,6 +81,10 @@ type AllWebviewToExtensionMessage =
   | { type: 'toggleElementSelection'; ids: string[] }
   | { type: 'selectTool'; tool: EditorTool }
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
+  | AddElementMessage
+  | { type: 'deletePreset'; id: string }
+  | { type: 'loadPresetAsset'; id: string }
+  | { type: 'revealPresetsFile' }
   | {
       type: 'updateElementsLayout';
       changes: {
