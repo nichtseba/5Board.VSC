@@ -10,7 +10,12 @@ import { StructureTreeProvider } from '../providers/StructureTreeProvider';
 import { EXTENSION } from '../extension';
 import deepEquals from 'deep-equal';
 import { FileTreeProvider } from '../providers/FileTreeProvider';
-import { findBoardElementById, groupElementsInDocument, isGroupElement } from '5board.vsc-common';
+import {
+  findBoardElementById,
+  groupElementsInDocument,
+  isGroupElement,
+  ungroupElementsInDocument,
+} from '5board.vsc-common';
 
 export class SidebarManager implements vscode.Disposable {
   private readonly sync: SidebarDocumentSync;
@@ -231,6 +236,13 @@ export class SidebarManager implements vscode.Disposable {
         return;
       }
       activeDocument.applyEdit((document) => groupElementsInDocument(document, ids));
+    });
+    this.messages.on('ungroupElements', ({ id }) => {
+      const activeDocument = EXTENSION.activeEditorDocument;
+      if (!activeDocument) {
+        return;
+      }
+      activeDocument.applyEdit((document) => ungroupElementsInDocument(document, id));
     });
   }
 

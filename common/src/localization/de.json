@@ -183,6 +183,7 @@
         "headSquare": "Quadrat"
       },
       "group": "Gruppieren",
+      "ungroup": "Gruppierung aufheben",
       "delete": "Löschen"
     }
   }

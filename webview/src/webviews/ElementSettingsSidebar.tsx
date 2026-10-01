@@ -8,7 +8,8 @@ import { useLocalization } from '../providers/LocalizationProvider';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
 import { Button, Icon } from 'vscrui';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
-import { flattenBoardElements } from '5board.vsc-common';
+import { flattenBoardElements, GroupElement, isGroupElement } from '5board.vsc-common';
+import { RectangleGroupIcon } from '@heroicons/react/24/outline';
 
 export default function ElementSettingsSidebar() {
   const messages = useMessageService();
@@ -49,23 +50,44 @@ export default function ElementSettingsSidebar() {
     });
   };
 
+  const selectedIdSet = new Set(selectedElementIds);
+
+  const selectedGroup =
+    selectedIdSet.size > 0
+      ? document?.content.elements.find(
+          (element): element is GroupElement =>
+            isGroupElement(element) &&
+            element.data.children.length === selectedIdSet.size &&
+            element.data.children.every((child) => selectedIdSet.has(child.id)),
+        )
+      : undefined;
+
   return (
     <SidebarShell>
       {content}
       {primarySelectedElement && <LayerSettings element={primarySelectedElement} />}
-      {selectedElements.length >= 2 && (
+      {(selectedGroup || selectedElements.length >= 2) && (
         <Button
           appearance="secondary"
           className="justify-center gap-2"
-          onClick={() =>
-            messages.send({
-              type: 'groupElements',
-              ids: selectedElementIds,
-            })
-          }
+          onClick={() => {
+            if (selectedGroup) {
+              messages.send({
+                type: 'ungroupElements',
+                id: selectedGroup.id,
+              });
+            } else {
+              messages.send({
+                type: 'groupElements',
+                ids: selectedElementIds,
+              });
+            }
+          }}
         >
-          <Icon name="layers" />
-          {t('webview.sidebar-element-settings.group')}
+          <RectangleGroupIcon className="size-4" />
+          {selectedGroup
+            ? t('webview.sidebar-element-settings.ungroup')
+            : t('webview.sidebar-element-settings.group')}
         </Button>
       )}
       {primarySelectedElement && (

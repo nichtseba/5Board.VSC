@@ -69,3 +69,24 @@ export function groupElementsInDocument(document: BoardDocument, ids: readonly s
 
   return true;
 }
+
+export function ungroupElementsInDocument(document: BoardDocument, groupId: string): boolean {
+  const index = document.content.elements.findIndex(
+    (element) => isGroupElement(element) && element.id === groupId,
+  );
+
+  if (index < 0) {
+    return false;
+  }
+
+  const group = document.content.elements[index];
+  if (!isGroupElement(group)) {
+    return false;
+  }
+
+  document.content.elements.splice(index, 1, ...group.data.children);
+  document.content.selectedElementIds = group.data.children.map((child) => child.id);
+  document.content.primarySelectedElementId = group.data.children[0]?.id ?? null;
+
+  return true;
+}

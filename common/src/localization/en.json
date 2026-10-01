@@ -183,6 +183,7 @@
         "headSquare": "Square"
       },
       "group": "Group",
+      "ungroup": "Ungroup",
       "delete": "Delete"
     }
   }
