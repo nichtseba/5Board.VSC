@@ -1,32 +1,44 @@
-import {
-  EditorElementType,
-  TextDecorationStyle,
-  WebviewToExtensionMessage,
-  getHeadingLevelSettings,
-} from '5board.vsc-common';
+import { EditorElementType, TextDecorationStyle, getHeadingLevelSettings } from '5board.vsc-common';
 import type React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import { EditorElementProps } from '../EditorElement';
 import { useHeadingNumber } from '../../../providers/HeadingNumberingContext';
-import { vscodeApi } from '../../VsCode';
 import { useBoardDocument } from '../../../providers/BoardDocumentProvider';
+import { useGrid } from '../../../providers/GridProvider';
+import { useIsEditorView } from '../../../providers/ViewTypeProvider';
+import { useMessageService } from '../../../services/MessageService';
+
+const HEADING_TAGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const;
 
 /**
- * Renders a heading element. The heading level (h1, h2, etc.) is determined by the `level` property in the element's data.
- * A hierarchical index (e.g. "1.", "1.1") derived from the heading's position is prefixed to the content.
- *
- * Double-clicking the heading enters inline edit mode for the text content. The change is committed
- * on blur or Enter and discarded on Escape. The derived index prefix is never editable.
+ * Uses the shared element edit mode while keeping the derived number read-only.
+ * Enter/blur commit the plain text draft; Escape discards it.
  */
-export function HeadingElement({ element }: EditorElementProps<EditorElementType.Heading>) {
+export function HeadingElement({
+  element,
+  editing = false,
+  editingPosition,
+  onStopEditing,
+  preview,
+}: EditorElementProps<EditorElementType.Heading>) {
   const number = useHeadingNumber(element.id);
   const boardDocument = useBoardDocument();
+  const messages = useMessageService();
+  const isEditorView = useIsEditorView();
+  const { cellSize, metrics } = useGrid();
   const levelSettings = getHeadingLevelSettings(
     boardDocument?.content.headingSettings,
     element.data.level,
   );
-  const [isEditing, setIsEditing] = useState(false);
+  const headingRef = useRef<HTMLHeadingElement>(null);
   const contentRef = useRef<HTMLSpanElement>(null);
+  const editSession = useRef<{
+    original: string;
+    draft: string;
+    node: HTMLSpanElement;
+  } | null>(null);
+  const pendingHeight = useRef<number | null>(null);
+  const HeadingTag = HEADING_TAGS[element.data.level - 1];
   const headingStyle: React.CSSProperties = {
     color: levelSettings.color,
     backgroundColor: levelSettings.backgroundColor,
@@ -35,144 +47,206 @@ export function HeadingElement({ element }: EditorElementProps<EditorElementType
     fontWeight: levelSettings.fontWeight,
     fontStyle: levelSettings.fontStyle,
     textDecoration: formatTextDecoration(levelSettings.textDecoration),
+    whiteSpace: 'pre-wrap',
+    overflowWrap: 'anywhere',
+    margin: 0,
   };
 
-  // When entering edit mode, focus the content span and place the caret at the end
-  // so the user can type immediately.
-  useEffect(() => {
-    if (!isEditing || !contentRef.current) return;
-    const span = contentRef.current;
-    span.focus();
-    const selection = window.getSelection();
-    if (selection) {
-      const range = document.createRange();
-      range.selectNodeContents(span);
-      range.collapse(false);
-      selection.removeAllRanges();
-      selection.addRange(range);
-    }
-  }, [isEditing]);
-
-  function commit(): void {
-    setIsEditing(false);
-    const newContent = contentRef.current?.textContent ?? '';
-    if (newContent !== element.data.content) {
-      const message: WebviewToExtensionMessage<'updateElements'> = {
+  const commit = useCallback(() => {
+    const session = editSession.current;
+    if (!session) return;
+    // Clear synchronously: blur and deselection can both end the same edit.
+    editSession.current = null;
+    if (contentRef.current) contentRef.current.textContent = session.draft;
+    if (session.draft !== element.data.content) {
+      messages.send({
         type: 'updateElements',
         changes: [
           {
             id: element.id,
-            changes: { data: { ...element.data, content: newContent } },
+            changes: { data: { ...element.data, content: session.draft } },
           },
         ],
-      };
-      vscodeApi.postMessage(message);
+      });
     }
-  }
+    onStopEditing?.();
+  }, [element.id, element.data, messages, onStopEditing]);
 
   function cancel(): void {
-    if (contentRef.current) {
-      contentRef.current.textContent = element.data.content;
-    }
-    setIsEditing(false);
+    const session = editSession.current;
+    if (!session) return;
+    editSession.current = null;
+    if (contentRef.current) contentRef.current.textContent = session.original;
+    onStopEditing?.();
   }
 
-  /** Utility component for rendering the appropriate heading tag based on the level */
-  function HeadingTag({
-    children,
-    level,
-    style,
-  }: {
-    children: React.ReactNode;
-    level: 1 | 2 | 3 | 4 | 5 | 6;
-    style: React.CSSProperties;
-  }) {
-    switch (level) {
-      case 1:
-        return (
-          <h1 className="leading-tight" style={style}>
-            {children}
-          </h1>
-        );
-      case 2:
-        return (
-          <h2 className="leading-tight" style={style}>
-            {children}
-          </h2>
-        );
-      case 3:
-        return (
-          <h3 className="leading-snug" style={style}>
-            {children}
-          </h3>
-        );
-      case 4:
-        return (
-          <h4 className="leading-snug" style={style}>
-            {children}
-          </h4>
-        );
-      case 5:
-        return (
-          <h5 className="leading-normal" style={style}>
-            {children}
-          </h5>
-        );
-      case 6:
-        return (
-          <h6 className="leading-normal" style={style}>
-            {children}
-          </h6>
-        );
-      default:
-        throw new Error(`Invalid heading level: ${level}`);
+  // The browser owns the editable children. Restore external content only when
+  // it changes, and preserve the draft if a different heading tag is mounted.
+  useLayoutEffect(() => {
+    const content = contentRef.current;
+    const session = editSession.current;
+    if (!content || session?.node === content) return;
+    content.textContent = session ? editableContent(session.draft) : element.data.content;
+    if (session) session.node = content;
+  }, [element.data.content, element.data.level]);
+
+  useLayoutEffect(() => {
+    if (!editing) {
+      commit();
+    } else if (!editSession.current && contentRef.current) {
+      editSession.current = {
+        original: element.data.content,
+        draft: element.data.content,
+        node: contentRef.current,
+      };
+      contentRef.current.textContent = editableContent(element.data.content);
     }
-  }
+  }, [editing, element.data.content, commit]);
+
+  useEffect(() => {
+    if (!editing) return;
+    const frame = requestAnimationFrame(() => {
+      const content = contentRef.current;
+      if (!content || !editSession.current) return;
+      content.focus();
+      const clickedContent =
+        editingPosition &&
+        Array.from(content.getClientRects()).some(
+          (rect) =>
+            editingPosition.x >= rect.left &&
+            editingPosition.x < rect.right &&
+            editingPosition.y >= rect.top &&
+            editingPosition.y < rect.bottom,
+        );
+      const range = clickedContent
+        ? document.caretRangeFromPoint(editingPosition.x, editingPosition.y)
+        : null;
+      const selection = window.getSelection();
+      if (!selection) return;
+      const caret =
+        range && content.contains(range.startContainer) ? range : document.createRange();
+      if (caret !== range) {
+        // The editable DOM may include a trailing caret placeholder. The
+        // fallback belongs at the end of the draft, before that placeholder.
+        caret.setStart(content.firstChild ?? content, editSession.current.draft.length);
+        caret.collapse(true);
+      } else if (caret.startContainer === content.firstChild) {
+        caret.setStart(
+          caret.startContainer,
+          Math.min(caret.startOffset, editSession.current.draft.length),
+        );
+        caret.collapse(true);
+      }
+      selection.removeAllRanges();
+      selection.addRange(caret);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [editing, editingPosition, element.data.level]);
+
+  useEffect(() => {
+    if (pendingHeight.current !== null && element.layout.height >= pendingHeight.current) {
+      pendingHeight.current = null;
+    }
+  }, [element.layout.height]);
+
+  useEffect(() => {
+    const heading = headingRef.current;
+    // GridProvider starts with placeholder cell sizes until the canvas mounts.
+    if (!heading || !isEditorView || preview || metrics.width <= 0 || cellSize.height <= 0) return;
+    let frame: number | null = null;
+    const scheduleMeasurement = () => {
+      if (frame !== null) return;
+      frame = requestAnimationFrame(() => {
+        frame = null;
+        const requiredRows = Math.ceil(
+          Math.max(heading.offsetHeight, heading.scrollHeight) / cellSize.height,
+        );
+        if (requiredRows <= Math.max(element.layout.height, pendingHeight.current ?? 0)) return;
+        pendingHeight.current = requiredRows;
+        messages.send({
+          type: 'updateElementsLayout',
+          changes: [{ id: element.id, changes: { height: requiredRows } }],
+        });
+      });
+    };
+    const observer = new ResizeObserver(scheduleMeasurement);
+    observer.observe(heading);
+    scheduleMeasurement();
+    return () => {
+      observer.disconnect();
+      if (frame !== null) cancelAnimationFrame(frame);
+    };
+  }, [
+    isEditorView,
+    preview,
+    metrics.width,
+    cellSize.height,
+    element.id,
+    element.data.level,
+    element.layout.height,
+    messages,
+  ]);
 
   return (
-    <HeadingTag level={element.data.level} style={headingStyle}>
+    <HeadingTag
+      ref={headingRef}
+      className={
+        element.data.level <= 2
+          ? 'leading-tight'
+          : element.data.level <= 4
+            ? 'leading-snug'
+            : 'leading-normal'
+      }
+      style={headingStyle}
+    >
       {number ? <span className="heading-index">{number} </span> : null}
       <span
         ref={contentRef}
         className="outline-none"
-        contentEditable={isEditing}
+        style={{ userSelect: editing ? 'text' : undefined }}
+        contentEditable={editing ? 'plaintext-only' : false}
         suppressContentEditableWarning
-        onDoubleClick={() => setIsEditing(true)}
-        onClick={(e) => {
-          if (isEditing) e.stopPropagation();
+        onInput={(event) => {
+          if (editSession.current) {
+            // Chromium keeps a terminal newline as a caret placeholder in this
+            // plain-text editing host. It is not part of the saved content.
+            editSession.current.draft = event.currentTarget.innerText
+              .replace(/\r\n?/g, '\n')
+              .replace(/\n$/, '');
+          }
         }}
-        onBlur={() => {
-          if (isEditing) commit();
+        onClick={(event) => {
+          if (editing) event.stopPropagation();
         }}
-        onKeyDown={(e) => {
-          if (!isEditing) return;
-          if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
+        onBlur={commit}
+        onKeyDown={(event) => {
+          if (!editing) return;
+          const key = event.key.toLowerCase();
+          const isClipboardShortcut =
+            (event.metaKey || event.ctrlKey) && (key === 'c' || key === 'v');
+          if (!isClipboardShortcut) event.stopPropagation();
+          if (event.nativeEvent.isComposing) return;
+          if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
             commit();
-          } else if (e.key === 'Escape') {
-            e.preventDefault();
+          } else if (event.key === 'Escape') {
+            event.preventDefault();
             cancel();
           }
         }}
-      >
-        {element.data.content}
-      </span>
+      />
     </HeadingTag>
   );
 }
 
+function editableContent(content: string): string {
+  return content.endsWith('\n') ? `${content}\n` : content;
+}
+
 function formatTextDecoration(textDecoration: TextDecorationStyle | undefined): string | undefined {
   const decorations: string[] = [];
-
-  if (textDecoration?.underline) {
-    decorations.push('underline');
-  }
-  if (textDecoration?.overline) {
-    decorations.push('overline');
-  }
-  if (textDecoration?.lineThrough) {
-    decorations.push('line-through');
-  }
-
+  if (textDecoration?.underline) decorations.push('underline');
+  if (textDecoration?.overline) decorations.push('overline');
+  if (textDecoration?.lineThrough) decorations.push('line-through');
   return decorations.length > 0 ? decorations.join(' ') : undefined;
 }
