@@ -75,7 +75,7 @@ class StructureNode extends vscode.TreeItem {
       label = element.data.content;
       state = vscode.TreeItemCollapsibleState.Collapsed;
     } else {
-      label = `${t(`webview.sidebar.elementType.${element.type}`)} ${element.id}`;
+      label = element.name ?? element.id;
       state = vscode.TreeItemCollapsibleState.None;
     }
     super(label, state);

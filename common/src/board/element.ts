@@ -20,11 +20,12 @@ export enum EditorElementType {
  */
 export type EditorElement<T extends EditorElementType = EditorElementType> = {
   id: string;
+  name?: string;
   type: T;
 
   layout: ElementLayout;
   style: ElementStyle;
-
+  display: ElementDisplay;
   data: EditorElementDataMap[T];
 };
 
@@ -52,6 +53,12 @@ export type ElementStyle = {
     style?: LineStyle;
     radius?: number;
   };
+};
+
+export type ElementDisplay = {
+  visible: boolean;
+  speakerNote: boolean;
+  excludeFromExport: boolean;
 };
 
 /**

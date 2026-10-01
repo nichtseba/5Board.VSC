@@ -210,6 +210,11 @@
         "headSquare": "Quadrat"
       },
       "delete": "Löschen",
+      "name": "Name",
+      "visibility": "Sichtbarkeit",
+      "visible": "Sichtbar",
+      "speakerNote": "Sprechernotiz",
+      "hideInExport": "Im Export ausblenden",
       "deleteTooltip": "Löschen (entf)"
     }
   }

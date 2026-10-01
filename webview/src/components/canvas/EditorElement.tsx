@@ -12,6 +12,7 @@ import { FreehandElement } from './elements/FreehandElement';
 import { TableOfContentsElement } from './elements/TableOfContentsElement';
 import { useEditorState } from '../../providers/EditorStateProvider';
 import { useMessageService } from '../../services/MessageService';
+import { useViewType } from '../../providers/ViewTypeProvider';
 import { useBoardDocument } from '../../providers/BoardDocumentProvider';
 import { useLocalization } from '../../providers/LocalizationProvider';
 import { RectangleElement } from './elements/RectangleElement';
@@ -141,6 +142,11 @@ export default function EditorElement<ElementType extends EditorElementType>({
       setEditingPosition(null);
     }
   }, [selected]);
+  const viewType = useViewType();
+  const hidden =
+    preview ||
+    (viewType === 'projector' && (element.display.speakerNote || !element.display.visible)) ||
+    (viewType === 'export' && (element.display.speakerNote || element.display.excludeFromExport));
 
   return (
     <>
@@ -160,6 +166,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
               : ''
           }
           ${selected ? 'outline outline-2 outline-focus-border bg-focus-border/12' : ''}
+          ${hidden ? 'invisible' : ''}
         `}
         ref={targetRef}
         style={{
@@ -214,7 +221,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
   );
 }
 
-/**
+/*
  * Mapping of editor element types to their corresponding React components.
  */
 const ELEMENT_COMPONENTS = {

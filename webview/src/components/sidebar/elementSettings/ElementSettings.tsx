@@ -6,8 +6,11 @@ import { CodeSettings } from './CodeSettings';
 import { ImageSettings } from './ImageSettings';
 import { LineSettings } from './LineSettings';
 import { FreehandSettings } from './FreehandSettings';
+import { useLocalization } from '../../../providers/LocalizationProvider';
+import { CommonSettings } from './CommonSettings';
 import { RectangleSettings } from './RectangleSettings';
 import { CircleSettings } from './CircleSettings';
+import GenericElementSettings from './GenericElementSettings';
 import { TableOfContentsSettings } from './ContentTableSettings';
 
 type SettingsProps<T extends EditorElementType> = {
@@ -30,12 +33,19 @@ export default function ElementSettings<ElementType extends EditorElementType>({
   const type = getSelectionType(elements);
 
   if (type === 'mixed') {
-    return; //<CommonSettings elements={elements} />;
+    return <CommonSettings elements={elements} />;
   }
 
-  const Component = SETTINGS_COMPONENTS[type] as React.ComponentType<SettingsProps<ElementType>>;
-
-  return <Component elements={elements} />;
+  const Component =
+    (SETTINGS_COMPONENTS[type] as React.ComponentType<SettingsProps<ElementType>>) ??
+    UnsupportedElementSettings;
+  return (
+    <>
+      <CommonSettings elements={elements} />
+      {elements.length === 1 && <GenericElementSettings element={elements[0]} />}
+      <Component elements={elements} />
+    </>
+  );
 }
 
 /**
@@ -54,3 +64,12 @@ const SETTINGS_COMPONENTS: {
   [EditorElementType.Freehand]: FreehandSettings,
   [EditorElementType.TableOfContents]: TableOfContentsSettings,
 };
+
+function UnsupportedElementSettings() {
+  const { t } = useLocalization();
+  return (
+    <div>
+      <p>{t('webview.sidebar-element-settings.unsupportedElement')}</p>
+    </div>
+  );
+}
