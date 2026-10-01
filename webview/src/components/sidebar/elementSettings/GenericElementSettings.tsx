@@ -32,25 +32,32 @@ export default function GenericElementSettings({ element }: { element: EditorEle
   );
   return (
     <>
-      <SettingsField label={t('webview.sidebar-element-settings.visible')}>
-        <Checkbox
-          checked={element.display.visible}
-          onChange={(checked) => updateElementDisplay({ visible: checked })}
-        />
+      <SettingsField label={t('webview.sidebar-element-settings.name')}>
+        <TextField value={element.name ?? ''} onChange={(value) => updateElementName(value)} />
       </SettingsField>
-      <SettingsField label={t('webview.sidebar-element-settings.speakerNote')}>
-        <Checkbox
-          checked={element.display.speakerNote}
-          onChange={(checked) => updateElementDisplay({ speakerNote: checked })}
-        />
-      </SettingsField>
-      <SettingsField label={t('webview.sidebar-element-settings.hideInExport')}>
-        <Checkbox
-          checked={element.display.excludeFromExport}
-          onChange={(checked) => updateElementDisplay({ excludeFromExport: checked })}
-        />
-        <TextField onChange={(value) => updateElementName(value)}></TextField>
-      </SettingsField>
+      <section className="mb-4">
+        <h3 className="mb-3 text-sm font-semibold">
+          {t('webview.sidebar-element-settings.visibility')}
+        </h3>
+        <SettingsField label={t('webview.sidebar-element-settings.visible')} inline>
+          <Checkbox
+            checked={element.display.visible}
+            onChange={(checked) => updateElementDisplay({ visible: checked })}
+          />
+        </SettingsField>
+        <SettingsField label={t('webview.sidebar-element-settings.speakerNote')} inline>
+          <Checkbox
+            checked={element.display.speakerNote}
+            onChange={(checked) => updateElementDisplay({ speakerNote: checked })}
+          />
+        </SettingsField>
+        <SettingsField label={t('webview.sidebar-element-settings.hideInExport')} inline>
+          <Checkbox
+            checked={element.display.excludeFromExport}
+            onChange={(checked) => updateElementDisplay({ excludeFromExport: checked })}
+          />
+        </SettingsField>
+      </section>
     </>
   );
 }

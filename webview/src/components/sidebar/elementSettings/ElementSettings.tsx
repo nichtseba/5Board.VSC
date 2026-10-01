@@ -39,7 +39,6 @@ export default function ElementSettings<ElementType extends EditorElementType>({
   const Component =
     (SETTINGS_COMPONENTS[type] as React.ComponentType<SettingsProps<ElementType>>) ??
     UnsupportedElementSettings;
-
   return (
     <>
       <CommonSettings elements={elements} />
