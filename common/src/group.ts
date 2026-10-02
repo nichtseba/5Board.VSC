@@ -42,8 +42,24 @@ export function findBoardElementById(
   return undefined;
 }
 
+export function findTopLevelBoardElement(
+  elements: readonly BoardElement[],
+  id: string,
+): BoardElement | undefined {
+  return elements.find(
+    (element) =>
+      element.id === id ||
+      (isGroupElement(element) && findBoardElementById(element.data.children, id) !== undefined),
+  );
+}
+
 export function groupElementsInDocument(document: BoardDocument, ids: readonly string[]): void {
-  const children = document.content.elements.filter((element) => ids.includes(element.id));
+  const selectedIds = new Set(ids);
+  const children = document.content.elements.filter((element) => selectedIds.has(element.id));
+
+  if (selectedIds.size < 2 || children.length !== selectedIds.size) {
+    return;
+  }
 
   const group: GroupElement = {
     id: crypto.randomUUID(),

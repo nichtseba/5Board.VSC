@@ -3,9 +3,8 @@ import {
   EditorElement,
   EditorElementType,
   EditorToolId,
+  findTopLevelBoardElement,
   flattenBoardElements,
-  GroupElement,
-  isGroupElement,
 } from '5board.vsc-common';
 import type React from 'react';
 import { TextElement } from './elements/TextElement';
@@ -76,12 +75,8 @@ export default function EditorElement<ElementType extends EditorElementType>({
   const handleSelectElement = (id: string, event?: React.MouseEvent) => {
     if (activeToolId !== EditorToolId.POINTER) return;
 
-    const group = boardElements.find(
-      (candidate): candidate is GroupElement =>
-        isGroupElement(candidate) && candidate.data.children.some((child) => child.id === id),
-    );
-
-    const selectedId = group?.id ?? id;
+    const selectedElement = findTopLevelBoardElement(boardElements, id);
+    const selectedId = selectedElement?.id ?? id;
 
     if (event?.shiftKey) {
       messages.send({ type: 'toggleElementSelection', ids: [selectedId] });

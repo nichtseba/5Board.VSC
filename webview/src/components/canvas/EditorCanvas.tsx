@@ -136,6 +136,7 @@ export default function EditorCanvas({
   const { marqueeRect } = useMarqueeSelection({
     activeToolId,
     elements: flatElements,
+    boardElements: elements,
     messages,
   });
 
