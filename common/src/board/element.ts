@@ -33,7 +33,7 @@ export const GROUP_ELEMENT_TYPE = 'group' as const;
 export type GroupElement = {
   id: string;
   type: typeof GROUP_ELEMENT_TYPE;
-  data: { children: EditorElement[] };
+  data: { children: BoardElement[] };
 };
 
 export type ElementLayout = {

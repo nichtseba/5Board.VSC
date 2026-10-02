@@ -8,7 +8,12 @@ import { useLocalization } from '../providers/LocalizationProvider';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
 import { Button, Icon } from 'vscrui';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
-import { flattenBoardElements, GroupElement, isGroupElement } from '5board.vsc-common';
+import {
+  findBoardElementById,
+  flattenBoardElements,
+  getLeafElementIds,
+  isGroupElement,
+} from '5board.vsc-common';
 import { RectangleGroupIcon } from '@heroicons/react/24/outline';
 
 export default function ElementSettingsSidebar() {
@@ -19,18 +24,16 @@ export default function ElementSettingsSidebar() {
   useEffect(() => {
     messages.send({ type: 'ready' });
   }, []);
-
+  const elements = document?.content.elements ?? [];
+  const flatElements = useMemo(() => flattenBoardElements(elements), [elements]);
   const selectedElementIds = document?.content.selectedElementIds ?? [];
+  const selectedLeafIds = selectedElementIds.flatMap((id) => {
+    const selected = findBoardElementById(elements, id);
+    return selected ? getLeafElementIds([selected]) : [];
+  });
 
-  const flatElements = useMemo(
-    () => flattenBoardElements(document?.content.elements ?? []),
-    [document?.content.elements],
-  );
   const selectedElements =
-    flatElements.filter((element) => selectedElementIds.includes(element.id)) ?? [];
-
-  const primarySelectedElement =
-    flatElements.find((e) => document?.content.primarySelectedElementId === e.id) ?? null;
+    flatElements.filter((element) => selectedLeafIds.includes(element.id)) ?? [];
 
   let content: React.ReactNode;
   if (selectedElements.length === 0) {
@@ -50,22 +53,18 @@ export default function ElementSettingsSidebar() {
     });
   };
 
-  const selectedIdSet = new Set(selectedElementIds);
+  const selectedElement =
+    selectedElementIds.length === 1
+      ? findBoardElementById(elements, selectedElementIds[0])
+      : undefined;
 
   const selectedGroup =
-    selectedIdSet.size > 0
-      ? document?.content.elements.find(
-          (element): element is GroupElement =>
-            isGroupElement(element) &&
-            element.data.children.length === selectedIdSet.size &&
-            element.data.children.every((child) => selectedIdSet.has(child.id)),
-        )
-      : undefined;
+    selectedElement && isGroupElement(selectedElement) ? selectedElement : undefined;
 
   return (
     <SidebarShell>
       {content}
-      {primarySelectedElement && <LayerSettings element={primarySelectedElement} />}
+      {selectedElements.length > 0 && <LayerSettings elements={selectedElements} />}
       {(selectedGroup || selectedElements.length >= 2) && (
         <Button
           appearance="secondary"
@@ -90,7 +89,7 @@ export default function ElementSettingsSidebar() {
             : t('webview.sidebar-element-settings.group')}
         </Button>
       )}
-      {primarySelectedElement && (
+      {selectedElements.length > 0 && (
         <Button
           appearance="secondary"
           className="justify-center gap-2"

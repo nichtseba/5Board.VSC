@@ -2,25 +2,30 @@ import { EditorElement, EditorElementType } from '5board.vsc-common';
 import { useLocalization } from '../../../providers/LocalizationProvider';
 import { useMessageService } from '../../../services/MessageService';
 import SettingsField from '../layout/SettingsField';
+import { getCommonValue } from './utils/getCommonValue';
 
 type Props = {
-  element: EditorElement<EditorElementType>;
+  elements: EditorElement<EditorElementType>[];
 };
 
 // Stacking order — shared across all element types, rendered once regardless of type.
-export function LayerSettings({ element }: Props) {
+export function LayerSettings({ elements }: Props) {
   const { t } = useLocalization();
   const messages = useMessageService();
+  const commonZIndex = getCommonValue(elements.map((element) => element.layout.zIndex));
 
   const updateZIndex = (zIndex: number) => {
     messages.send({
       type: 'updateElements',
-      changes: [
-        {
-          id: element.id,
-          changes: { layout: { ...element.layout, zIndex } },
+      changes: elements.map((element) => ({
+        id: element.id,
+        changes: {
+          layout: {
+            ...element.layout,
+            zIndex,
+          },
         },
-      ],
+      })),
     });
   };
 
@@ -28,7 +33,7 @@ export function LayerSettings({ element }: Props) {
     <SettingsField label={t('webview.sidebar-element-settings.layer')} inline>
       <input
         type="number"
-        value={element.layout.zIndex ?? 0}
+        value={commonZIndex}
         onChange={(e) => updateZIndex(Number(e.target.value))}
         className="w-20 rounded-xs border border-dropdown-border bg-input-background px-2 py-[3px] text-input-foreground [color-scheme:light_dark] focus:border-focus-border focus:outline-none"
       />

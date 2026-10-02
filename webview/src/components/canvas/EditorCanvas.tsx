@@ -3,7 +3,9 @@ import {
   EditorToolId,
   ProjectorPointerStyle,
   computeHeadingNumbers,
+  findBoardElementById,
   flattenBoardElements,
+  getLeafElementIds,
 } from '5board.vsc-common';
 import { useEffect, useMemo, useRef, type CSSProperties, useState } from 'react';
 import EditorElement from './EditorElement';
@@ -52,6 +54,10 @@ export default function EditorCanvas({
   const elements = document?.content.elements ?? [];
   const flatElements = useMemo(() => flattenBoardElements(elements), [elements]);
   const selectedElementIds = document?.content.selectedElementIds ?? [];
+  const selectedLeafIds = selectedElementIds.flatMap((id) => {
+    const selected = findBoardElementById(elements, id);
+    return selected ? getLeafElementIds([selected]) : [];
+  });
   const activeToolId = editorState?.tool.type;
 
   const messages = useMessageService();
@@ -160,16 +166,16 @@ export default function EditorCanvas({
           <EditorElement
             key={element.id}
             element={element}
-            selected={!readOnly && selectedElementIds.includes(element.id)}
-            grouped={selectedElementIds.length > 1}
+            selected={!readOnly && selectedLeafIds.includes(element.id)}
+            grouped={selectedLeafIds.length > 1}
             assetUrls={assetUrls}
           />
         ))}
 
-        {activeToolId === EditorToolId.POINTER && selectedElementIds.length > 1 && (
+        {activeToolId === EditorToolId.POINTER && selectedLeafIds.length > 1 && (
           <GroupInteractionController
             elements={flatElements}
-            selectedElementIds={selectedElementIds}
+            selectedElementIds={selectedLeafIds}
           />
         )}
 

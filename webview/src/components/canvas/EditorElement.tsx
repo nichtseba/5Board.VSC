@@ -81,14 +81,14 @@ export default function EditorElement<ElementType extends EditorElementType>({
         isGroupElement(candidate) && candidate.data.children.some((child) => child.id === id),
     );
 
-    const ids = group ? group.data.children.map((child) => child.id) : [id];
+    const selectedId = group?.id ?? id;
 
     if (event?.shiftKey) {
-      messages.send({ type: 'toggleElementSelection', ids });
+      messages.send({ type: 'toggleElementSelection', ids: [selectedId] });
       return;
     }
 
-    messages.send({ type: 'selectElements', ids });
+    messages.send({ type: 'selectElements', ids: [selectedId] });
   };
 
   const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
