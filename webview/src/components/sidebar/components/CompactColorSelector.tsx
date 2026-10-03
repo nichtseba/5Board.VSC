@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useId, useLayoutEffect, useRef, useState } from 'react';
 import ColorSelector, { type ColorSelectorProps } from './ColorSelector';
 
 const POPOVER_WIDTH = 280;
@@ -12,21 +12,28 @@ export default function CompactColorSelector(props: ColorSelectorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const popoverId = useId();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isOpen) return;
 
     const updatePosition = () => {
       const rect = triggerRef.current?.getBoundingClientRect();
-      if (!rect) return;
+      const popover = popoverRef.current;
+      if (!rect || !popover) return;
 
-      const width = Math.min(POPOVER_WIDTH, window.innerWidth - 16);
+      const viewportWidth = document.documentElement.clientWidth;
+      const width = Math.min(POPOVER_WIDTH, viewportWidth - 16);
       const maxHeight = Math.min(POPOVER_MAX_HEIGHT, window.innerHeight - 16);
-      const left = Math.max(8, Math.min(rect.left, window.innerWidth - width - 8));
-      const spaceBelow = window.innerHeight - rect.bottom;
-      const top =
-        spaceBelow >= maxHeight + 8 ? rect.bottom + 4 : Math.max(8, rect.top - maxHeight - 4);
+      const left = Math.max(8, Math.min(rect.left, viewportWidth - width - 8));
+      const spaceBelow = Math.max(0, window.innerHeight - rect.bottom - 12);
+      const spaceAbove = Math.max(0, rect.top - 12);
+      const desiredHeight = Math.min(popover.scrollHeight, maxHeight);
+      const openBelow =
+        desiredHeight <= spaceBelow || (desiredHeight > spaceAbove && spaceBelow >= spaceAbove);
+      const availableHeight = openBelow ? spaceBelow : spaceAbove;
+      const visibleHeight = Math.min(desiredHeight, availableHeight);
+      const top = openBelow ? rect.bottom + 4 : rect.top - visibleHeight - 4;
 
-      setPosition({ left, top, maxHeight });
+      setPosition({ left, top, maxHeight: availableHeight });
     };
 
     const handlePointerDown = (event: PointerEvent) => {
@@ -71,7 +78,7 @@ export default function CompactColorSelector(props: ColorSelectorProps) {
         aria-expanded={isOpen}
         aria-controls={popoverId}
         onClick={() => setIsOpen((open) => !open)}
-        className={`relative h-6 w-6 shrink-0 rounded-full border ${
+        className={`relative h-6 w-6 shrink-0 overflow-hidden rounded-full border ${
           isOpen ? 'ring-2 ring-focus-border border-transparent' : 'border-foreground-description'
         }`}
         style={{ backgroundColor: props.color ?? 'transparent' }}
@@ -91,6 +98,8 @@ export default function CompactColorSelector(props: ColorSelectorProps) {
             style={{
               left: position.left,
               top: position.top,
+              width: Math.min(POPOVER_WIDTH, document.documentElement.clientWidth - 16),
+              maxWidth: document.documentElement.clientWidth - 16,
               maxHeight: position.maxHeight,
             }}
           >
