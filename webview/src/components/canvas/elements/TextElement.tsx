@@ -227,7 +227,7 @@ export function TextElement({
 
       case 'setFontFamily':
         if (msg.command.font === 'default') {
-          chain.unsetFontFamily().run();
+          chain.setMark('textStyle', { fontFamily: null }).run();
         } else {
           chain.setFontFamily(msg.command.font).run();
         }
@@ -247,7 +247,7 @@ export function TextElement({
 
       case 'setBackgroundColor':
         if (msg.command.color === undefined) {
-          chain.unsetBackgroundColor().run();
+          chain.setMark('textStyle', { backgroundColor: null }).run();
         } else {
           chain.setBackgroundColor(msg.command.color).run();
         }
