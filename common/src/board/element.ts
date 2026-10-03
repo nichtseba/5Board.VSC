@@ -331,7 +331,7 @@ export const DEFAULT_ELEMENT_PROFILES = {
     data: { strokes: [] },
   },
   [EditorElementType.TableOfContents]: {
-    layout: { width: 40, height: 10 },
+    layout: { width: 30, height: 10 },
     style: {
       visible: true,
     },
