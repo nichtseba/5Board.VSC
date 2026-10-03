@@ -192,7 +192,10 @@ export function TextElement({
     const chain = editor.chain();
 
     if (editing) {
-      chain.focus();
+      if (msg.command.type === 'setFontSize') {
+      } else {
+        chain.focus();
+      }
     } else {
       chain.selectAll();
     }
