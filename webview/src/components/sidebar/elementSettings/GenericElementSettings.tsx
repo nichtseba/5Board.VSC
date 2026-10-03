@@ -1,7 +1,7 @@
 import { EditorElement, ElementDisplay } from '5board.vsc-common';
 import SettingsField from '../layout/SettingsField';
 import { useLocalization } from '../../../providers/LocalizationProvider';
-import { Button, TextField } from 'vscrui';
+import { Button, Divider, TextField } from 'vscrui';
 import { useMessageService } from '../../../services/MessageService';
 import { useCallback } from 'react';
 import {
@@ -40,7 +40,7 @@ export default function GenericElementSettings({ element }: { element: EditorEle
       <SettingsField label={t('webview.sidebar-element-settings.name')}>
         <TextField value={element.name ?? ''} onChange={(value) => updateElementName(value)} />
       </SettingsField>
-
+      <Divider />
       <SettingsField label={t('webview.sidebar-element-settings.visibility')}>
         <div className="mt-1 grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3">
           <Button
