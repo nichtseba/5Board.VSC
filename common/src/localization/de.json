@@ -216,6 +216,7 @@
       "name": "Name",
       "visibility": "Sichtbarkeit",
       "visible": "Sichtbar",
+      "hide": "Ausblenden",
       "speakerNote": "Sprechernotiz",
       "hideInExport": "Im Export ausblenden",
       "deleteTooltip": "Löschen (entf)"

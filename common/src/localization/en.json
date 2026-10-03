@@ -216,6 +216,7 @@
       "name": "Name",
       "visibility": "Visibility",
       "visible": "Visible",
+      "hide": "Hide",
       "speakerNote": "Speaker Note",
       "hideInExport": "Hide in Export",
       "deleteTooltip": "Delete (entf)"

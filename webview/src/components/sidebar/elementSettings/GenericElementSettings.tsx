@@ -1,9 +1,14 @@
 import { EditorElement, ElementDisplay } from '5board.vsc-common';
 import SettingsField from '../layout/SettingsField';
 import { useLocalization } from '../../../providers/LocalizationProvider';
-import { Checkbox, TextField } from 'vscrui';
+import { Button, TextField } from 'vscrui';
 import { useMessageService } from '../../../services/MessageService';
 import { useCallback } from 'react';
+import {
+  ArrowTopRightOnSquareIcon,
+  ChatBubbleBottomCenterTextIcon,
+  EyeSlashIcon,
+} from '@heroicons/react/24/outline';
 export default function GenericElementSettings({ element }: { element: EditorElement }) {
   const { t } = useLocalization();
   const messages = useMessageService();
@@ -35,29 +40,43 @@ export default function GenericElementSettings({ element }: { element: EditorEle
       <SettingsField label={t('webview.sidebar-element-settings.name')}>
         <TextField value={element.name ?? ''} onChange={(value) => updateElementName(value)} />
       </SettingsField>
-      <section className="mb-4">
-        <h3 className="mb-3 text-sm font-semibold">
-          {t('webview.sidebar-element-settings.visibility')}
-        </h3>
-        <SettingsField label={t('webview.sidebar-element-settings.visible')} inline>
-          <Checkbox
-            checked={element.display.visible}
-            onChange={(checked) => updateElementDisplay({ visible: checked })}
-          />
-        </SettingsField>
-        <SettingsField label={t('webview.sidebar-element-settings.speakerNote')} inline>
-          <Checkbox
-            checked={element.display.speakerNote}
-            onChange={(checked) => updateElementDisplay({ speakerNote: checked })}
-          />
-        </SettingsField>
-        <SettingsField label={t('webview.sidebar-element-settings.hideInExport')} inline>
-          <Checkbox
-            checked={element.display.excludeFromExport}
-            onChange={(checked) => updateElementDisplay({ excludeFromExport: checked })}
-          />
-        </SettingsField>
-      </section>
+
+      <SettingsField label={t('webview.sidebar-element-settings.visibility')}>
+        <div className="mt-1 grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3">
+          <Button
+            className="h-8 flex flex-col items-center justify-center gap-2"
+            appearance={!element.display.visible ? 'primary' : 'secondary'}
+            title={t('webview.sidebar-element-settings.hide')}
+            aria-label={t('webview.sidebar-element-settings.hide')}
+            aria-pressed={!element.display.visible}
+            onClick={() => updateElementDisplay({ visible: !element.display.visible })}
+          >
+            <EyeSlashIcon className="size-5" />
+          </Button>
+          <Button
+            className="h-8 flex flex-col items-center justify-center gap-2"
+            appearance={element.display.speakerNote ? 'primary' : 'secondary'}
+            title={t('webview.sidebar-element-settings.speakerNote')}
+            aria-label={t('webview.sidebar-element-settings.speakerNote')}
+            aria-pressed={element.display.speakerNote}
+            onClick={() => updateElementDisplay({ speakerNote: !element.display.speakerNote })}
+          >
+            <ChatBubbleBottomCenterTextIcon className="size-5" />
+          </Button>
+          <Button
+            className="h-8 flex flex-col items-center justify-center gap-2"
+            appearance={element.display.excludeFromExport ? 'primary' : 'secondary'}
+            title={t('webview.sidebar-element-settings.hideInExport')}
+            aria-label={t('webview.sidebar-element-settings.hideInExport')}
+            aria-pressed={element.display.excludeFromExport}
+            onClick={() =>
+              updateElementDisplay({ excludeFromExport: !element.display.excludeFromExport })
+            }
+          >
+            <ArrowTopRightOnSquareIcon className="size-5" />
+          </Button>
+        </div>
+      </SettingsField>
     </>
   );
 }
