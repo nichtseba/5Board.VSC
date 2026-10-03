@@ -27,6 +27,8 @@ import { FontSizeInput } from './components/FontSizeInput';
 import { getCommonValue } from './utils/getCommonValue';
 import GenericElementSettings from './GenericElementSettings';
 import { CommonSettings } from './CommonSettings';
+import ElementStyleSettings from '../components/ElementStyleSettings';
+import { getCommonElementStyle } from './utils/getCommonElementStyle';
 
 type Props = {
   elements: EditorElement<EditorElementType.Text>[];
@@ -52,6 +54,18 @@ export function TextSettings({ elements }: Props) {
     elements.map((element) => element.data.tiptap?.marks?.textStyle?.backgroundColor),
   );
   const backgroundColor = getCommonValue(elements.map((element) => element.style.backgroundColor));
+
+  const updateStyle = (changes: Partial<(typeof elements)[number]['style']>) => {
+    messages.send({
+      type: 'updateElements',
+      changes: elements.map((element) => ({
+        id: element.id,
+        changes: {
+          style: { ...element.style, ...changes },
+        },
+      })),
+    });
+  };
   return (
     <>
       <SettingsPanel
@@ -62,6 +76,19 @@ export function TextSettings({ elements }: Props) {
         <Divider />
         <CommonSettings elements={elements} />
         <Divider />
+        <ElementStyleSettings
+          style={getCommonElementStyle(elements)}
+          onChange={updateStyle}
+          allowNone
+          editableProperties={[
+            'backgroundColor',
+            'opacity',
+            'borderColor',
+            'borderWidth',
+            'borderRadius',
+            'borderStyle',
+          ]}
+        />
         <SettingsField>
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <FontFamilyDropdown

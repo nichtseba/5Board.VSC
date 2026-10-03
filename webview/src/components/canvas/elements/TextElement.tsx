@@ -264,9 +264,23 @@ export function TextElement({
     }
   });
 
+  const { backgroundColor, border } = element.style;
+  const cssBorderStyle =
+    border?.style === 'dashed' || border?.style === 'dotted' ? border.style : 'solid';
+
   return (
     <div
-      style={{ width: '100%', height: '100%', backgroundColor: element.style.backgroundColor }}
+      style={{
+        width: '100%',
+        height: '100%',
+        boxSizing: 'border-box',
+        backgroundColor,
+        opacity: element.style.opacity ?? 1,
+        border: border?.color
+          ? `${border.width ?? 1}px ${cssBorderStyle} ${border.color}`
+          : undefined,
+        borderRadius: border?.radius,
+      }}
       className="flex flex-col"
     >
       <EditorContent editor={editor} />
