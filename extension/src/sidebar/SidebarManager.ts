@@ -10,7 +10,11 @@ import { StructureTreeProvider } from '../providers/StructureTreeProvider';
 import { EXTENSION } from '../extension';
 import deepEquals from 'deep-equal';
 import { FileTreeProvider } from '../providers/FileTreeProvider';
-import { getElementSectionMap, reconcileElementRevealOrder } from '5board.vsc-common';
+import {
+  HeadingLevelSettings,
+  getElementSectionMap,
+  reconcileElementRevealOrder,
+} from '5board.vsc-common';
 
 export class SidebarManager implements vscode.Disposable {
   private readonly sync: SidebarDocumentSync;
@@ -231,13 +235,12 @@ export class SidebarManager implements vscode.Disposable {
           },
         };
 
-        const clearsBackgroundColor =
-          Object.prototype.hasOwnProperty.call(msg.changes, 'backgroundColor') &&
-          msg.changes.backgroundColor === undefined;
-
-        const cleanedLevelSettings = clearsBackgroundColor
-          ? removeBackgroundColor(nextLevelSettings)
-          : nextLevelSettings;
+        const clearedKeys = new Set<keyof HeadingLevelSettings>(msg.clear ?? []);
+        const cleanedLevelSettings = Object.fromEntries(
+          Object.entries(nextLevelSettings).filter(
+            ([key]) => !clearedKeys.has(key as keyof HeadingLevelSettings),
+          ),
+        ) as HeadingLevelSettings;
 
         document.content.headingSettings = {
           ...headingSettings,
@@ -288,12 +291,4 @@ export class SidebarManager implements vscode.Disposable {
     this.sync.dispose();
     this.projectorDocumentListener.dispose();
   }
-}
-
-function removeBackgroundColor<T extends { backgroundColor?: string }>(
-  value: T,
-): Omit<T, 'backgroundColor'> {
-  return Object.fromEntries(
-    Object.entries(value).filter(([key]) => key !== 'backgroundColor'),
-  ) as Omit<T, 'backgroundColor'>;
 }

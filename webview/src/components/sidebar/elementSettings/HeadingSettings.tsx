@@ -94,7 +94,10 @@ export function HeadingSettings({ elements }: Props) {
     }
   };
 
-  const handleLevelSettingsChange = (changes: HeadingLevelSettings) => {
+  const handleLevelSettingsChange = (
+    changes: HeadingLevelSettings,
+    clear?: (keyof HeadingLevelSettings)[],
+  ) => {
     const levels = [...new Set(elements.map((element) => element.data.level))];
 
     for (const level of levels) {
@@ -102,6 +105,7 @@ export function HeadingSettings({ elements }: Props) {
         type: 'updateHeadingLevelSettings',
         level,
         changes,
+        clear,
       });
     }
   };
@@ -183,11 +187,13 @@ export function HeadingSettings({ elements }: Props) {
             <div className="flex flex-wrap items-center gap-3">
               <FontFamilyDropdown
                 value={commonLevelSettings.fontFamily ?? 'default'}
-                onChange={(fontFamily) =>
-                  handleLevelSettingsChange({
-                    fontFamily: fontFamily === 'default' ? undefined : fontFamily,
-                  })
-                }
+                onChange={(fontFamily) => {
+                  if (fontFamily === 'default') {
+                    handleLevelSettingsChange({}, ['fontFamily']);
+                    return;
+                  }
+                  handleLevelSettingsChange({ fontFamily });
+                }}
               />
               <FontSizeInput
                 value={commonLevelSettings.fontSize ?? ''}
@@ -202,7 +208,13 @@ export function HeadingSettings({ elements }: Props) {
             <ColorField
               value={commonLevelSettings.backgroundColor}
               label={t('webview.sidebar-element-settings.textSettings.highlightColor')}
-              onChange={(backgroundColor) => handleLevelSettingsChange({ backgroundColor })}
+              onChange={(backgroundColor) => {
+                if (backgroundColor === undefined) {
+                  handleLevelSettingsChange({}, ['backgroundColor']);
+                  return;
+                }
+                handleLevelSettingsChange({ backgroundColor });
+              }}
               allowNone
             />
           </div>
