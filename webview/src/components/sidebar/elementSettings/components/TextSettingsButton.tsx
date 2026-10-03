@@ -5,7 +5,6 @@ import {
   Bars3BottomLeftIcon,
   Bars3BottomRightIcon,
   Bars3Icon,
-  Bars4Icon,
   BoldIcon,
   CodeBracketIcon,
   ItalicIcon,
@@ -14,6 +13,7 @@ import {
   StrikethroughIcon,
   UnderlineIcon,
 } from '@heroicons/react/24/outline';
+import type { SVGProps } from 'react';
 import { getCommonValue } from '../utils/getCommonValue';
 
 type IconType = React.ComponentType<{ className?: string }>;
@@ -133,7 +133,7 @@ export function AlignCenterButton({ elements }: Props) {
       active={alignCenter}
       command={{ type: 'setTextAlign', value: 'center' }}
       elements={elements}
-      Icon={Bars3Icon}
+      Icon={AlignCenterIcon}
     />
   );
 }
@@ -161,7 +161,7 @@ export function AlignJustifyButton({ elements }: Props) {
       active={alignJustify}
       command={{ type: 'setTextAlign', value: 'justify' }}
       elements={elements}
-      Icon={Bars4Icon}
+      Icon={Bars3Icon}
     />
   );
 }
@@ -191,5 +191,27 @@ export function OrderedListButton({ elements }: Props) {
       elements={elements}
       Icon={NumberedListIcon}
     />
+  );
+}
+
+export function AlignCenterIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...props}
+    >
+      {' '}
+      <path
+        d="M9.25 6.75H14.75M3.75 12H20.25M6.5 17.25H17.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />{' '}
+    </svg>
   );
 }
