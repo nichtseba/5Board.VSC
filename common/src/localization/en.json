@@ -183,7 +183,11 @@
         "textColor": "Text Color",
         "highlightColor": "Highlight Color",
         "backgroundColor": "Background Color",
-        "fontSize": "Font size"
+        "fontSize": "Font size",
+        "fontSettings": "Font",
+        "decoration": "Decoration",
+        "list": "List",
+        "alignment": "Alignment"
       },
       "imageSettings": {
         "title": "Image"

@@ -183,7 +183,11 @@
         "textColor": "Textfarbe",
         "highlightColor": "Textmarker",
         "backgroundColor": "Hintergrundfarbe",
-        "fontSize": "Schriftgröße"
+        "fontSize": "Schriftgröße",
+        "fontSettings": "Schrift",
+        "decoration": "Auszeichnung",
+        "list": "Liste",
+        "alignment": "Ausrichtung"
       },
       "imageSettings": {
         "title": "Bild"
