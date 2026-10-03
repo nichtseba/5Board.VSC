@@ -149,6 +149,7 @@
       "unsupportedElement": "Elementtyp wird nicht unterstützt",
       "selectedElement": "Ausgewähltes Element",
       "layer": "Ebene",
+      "elementStyle": "Element Style",
       "headingSettings": {
         "title": "Überschrift",
         "levelLabel": "Hierarchiestufe",

@@ -149,6 +149,7 @@
       "unsupportedElement": "Unsupported element type",
       "selectedElement": "Selected Element",
       "layer": "Layer",
+      "elementStyle": "Element Style",
       "headingSettings": {
         "title": "Heading",
         "levelLabel": "Hierarchy level",
@@ -180,7 +181,7 @@
       "textSettings": {
         "title": "Text",
         "textColor": "Text Color",
-        "highlightColor": "Highligt Color",
+        "highlightColor": "Highlight Color",
         "backgroundColor": "Background Color",
         "fontSize": "Font size"
       },
@@ -199,10 +200,10 @@
       "lineSettings": {
         "title": "Line",
         "symbols": "Symbols",
-        "borderColor": "Border color",
-        "borderWidth": "Border width",
-        "borderRadius": "Border radius",
-        "borderStyle": "Border style",
+        "borderColor": "Border Color",
+        "borderWidth": "Border Width",
+        "borderRadius": "Border Radius",
+        "borderStyle": "Border Style",
         "startHead": "Start head",
         "endHead": "End head",
         "headSize": "Head size",

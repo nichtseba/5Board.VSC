@@ -11,6 +11,7 @@ import ColorSelector from './CompactColorSelector';
 import LineStyleSelect from './LineStyleSelect';
 import SliderInput from './SliderInput';
 import { useLocalization } from '../../../providers/LocalizationProvider';
+import SettingsField from '../layout/SettingsField';
 
 type Props = {
   style: ElementStyle;
@@ -59,85 +60,87 @@ export default function ElementStyleSettings({
   }));
 
   return (
-    <div className="flex flex-col gap-4">
-      {isEditable('color') && (
-        <ColorSelector
-          color={color}
-          onChange={(value) => onChange({ color: value })}
-          presets={colorPresets}
-          label={t('webview.sidebar.freehand.color')}
-          customColorLabel={t('webview.sidebar.freehand.customColor')}
-        />
-      )}
+    <SettingsField label={t('webview.sidebar-element-settings.elementStyle')}>
+      <div className="flex flex-col gap-4">
+        {isEditable('color') && (
+          <ColorSelector
+            color={color}
+            onChange={(value) => onChange({ color: value })}
+            presets={colorPresets}
+            label={t('webview.sidebar.freehand.color')}
+            customColorLabel={t('webview.sidebar.freehand.customColor')}
+          />
+        )}
 
-      {isEditable('backgroundColor') && (
-        <ColorSelector
-          color={backgroundColor}
-          allowNone={allowNone}
-          onChange={(value) => onChange({ backgroundColor: value })}
-          presets={colorPresets}
-          label={t('webview.sidebar-element-settings.headingSettings.backgroundColor')}
-          customColorLabel={t('webview.sidebar.freehand.customColor')}
-        />
-      )}
+        {isEditable('backgroundColor') && (
+          <ColorSelector
+            color={backgroundColor}
+            allowNone={allowNone}
+            onChange={(value) => onChange({ backgroundColor: value })}
+            presets={colorPresets}
+            label={t('webview.sidebar-element-settings.textSettings.backgroundColor')}
+            customColorLabel={t('webview.sidebar.freehand.customColor')}
+          />
+        )}
 
-      {isEditable('opacity') && (
-        <SliderInput
-          label={t('webview.sidebar.freehand.opacity')}
-          value={Math.round(opacity * 100)}
-          min={0}
-          max={100}
-          step={5}
-          unit="%"
-          onChange={(value) => onChange({ opacity: value / 100 })}
-        />
-      )}
+        {isEditable('borderColor') && (
+          <ColorSelector
+            color={borderColor}
+            allowNone={allowNone}
+            onChange={(value) => updateBorder({ color: value })}
+            presets={colorPresets}
+            label={t('webview.sidebar-element-settings.lineSettings.borderColor')}
+            customColorLabel={t('webview.sidebar.freehand.customColor')}
+          />
+        )}
 
-      {isEditable('borderColor') && (
-        <ColorSelector
-          color={borderColor}
-          allowNone={allowNone}
-          onChange={(value) => updateBorder({ color: value })}
-          presets={colorPresets}
-          label={t('webview.sidebar-element-settings.lineSettings.borderColor')}
-          customColorLabel={t('webview.sidebar.freehand.customColor')}
-        />
-      )}
+        {isEditable('borderWidth') && (
+          <SliderInput
+            label={t('webview.sidebar-element-settings.lineSettings.borderWidth')}
+            value={borderWidth}
+            min={FREEHAND_MIN_WIDTH}
+            max={FREEHAND_MAX_WIDTH}
+            unit="px"
+            onChange={(value) => updateBorder({ width: value })}
+          />
+        )}
 
-      {isEditable('borderWidth') && (
-        <SliderInput
-          label={t('webview.sidebar-element-settings.lineSettings.borderWidth')}
-          value={borderWidth}
-          min={FREEHAND_MIN_WIDTH}
-          max={FREEHAND_MAX_WIDTH}
-          unit="px"
-          onChange={(value) => updateBorder({ width: value })}
-        />
-      )}
+        {isEditable('borderRadius') && (
+          <SliderInput
+            label={t('webview.sidebar-element-settings.lineSettings.borderRadius')}
+            value={borderRadius}
+            min={0}
+            max={10}
+            step={0.5}
+            unit="px"
+            onChange={(value) => updateBorder({ radius: value })}
+          />
+        )}
 
-      {isEditable('borderRadius') && (
-        <SliderInput
-          label={t('webview.sidebar-element-settings.lineSettings.borderRadius')}
-          value={borderRadius}
-          min={0}
-          max={10}
-          step={0.5}
-          unit="px"
-          onChange={(value) => updateBorder({ radius: value })}
-        />
-      )}
+        {isEditable('borderStyle') && (
+          <LineStyleSelect
+            label={t('webview.sidebar-element-settings.lineSettings.borderStyle')}
+            value={borderStyle as LineStyle}
+            options={BORDER_LINE_STYLES.map((styleOption) => ({
+              id: styleOption.id,
+              label: t(`webview.sidebar.freehand.lineStyles.${styleOption.id}` as TranslationKey),
+            }))}
+            onChange={(value) => updateBorder({ style: value })}
+          />
+        )}
 
-      {isEditable('borderStyle') && (
-        <LineStyleSelect
-          label={t('webview.sidebar-element-settings.lineSettings.borderStyle')}
-          value={borderStyle as LineStyle}
-          options={BORDER_LINE_STYLES.map((styleOption) => ({
-            id: styleOption.id,
-            label: t(`webview.sidebar.freehand.lineStyles.${styleOption.id}` as TranslationKey),
-          }))}
-          onChange={(value) => updateBorder({ style: value })}
-        />
-      )}
-    </div>
+        {isEditable('opacity') && (
+          <SliderInput
+            label={t('webview.sidebar.freehand.opacity')}
+            value={Math.round(opacity * 100)}
+            min={0}
+            max={100}
+            step={5}
+            unit="%"
+            onChange={(value) => onChange({ opacity: value / 100 })}
+          />
+        )}
+      </div>
+    </SettingsField>
   );
 }
