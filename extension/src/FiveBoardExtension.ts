@@ -483,4 +483,35 @@ export class FiveBoardExtension extends ExtensionBase {
       }
     });
   }
+
+  @Command('5board-vsc.unrevealNext')
+  public unrevealNextCommand(): void {
+    this.applyEditToActiveDocument((document) => {
+      for (let index = document.content.elements.length - 1; index >= 0; index--) {
+        const element = document.content.elements[index];
+        if (element.display.visible && !element.display.speakerNote) {
+          element.display.visible = false;
+          break;
+        }
+      }
+    });
+  }
+
+  @Command('5board-vsc.revealAll')
+  public revealAllCommand(): void {
+    this.setAllElementsVisible(true);
+  }
+
+  @Command('5board-vsc.hideAll')
+  public hideAllCommand(): void {
+    this.setAllElementsVisible(false);
+  }
+
+  private setAllElementsVisible(visible: boolean): void {
+    this.applyEditToActiveDocument((document) => {
+      for (const element of document.content.elements) {
+        element.display.visible = visible && !element.display.speakerNote;
+      }
+    });
+  }
 }

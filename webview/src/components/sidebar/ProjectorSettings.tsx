@@ -105,6 +105,37 @@ export default function ProjectorSettings() {
         </span>
       </div>
 
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => messages.send({ type: 'revealNext' })}
+          className="rounded border border-foreground-description px-2 py-1 text-sm"
+        >
+          {t('webview.sidebar.projectorSettings.revealNext')}
+        </button>
+        <button
+          type="button"
+          onClick={() => messages.send({ type: 'unrevealNext' })}
+          className="rounded border border-foreground-description px-2 py-1 text-sm"
+        >
+          {t('webview.sidebar.projectorSettings.unrevealNext')}
+        </button>
+        <button
+          type="button"
+          onClick={() => messages.send({ type: 'setAllElementsVisible', visible: true })}
+          className="rounded border border-foreground-description px-2 py-1 text-sm"
+        >
+          {t('webview.sidebar.projectorSettings.showAll')}
+        </button>
+        <button
+          type="button"
+          onClick={() => messages.send({ type: 'setAllElementsVisible', visible: false })}
+          className="rounded border border-foreground-description px-2 py-1 text-sm"
+        >
+          {t('webview.sidebar.projectorSettings.hideAll')}
+        </button>
+      </div>
+
       <Checkbox
         checked={cursorTracking}
         onChange={() => messages.send({ type: 'toggleCursorTracking' })}

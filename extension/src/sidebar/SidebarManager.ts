@@ -97,6 +97,17 @@ export class SidebarManager implements vscode.Disposable {
       EXTENSION.projectorDocument.broadcastProjectorState(); // editor + projector
     });
 
+    this.messages.on('setAllElementsVisible', (msg) => {
+      const command = msg.visible ? '5board-vsc.revealAll' : '5board-vsc.hideAll';
+      void vscode.commands.executeCommand(command);
+    });
+    this.messages.on('revealNext', () => {
+      void vscode.commands.executeCommand('5board-vsc.revealNext');
+    });
+    this.messages.on('unrevealNext', () => {
+      void vscode.commands.executeCommand('5board-vsc.unrevealNext');
+    });
+
     // Toggle the global cursor tracking setting from the sidebar and notify every view.
     this.messages.on('toggleCursorTracking', () => {
       EXTENSION.cursorTrackingEnabled = !EXTENSION.cursorTrackingEnabled;
