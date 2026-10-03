@@ -18,6 +18,7 @@ import { FreehandElement } from './elements/FreehandElement';
 import { TableOfContentsElement } from './elements/TableOfContentsElement';
 import { useEditorState } from '../../providers/EditorStateProvider';
 import { useMessageService } from '../../services/MessageService';
+import { useViewType } from '../../providers/ViewTypeProvider';
 import { useBoardDocument } from '../../providers/BoardDocumentProvider';
 import { useLocalization } from '../../providers/LocalizationProvider';
 import { RectangleElement } from './elements/RectangleElement';
@@ -71,6 +72,8 @@ export default function EditorElement<ElementType extends EditorElementType>({
   const activeToolId = useEditorState()?.tool.type;
   const boardElements = useBoardDocument()?.content.elements ?? [];
   const allElements = flattenBoardElements(boardElements);
+  const viewType = useViewType();
+  const canEdit = viewType === 'editor' && !preview && activeToolId === EditorToolId.POINTER;
 
   const handleSelectElement = (id: string, event?: React.MouseEvent) => {
     if (activeToolId !== EditorToolId.POINTER) return;
@@ -112,7 +115,14 @@ export default function EditorElement<ElementType extends EditorElementType>({
         return;
       }
 
-      if (!selected) {
+      const target = event.target;
+      if (
+        !selected ||
+        editing ||
+        !canEdit ||
+        (target instanceof HTMLElement &&
+          (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)))
+      ) {
         return;
       }
 
@@ -128,7 +138,11 @@ export default function EditorElement<ElementType extends EditorElementType>({
   });
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (element.type !== EditorElementType.Text) {
+    if (
+      !canEdit ||
+      editing ||
+      (element.type !== EditorElementType.Text && element.type !== EditorElementType.Heading)
+    ) {
       return;
     }
     setEditingPosition({
@@ -144,11 +158,15 @@ export default function EditorElement<ElementType extends EditorElementType>({
   };
 
   useEffect(() => {
-    if (!selected) {
+    if (!selected || !canEdit) {
       setEditing(false);
       setEditingPosition(null);
     }
-  }, [selected]);
+  }, [selected, canEdit]);
+  const hidden =
+    preview ||
+    (viewType === 'projector' && (element.display.speakerNote || !element.display.visible)) ||
+    (viewType === 'export' && (element.display.speakerNote || element.display.excludeFromExport));
 
   return (
     <>
@@ -168,6 +186,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
               : ''
           }
           ${selected ? 'outline outline-2 outline-focus-border bg-focus-border/12' : ''}
+          ${hidden ? 'invisible' : ''}
         `}
         ref={targetRef}
         style={{
@@ -221,7 +240,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
   );
 }
 
-/**
+/*
  * Mapping of editor element types to their corresponding React components.
  */
 const ELEMENT_COMPONENTS = {

@@ -93,6 +93,7 @@ export default function ElementSettingsSidebar() {
         <Button
           appearance="secondary"
           className="justify-center gap-2"
+          title={t('webview.sidebar-element-settings.deleteTooltip')}
           onClick={() => handleDelete()}
         >
           <Icon name="trash" className="color-foreground-error" />

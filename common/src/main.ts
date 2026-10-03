@@ -1,4 +1,5 @@
 export * from './board/board';
+export * from './board/elementSections';
 export * from './messages';
 export * from './localization/index';
 export * from './editortool';

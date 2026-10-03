@@ -26,6 +26,7 @@ export type ElementStyleEditableProperty =
   | 'opacity'
   | 'borderColor'
   | 'borderWidth'
+  | 'borderRadius'
   | 'borderStyle';
 
 const BORDER_LINE_STYLES = FREEHAND_LINE_STYLES.filter(({ id }) => id !== 'custom');
@@ -42,6 +43,7 @@ export default function ElementStyleSettings({
   const border = style.border ?? {};
   const borderColor = border.color;
   const borderWidth = border.width ?? 2;
+  const borderRadius = border.radius ?? 0;
   const borderStyle = border.style ?? 'solid';
   const opacity = style.opacity ?? 1;
   const isEditable = (property: ElementStyleEditableProperty) =>
@@ -110,6 +112,18 @@ export default function ElementStyleSettings({
           max={FREEHAND_MAX_WIDTH}
           unit="px"
           onChange={(value) => updateBorder({ width: value })}
+        />
+      )}
+
+      {isEditable('borderRadius') && (
+        <SliderInput
+          label={t('webview.sidebar-element-settings.lineSettings.borderRadius')}
+          value={borderRadius}
+          min={0}
+          max={10}
+          step={0.5}
+          unit="px"
+          onChange={(value) => updateBorder({ radius: value })}
         />
       )}
 

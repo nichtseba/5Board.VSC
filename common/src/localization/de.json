@@ -20,6 +20,21 @@
       "loading": "Lade…",
       "live": "Live",
       "paused": "Pausiert"
+    },
+    "presets": {
+      "noElementSelected": "Kein Element ausgewählt. Bitte wähle ein Element aus, um es als Preset zu speichern.",
+      "groupNotSupported": "Gruppen werden bei der Erstellung von Presets noch nicht unterstützt. Bitte wähle ein einzelnes Element aus, um es als Preset zu speichern.",
+      "savePreset": "Als Preset speichern",
+      "presetNotSaved": "Preset wurde nicht gespeichert mit aufgrund der ausgewählten Optionen.",
+      "presetName": "Preset Name",
+      "presetNamePlaceholder": "Preset Name eingeben",
+      "keepStyle": "Style beibehalten",
+      "keepContent": "Inhalt beibehalten",
+      "keepPosition": "X-Position beibehalten",
+      "presetOptions": "Preset Optionen",
+      "selectOptions": "Optionen auswählen",
+      "imageAssetMissing": "Das ausgewählte Bild-Asset wurde nicht gefunden. Das Preset wurde nicht gespeichert.",
+      "presetSaved": "Preset erfolgreich gespeichert."
     }
   },
   "webview": {
@@ -111,8 +126,20 @@
         }
       },
       "goToElement": "Gehe zu Element",
+      "renameElement": "Element umbenennen",
       "addElement": "Element hinzufügen",
-      "addCustomElement": "Custom Element hinzufügen",
+      "presets": {
+        "addCustomElement": "Preset auswählen",
+        "filtered": "Presets sind nach dem ausgewählten Tool gefiltert",
+        "deletePreset": "Preset löschen",
+        "noPresets": "Keine Presets gespeichert",
+        "settings": {
+          "keepStyle": "Stil",
+          "keepXPosition": "X-Position beibehalten",
+          "content": "Inhalte"
+        },
+        "openPresetFile": "Preset-Datei öffnen"
+      },
       "tableOfContentsAlreadyExists": "Es existiert bereits ein Inhaltsverzeichnis."
     },
     "sidebar-element-settings": {
@@ -172,6 +199,7 @@
         "symbols": "Symbole",
         "borderColor": "Rahmenfarbe",
         "borderWidth": "Rahmenbreite",
+        "borderRadius": "Rahmenradius",
         "borderStyle": "Rahmenstil",
         "startHead": "Startsymbol",
         "endHead": "Endsymbol",
@@ -184,7 +212,13 @@
       },
       "group": "Gruppieren",
       "ungroup": "Gruppierung aufheben",
-      "delete": "Löschen"
+      "delete": "Löschen",
+      "name": "Name",
+      "visibility": "Sichtbarkeit",
+      "visible": "Sichtbar",
+      "speakerNote": "Sprechernotiz",
+      "hideInExport": "Im Export ausblenden",
+      "deleteTooltip": "Löschen (entf)"
     }
   }
 }

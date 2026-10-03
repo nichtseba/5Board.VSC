@@ -7,6 +7,7 @@ import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
 import { FreehandPreview } from '../components/canvas/tools/FreehandPreviewOverlay';
 import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
+import { ViewTypeProvider } from '../providers/ViewTypeProvider';
 
 // The projector view shows the same canvas as the editor,
 // but is read-only and display-only — no interactive controls.
@@ -121,27 +122,28 @@ export default function Projector() {
   });
 
   return (
-    <div>
-      {/* Projector badge — display only, no interactive elements */}
-      <div
-        style={{
-          background: paused
-            ? 'var(--vscode-statusBarItem-warningBackground, #cca700)'
-            : 'var(--vscode-badge-background)',
-          color: paused
-            ? 'var(--vscode-statusBarItem-warningForeground, #000000)'
-            : 'var(--vscode-badge-foreground)',
-          padding: '4px 12px',
-          fontWeight: 'bold',
-          fontSize: '0.85rem',
-          letterSpacing: '0.05em',
-          textTransform: 'uppercase',
-        }}
-      >
-        {t('extension.projector.title')} — {boardDocument?.manifest.title ?? ''} ·{' '}
-        {paused ? t('extension.projector.paused') : t('extension.projector.live')}
-      </div>
-      {/*
+    <ViewTypeProvider value={'projector'}>
+      <div>
+        {/* Projector badge — display only, no interactive elements */}
+        <div
+          style={{
+            background: paused
+              ? 'var(--vscode-statusBarItem-warningBackground, #cca700)'
+              : 'var(--vscode-badge-background)',
+            color: paused
+              ? 'var(--vscode-statusBarItem-warningForeground, #000000)'
+              : 'var(--vscode-badge-foreground)',
+            padding: '4px 12px',
+            fontWeight: 'bold',
+            fontSize: '0.85rem',
+            letterSpacing: '0.05em',
+            textTransform: 'uppercase',
+          }}
+        >
+          {t('extension.projector.title')} — {boardDocument?.manifest.title ?? ''} ·{' '}
+          {paused ? t('extension.projector.paused') : t('extension.projector.live')}
+        </div>
+        {/*
         Pass the live cursor position directly into EditorCanvas so the overlay
         is rendered inside the canvas div and positioned against the same grid
         that the editor uses to calculate coordinates. This guarantees the dot
@@ -151,25 +153,26 @@ export default function Projector() {
         so the projector always mirrors the editor's selection (not the projector
         user's own clicks).
       */}
-      {/*
+        {/*
         Beamer view: display only. pointerEvents:'none' aka no interactive controls.
       */}
-      <div style={{ pointerEvents: 'none' }}>
-        {boardDocument ? (
-          <CanvasEventsProvider>
-            <EditorCanvas
-              enableKeyboardShortcuts={false}
-              cursor={cursor}
-              pointerStyle={pointerStyle}
-              freehandPreview={freehandPreview}
-            />
-          </CanvasEventsProvider>
-        ) : (
-          // Shown while waiting for the first 'init' message from the extension.
-          <div style={{ padding: '1rem', opacity: 0.5 }}>{t('extension.projector.loading')}</div>
-        )}
+        <div style={{ pointerEvents: 'none' }}>
+          {boardDocument ? (
+            <CanvasEventsProvider>
+              <EditorCanvas
+                enableKeyboardShortcuts={false}
+                cursor={cursor}
+                pointerStyle={pointerStyle}
+                freehandPreview={freehandPreview}
+              />
+            </CanvasEventsProvider>
+          ) : (
+            // Shown while waiting for the first 'init' message from the extension.
+            <div style={{ padding: '1rem', opacity: 0.5 }}>{t('extension.projector.loading')}</div>
+          )}
+        </div>
       </div>
-    </div>
+    </ViewTypeProvider>
   );
 }
 

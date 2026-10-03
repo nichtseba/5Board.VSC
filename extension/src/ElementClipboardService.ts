@@ -2,7 +2,12 @@ import * as vscode from 'vscode';
 import { BoardCustomDocument } from './board/BoardCustomDocument';
 import { BoardPackage } from './board/package';
 import { addImageAsset } from './board/addElement/addImageAsset';
-import { BoardElement, EditorElement, EditorElementType } from '5board.vsc-common';
+import {
+  BoardElement,
+  EditorElement,
+  EditorElementType,
+  normalizeElementRevealOrder,
+} from '5board.vsc-common';
 
 const ELEMENT_CLIPBOARD_MARKER = '5board-vsc.elements';
 
@@ -41,7 +46,11 @@ export class ElementClipboardService {
 
     try {
       const imageAssets = await this.getImageAssetsForPaste(payload, document);
-      this.insertClonedElements(document, payload.elements, imageAssets);
+      const pastedElementIds = this.insertClonedElements(document, payload.elements, imageAssets);
+      document.messageService.send({
+        type: 'goToElement',
+        elementId: pastedElementIds[0],
+      });
     } catch (error) {
       void vscode.window.showErrorMessage(`Image could not be inserted: ${String(error)}`);
     }
@@ -122,7 +131,7 @@ export class ElementClipboardService {
     document: BoardCustomDocument,
     elements: BoardElement[],
     imageAssets?: Map<string, Uint8Array>,
-  ): void {
+  ): string[] {
     const clones = structuredClone(elements).map((element) => ({
       ...element,
       id: crypto.randomUUID(),
@@ -147,8 +156,10 @@ export class ElementClipboardService {
         };
       }
       boardDocument.content.elements.push(...clones);
+      boardDocument.content.elements = normalizeElementRevealOrder(boardDocument.content.elements);
       boardDocument.content.selectedElementIds = cloneIds;
       boardDocument.content.primarySelectedElementId = cloneIds[0] ?? null;
     });
+    return cloneIds;
   }
 }

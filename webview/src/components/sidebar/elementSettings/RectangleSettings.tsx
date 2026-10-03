@@ -40,6 +40,7 @@ export function RectangleSettings({ elements }: Props) {
           'opacity',
           'borderColor',
           'borderWidth',
+          'borderRadius',
           'borderStyle',
         ]}
       />

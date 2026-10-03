@@ -14,6 +14,7 @@ import {
 } from '5board.vsc-common';
 import AddOverlay from './AddOverlay';
 import { useEditorState } from '../../../../providers/EditorStateProvider';
+import { useBoardDocument } from '../../../../providers/BoardDocumentProvider';
 /**
  * DragAddTool
  *
@@ -25,9 +26,12 @@ export function DragAddTool() {
   const messages = useMessageService();
   const { cellSize, metrics } = useGrid();
   const editorState = useEditorState();
+  const boardDocument = useBoardDocument();
 
   const elementType = (editorState.tool as EditorTool<EditorToolId.AddElement>).parameters?.type;
-  const defaults = (editorState.tool as EditorTool<EditorToolId.AddElement>).parameters?.defaults;
+  const addToolParameters = (editorState.tool as EditorTool<EditorToolId.AddElement>).parameters;
+  const defaults = addToolParameters?.defaults;
+  const fixedXPosition = addToolParameters?.fixedXPosition;
 
   const imageAsset = defaults?.asset;
   const definition = elementType ? getElementTypeDefinition(elementType) : null;
@@ -86,11 +90,15 @@ export function DragAddTool() {
     };
   }, [previewImageUrl]);
 
-  const elementWidth = elementType
-    ? (defaults?.layout?.width ??
-      imageSize?.width ??
-      DEFAULT_ELEMENT_PROFILES[elementType].layout.width)
-    : 1;
+  const elementWidth =
+    elementType === EditorElementType.Heading
+      ? (boardDocument?.content.grid?.columnCount ??
+        DEFAULT_ELEMENT_PROFILES[EditorElementType.Heading].layout.width)
+      : elementType
+        ? (defaults?.layout?.width ??
+          imageSize?.width ??
+          DEFAULT_ELEMENT_PROFILES[elementType].layout.width)
+        : 1;
   const elementHeight = elementType
     ? (defaults?.layout?.height ??
       imageSize?.height ??
@@ -115,16 +123,18 @@ export function DragAddTool() {
       return layout;
     }
 
-    switch (definition.placement) {
-      case 'fullRow':
-        return {
-          ...layout,
-          xPos: 0,
-        };
-
-      default:
-        return layout;
+    if (fixedXPosition !== undefined) {
+      return { ...layout, xPos: fixedXPosition };
     }
+
+    if (definition.placement === 'fullRow') {
+      return {
+        ...layout,
+        xPos: 0,
+      };
+    }
+
+    return layout;
   };
 
   useCanvasEvents(
@@ -171,7 +181,17 @@ export function DragAddTool() {
           });
         },
       }),
-      [messages, metrics, cellSize, elementType, elementWidth, elementHeight, definition, defaults],
+      [
+        messages,
+        metrics,
+        cellSize,
+        elementType,
+        elementWidth,
+        elementHeight,
+        definition,
+        defaults,
+        fixedXPosition,
+      ],
     ),
   );
 
@@ -193,9 +213,7 @@ export function DragAddTool() {
       width: elementWidth,
       height: elementHeight,
     },
-    style: {
-      visible: true,
-    },
+    style: defaults?.style ?? { visible: true },
     data: {
       ...structuredClone(DEFAULT_ELEMENT_PROFILES[elementType].data),
       ...defaults?.data,

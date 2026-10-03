@@ -81,6 +81,10 @@ type AllWebviewToExtensionMessage =
   | { type: 'toggleElementSelection'; ids: string[] }
   | { type: 'selectTool'; tool: EditorTool }
   | { type: 'insertSpacerRows'; startRow: number; rowCount: number }
+  | AddElementMessage
+  | { type: 'deletePreset'; id: string }
+  | { type: 'loadPresetAsset'; id: string }
+  | { type: 'revealPresetsFile' }
   | {
       type: 'updateElementsLayout';
       changes: {
@@ -95,7 +99,7 @@ type AllWebviewToExtensionMessage =
       type: 'updateElements';
       changes: {
         id: string;
-        changes: Partial<EditorElement>;
+        changes: Omit<Partial<EditorElement>, 'id'>;
       }[];
     } // Update element with it's settings, array can handle one or more elements
   | { type: 'groupElements'; ids: string[] }
