@@ -145,6 +145,18 @@
         "title": "%commands.revealNext%"
       },
       {
+        "command": "5board-vsc.unrevealNext",
+        "title": "%commands.unrevealNext%"
+      },
+      {
+        "command": "5board-vsc.revealAll",
+        "title": "%commands.revealAll%"
+      },
+      {
+        "command": "5board-vsc.hideAll",
+        "title": "%commands.hideAll%"
+      },
+      {
         "command": "5board-vsc.savePreset",
         "title": "%commands.savePreset%",
         "icon": "$(save)"
