@@ -21,6 +21,8 @@ import {
   normalizeElementRevealOrder,
   flattenBoardElements,
   isGroupElement,
+  groupElementsInDocument,
+  ungroupElementsInDocument,
 } from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
 import { ExportPreviewProvider } from './providers/ExportPreviewProvider';
@@ -341,6 +343,40 @@ export class FiveBoardExtension extends ExtensionBase {
       return;
     }
     this.elementClipboard.duplicate(document);
+  }
+
+  @Command('5board-vsc.group')
+  groupOrUngroupElements(): void {
+    const activeDocument = this.activeEditorDocument;
+    if (!activeDocument) {
+      return;
+    }
+
+    const document = activeDocument.boardPackage.document;
+    const selectedIds = document.content.selectedElementIds;
+
+    if (selectedIds.length === 1) {
+      const selectedElement = document.content.elements.find(
+        (element) => element.id === selectedIds[0],
+      );
+
+      if (!selectedElement || !isGroupElement(selectedElement)) {
+        return;
+      }
+
+      activeDocument.applyEdit((boardDocument) =>
+        ungroupElementsInDocument(boardDocument, selectedElement.id),
+      );
+      return;
+    }
+
+    if (selectedIds.length < 2) {
+      return;
+    }
+
+    activeDocument.applyEdit((boardDocument) =>
+      groupElementsInDocument(boardDocument, selectedIds),
+    );
   }
 
   @Command('5board-vsc.addNewEditorElement')

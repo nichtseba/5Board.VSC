@@ -24,6 +24,7 @@
   "commands.copy": "5Board-Elemente kopieren",
   "commands.paste": "5Board-Elemente einfuegen",
   "commands.duplicate": "5Board-Elemente duplizieren",
+  "commands.group": "5Board-Elemente gruppieren/entgruppieren",
   "commands.openSettings": "5Board-Einstellungen öffnen",
   "configuration.java.home.description": "Pfad zur Verzeichnis des Java Development Kits. Leer lassen, um Java aus dem System-PATH zu verwenden.",
   "configuration.grid.cellSize.description": "Änderungen an der Grid-Größe haben Auswirkung auf die Export Darstellung! \n\n Standardgröße einer Rasterzelle in Pixeln für neue Dokumente.",
