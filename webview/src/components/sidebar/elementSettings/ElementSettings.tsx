@@ -10,8 +10,7 @@ import { useLocalization } from '../../../providers/LocalizationProvider';
 import { CommonSettings } from './CommonSettings';
 import { RectangleSettings } from './RectangleSettings';
 import { CircleSettings } from './CircleSettings';
-import GenericElementSettings from './GenericElementSettings';
-import { TableOfContentsSettings } from './ContentTableSettings';
+import { TableOfContentsSettings } from './TableOfContentsSettings';
 
 type SettingsProps<T extends EditorElementType> = {
   elements: EditorElement<T>[];
@@ -41,8 +40,6 @@ export default function ElementSettings<ElementType extends EditorElementType>({
     UnsupportedElementSettings;
   return (
     <>
-      <CommonSettings elements={elements} />
-      {elements.length === 1 && <GenericElementSettings element={elements[0]} />}
       <Component elements={elements} />
     </>
   );

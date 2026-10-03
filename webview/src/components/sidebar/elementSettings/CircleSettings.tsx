@@ -4,6 +4,9 @@ import { useMessageService } from '../../../services/MessageService';
 import SettingsPanel from '../layout/SettingsPanel';
 import ElementStyleSettings from '../components/ElementStyleSettings';
 import { getCommonElementStyle } from './utils/getCommonElementStyle';
+import { Divider } from 'vscrui';
+import { CommonSettings } from './CommonSettings';
+import GenericElementSettings from './GenericElementSettings';
 
 type Props = {
   elements: EditorElement<EditorElementType.Circle>[];
@@ -31,6 +34,10 @@ export function CircleSettings({ elements }: Props) {
       title={t('webview.sidebar-element-settings.circleSettings.title')}
       icon="symbol-color"
     >
+      <GenericElementSettings element={elements[0]} />
+      <Divider />
+      <CommonSettings elements={elements} />
+      <Divider />
       <ElementStyleSettings
         style={commonElementStyle}
         onChange={updateStyle}

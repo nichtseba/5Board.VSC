@@ -18,6 +18,9 @@ import LineStyleSelect from '../components/LineStyleSelect';
 import { useLocalization } from '../../../providers/LocalizationProvider';
 import { useMessageService } from '../../../services/MessageService';
 import { getCommonValue } from './utils/getCommonValue';
+import { Divider } from 'vscrui';
+import { CommonSettings } from './CommonSettings';
+import GenericElementSettings from './GenericElementSettings';
 
 type Props = {
   elements: EditorElement<EditorElementType.Freehand>[];
@@ -111,6 +114,10 @@ export function FreehandSettings({ elements }: Props) {
       title={t('webview.sidebar-element-settings.freehandSettings.title')}
       icon="pencil"
     >
+      <GenericElementSettings element={elements[0]} />
+      <Divider />
+      <CommonSettings elements={elements} />
+      <Divider />
       <div className="flex flex-col gap-4">
         <ColorSelector
           color={color}

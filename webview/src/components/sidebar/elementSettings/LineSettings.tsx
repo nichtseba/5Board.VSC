@@ -1,5 +1,5 @@
 import { EditorElement, EditorElementType, LineElementData } from '5board.vsc-common';
-import { Checkbox, Dropdown, DropdownOption } from 'vscrui';
+import { Checkbox, Divider, Dropdown, DropdownOption } from 'vscrui';
 import { useMessageService } from '../../../services/MessageService';
 import { useLocalization } from '../../../providers/LocalizationProvider';
 import SettingsPanel from '../layout/SettingsPanel';
@@ -8,6 +8,8 @@ import SliderInput from '../components/SliderInput';
 import ElementStyleSettings from '../components/ElementStyleSettings';
 import { getCommonElementStyle } from './utils/getCommonElementStyle';
 import { getCommonLineData } from './utils/getCommonLineData';
+import { CommonSettings } from './CommonSettings';
+import GenericElementSettings from './GenericElementSettings';
 
 type Props = {
   elements: EditorElement<EditorElementType.Line>[];
@@ -68,6 +70,10 @@ export function LineSettings({ elements }: Props) {
       title={t('webview.sidebar-element-settings.lineSettings.title')}
       icon="symbol-line"
     >
+      <GenericElementSettings element={elements[0]} />
+      <Divider />
+      <CommonSettings elements={elements} />
+      <Divider />
       <ElementStyleSettings
         style={commonElementStyle}
         onChange={updateStyle}

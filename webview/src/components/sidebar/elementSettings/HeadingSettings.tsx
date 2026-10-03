@@ -9,7 +9,7 @@ import {
   getHeadingNumberingEnabled,
   getHeadingNumberingStyle,
 } from '5board.vsc-common';
-import { Button, Dropdown, DropdownOption, TextField } from 'vscrui';
+import { Button, Divider, Dropdown, DropdownOption, TextField } from 'vscrui';
 import SettingsField from '../layout/SettingsField';
 import SettingsPanel from '../layout/SettingsPanel';
 import { useLocalization } from '../../../providers/LocalizationProvider';
@@ -19,6 +19,8 @@ import ColorSelector from '../components/ColorSelector';
 import { FontSizeInput } from './components/FontSizeInput';
 import { getCommonHeadingLevelSettings } from './utils/getCommonHeadingLevelSettings';
 import { getCommonValue } from './utils/getCommonValue';
+import { CommonSettings } from './CommonSettings';
+import GenericElementSettings from './GenericElementSettings';
 
 type Props = {
   elements: EditorElement<EditorElementType.Heading>[];
@@ -116,6 +118,10 @@ export function HeadingSettings({ elements }: Props) {
         title={t('webview.sidebar-element-settings.headingSettings.title')}
         icon="text-size"
       >
+        <GenericElementSettings element={elements[0]} />
+        <Divider />
+        <CommonSettings elements={elements} />
+        <Divider />
         <SettingsField
           label={t('webview.sidebar-element-settings.headingSettings.levelLabel')}
           inline
