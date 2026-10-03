@@ -7,7 +7,7 @@ import {
   LineStyle,
   TranslationKey,
 } from '5board.vsc-common';
-import ColorSelector from './ColorSelector';
+import ColorSelector from './CompactColorSelector';
 import LineStyleSelect from './LineStyleSelect';
 import SliderInput from './SliderInput';
 import { useLocalization } from '../../../providers/LocalizationProvider';

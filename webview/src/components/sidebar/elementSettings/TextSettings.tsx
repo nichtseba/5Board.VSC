@@ -22,7 +22,7 @@ import {
   UnderlineButton,
 } from './components/TextSettingsButton';
 import { useMessageService } from '../../../services/MessageService';
-import ColorSelector from '../components/ColorSelector';
+import ColorSelector from '../components/CompactColorSelector';
 import { FontSizeInput } from './components/FontSizeInput';
 import { getCommonValue } from './utils/getCommonValue';
 import GenericElementSettings from './GenericElementSettings';

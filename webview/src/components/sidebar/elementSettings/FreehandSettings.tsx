@@ -12,7 +12,7 @@ import {
   TranslationKey,
 } from '5board.vsc-common';
 import SettingsPanel from '../layout/SettingsPanel';
-import ColorSelector from '../components/ColorSelector';
+import ColorSelector from '../components/CompactColorSelector';
 import SliderInput from '../components/SliderInput';
 import LineStyleSelect from '../components/LineStyleSelect';
 import { useLocalization } from '../../../providers/LocalizationProvider';

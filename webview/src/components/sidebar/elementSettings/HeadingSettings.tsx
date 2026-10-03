@@ -15,7 +15,7 @@ import SettingsPanel from '../layout/SettingsPanel';
 import { useLocalization } from '../../../providers/LocalizationProvider';
 import { useMessageService } from '../../../services/MessageService';
 import { useBoardDocument } from '../../../providers/BoardDocumentProvider';
-import ColorSelector from '../components/ColorSelector';
+import ColorSelector from '../components/CompactColorSelector';
 import { FontSizeInput } from './components/FontSizeInput';
 import { getCommonHeadingLevelSettings } from './utils/getCommonHeadingLevelSettings';
 import { getCommonValue } from './utils/getCommonValue';

@@ -9,7 +9,7 @@ import {
 } from '5board.vsc-common';
 import { useLocalization } from '../../providers/LocalizationProvider';
 import { useMessageService, useOnMessage } from '../../services/MessageService';
-import ColorSelector from './components/ColorSelector';
+import ColorSelector from './components/CompactColorSelector';
 
 const SHAPES: { id: ProjectorPointerShape; labelKey: TranslationKey }[] = [
   { id: 'dot', labelKey: 'webview.sidebar.projectorSettings.shapes.dot' },

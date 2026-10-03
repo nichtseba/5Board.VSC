@@ -3,7 +3,7 @@ import { ColorPreset, ColorPresets } from './ColorPresets';
 import { useSettings } from '../../../providers/SettingsProvider';
 import { useState } from 'react';
 
-type ColorSelectorProps = {
+export type ColorSelectorProps = {
   color?: string;
   onChange: (color: string | undefined) => void;
   allowNone?: boolean;
