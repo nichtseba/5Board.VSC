@@ -8,7 +8,7 @@ export class EditorEditorProvider implements vscode.CustomEditorProvider<BoardCu
   public static readonly VIEW_TYPE = '5board-vsc.editor';
 
   private didChangeCustomDocument = new vscode.EventEmitter<
-    vscode.CustomDocumentContentChangeEvent<BoardCustomDocument>
+    vscode.CustomDocumentEditEvent<BoardCustomDocument>
   >();
   onDidChangeCustomDocument = this.didChangeCustomDocument.event;
 
@@ -46,6 +46,24 @@ export class EditorEditorProvider implements vscode.CustomEditorProvider<BoardCu
     };
 
     document.messageService.registerPanel(webviewPanel);
+    console.log('registering document change listener');
+    document.onDocumentChange(({ next, previous, isUndo, isRedo }) => {
+      if (isUndo || isRedo) {
+        return;
+      }
+      console.log('firing document change');
+      this.didChangeCustomDocument.fire({
+        document,
+        undo() {
+          console.log('undoing document change');
+          document.applyEdit((_) => previous, { isUndo: true });
+        },
+        redo() {
+          console.log('redoing document change');
+          document.applyEdit((_) => next, { isRedo: true });
+        },
+      });
+    });
 
     // Todo: Replace with actual document title
     webviewPanel.title = `5Board: ${vscode.workspace.asRelativePath(document.uri, false)}`;
@@ -83,6 +101,8 @@ export class EditorEditorProvider implements vscode.CustomEditorProvider<BoardCu
   }
 
   public register(): void {
+    console.log('registering editor provider');
+
     this.context.subscriptions.push(
       vscode.window.registerCustomEditorProvider(EditorEditorProvider.VIEW_TYPE, this, {
         supportsMultipleEditorsPerDocument: true,

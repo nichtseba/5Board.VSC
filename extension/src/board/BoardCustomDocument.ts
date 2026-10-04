@@ -10,6 +10,8 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   public readonly documentChange = new vscode.EventEmitter<{
     previous: BoardDocument;
     next: BoardDocument;
+    isUndo: boolean;
+    isRedo: boolean;
   }>();
   public readonly onDocumentChange = this.documentChange.event;
   public readonly messageService = new MessageService();
@@ -170,11 +172,19 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     }
   }
 
-  public applyEdit(edit: (document: BoardDocument) => BoardDocument): void {
+  public applyEdit(
+    edit: (document: BoardDocument) => BoardDocument,
+    options?: { isUndo?: boolean; isRedo?: boolean },
+  ): void {
     const previous = this.boardPackage.document;
     const next = edit(structuredClone(this.boardPackage.document));
     this.boardPackage.document = next;
-    this.documentChange.fire({ previous, next: this.boardPackage.document });
+    this.documentChange.fire({
+      previous,
+      next: this.boardPackage.document,
+      isUndo: options?.isUndo ?? false,
+      isRedo: options?.isRedo ?? false,
+    });
   }
 }
 
