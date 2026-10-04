@@ -107,6 +107,7 @@ type AllWebviewToExtensionMessage =
   | { type: 'textEditorCommand'; ids: string[]; command: TextEditorCommand }
   | { type: 'addImageFromFile' }
   | { type: 'addImageFromBytes'; name: string; bytes: number[] }
+  | { type: 'replaceElementContent'; changes: { id: string; content: string }[] }
   | { type: 'toggleCursorTracking' }
   | { type: 'toggleProjectorPaused' }
   | { type: 'setAllElementsVisible'; visible: boolean }

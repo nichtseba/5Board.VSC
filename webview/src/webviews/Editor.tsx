@@ -8,6 +8,8 @@ import ProjectorCursorMirror from '../components/projector/ProjectorCursorMirror
 import ProjectorScrollMirror from '../components/projector/ProjectorScrollMirror';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
 import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
+import { FindProvider } from '../providers/FindProvider';
+import FindWidget from '../components/find/FindWidget';
 import { ViewTypeProvider } from '../providers/ViewTypeProvider';
 
 export default function Editor() {
@@ -20,18 +22,21 @@ export default function Editor() {
   }, []);
 
   return (
-    <ViewTypeProvider value={'editor'}>
-      <div className="relative">
-        {boardDocument && (
-          <CanvasEventsProvider>
-            <EditorCanvas enableKeyboardShortcuts />
-            <ProjectorCursorMirror />
-            <ProjectorScrollMirror />
-          </CanvasEventsProvider>
-        )}
-        <ProjectorViewPort />
-      </div>
-    </ViewTypeProvider>
+    <FindProvider>
+      <ViewTypeProvider value="editor">
+        <div className="relative">
+          {boardDocument && (
+            <CanvasEventsProvider>
+              <EditorCanvas enableKeyboardShortcuts />
+              <ProjectorCursorMirror />
+              <ProjectorScrollMirror />
+            </CanvasEventsProvider>
+          )}
+          <ProjectorViewPort />
+        </div>
+        <FindWidget />
+      </ViewTypeProvider>
+    </FindProvider>
   );
 }
 

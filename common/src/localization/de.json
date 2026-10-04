@@ -51,6 +51,21 @@
       "saveHtml": "HTML speichern",
       "loading": "Vorschau wird geladen..."
     },
+    "find": {
+      "searchPlaceholder": "Suchen",
+      "replacePlaceholder": "Ersetzen",
+      "noResults": "Keine Ergebnisse",
+      "of": "von",
+      "matchCase": "Groß-/Kleinschreibung beachten",
+      "wholeWord": "Nur ganzes Wort suchen",
+      "useRegex": "Regulären Ausdruck verwenden",
+      "previousMatch": "Vorherige Übereinstimmung",
+      "nextMatch": "Nächste Übereinstimmung",
+      "close": "Schließen",
+      "toggleReplace": "Ersetzen umschalten",
+      "replace": "Ersetzen",
+      "replaceAll": "Alle ersetzen"
+    },
     "sidebar": {
       "title": "5Board Seitenleiste",
       "tools": {
