@@ -69,7 +69,7 @@ export default function CompactColorSelector(props: ColorSelectorProps) {
 
   return (
     <div className="flex min-h-6 items-center justify-between gap-2">
-      {props.label && <span className="text-foreground-description">{props.label}</span>}
+      {props.label && <span className="text-xs text-foreground-description">{props.label}</span>}
       <button
         ref={triggerRef}
         type="button"
