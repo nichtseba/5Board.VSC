@@ -1,6 +1,6 @@
-import { GridSettings } from '../settings.js';
-import { BoardElement } from './element.js';
-import { HeadingSettings } from './headingSettings.js';
+import { GridSettings } from '../settings';
+import { BoardElement } from './element';
+import { HeadingSettings } from './headingSettings';
 
 /**
  * Represents a single .5boardz file in memory

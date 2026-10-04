@@ -1,4 +1,4 @@
-import { BoardElement, EditorElement, EditorElementType } from './element.js';
+import { BoardElement, EditorElement, EditorElementType } from './element';
 
 export type ElementSectionMap = Map<string, string | null>;
 

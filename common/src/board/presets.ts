@@ -1,4 +1,4 @@
-import { EditorElement } from './element.js';
+import { EditorElement } from './element';
 
 export type Preset = {
   id: string;

@@ -1,5 +1,5 @@
 import type { JSONContent } from '@tiptap/core';
-import { TranslationKey } from '../localization/index.js';
+import { TranslationKey } from '../localization';
 
 export type BoardElement = EditorElement; // Todo: Replace with new Element type when we have it defined
 // Todo: Add additional element types

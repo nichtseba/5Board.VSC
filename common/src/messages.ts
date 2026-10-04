@@ -1,10 +1,6 @@
-import { BoardDocument } from './board/document.js';
-import {
-  HeadingLevel,
-  HeadingLevelSettings,
-  HeadingNumberingStyle,
-} from './board/headingSettings.js';
-import { Language } from './localization/index.js';
+import { BoardDocument } from './board/document';
+import { HeadingLevel, HeadingLevelSettings, HeadingNumberingStyle } from './board/headingSettings';
+import { Language } from './localization/index';
 import {
   EditorElement,
   EditorElementType,
@@ -15,9 +11,9 @@ import {
   LineStyle,
   TextEditorCommand,
   WebviewSettings,
-} from './main.js';
-import { ProjectorPointerStyle } from './projector.js';
-import { TranscriptSegment } from './board/element.js';
+} from './main';
+import { ProjectorPointerStyle } from './projector';
+import { TranscriptSegment } from './board/element';
 
 /**
  * Messages from the extension to webviews

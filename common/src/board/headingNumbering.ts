@@ -1,11 +1,11 @@
-import { BoardElement, EditorElementType } from './element.js';
+import { BoardElement, EditorElementType } from './element';
 import {
   HeadingLevel,
   HeadingNumberingStyle,
   HeadingSettings,
   getHeadingNumberingEnabled,
   getHeadingNumberingStyle,
-} from './headingSettings.js';
+} from './headingSettings';
 
 export type ComputeHeadingNumberOptions = Pick<
   HeadingSettings,

@@ -8,8 +8,8 @@ import {
   ELEMENT_TYPE_DEFINITIONS,
   ImageElementData,
   FreehandElementData,
-} from './main.js';
-import type { Preset } from './board/presets.js';
+} from './main';
+import type { Preset } from './board/presets';
 
 export enum EditorToolId {
   POINTER = 'pointer',

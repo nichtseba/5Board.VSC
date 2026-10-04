@@ -1,4 +1,4 @@
-import { BoardManifest } from './document.js';
+import { BoardManifest } from './document';
 
 export type LegacyObject =
   | LegacyTextboxObject

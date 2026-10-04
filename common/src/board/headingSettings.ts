@@ -1,4 +1,4 @@
-import { HeadingElementData, TextDecorationStyle } from './element.js';
+import { HeadingElementData, TextDecorationStyle } from './element';
 
 export type HeadingLevel = HeadingElementData['level'];
 

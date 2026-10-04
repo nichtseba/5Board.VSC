@@ -1,4 +1,4 @@
-import { indentCode, type CommentPrefix } from './markers.js';
+import { indentCode, type CommentPrefix } from './markers';
 
 interface LanguageInfo {
   fileExtension: string;

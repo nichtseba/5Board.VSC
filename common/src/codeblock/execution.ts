@@ -1,4 +1,4 @@
-import { Source } from '../board/document.js';
+import { Source } from '../board/document';
 
 export interface CodeblockExecutionRequest {
   fileName: string;

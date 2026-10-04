@@ -3,8 +3,8 @@ import {
   fileExtensionFor,
   getLanguageSupport,
   sanitizeClassName,
-} from './language.js';
-import { markBlock } from './markers.js';
+} from './language';
+import { markBlock } from './markers';
 
 export function fileNameFromClassName(className: string, language: string): string {
   return `${className}.${fileExtensionFor(language)}`;
