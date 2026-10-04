@@ -5,7 +5,7 @@ import ElementSettings from '../components/sidebar/elementSettings/ElementSettin
 import { useMessageService } from '../services/MessageService';
 import { useLocalization } from '../providers/LocalizationProvider';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
-import { Button, Icon } from 'vscrui';
+import { Button, Divider, Icon } from 'vscrui';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
 
 export default function ElementSettingsSidebar() {
@@ -48,16 +48,21 @@ export default function ElementSettingsSidebar() {
     <SidebarShell>
       {content}
       {primarySelectedElement && (
-        <Button
-          appearance="secondary"
-          className="justify-center gap-2"
-          title={t('webview.sidebar-element-settings.deleteTooltip')}
-          onClick={() => handleDelete()}
-        >
-          <Icon name="trash" className="color-foreground-error" />
+        <>
+          <div className="-mt-2">
+            <Divider />
+          </div>
+          <Button
+            appearance="secondary"
+            className="justify-center gap-2"
+            title={t('webview.sidebar-element-settings.deleteTooltip')}
+            onClick={() => handleDelete()}
+          >
+            <Icon name="trash" className="color-foreground-error" />
 
-          {t('webview.sidebar-element-settings.delete')}
-        </Button>
+            {t('webview.sidebar-element-settings.delete')}
+          </Button>
+        </>
       )}
     </SidebarShell>
   );
