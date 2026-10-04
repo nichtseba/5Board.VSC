@@ -209,7 +209,7 @@ export class SidebarManager implements vscode.Disposable {
             previousSections,
           );
         }
-        return changed;
+        return changed ? document : null;
       });
     });
 
@@ -244,13 +244,18 @@ export class SidebarManager implements vscode.Disposable {
           ),
         ) as HeadingLevelSettings;
 
-        document.content.headingSettings = {
+        const nextHeadingSettings = {
           ...headingSettings,
           levels: {
             ...levels,
             [msg.level]: cleanedLevelSettings,
           },
         };
+        if (deepEquals(headingSettings, nextHeadingSettings)) {
+          return null;
+        }
+        document.content.headingSettings = nextHeadingSettings;
+        return document;
       });
     });
 
@@ -263,7 +268,7 @@ export class SidebarManager implements vscode.Disposable {
         const headingSettings = document.content.headingSettings ?? {};
         const numberingFormats = headingSettings.numberingFormats ?? {};
 
-        document.content.headingSettings = {
+        const nextHeadingSettings = {
           ...headingSettings,
           numberingEnabled: msg.enabled ?? headingSettings.numberingEnabled,
           numberingFormats:
@@ -274,6 +279,11 @@ export class SidebarManager implements vscode.Disposable {
                 }
               : numberingFormats,
         };
+        if (deepEquals(headingSettings, nextHeadingSettings)) {
+          return null;
+        }
+        document.content.headingSettings = nextHeadingSettings;
+        return document;
       });
     });
     this.messages.on('groupElements', ({ ids }) => {
@@ -281,14 +291,24 @@ export class SidebarManager implements vscode.Disposable {
       if (!activeDocument) {
         return;
       }
-      activeDocument.applyEdit((document) => groupElementsInDocument(document, ids));
+      activeDocument.applyEdit((document) => {
+        if (groupElementsInDocument(document, ids)) {
+          return document;
+        }
+        return null;
+      });
     });
     this.messages.on('ungroupElements', ({ id }) => {
       const activeDocument = EXTENSION.activeEditorDocument;
       if (!activeDocument) {
         return;
       }
-      activeDocument.applyEdit((document) => ungroupElementsInDocument(document, id));
+      activeDocument.applyEdit((document) => {
+        if (ungroupElementsInDocument(document, id)) {
+          return document;
+        }
+        return null;
+      });
     });
   }
 

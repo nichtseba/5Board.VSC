@@ -53,12 +53,12 @@ export function findTopLevelBoardElement(
   );
 }
 
-export function groupElementsInDocument(document: BoardDocument, ids: readonly string[]): void {
+export function groupElementsInDocument(document: BoardDocument, ids: readonly string[]): boolean {
   const selectedIds = new Set(ids);
   const children = document.content.elements.filter((element) => selectedIds.has(element.id));
 
   if (selectedIds.size < 2 || children.length !== selectedIds.size) {
-    return;
+    return false;
   }
 
   const group: GroupElement = {
@@ -76,13 +76,14 @@ export function groupElementsInDocument(document: BoardDocument, ids: readonly s
 
   document.content.selectedElementIds = [group.id];
   document.content.primarySelectedElementId = group.id;
+  return true;
 }
 
-export function ungroupElementsInDocument(document: BoardDocument, groupId: string): void {
+export function ungroupElementsInDocument(document: BoardDocument, groupId: string): boolean {
   const index = document.content.elements.findIndex((element) => element.id === groupId);
   const group = document.content.elements[index];
   if (!isGroupElement(group)) {
-    return;
+    return false;
   }
 
   const children = group.data?.children;
@@ -91,4 +92,5 @@ export function ungroupElementsInDocument(document: BoardDocument, groupId: stri
 
   document.content.selectedElementIds = children.map((child) => child.id);
   document.content.primarySelectedElementId = children[0]?.id ?? null;
+  return true;
 }

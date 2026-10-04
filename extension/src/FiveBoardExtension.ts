@@ -29,7 +29,7 @@ import { Command, ExtensionBase } from './ExtensionBase';
 import { ExportPreviewProvider } from './providers/ExportPreviewProvider';
 import { ProjectorProvider } from './providers/ProjectorProvider';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
-import { PackageManager } from './PackageManager';
+import { DocumentManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
 import { getRunner } from './runner';
 import { getConfiguredHome, watchToolchainSettings } from './config';
@@ -43,7 +43,7 @@ export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
   private presetProvider!: PresetProvider;
   private presetsReady = Promise.resolve();
-  public readonly packageManager = new PackageManager();
+  public readonly packageManager = new DocumentManager();
   public readonly settingsService = new SettingsService();
   private openDocuments = new Map<string, BoardCustomDocument>();
   private toolchainOutput?: vscode.OutputChannel;
@@ -359,7 +359,12 @@ export class FiveBoardExtension extends ExtensionBase {
   @Command('5board-vsc.deleteEditorElement')
   deleteEditorElement(id: string): void {
     this.applyEditToActiveDocument((document) => {
-      document.content.elements = document.content.elements.filter((e) => e.id !== id);
+      const elements = document.content.elements.filter((e) => e.id !== id);
+      if (elements.length === document.content.elements.length) {
+        return null;
+      }
+      document.content.elements = elements;
+      return document;
     });
   }
 
@@ -410,7 +415,7 @@ export class FiveBoardExtension extends ExtensionBase {
       }
 
       activeDocument.applyEdit((boardDocument) =>
-        ungroupElementsInDocument(boardDocument, selectedElement.id),
+        ungroupElementsInDocument(boardDocument, selectedElement.id) ? boardDocument : null,
       );
       return;
     }
@@ -420,7 +425,7 @@ export class FiveBoardExtension extends ExtensionBase {
     }
 
     activeDocument.applyEdit((boardDocument) =>
-      groupElementsInDocument(boardDocument, selectedIds),
+      groupElementsInDocument(boardDocument, selectedIds) ? boardDocument : null,
     );
   }
 
@@ -437,6 +442,7 @@ export class FiveBoardExtension extends ExtensionBase {
         updateBlockCode(document, element.id, '');
       }
       document.content.elements = normalizeElementRevealOrder(document.content.elements);
+      return document;
     });
   }
 
@@ -523,12 +529,20 @@ export class FiveBoardExtension extends ExtensionBase {
     });
   }
 
-  public applyEditToActiveDocument(edit: (document: BoardDocument) => void): void {
-    if (!this.activeEditorDocument) {
+  public applyEditToActiveDocument(edit: (document: BoardDocument) => BoardDocument | null): void {
+    const activeDocument = this.activeEditorDocument;
+    if (!activeDocument) {
       return;
     }
-    this.activeEditorDocument.applyEdit(edit);
-    this.activeDocumentChange.fire(this.activeEditorDocument);
+    let changed = false;
+    activeDocument.applyEdit((document) => {
+      const next = edit(document);
+      changed = next !== null;
+      return next;
+    });
+    if (changed) {
+      this.activeDocumentChange.fire(activeDocument);
+    }
   }
 
   /**
@@ -611,9 +625,11 @@ export class FiveBoardExtension extends ExtensionBase {
 
     this.applyEditToActiveDocument((document) => {
       const target = document.content.elements.find((candidate) => candidate.id === elementId);
-      if (target && target.type !== EditorElementType.Heading) {
-        target.name = name || undefined;
+      if (!target || target.type === EditorElementType.Heading) {
+        return null;
       }
+      target.name = name || undefined;
+      return document;
     });
   }
 
@@ -626,9 +642,10 @@ export class FiveBoardExtension extends ExtensionBase {
         }
         if (!element.display.visible && !element.display.speakerNote) {
           element.display.visible = true;
-          break;
+          return document;
         }
       }
+      return null;
     });
   }
 
@@ -643,9 +660,10 @@ export class FiveBoardExtension extends ExtensionBase {
         }
         if (element.display.visible && !element.display.speakerNote) {
           element.display.visible = false;
-          break;
+          return document;
         }
       }
+      return null;
     });
   }
 
@@ -661,12 +679,15 @@ export class FiveBoardExtension extends ExtensionBase {
 
   private setAllElementsVisible(visible: boolean): void {
     this.applyEditToActiveDocument((document) => {
+      let changed = false;
       for (const element of flattenBoardElements(document.content.elements)) {
-        if (isGroupElement(element)) {
-          continue;
+        const nextVisible = visible && !element.display.speakerNote;
+        if (element.display.visible !== nextVisible) {
+          element.display.visible = nextVisible;
+          changed = true;
         }
-        element.display.visible = visible && !element.display.speakerNote;
       }
+      return changed ? document : null;
     });
   }
 }

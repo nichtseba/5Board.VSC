@@ -1,6 +1,6 @@
 import vscode from 'vscode';
 import { BoardPackage } from './package';
-import { BoardDocument, EditorElement } from '5board.vsc-common';
+import { BoardDocument } from '5board.vsc-common';
 import { MessageService } from '../MessageService';
 import { EXTENSION } from '../extension';
 import { t } from '../localization';
@@ -8,7 +8,12 @@ import { DocumentMessageHandlers } from './DocumentMessageHandlers';
 import { CodeblockController } from './CodeblockController';
 
 export class BoardCustomDocument implements vscode.CustomDocument {
-  public readonly documentChange = new vscode.EventEmitter<BoardDocument>();
+  public readonly documentChange = new vscode.EventEmitter<{
+    previous: BoardDocument;
+    next: BoardDocument;
+    isUndo: boolean;
+    isRedo: boolean;
+  }>();
   public readonly onDocumentChange = this.documentChange.event;
   public readonly messageService = new MessageService();
   // Per-document codeblock coordinator; also reached by the executeCodeblock command.
@@ -32,22 +37,19 @@ export class BoardCustomDocument implements vscode.CustomDocument {
         sender,
       );
     });
-    // this.messageService.on('focus', () => {
-    //   EXTENSION.activeEditorDocument = this;
-    // });
     this.messageService.on('saveHtmlExport', async (msg) => {
       await this.saveHtmlExport(msg.html, msg.backgroundColor);
     });
-    this.onDocumentChange((document) => {
-      this.messageService.send({ type: 'updateDocument', document });
+    this.onDocumentChange(({ next }) => {
+      this.messageService.send({ type: 'updateDocument', document: next });
     });
     // Register in the global document registry so ProjectorProvider can
     // find this document and attach the projector panel to the same MessageService.
     EXTENSION.registerDocument(this);
 
     this.disposables.push(
-      this.onDocumentChange((document) => {
-        this.messageService.send({ type: 'updateDocument', document });
+      this.onDocumentChange(({ next }) => {
+        this.messageService.send({ type: 'updateDocument', document: next });
       }),
     );
     this.disposables.push(
@@ -59,13 +61,8 @@ export class BoardCustomDocument implements vscode.CustomDocument {
       }),
     );
 
-    this.disposables.push(
-      this.boardPackage.onDocumentChange(() => {
-        this.documentChange.fire(this.boardPackage.document);
-      }),
-    );
-
     this.registerMessageHandlers();
+    EXTENSION.packageManager.registerDocument(this.uri, this);
   }
 
   private registerMessageHandlers(): void {
@@ -81,6 +78,7 @@ export class BoardCustomDocument implements vscode.CustomDocument {
       disposable.dispose();
     }
     this.clearActiveEditorDocument();
+    EXTENSION.packageManager.unregisterDocument(this.uri);
   }
 
   /** Check if projector window is active/attached */
@@ -177,20 +175,21 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     }
   }
 
-  public applyEdit(edit: (document: BoardDocument) => unknown): void {
-    const changed = edit(this.boardPackage.document);
-    if (changed === false) return;
-    this.documentChange.fire(this.boardPackage.document);
-  }
-
-  /** Merges changes into the data of the element with the given id and persists the edit. */
-  public updateElement(id: string, changes: Partial<EditorElement>): void {
-    this.applyEdit((document) => {
-      const element = document.content.elements.find((e) => e.id === id);
-      if (!element) return;
-      if (changes.data) {
-        element.data = { ...element.data, ...changes.data };
-      }
+  public applyEdit(
+    edit: (document: BoardDocument) => BoardDocument | null,
+    options?: { isUndo?: boolean; isRedo?: boolean },
+  ): void {
+    const previous = this.boardPackage.document;
+    const next = edit(structuredClone(this.boardPackage.document));
+    if (next === null) {
+      return;
+    }
+    this.boardPackage.document = next;
+    this.documentChange.fire({
+      previous,
+      next: this.boardPackage.document,
+      isUndo: options?.isUndo ?? false,
+      isRedo: options?.isRedo ?? false,
     });
   }
 }

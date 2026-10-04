@@ -29,7 +29,9 @@ export class CodeblockController {
     const messages = this.document.messageService;
     return [
       messages.on('updateBlockCode', (msg) => {
-        this.document.applyEdit((document) => updateBlockCode(document, msg.elementId, msg.code));
+        this.document.applyEdit((document) =>
+          updateBlockCode(document, msg.elementId, msg.code) ? document : null,
+        );
       }),
       messages.on('openSource', (msg) => this.openSource(msg.elementId)),
       messages.on('executeCodeblock', (msg) => void this.executeBlock(msg.elementId)),
@@ -131,6 +133,7 @@ export class CodeblockController {
     let changed = false;
     this.document.applyEdit((document) => {
       changed = edit(document);
+      return changed ? document : null;
     });
     return changed;
   }
