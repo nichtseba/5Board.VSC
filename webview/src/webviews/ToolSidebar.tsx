@@ -6,13 +6,13 @@ import {
   EditorTool,
   EditorToolDefinition,
   EditorToolId,
-  FREEHAND_COLORS,
   FREEHAND_LINE_STYLES,
   FREEHAND_MAX_DASH,
   FREEHAND_MAX_WIDTH,
   FREEHAND_MIN_DASH,
   FREEHAND_MIN_WIDTH,
   FreehandToolParameters,
+  PROJECTOR_POINTER_PRESET_COLORS,
   TOOL_DEFINITIONS,
   TranslationKey,
 } from '5board.vsc-common';
@@ -20,7 +20,7 @@ import { useLocalization } from '../providers/LocalizationProvider';
 import { Button } from 'vscrui';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
 import SliderInput from '../components/sidebar/components/SliderInput';
-import { ColorPicker } from '../components/sidebar/components/ColorPicker';
+import CompactColorSelector from '../components/sidebar/components/CompactColorSelector';
 import LineStyleSelect from '../components/sidebar/components/LineStyleSelect';
 import { useMessageService } from '../services/MessageService';
 import { useEditorState } from '../providers/EditorStateProvider';
@@ -123,28 +123,15 @@ export default function ToolSidebar() {
               {t('webview.sidebar.freehand.title')}
             </span>
 
-            <span className="text-xs opacity-80">{t('webview.sidebar.freehand.color')}</span>
-            <div className="flex flex-wrap gap-2">
-              {FREEHAND_COLORS.map((color) => (
-                <button
-                  key={color.id}
-                  title={t(`webview.sidebar.freehand.colors.${color.id}` as TranslationKey)}
-                  onClick={() => updateFreehand({ color: color.value })}
-                  className={`h-6 w-6 rounded-full border border-foreground-description ${
-                    freehandParams.color === color.value
-                      ? 'outline outline-2 outline-offset-1 outline-focus-border'
-                      : ''
-                  }`}
-                  style={{ backgroundColor: color.value }}
-                />
-              ))}
-            </div>
-
-            {/* Custom colour beyond the presets */}
-            <ColorPicker
+            <CompactColorSelector
               color={freehandParams.color}
               onChange={(color) => updateFreehand({ color })}
-              label={t('webview.sidebar.freehand.customColor')}
+              presets={PROJECTOR_POINTER_PRESET_COLORS.map((color) => ({
+                ...color,
+                label: t(`webview.sidebar.projectorSettings.colors.${color.id}` as TranslationKey),
+              }))}
+              label={t('webview.sidebar.freehand.color')}
+              customColorLabel={t('webview.sidebar.projectorSettings.customColor')}
             />
 
             <SliderInput

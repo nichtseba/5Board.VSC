@@ -9,7 +9,7 @@ import {
 } from '5board.vsc-common';
 import { useLocalization } from '../../providers/LocalizationProvider';
 import { useMessageService, useOnMessage } from '../../services/MessageService';
-import ColorSelector from './components/ColorSelector';
+import ColorSelector from './components/CompactColorSelector';
 
 const SHAPES: { id: ProjectorPointerShape; labelKey: TranslationKey }[] = [
   { id: 'dot', labelKey: 'webview.sidebar.projectorSettings.shapes.dot' },
@@ -105,6 +105,37 @@ export default function ProjectorSettings() {
         </span>
       </div>
 
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          onClick={() => messages.send({ type: 'revealNext' })}
+          className="rounded border border-foreground-description px-2 py-1 text-sm"
+        >
+          {t('webview.sidebar.projectorSettings.revealNext')}
+        </button>
+        <button
+          type="button"
+          onClick={() => messages.send({ type: 'unrevealNext' })}
+          className="rounded border border-foreground-description px-2 py-1 text-sm"
+        >
+          {t('webview.sidebar.projectorSettings.unrevealNext')}
+        </button>
+        <button
+          type="button"
+          onClick={() => messages.send({ type: 'setAllElementsVisible', visible: true })}
+          className="rounded border border-foreground-description px-2 py-1 text-sm"
+        >
+          {t('webview.sidebar.projectorSettings.showAll')}
+        </button>
+        <button
+          type="button"
+          onClick={() => messages.send({ type: 'setAllElementsVisible', visible: false })}
+          className="rounded border border-foreground-description px-2 py-1 text-sm"
+        >
+          {t('webview.sidebar.projectorSettings.hideAll')}
+        </button>
+      </div>
+
       <Checkbox
         checked={cursorTracking}
         onChange={() => messages.send({ type: 'toggleCursorTracking' })}
@@ -142,7 +173,7 @@ export default function ProjectorSettings() {
         <ColorSelector
           color={style.color}
           onChange={(color) => update({ color })}
-          themePresets={PROJECTOR_POINTER_PRESET_COLORS.map((c) => ({
+          presets={PROJECTOR_POINTER_PRESET_COLORS.map((c) => ({
             id: c.id,
             value: c.value,
             label: t(`webview.sidebar.projectorSettings.colors.${c.id}` as TranslationKey),

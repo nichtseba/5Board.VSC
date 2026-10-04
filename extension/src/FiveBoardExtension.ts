@@ -19,6 +19,10 @@ import {
   ProjectorPointerStyle,
   createAddElementToolFromPreset,
   normalizeElementRevealOrder,
+  flattenBoardElements,
+  isGroupElement,
+  groupElementsInDocument,
+  ungroupElementsInDocument,
 } from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
 import { ExportPreviewProvider } from './providers/ExportPreviewProvider';
@@ -197,6 +201,11 @@ export class FiveBoardExtension extends ExtensionBase {
       return;
     }
 
+    if (isGroupElement(selectedElement)) {
+      vscode.window.showInformationMessage(t('extension.presets.groupNotSupported'));
+      return;
+    }
+
     const name = await vscode.window.showInputBox({
       title: t('extension.presets.savePreset'),
       prompt: t('extension.presets.presetName'),
@@ -334,6 +343,40 @@ export class FiveBoardExtension extends ExtensionBase {
       return;
     }
     this.elementClipboard.duplicate(document);
+  }
+
+  @Command('5board-vsc.group')
+  groupOrUngroupElements(): void {
+    const activeDocument = this.activeEditorDocument;
+    if (!activeDocument) {
+      return;
+    }
+
+    const document = activeDocument.boardPackage.document;
+    const selectedIds = document.content.selectedElementIds;
+
+    if (selectedIds.length === 1) {
+      const selectedElement = document.content.elements.find(
+        (element) => element.id === selectedIds[0],
+      );
+
+      if (!selectedElement || !isGroupElement(selectedElement)) {
+        return;
+      }
+
+      activeDocument.applyEdit((boardDocument) =>
+        ungroupElementsInDocument(boardDocument, selectedElement.id),
+      );
+      return;
+    }
+
+    if (selectedIds.length < 2) {
+      return;
+    }
+
+    activeDocument.applyEdit((boardDocument) =>
+      groupElementsInDocument(boardDocument, selectedIds),
+    );
   }
 
   @Command('5board-vsc.addNewEditorElement')
@@ -493,11 +536,52 @@ export class FiveBoardExtension extends ExtensionBase {
   @Command('5board-vsc.revealNext')
   public revealNextCommand(): void {
     this.applyEditToActiveDocument((document) => {
-      for (const element of document.content.elements) {
+      for (const element of flattenBoardElements(document.content.elements)) {
+        if (isGroupElement(element)) {
+          continue;
+        }
         if (!element.display.visible && !element.display.speakerNote) {
           element.display.visible = true;
           break;
         }
+      }
+    });
+  }
+
+  @Command('5board-vsc.unrevealNext')
+  public unrevealNextCommand(): void {
+    this.applyEditToActiveDocument((document) => {
+      const elements = flattenBoardElements(document.content.elements);
+      for (let index = elements.length - 1; index >= 0; index--) {
+        const element = elements[index];
+        if (isGroupElement(element)) {
+          continue;
+        }
+        if (element.display.visible && !element.display.speakerNote) {
+          element.display.visible = false;
+          break;
+        }
+      }
+    });
+  }
+
+  @Command('5board-vsc.revealAll')
+  public revealAllCommand(): void {
+    this.setAllElementsVisible(true);
+  }
+
+  @Command('5board-vsc.hideAll')
+  public hideAllCommand(): void {
+    this.setAllElementsVisible(false);
+  }
+
+  private setAllElementsVisible(visible: boolean): void {
+    this.applyEditToActiveDocument((document) => {
+      for (const element of flattenBoardElements(document.content.elements)) {
+        if (isGroupElement(element)) {
+          continue;
+        }
+        element.display.visible = visible && !element.display.speakerNote;
       }
     });
   }

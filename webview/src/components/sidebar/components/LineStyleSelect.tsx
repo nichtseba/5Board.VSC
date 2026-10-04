@@ -1,4 +1,5 @@
 import { LineStyle } from '5board.vsc-common';
+import { Button } from 'vscrui';
 
 type LineStyleSelectProps = {
   value: LineStyle;
@@ -19,30 +20,40 @@ export default function LineStyleSelect({ value, onChange, options, label }: Lin
   return (
     <div className="flex flex-col gap-2">
       {label && <span className="text-xs opacity-80">{label}</span>}
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3">
         {options.map((option) => (
-          <button
+          <Button
             key={option.id}
             type="button"
             title={option.label}
             aria-pressed={value === option.id}
             onClick={() => onChange(option.id)}
-            className={`flex h-8 w-12 items-center justify-center rounded border ${
-              value === option.id
-                ? 'ring-2 ring-focus-border border-transparent'
-                : 'border-foreground-description'
-            }`}
+            className="h-8 w-full flex flex-col items-center justify-center gap-2"
+            appearance={value === option.id ? 'primary' : 'secondary'}
           >
             {/* Line preview for CSS styles, label text for custom/others. */}
             {isPreviewable(option.id) ? (
-              <span
-                className="w-8 border-t-2 border-foreground"
-                style={{ borderTopStyle: option.id }}
-              />
+              <svg aria-hidden="true" className="h-2 w-8" viewBox="0 0 32 8">
+                {option.id === 'dotted' ? (
+                  [3, 9.5, 16, 22.5, 29].map((cx) => (
+                    <circle key={cx} cx={cx} cy="4" r="1.25" fill="currentColor" />
+                  ))
+                ) : (
+                  <line
+                    x1="0"
+                    y1="4"
+                    x2="32"
+                    y2="4"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeDasharray={option.id === 'dashed' ? '4 3' : undefined}
+                  />
+                )}
+              </svg>
             ) : (
               <span className="truncate px-1 text-xs">{option.label}</span>
             )}
-          </button>
+          </Button>
         ))}
       </div>
     </div>

@@ -3,6 +3,9 @@ import {
   EditorToolId,
   ProjectorPointerStyle,
   computeHeadingNumbers,
+  findBoardElementById,
+  flattenBoardElements,
+  getLeafElementIds,
 } from '5board.vsc-common';
 import { useEffect, useMemo, useRef, type CSSProperties, useState } from 'react';
 import EditorElement from './EditorElement';
@@ -49,7 +52,12 @@ export default function EditorCanvas({
   const editorState = useEditorState();
 
   const elements = document?.content.elements ?? [];
+  const flatElements = useMemo(() => flattenBoardElements(elements), [elements]);
   const selectedElementIds = document?.content.selectedElementIds ?? [];
+  const selectedLeafIds = selectedElementIds.flatMap((id) => {
+    const selected = findBoardElementById(elements, id);
+    return selected ? getLeafElementIds([selected]) : [];
+  });
   const activeToolId = editorState?.tool.type;
 
   const messages = useMessageService();
@@ -146,13 +154,14 @@ export default function EditorCanvas({
     setAssetUrls(createAssetUrls(document.assets));
   }, [document]);
   const headingNumbers = useMemo(
-    () => computeHeadingNumbers(elements ?? [], document?.content.headingSettings),
+    () => computeHeadingNumbers(flatElements, document?.content.headingSettings),
     [elements, document?.content.headingSettings],
   );
 
   const { marqueeRect } = useMarqueeSelection({
     activeToolId,
-    elements,
+    elements: flatElements,
+    boardElements: elements,
     messages,
   });
 
@@ -179,19 +188,21 @@ export default function EditorCanvas({
       >
         {!exportMode && <CanvasTools />}
 
-        {document?.content.elements.map((element) => (
+        {flatElements.map((element) => (
           <EditorElement
             key={element.id}
             element={element}
-            selected={!exportMode && selectedElementIds.includes(element.id)}
-            grouped={selectedElementIds.length > 1}
+            selected={!exportMode && selectedLeafIds.includes(element.id)}
+            grouped={selectedLeafIds.length > 1}
             assetUrls={assetUrls}
             exportMode={exportMode}
           />
         ))}
-
-        {!exportMode && activeToolId === EditorToolId.POINTER && selectedElementIds.length > 1 && (
-          <GroupInteractionController elements={elements} selectedElementIds={selectedElementIds} />
+        {!exportMode && activeToolId === EditorToolId.POINTER && selectedLeafIds.length > 1 && (
+          <GroupInteractionController
+            elements={flatElements}
+            selectedElementIds={selectedLeafIds}
+          />
         )}
 
         {/* Cursor overlay — only rendered in the projector via the cursor prop */}

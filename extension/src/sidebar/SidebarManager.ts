@@ -10,7 +10,15 @@ import { StructureTreeProvider } from '../providers/StructureTreeProvider';
 import { EXTENSION } from '../extension';
 import deepEquals from 'deep-equal';
 import { FileTreeProvider } from '../providers/FileTreeProvider';
-import { getElementSectionMap, reconcileElementRevealOrder } from '5board.vsc-common';
+import {
+  HeadingLevelSettings,
+  findBoardElementById,
+  getElementSectionMap,
+  groupElementsInDocument,
+  isGroupElement,
+  reconcileElementRevealOrder,
+  ungroupElementsInDocument,
+} from '5board.vsc-common';
 
 export class SidebarManager implements vscode.Disposable {
   private readonly sync: SidebarDocumentSync;
@@ -97,6 +105,17 @@ export class SidebarManager implements vscode.Disposable {
       EXTENSION.projectorDocument.broadcastProjectorState(); // editor + projector
     });
 
+    this.messages.on('setAllElementsVisible', (msg) => {
+      const command = msg.visible ? '5board-vsc.revealAll' : '5board-vsc.hideAll';
+      void vscode.commands.executeCommand(command);
+    });
+    this.messages.on('revealNext', () => {
+      void vscode.commands.executeCommand('5board-vsc.revealNext');
+    });
+    this.messages.on('unrevealNext', () => {
+      void vscode.commands.executeCommand('5board-vsc.unrevealNext');
+    });
+
     // Toggle the global cursor tracking setting from the sidebar and notify every view.
     this.messages.on('toggleCursorTracking', () => {
       EXTENSION.cursorTrackingEnabled = !EXTENSION.cursorTrackingEnabled;
@@ -131,11 +150,11 @@ export class SidebarManager implements vscode.Disposable {
         let changed = false;
 
         for (const update of msg.changes) {
-          const elementIndex = document.content.elements.findIndex((e) => e.id === update.id);
-          const element = document.content.elements[elementIndex];
-          if (!element) {
-            continue; // Todo: Warn here, something has gone wrong
+          const element = findBoardElementById(document.content.elements, update.id);
+          if (!element || isGroupElement(element)) {
+            continue;
           }
+
           const nextData = {
             ...element.data,
             ...update.changes.data,
@@ -167,20 +186,14 @@ export class SidebarManager implements vscode.Disposable {
           }
 
           document.content.elements = document.content.elements.map((el) => {
-            if (el.id !== update.id) {
+            if (el.id !== update.id || isGroupElement(el)) {
               return el;
             }
 
             return {
               ...el,
-              layout: {
-                ...el.layout,
-                ...update.changes.layout,
-              },
-              data: {
-                ...el.data,
-                ...update.changes.data,
-              } as typeof el.data,
+              layout: nextLayout,
+              data: nextData as typeof el.data,
               style: nextStyle,
               display: nextDisplay,
             };
@@ -220,13 +233,12 @@ export class SidebarManager implements vscode.Disposable {
           },
         };
 
-        const clearsBackgroundColor =
-          Object.prototype.hasOwnProperty.call(msg.changes, 'backgroundColor') &&
-          msg.changes.backgroundColor === undefined;
-
-        const cleanedLevelSettings = clearsBackgroundColor
-          ? removeBackgroundColor(nextLevelSettings)
-          : nextLevelSettings;
+        const clearedKeys = new Set<keyof HeadingLevelSettings>(msg.clear ?? []);
+        const cleanedLevelSettings = Object.fromEntries(
+          Object.entries(nextLevelSettings).filter(
+            ([key]) => !clearedKeys.has(key as keyof HeadingLevelSettings),
+          ),
+        ) as HeadingLevelSettings;
 
         document.content.headingSettings = {
           ...headingSettings,
@@ -260,6 +272,20 @@ export class SidebarManager implements vscode.Disposable {
         };
       });
     });
+    this.messages.on('groupElements', ({ ids }) => {
+      const activeDocument = EXTENSION.activeEditorDocument;
+      if (!activeDocument) {
+        return;
+      }
+      activeDocument.applyEdit((document) => groupElementsInDocument(document, ids));
+    });
+    this.messages.on('ungroupElements', ({ id }) => {
+      const activeDocument = EXTENSION.activeEditorDocument;
+      if (!activeDocument) {
+        return;
+      }
+      activeDocument.applyEdit((document) => ungroupElementsInDocument(document, id));
+    });
   }
 
   /** Mirror the projector state to the sidebars (they live on a different MessageService). */
@@ -277,12 +303,4 @@ export class SidebarManager implements vscode.Disposable {
     this.sync.dispose();
     this.projectorDocumentListener.dispose();
   }
-}
-
-function removeBackgroundColor<T extends { backgroundColor?: string }>(
-  value: T,
-): Omit<T, 'backgroundColor'> {
-  return Object.fromEntries(
-    Object.entries(value).filter(([key]) => key !== 'backgroundColor'),
-  ) as Omit<T, 'backgroundColor'>;
 }

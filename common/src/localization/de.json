@@ -23,6 +23,7 @@
     },
     "presets": {
       "noElementSelected": "Kein Element ausgewählt. Bitte wähle ein Element aus, um es als Preset zu speichern.",
+      "groupNotSupported": "Gruppen werden bei der Erstellung von Presets noch nicht unterstützt. Bitte wähle ein einzelnes Element aus, um es als Preset zu speichern.",
       "savePreset": "Als Preset speichern",
       "presetNotSaved": "Preset wurde nicht gespeichert mit aufgrund der ausgewählten Optionen.",
       "presetName": "Preset Name",
@@ -93,7 +94,8 @@
         "circle": "Kreis",
         "line": "Linie",
         "freehand": "Freihand",
-        "tableOfContents": "Inhaltsverzeichnis"
+        "tableOfContents": "Inhaltsverzeichnis",
+        "group": "Gruppe"
       },
       "projectorSettings": {
         "title": "Beameransicht-Einstellungen",
@@ -103,6 +105,10 @@
         "statusLive": "Live",
         "statusPaused": "Pausiert",
         "statusClosed": "Beendet",
+        "revealNext": "Nächstes einblenden",
+        "unrevealNext": "Letztes ausblenden",
+        "showAll": "Alle einblenden",
+        "hideAll": "Alle ausblenden",
         "pointerColor": "Zeiger-Farbe",
         "customColor": "Eigene Farbe",
         "pointerShape": "Zeiger-Form",
@@ -144,7 +150,16 @@
       "noElementSelected": "Kein Element ausgewählt",
       "unsupportedElement": "Elementtyp wird nicht unterstützt",
       "selectedElement": "Ausgewähltes Element",
-      "layer": "Ebene",
+      "elementStyle": "Element Style",
+      "transformation": {
+        "title": "Transformation",
+        "x": "X:",
+        "y": "Y:",
+        "width": "B:",
+        "height": "H:",
+        "rotation": "R:",
+        "zIndex": "Z:"
+      },
       "headingSettings": {
         "title": "Überschrift",
         "levelLabel": "Hierarchiestufe",
@@ -178,12 +193,53 @@
         "textColor": "Textfarbe",
         "highlightColor": "Textmarker",
         "backgroundColor": "Hintergrundfarbe",
-        "fontSize": "Schriftgröße"
+        "fontSize": "Schriftgröße",
+        "fontSettings": "Schrift",
+        "decoration": "Auszeichnung",
+        "list": "Liste",
+        "alignment": "Ausrichtung",
+        "fontFamilyTooltip": "Schriftart",
+        "fontSizeTooltip": "Schriftgröße",
+        "lineHeightTooltip": "Zeilenhöhe",
+        "textColorTooltip": "Textfarbe",
+        "highlightColorTooltip": "Textmarkerfarbe",
+        "backgroundColorTooltip": "Hintergrundfarbe",
+        "customColorTooltip": "Benutzerdefinierte Farbe auswählen",
+        "noColorTooltip": "Keine Farbe",
+        "boldTooltip": "Fett",
+        "italicTooltip": "Kursiv",
+        "strikeTooltip": "Durchgestrichen",
+        "underlineTooltip": "Unterstrichen",
+        "codeTooltip": "Code",
+        "bulletListTooltip": "Aufzählungsliste",
+        "orderedListTooltip": "Nummerierte Liste",
+        "alignLeftTooltip": "Linksbündig",
+        "alignCenterTooltip": "Zentriert",
+        "alignRightTooltip": "Rechtsbündig",
+        "alignJustifyTooltip": "Blocksatz",
+        "colorPresets": {
+          "foreground": "Vordergrund",
+          "muted": "Gedämpft",
+          "background": "Hintergrund",
+          "primary": "Primär",
+          "secondary": "Sekundär",
+          "accent1": "Akzent 1",
+          "accent2": "Akzent 2",
+          "red": "Rot",
+          "orange": "Orange",
+          "yellow": "Gelb",
+          "green": "Grün",
+          "blue": "Blau",
+          "purple": "Lila",
+          "black": "Schwarz",
+          "white": "Weiß"
+        }
       },
       "imageSettings": {
         "title": "Bild",
         "hideInExport": "Im Export durch Platzhalter ersetzen",
-        "exportPlaceholder": "Bild nicht im Export enthalten"
+        "exportPlaceholder": "Bild nicht im Export enthalten",
+        "imageName": "Bildname"
       },
       "freehandSettings": {
         "title": "Freihand"
@@ -210,10 +266,13 @@
         "headCircle": "Kreis",
         "headSquare": "Quadrat"
       },
+      "group": "Gruppieren",
+      "ungroup": "Gruppierung aufheben",
       "delete": "Löschen",
       "name": "Name",
       "visibility": "Sichtbarkeit",
       "visible": "Sichtbar",
+      "hide": "Ausblenden",
       "speakerNote": "Sprechernotiz",
       "hideInExport": "Im Export ausblenden",
       "deleteTooltip": "Löschen (entf)"

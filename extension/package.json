@@ -145,6 +145,18 @@
         "title": "%commands.revealNext%"
       },
       {
+        "command": "5board-vsc.unrevealNext",
+        "title": "%commands.unrevealNext%"
+      },
+      {
+        "command": "5board-vsc.revealAll",
+        "title": "%commands.revealAll%"
+      },
+      {
+        "command": "5board-vsc.hideAll",
+        "title": "%commands.hideAll%"
+      },
+      {
         "command": "5board-vsc.savePreset",
         "title": "%commands.savePreset%",
         "icon": "$(save)"
@@ -172,9 +184,21 @@
         "title": "%commands.duplicate%"
       },
       {
+        "command": "5board-vsc.group",
+        "title": "%commands.group%"
+      },
+      {
         "command": "5board-vsc.openSettings",
         "title": "%commands.openSettings%",
         "icon": "$(gear)"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "5board-vsc.group",
+        "key": "ctrl+g",
+        "mac": "cmd+g",
+        "when": "activeCustomEditorId == '5board-vsc.editor'"
       }
     ],
     "menus": {
