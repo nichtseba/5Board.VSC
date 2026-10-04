@@ -1,4 +1,9 @@
-import { EditorElement, EditorElementType, TextEditorCommand } from '5board.vsc-common';
+import {
+  EditorElement,
+  EditorElementType,
+  TextEditorCommand,
+  TranslationKey,
+} from '5board.vsc-common';
 import { Button } from 'vscrui';
 import { useMessageService } from '../../../../services/MessageService';
 import {
@@ -15,6 +20,7 @@ import {
 } from '@heroicons/react/24/outline';
 import type { SVGProps } from 'react';
 import { getCommonValue } from '../utils/getCommonValue';
+import { useLocalization } from '../../../../providers/LocalizationProvider';
 
 type IconType = React.ComponentType<{ className?: string }>;
 
@@ -23,14 +29,23 @@ type TextSettingsButtonProps = {
   command: TextEditorCommand;
   elements: EditorElement<EditorElementType.Text>[];
   Icon: IconType;
+  title: TranslationKey;
 };
 
-export function TextSettingsButton({ active, command, elements, Icon }: TextSettingsButtonProps) {
+export function TextSettingsButton({
+  active,
+  command,
+  elements,
+  Icon,
+  title,
+}: TextSettingsButtonProps) {
   const messages = useMessageService();
+  const { t } = useLocalization();
   return (
     <Button
       className="h-8 flex flex-col items-center justify-center gap-2"
       appearance={active ? 'primary' : 'secondary'}
+      title={t(title)}
       onClick={() =>
         messages.send({
           type: 'textEditorCommand',
@@ -56,6 +71,7 @@ export function BoldButton({ elements }: Props) {
       command={{ type: 'toggleBold' }}
       elements={elements}
       Icon={BoldIcon}
+      title="webview.sidebar-element-settings.textSettings.boldTooltip"
     />
   );
 }
@@ -68,6 +84,7 @@ export function ItalicButton({ elements }: Props) {
       command={{ type: 'toggleItalic' }}
       elements={elements}
       Icon={ItalicIcon}
+      title="webview.sidebar-element-settings.textSettings.italicTooltip"
     />
   );
 }
@@ -80,6 +97,7 @@ export function StrikeButton({ elements }: Props) {
       command={{ type: 'toggleStrike' }}
       elements={elements}
       Icon={StrikethroughIcon}
+      title="webview.sidebar-element-settings.textSettings.strikeTooltip"
     />
   );
 }
@@ -94,6 +112,7 @@ export function UnderlineButton({ elements }: Props) {
       command={{ type: 'toggleUnderline' }}
       elements={elements}
       Icon={UnderlineIcon}
+      title="webview.sidebar-element-settings.textSettings.underlineTooltip"
     />
   );
 }
@@ -106,6 +125,7 @@ export function CodeButton({ elements }: Props) {
       command={{ type: 'toggleCode' }}
       elements={elements}
       Icon={CodeBracketIcon}
+      title="webview.sidebar-element-settings.textSettings.codeTooltip"
     />
   );
 }
@@ -120,6 +140,7 @@ export function AlignLeftButton({ elements }: Props) {
       command={{ type: 'setTextAlign', value: 'left' }}
       elements={elements}
       Icon={Bars3BottomLeftIcon}
+      title="webview.sidebar-element-settings.textSettings.alignLeftTooltip"
     />
   );
 }
@@ -134,6 +155,7 @@ export function AlignCenterButton({ elements }: Props) {
       command={{ type: 'setTextAlign', value: 'center' }}
       elements={elements}
       Icon={AlignCenterIcon}
+      title="webview.sidebar-element-settings.textSettings.alignCenterTooltip"
     />
   );
 }
@@ -148,6 +170,7 @@ export function AlignRightButton({ elements }: Props) {
       command={{ type: 'setTextAlign', value: 'right' }}
       elements={elements}
       Icon={Bars3BottomRightIcon}
+      title="webview.sidebar-element-settings.textSettings.alignRightTooltip"
     />
   );
 }
@@ -162,6 +185,7 @@ export function AlignJustifyButton({ elements }: Props) {
       command={{ type: 'setTextAlign', value: 'justify' }}
       elements={elements}
       Icon={Bars3Icon}
+      title="webview.sidebar-element-settings.textSettings.alignJustifyTooltip"
     />
   );
 }
@@ -176,6 +200,7 @@ export function BulletListButton({ elements }: Props) {
       command={{ type: 'toggleBulletList' }}
       elements={elements}
       Icon={ListBulletIcon}
+      title="webview.sidebar-element-settings.textSettings.bulletListTooltip"
     />
   );
 }
@@ -190,6 +215,7 @@ export function OrderedListButton({ elements }: Props) {
       command={{ type: 'toggleOrderedList' }}
       elements={elements}
       Icon={NumberedListIcon}
+      title="webview.sidebar-element-settings.textSettings.orderedListTooltip"
     />
   );
 }

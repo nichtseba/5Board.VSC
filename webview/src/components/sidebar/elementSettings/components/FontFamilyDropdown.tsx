@@ -4,15 +4,17 @@ type Props = {
   value?: string;
   onChange?: (font: string) => void;
   label?: string;
+  title?: string;
 };
 
-export function FontFamilyDropdown({ value, onChange, label }: Props) {
+export function FontFamilyDropdown({ value, onChange, label, title }: Props) {
   return (
     <>
       {label && <span className="text-foreground-description">{label}</span>}
       <Dropdown
         options={fonts}
         value={value}
+        title={title}
         onChange={(value) => {
           if (!value) {
             return;

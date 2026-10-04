@@ -3,14 +3,16 @@ type ColorPickerProps = {
   onChange?: (color: string) => void;
   // Optional caption shown next to the native picker.
   label?: string;
+  title?: string;
 };
 
 // Just the native colour input (+ optional label)
-export function ColorPicker({ color, onChange, label }: ColorPickerProps) {
+export function ColorPicker({ color, onChange, label, title }: ColorPickerProps) {
   return (
     <label className="flex items-center gap-2">
       <input
         type="color"
+        title={title}
         // Native picker needs a hex value; a preset token (var(--…)) can't be shown there.
         value={color?.startsWith('#') ? color : '#000000'}
         onChange={(e) => onChange?.(e.target.value)}
