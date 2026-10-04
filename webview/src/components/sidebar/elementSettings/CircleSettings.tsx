@@ -5,7 +5,7 @@ import SettingsPanel from '../layout/SettingsPanel';
 import ElementStyleSettings from '../components/ElementStyleSettings';
 import { getCommonElementStyle } from './utils/getCommonElementStyle';
 import { Divider } from 'vscrui';
-import { CommonSettings } from './CommonSettings';
+import { TransformationSettings } from './TransformationSettings';
 import GenericElementSettings from './GenericElementSettings';
 
 type Props = {
@@ -36,7 +36,7 @@ export function CircleSettings({ elements }: Props) {
     >
       <GenericElementSettings element={elements[0]} />
       <Divider />
-      <CommonSettings elements={elements} />
+      <TransformationSettings elements={elements} />
       <Divider />
       <ElementStyleSettings
         style={commonElementStyle}

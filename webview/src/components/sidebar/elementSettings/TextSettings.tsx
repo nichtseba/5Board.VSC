@@ -26,7 +26,7 @@ import ColorSelector from '../components/CompactColorSelector';
 import { FontSizeInput } from './components/FontSizeInput';
 import { getCommonValue } from './utils/getCommonValue';
 import GenericElementSettings from './GenericElementSettings';
-import { CommonSettings } from './CommonSettings';
+import { TransformationSettings } from './TransformationSettings';
 import ElementStyleSettings from '../components/ElementStyleSettings';
 import { getCommonElementStyle } from './utils/getCommonElementStyle';
 
@@ -73,7 +73,7 @@ export function TextSettings({ elements }: Props) {
       >
         <GenericElementSettings element={elements[0]} />
         <Divider />
-        <CommonSettings elements={elements} />
+        <TransformationSettings elements={elements} />
         <Divider />
         <ElementStyleSettings
           style={getCommonElementStyle(elements)}

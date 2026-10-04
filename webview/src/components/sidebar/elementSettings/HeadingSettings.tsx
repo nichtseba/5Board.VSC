@@ -21,7 +21,7 @@ import { FontSizeInput } from './components/FontSizeInput';
 import { FontFamilyDropdown } from './components/FontFamilyDropdown';
 import { getCommonHeadingLevelSettings } from './utils/getCommonHeadingLevelSettings';
 import { getCommonValue } from './utils/getCommonValue';
-import { CommonSettings } from './CommonSettings';
+import { TransformationSettings } from './TransformationSettings';
 import GenericElementSettings from './GenericElementSettings';
 
 type Props = {
@@ -126,7 +126,7 @@ export function HeadingSettings({ elements }: Props) {
       >
         <GenericElementSettings element={elements[0]} />
         <Divider />
-        <CommonSettings elements={elements} />
+        <TransformationSettings elements={elements} />
         <Divider />
         <SettingsField label={t('webview.sidebar-element-settings.headingSettings.title')}>
           <div className="flex gap-2">

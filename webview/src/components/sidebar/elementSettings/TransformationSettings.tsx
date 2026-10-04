@@ -20,7 +20,7 @@ const rotationOptions = ROTATION_VALUES.map((rotation) => ({
   label: `${rotation}°`,
 }));
 
-export function CommonSettings({ elements }: Props) {
+export function TransformationSettings({ elements }: Props) {
   const { t } = useLocalization();
   const messages = useMessageService();
 

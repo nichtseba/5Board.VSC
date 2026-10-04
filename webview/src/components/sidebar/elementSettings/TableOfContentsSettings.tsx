@@ -5,7 +5,7 @@ import { useLocalization } from '../../../providers/LocalizationProvider';
 import { useMessageService } from '../../../services/MessageService';
 import { getCommonValue } from './utils/getCommonValue';
 import { Divider } from 'vscrui';
-import { CommonSettings } from './CommonSettings';
+import { TransformationSettings } from './TransformationSettings';
 import GenericElementSettings from './GenericElementSettings';
 import { FontSizeInput } from './components/FontSizeInput';
 
@@ -39,7 +39,7 @@ export function TableOfContentsSettings({ elements }: Props) {
     >
       <GenericElementSettings element={elements[0]} />
       <Divider />
-      <CommonSettings elements={elements} />
+      <TransformationSettings elements={elements} />
       <Divider />
       <SettingsField label={t('webview.sidebar-element-settings.textSettings.fontSettings')}>
         <FontSizeInput

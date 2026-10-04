@@ -7,7 +7,7 @@ import { ImageSettings } from './ImageSettings';
 import { LineSettings } from './LineSettings';
 import { FreehandSettings } from './FreehandSettings';
 import { useLocalization } from '../../../providers/LocalizationProvider';
-import { CommonSettings } from './CommonSettings';
+import { TransformationSettings } from './TransformationSettings';
 import { RectangleSettings } from './RectangleSettings';
 import { CircleSettings } from './CircleSettings';
 import { TableOfContentsSettings } from './TableOfContentsSettings';
@@ -32,7 +32,7 @@ export default function ElementSettings<ElementType extends EditorElementType>({
   const type = getSelectionType(elements);
 
   if (type === 'mixed') {
-    return <CommonSettings elements={elements} />;
+    return <TransformationSettings elements={elements} />;
   }
 
   const Component =
