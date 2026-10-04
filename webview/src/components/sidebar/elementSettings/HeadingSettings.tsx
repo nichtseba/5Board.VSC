@@ -290,7 +290,7 @@ function ColorField({
       color={value}
       allowNone={allowNone}
       onChange={onChange}
-      themePresets={PROJECTOR_POINTER_PRESET_COLORS}
+      presets={PROJECTOR_POINTER_PRESET_COLORS}
       label={label}
       customColorLabel={t('webview.sidebar.projectorSettings.customColor')}
     />
