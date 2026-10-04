@@ -11,7 +11,6 @@ type Props = {
 
 export function ImageSettings({ elements }: Props) {
   const { t } = useLocalization();
-  const selectedElementIds = elements.map((element) => element.id);
   return (
     <SettingsPanel
       title={t('webview.sidebar-element-settings.imageSettings.title')}
@@ -20,10 +19,6 @@ export function ImageSettings({ elements }: Props) {
       <GenericElementSettings element={elements[0]} />
       <Divider />
       <CommonSettings elements={elements} />
-      <Divider />
-      <>
-        <div>Add ImageSettings for{selectedElementIds.join(', ')}</div>
-      </>
     </SettingsPanel>
   );
 }

@@ -7,6 +7,7 @@ import { getCommonValue } from './utils/getCommonValue';
 import { Divider } from 'vscrui';
 import { CommonSettings } from './CommonSettings';
 import GenericElementSettings from './GenericElementSettings';
+import { FontSizeInput } from './components/FontSizeInput';
 
 type Props = {
   elements: EditorElement<EditorElementType.TableOfContents>[];
@@ -40,13 +41,10 @@ export function TableOfContentsSettings({ elements }: Props) {
       <Divider />
       <CommonSettings elements={elements} />
       <Divider />
-      <SettingsField label={t('webview.sidebar-element-settings.headingSettings.fontSize')} inline>
-        <input
-          type="number"
-          min={1}
+      <SettingsField label={t('webview.sidebar-element-settings.textSettings.fontSettings')}>
+        <FontSizeInput
           value={getCommonValue(elements.map((element) => element.data.fontSize)) ?? 14}
-          onChange={(e) => handleFontSizeChange(e.target.value)}
-          className="w-20 rounded-xs border border-dropdown-border bg-input-background px-2 py-[3px] text-input-foreground [color-scheme:light_dark] focus:border-focus-border focus:outline-none"
+          onChange={handleFontSizeChange}
         />
       </SettingsField>
     </SettingsPanel>
