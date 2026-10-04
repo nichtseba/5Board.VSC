@@ -154,6 +154,7 @@ export class ElementClipboardService {
       boardDocument.content.elements = normalizeElementRevealOrder(boardDocument.content.elements);
       boardDocument.content.selectedElementIds = cloneIds;
       boardDocument.content.primarySelectedElementId = cloneIds[0] ?? null;
+      return boardDocument;
     });
     return cloneIds;
   }

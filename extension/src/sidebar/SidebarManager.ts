@@ -204,7 +204,7 @@ export class SidebarManager implements vscode.Disposable {
             previousSections,
           );
         }
-        return changed;
+        return document;
       });
     });
 
@@ -246,6 +246,7 @@ export class SidebarManager implements vscode.Disposable {
             [msg.level]: cleanedLevelSettings,
           },
         };
+        return document;
       });
     });
 
@@ -269,6 +270,7 @@ export class SidebarManager implements vscode.Disposable {
                 }
               : numberingFormats,
         };
+        return document;
       });
     });
   }

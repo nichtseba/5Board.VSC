@@ -68,7 +68,7 @@ export class StructureTreeProvider
       const elements = boardDocument.content.elements;
       const source = elements.find((candidate) => candidate.id === sourceId);
       if (!source) {
-        return false;
+        return boardDocument;
       }
 
       const previousPositions = new Map(
@@ -78,7 +78,7 @@ export class StructureTreeProvider
         ? moveHeadingSectionBefore(elements, sourceId, target.elementId)
         : moveElementBeforeInSection(elements, sourceId, target.elementId);
       if (!reordered) {
-        return false;
+        return boardDocument;
       }
 
       const changed =
@@ -87,11 +87,11 @@ export class StructureTreeProvider
           (candidate) => previousPositions.get(candidate.id) !== candidate.layout.yPos,
         );
       if (!changed) {
-        return false;
+        return boardDocument;
       }
 
       boardDocument.content.elements = reordered;
-      return true;
+      return boardDocument;
     });
   }
 

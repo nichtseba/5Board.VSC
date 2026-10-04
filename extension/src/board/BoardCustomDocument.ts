@@ -1,13 +1,16 @@
 import vscode from 'vscode';
 import { BoardPackage } from './package';
-import { BoardDocument, EditorElement } from '5board.vsc-common';
+import { BoardDocument } from '5board.vsc-common';
 import { MessageService } from '../MessageService';
 import { EXTENSION } from '../extension';
 import { t } from '../localization';
 import { DocumentMessageHandlers } from './DocumentMessageHandlers';
 
 export class BoardCustomDocument implements vscode.CustomDocument {
-  public readonly documentChange = new vscode.EventEmitter<BoardDocument>();
+  public readonly documentChange = new vscode.EventEmitter<{
+    previous: BoardDocument;
+    next: BoardDocument;
+  }>();
   public readonly onDocumentChange = this.documentChange.event;
   public readonly messageService = new MessageService();
   private readonly disposables: vscode.Disposable[] = [];
@@ -35,16 +38,16 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     this.messageService.on('saveHtmlExport', async (msg) => {
       await this.saveHtmlExport(msg.html, msg.backgroundColor);
     });
-    this.onDocumentChange((document) => {
-      this.messageService.send({ type: 'updateDocument', document });
+    this.onDocumentChange(({ next }) => {
+      this.messageService.send({ type: 'updateDocument', document: next });
     });
     // Register in the global document registry so ProjectorProvider can
     // find this document and attach the projector panel to the same MessageService.
     EXTENSION.registerDocument(this);
 
     this.disposables.push(
-      this.onDocumentChange((document) => {
-        this.messageService.send({ type: 'updateDocument', document });
+      this.onDocumentChange(({ next }) => {
+        this.messageService.send({ type: 'updateDocument', document: next });
       }),
     );
     this.disposables.push(
@@ -167,21 +170,11 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     }
   }
 
-  public applyEdit(edit: (document: BoardDocument) => unknown): void {
-    const changed = edit(this.boardPackage.document);
-    if (changed === false) return;
-    this.documentChange.fire(this.boardPackage.document);
-  }
-
-  /** Merges changes into the data of the element with the given id and persists the edit. */
-  public updateElement(id: string, changes: Partial<EditorElement>): void {
-    this.applyEdit((document) => {
-      const element = document.content.elements.find((e) => e.id === id);
-      if (!element) return;
-      if (changes.data) {
-        element.data = { ...element.data, ...changes.data };
-      }
-    });
+  public applyEdit(edit: (document: BoardDocument) => BoardDocument): void {
+    const previous = this.boardPackage.document;
+    const next = edit(structuredClone(this.boardPackage.document));
+    this.boardPackage.document = next;
+    this.documentChange.fire({ previous, next: this.boardPackage.document });
   }
 }
 

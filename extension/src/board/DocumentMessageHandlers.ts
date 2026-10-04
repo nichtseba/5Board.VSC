@@ -62,6 +62,7 @@ export class DocumentMessageHandlers {
 
           document.content.selectedElementIds = next;
           document.content.primarySelectedElementId = next[0] ?? null;
+          return document;
         });
       }),
       this.document.messageService.on('addElement', (msg) => {
@@ -88,6 +89,7 @@ export class DocumentMessageHandlers {
         this.document.applyEdit((document) => {
           document.content.selectedElementIds = msg.ids;
           document.content.primarySelectedElementId = msg.ids[0] ?? null;
+          return document;
         });
       }),
 
@@ -131,7 +133,7 @@ export class DocumentMessageHandlers {
               previousSections,
             );
           }
-          return changed;
+          return document;
         });
       }),
       //#endregion "General"
@@ -156,7 +158,7 @@ export class DocumentMessageHandlers {
               previousSections,
             );
           }
-          return changed;
+          return document;
         });
       }),
       this.document.messageService.on('textEditorCommand', (msg) => {
@@ -228,7 +230,7 @@ export class DocumentMessageHandlers {
               previousSections,
             );
           }
-          return changed;
+          return document;
         });
       }),
 
@@ -257,6 +259,7 @@ export class DocumentMessageHandlers {
         this.document.applyEdit((document) => {
           document.content.elements.push(msg.element);
           document.content.elements = normalizeElementRevealOrder(document.content.elements);
+          return document;
         });
       }),
 

@@ -306,6 +306,7 @@ export class FiveBoardExtension extends ExtensionBase {
   deleteEditorElement(id: string): void {
     this.applyEditToActiveDocument((document) => {
       document.content.elements = document.content.elements.filter((e) => e.id !== id);
+      return document;
     });
   }
 
@@ -346,6 +347,7 @@ export class FiveBoardExtension extends ExtensionBase {
       const element = createDefaultElement(type, position, defaults, document);
       document.content.elements.push(element);
       document.content.elements = normalizeElementRevealOrder(document.content.elements);
+      return document;
     });
   }
 
@@ -414,7 +416,7 @@ export class FiveBoardExtension extends ExtensionBase {
     );
   }
 
-  public applyEditToActiveDocument(edit: (document: BoardDocument) => void): void {
+  public applyEditToActiveDocument(edit: (document: BoardDocument) => BoardDocument): void {
     if (!this.activeEditorDocument) {
       return;
     }
@@ -469,6 +471,7 @@ export class FiveBoardExtension extends ExtensionBase {
       if (target && target.type !== EditorElementType.Heading) {
         target.name = name || undefined;
       }
+      return document;
     });
   }
 
@@ -481,6 +484,7 @@ export class FiveBoardExtension extends ExtensionBase {
           break;
         }
       }
+      return document;
     });
   }
 
@@ -494,6 +498,7 @@ export class FiveBoardExtension extends ExtensionBase {
           break;
         }
       }
+      return document;
     });
   }
 
@@ -512,6 +517,7 @@ export class FiveBoardExtension extends ExtensionBase {
       for (const element of document.content.elements) {
         element.display.visible = visible && !element.display.speakerNote;
       }
+      return document;
     });
   }
 }
