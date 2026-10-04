@@ -148,8 +148,16 @@
       "noElementSelected": "No element selected",
       "unsupportedElement": "Unsupported element type",
       "selectedElement": "Selected Element",
-      "layer": "Layer",
       "elementStyle": "Element Style",
+      "transformation": {
+        "title": "Transformation",
+        "x": "X:",
+        "y": "Y:",
+        "width": "W:",
+        "height": "H:",
+        "rotation": "R:",
+        "zIndex": "Z:"
+      },
       "headingSettings": {
         "title": "Heading",
         "levelLabel": "Hierarchy level",

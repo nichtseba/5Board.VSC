@@ -148,8 +148,16 @@
       "noElementSelected": "Kein Element ausgewählt",
       "unsupportedElement": "Elementtyp wird nicht unterstützt",
       "selectedElement": "Ausgewähltes Element",
-      "layer": "Ebene",
       "elementStyle": "Element Style",
+      "transformation": {
+        "title": "Transformation",
+        "x": "X:",
+        "y": "Y:",
+        "width": "B:",
+        "height": "H:",
+        "rotation": "R:",
+        "zIndex": "Z:"
+      },
       "headingSettings": {
         "title": "Überschrift",
         "levelLabel": "Hierarchiestufe",

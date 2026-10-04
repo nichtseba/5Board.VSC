@@ -10,7 +10,7 @@ export default function SettingsField({ label, children, inline = false }: Props
   if (inline) {
     return (
       <div className="mb-4 flex items-center justify-between gap-3">
-        <Label>{label}</Label>
+        <Label className="shrink-0 whitespace-nowrap">{label}</Label>
 
         {children}
       </div>
