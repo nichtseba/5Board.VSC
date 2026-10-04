@@ -80,7 +80,7 @@ export function LineSettings({ elements }: Props) {
         editableProperties={['opacity', 'borderColor', 'borderWidth', 'borderStyle']}
       />
 
-      <SettingsField label={t('webview.sidebar-element-settings.lineSettings.symbols')}>
+      <SettingsField>
         <div className="grid grid-cols-2 gap-3">
           <SettingsField label={t('webview.sidebar-element-settings.lineSettings.startHead')}>
             <Dropdown
