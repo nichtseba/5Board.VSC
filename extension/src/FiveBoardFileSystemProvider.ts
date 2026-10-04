@@ -8,7 +8,7 @@ import {
   MANIFEST_PATH,
   SRC_ROOT,
 } from './board/package';
-import { Asset } from '5board.vsc-common';
+import { Asset, BoardDocument } from '5board.vsc-common';
 import { DocumentManager } from './PackageManager';
 import { randomUUID } from 'crypto';
 
@@ -70,23 +70,21 @@ export class FiveBoardFileSystemProvider implements vscode.FileSystemProvider {
     }
   }
 
-  private async getPackage(uri: vscode.Uri): Promise<BoardPackage> {
+  private async getPackageReadonly(uri: vscode.Uri): Promise<BoardPackage> {
     const split = splitPath(uri);
     if (!split) {
       throw FileSystemError.FileNotFound(uri);
     }
     const { packageUri } = split;
-    return await this.packageManager.getOrLoadPackage(packageUri);
+    return await this.packageManager.getPackageReadonly(packageUri);
   }
 
-  private async savePackage(pkg: BoardPackage, uri: vscode.Uri): Promise<void> {
+  private getPackageUri(uri: vscode.Uri): vscode.Uri {
     const split = splitPath(uri);
     if (!split) {
       throw FileSystemError.FileNotFound(uri);
     }
-    const { packageUri } = split;
-    await pkg.write(packageUri);
-    pkg.documentChange.fire();
+    return split.packageUri;
   }
 
   async stat(uri: vscode.Uri): Promise<vscode.FileStat> {
@@ -94,7 +92,7 @@ export class FiveBoardFileSystemProvider implements vscode.FileSystemProvider {
     if (!info) {
       throw FileSystemError.FileNotFound(uri);
     }
-    const pkg = await this.getPackage(uri);
+    const pkg = await this.getPackageReadonly(uri);
     switch (info.type) {
       case 'manifest':
       case 'content': {
@@ -159,7 +157,7 @@ export class FiveBoardFileSystemProvider implements vscode.FileSystemProvider {
     if (info.type !== 'directory') {
       throw FileSystemError.FileNotADirectory(uri);
     }
-    const pkg = await this.getPackage(uri);
+    const pkg = await this.getPackageReadonly(uri);
     if (info.path === SRC_ROOT) {
       const languages = new Set(pkg.document.sources.map((s) => s.language));
       return Array.from(languages).map((language) => [language, vscode.FileType.Directory]);
@@ -193,7 +191,7 @@ export class FiveBoardFileSystemProvider implements vscode.FileSystemProvider {
     if (!info) {
       throw FileSystemError.FileNotFound(uri);
     }
-    const pkg = await this.getPackage(uri);
+    const pkg = await this.getPackageReadonly(uri);
     switch (info.type) {
       case 'directory': {
         throw FileSystemError.FileIsADirectory(uri);
@@ -240,90 +238,92 @@ export class FiveBoardFileSystemProvider implements vscode.FileSystemProvider {
     if (!info.writeable) {
       throw FileSystemError.NoPermissions(uri);
     }
-    const pkg = await this.getPackage(uri);
     switch (info.type) {
       case 'directory': {
         throw FileSystemError.FileIsADirectory(uri);
       }
       case 'source': {
-        this.writeSrcFile(info.path, uri, pkg, content, options);
+        await this.writeSrcFile(info.path, uri, content, options);
         break;
       }
       case 'asset': {
-        this.writeAssetFile(info.path, uri, pkg, content, options);
+        await this.writeAssetFile(info.path, uri, content, options);
         break;
       }
     }
   }
 
-  private writeSrcFile(
+  private async writeSrcFile(
     path: string,
     uri: vscode.Uri,
-    pkg: BoardPackage,
     content: Uint8Array,
     options: { create: boolean; overwrite: boolean },
-  ): void {
+  ): Promise<void> {
     const srcPath = splitSrcPath(path);
     if (!srcPath) {
       throw FileSystemError.FileNotFound(uri);
     }
     const { language, name } = srcPath;
-    let source = pkg.document.sources.find((s) => s.language === language && s.name === name);
-    if (source) {
-      if (!options.overwrite) {
-        throw FileSystemError.FileExists(uri);
+    let changeType = vscode.FileChangeType.Changed;
+    await this.packageManager.applyEdit(this.getPackageUri(uri), (document) => {
+      const source = document.sources.find((s) => s.language === language && s.name === name);
+      if (source) {
+        if (!options.overwrite) {
+          throw FileSystemError.FileExists(uri);
+        }
+        source.code = Buffer.from(content).toString('utf8');
+        source.modifiedAt = Date.now();
+      } else {
+        if (!options.create) {
+          throw FileSystemError.FileNotFound(uri);
+        }
+        changeType = vscode.FileChangeType.Created;
+        document.sources.push({
+          language,
+          name,
+          code: Buffer.from(content).toString('utf8'),
+          createdAt: Date.now(),
+          modifiedAt: Date.now(),
+        });
       }
-      source.code = Buffer.from(content).toString('utf8');
-      source.modifiedAt = Date.now();
-      this.fireChange(uri, vscode.FileChangeType.Changed);
-    } else {
-      if (!options.create) {
-        throw FileSystemError.FileNotFound(uri);
-      }
-      source = {
-        language,
-        name,
-        code: Buffer.from(content).toString('utf8'),
-        createdAt: Date.now(),
-        modifiedAt: Date.now(),
-      };
-      pkg.document.sources.push(source);
-      this.fireChange(uri, vscode.FileChangeType.Created);
-    }
-    this.savePackage(pkg, uri);
+      return document;
+    });
+    this.fireChange(uri, changeType);
   }
 
-  private writeAssetFile(
+  private async writeAssetFile(
     path: string,
     uri: vscode.Uri,
-    pkg: BoardPackage,
     content: Uint8Array,
     options: { create: boolean; overwrite: boolean },
-  ): void {
+  ): Promise<void> {
     const assetName = path.substring(ASSET_ROOT.length + 1);
-    const asset = pkg.document.assets.find((asset) => asset.name === assetName);
-    if (asset) {
-      if (!options.overwrite) {
-        throw FileSystemError.FileExists(uri);
+    let changeType = vscode.FileChangeType.Changed;
+    await this.packageManager.applyEdit(this.getPackageUri(uri), (document) => {
+      const asset = document.assets.find((a) => a.name === assetName);
+      if (asset) {
+        if (!options.overwrite) {
+          throw FileSystemError.FileExists(uri);
+        }
+        asset.bytes = content;
+        asset.modifiedAt = Date.now();
+      } else {
+        if (!options.create) {
+          throw FileSystemError.FileNotFound(uri);
+        }
+        changeType = vscode.FileChangeType.Created;
+        const created: Asset = {
+          name: assetName,
+          bytes: content,
+          createdAt: Date.now(),
+          modifiedAt: Date.now(),
+          mime: 'application/octet-stream', // Todo: Store and read actual mime types for assets
+        };
+        document.assets.push(created);
       }
-      asset.bytes = content;
-      asset.modifiedAt = Date.now();
-      this.fireChange(uri, vscode.FileChangeType.Changed);
-    } else {
-      if (!options.create) {
-        throw FileSystemError.FileNotFound(uri);
-      }
-      const asset: Asset = {
-        name: assetName,
-        bytes: content,
-        createdAt: Date.now(),
-        modifiedAt: Date.now(),
-        mime: 'application/octet-stream', // Todo: Store and read actual mime types for assets
-      };
-      pkg.document.assets.push(asset);
-      this.fireChange(uri, vscode.FileChangeType.Created);
-    }
-    this.savePackage(pkg, uri);
+      return document;
+    });
+    this.fireChange(uri, changeType);
   }
 
   createDirectory(uri: vscode.Uri): void {
@@ -354,7 +354,7 @@ export class FiveBoardFileSystemProvider implements vscode.FileSystemProvider {
     if (!newInfo) {
       throw FileSystemError.FileNotFound(newUri);
     }
-    if (oldUri.path !== newUri.path) {
+    if (oldInfo.path !== newInfo.path) {
       throw FileSystemError.NoPermissions(oldUri);
     }
     if (oldInfo.type !== newInfo.type) {
@@ -363,10 +363,31 @@ export class FiveBoardFileSystemProvider implements vscode.FileSystemProvider {
     if (!oldInfo.writeable || !newInfo.writeable) {
       throw FileSystemError.NoPermissions(oldUri);
     }
-    const pkg = await this.getPackage(oldUri);
+    const changes: [vscode.Uri, vscode.FileChangeType][] = [];
+    await this.packageManager.applyEdit(this.getPackageUri(oldUri), (document) => {
+      this.applyRename(document, oldUri, newUri, oldInfo, newInfo, options, changes);
+      return document;
+    });
+    for (const [changedUri, type] of changes) {
+      this.fireChange(changedUri, type);
+    }
+  }
+
+  private applyRename(
+    document: BoardDocument,
+    oldUri: vscode.Uri,
+    newUri: vscode.Uri,
+    oldInfo: PathInfo,
+    newInfo: PathInfo,
+    options: { overwrite: boolean },
+    changes: [vscode.Uri, vscode.FileChangeType][],
+  ): void {
+    const fireChange = (uri: vscode.Uri, type: vscode.FileChangeType): void => {
+      changes.push([uri, type]);
+    };
     if (oldInfo.type === 'directory') {
       if (oldInfo.path.startsWith(SRC_ROOT + '/')) {
-        const languages = new Set(pkg.document.sources.map((s) => s.language));
+        const languages = new Set(document.sources.map((s) => s.language));
         const oldLanguage = oldInfo.path.substring(SRC_ROOT.length + 1);
         const newLanguage = newInfo.path.substring(SRC_ROOT.length + 1);
         if (!languages.has(oldLanguage)) {
@@ -374,80 +395,63 @@ export class FiveBoardFileSystemProvider implements vscode.FileSystemProvider {
         }
         if (languages.has(newLanguage)) {
           if (options.overwrite) {
-            pkg.document.sources = pkg.document.sources.filter((s) => s.language !== newLanguage);
-            for (const source of pkg.document.sources) {
+            for (const source of document.sources) {
               if (source.language === newLanguage) {
-                this.fireChange(
-                  vscode.Uri.joinPath(newUri, source.name),
-                  vscode.FileChangeType.Deleted,
-                );
+                fireChange(vscode.Uri.joinPath(newUri, source.name), vscode.FileChangeType.Deleted);
               }
             }
+            document.sources = document.sources.filter((s) => s.language !== newLanguage);
           } else {
             throw FileSystemError.FileExists(newUri);
           }
         }
-        for (const source of pkg.document.sources) {
+        for (const source of document.sources) {
           if (source.language === oldLanguage) {
             source.language = newLanguage;
-            this.fireChange(
-              vscode.Uri.joinPath(oldUri, source.name),
-              vscode.FileChangeType.Deleted,
-            );
-            this.fireChange(
-              vscode.Uri.joinPath(newUri, source.name),
-              vscode.FileChangeType.Created,
-            );
+            fireChange(vscode.Uri.joinPath(oldUri, source.name), vscode.FileChangeType.Deleted);
+            fireChange(vscode.Uri.joinPath(newUri, source.name), vscode.FileChangeType.Created);
           }
         }
       } else {
         throw FileSystemError.NoPermissions(oldUri);
       }
     } else if (oldInfo.type === 'source' && newInfo.type === 'source') {
-      const oldSource = pkg.document.sources.find(
+      const oldSource = document.sources.find(
         (s) => s.language === oldInfo.language && s.name === oldInfo.name,
       );
       if (!oldSource) {
         throw FileSystemError.FileNotFound(oldUri);
       }
-      const newSource = pkg.document.sources.find(
+      const newSource = document.sources.find(
         (s) => s.language === newInfo.language && s.name === newInfo.name,
       );
       if (newSource) {
         if (!options.overwrite) {
           throw FileSystemError.FileExists(newUri);
         }
-        pkg.document.sources = pkg.document.sources.filter(
-          (s) => !(s.language === newInfo.language && s.name === newInfo.name),
-        );
+        document.sources = document.sources.filter((s) => s !== newSource);
       }
       oldSource.language = newInfo.language;
       oldSource.name = newInfo.name;
       oldSource.modifiedAt = Date.now();
-      this.fireChange(oldUri, vscode.FileChangeType.Deleted);
-      this.fireChange(
-        newUri,
-        newSource ? vscode.FileChangeType.Changed : vscode.FileChangeType.Created,
-      );
+      fireChange(oldUri, vscode.FileChangeType.Deleted);
+      fireChange(newUri, newSource ? vscode.FileChangeType.Changed : vscode.FileChangeType.Created);
     } else if (oldInfo.type === 'asset' && newInfo.type === 'asset') {
-      const oldAsset = pkg.document.assets.find((a) => a.name === oldInfo.name);
+      const oldAsset = document.assets.find((a) => a.name === oldInfo.name);
       if (!oldAsset) {
         throw FileSystemError.FileNotFound(oldUri);
       }
-      const newAsset = pkg.document.assets.find((a) => a.name === newInfo.name);
+      const newAsset = document.assets.find((a) => a.name === newInfo.name);
       if (newAsset) {
         if (!options.overwrite) {
           throw FileSystemError.FileExists(newUri);
         }
-        pkg.document.assets = pkg.document.assets.filter((a) => a.name !== newInfo.name);
+        document.assets = document.assets.filter((a) => a !== newAsset);
       }
       oldAsset.name = newInfo.name;
       oldAsset.modifiedAt = Date.now();
-      this.fireChange(oldUri, vscode.FileChangeType.Deleted);
-      this.fireChange(
-        newUri,
-        newAsset ? vscode.FileChangeType.Changed : vscode.FileChangeType.Created,
-      );
+      fireChange(oldUri, vscode.FileChangeType.Deleted);
+      fireChange(newUri, newAsset ? vscode.FileChangeType.Changed : vscode.FileChangeType.Created);
     }
   }
 }
