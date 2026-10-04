@@ -60,8 +60,16 @@ export class DocumentMessageHandlers {
             next = exists ? next.filter((selectedId) => selectedId !== id) : [...next, id];
           }
 
+          const primarySelectedElementId = next[0] ?? null;
+          if (
+            deepEquals(next, document.content.selectedElementIds) &&
+            primarySelectedElementId === document.content.primarySelectedElementId
+          ) {
+            return null;
+          }
+
           document.content.selectedElementIds = next;
-          document.content.primarySelectedElementId = next[0] ?? null;
+          document.content.primarySelectedElementId = primarySelectedElementId;
           return document;
         });
       }),
@@ -87,8 +95,16 @@ export class DocumentMessageHandlers {
 
       this.document.messageService.on('selectElements', (msg) => {
         this.document.applyEdit((document) => {
+          const primarySelectedElementId = msg.ids[0] ?? null;
+          if (
+            deepEquals(msg.ids, document.content.selectedElementIds) &&
+            primarySelectedElementId === document.content.primarySelectedElementId
+          ) {
+            return null;
+          }
+
           document.content.selectedElementIds = msg.ids;
-          document.content.primarySelectedElementId = msg.ids[0] ?? null;
+          document.content.primarySelectedElementId = primarySelectedElementId;
           return document;
         });
       }),
@@ -105,22 +121,33 @@ export class DocumentMessageHandlers {
               continue;
             }
 
-            if (deepEquals(update.changes, element.layout)) {
-              continue;
-            }
-
-            element.layout = {
+            const nextLayout = {
               ...element.layout,
               ...update.changes,
             };
+            const imageElement =
+              element.type === EditorElementType.Image
+                ? (element as EditorElement<EditorElementType.Image>)
+                : undefined;
+            const nextAspectRatio = imageElement
+              ? (update.aspectRatio ?? imageElement.data.aspectRatio)
+              : undefined;
+            if (
+              deepEquals(nextLayout, element.layout) &&
+              (!imageElement ||
+                (imageElement.data.configuredWidth &&
+                  nextAspectRatio === imageElement.data.aspectRatio))
+            ) {
+              continue;
+            }
 
-            if (element.type === EditorElementType.Image) {
-              const imageElement = element as EditorElement<EditorElementType.Image>;
+            element.layout = nextLayout;
 
+            if (imageElement) {
               imageElement.data = {
                 ...imageElement.data,
                 configuredWidth: true,
-                aspectRatio: update.aspectRatio ?? imageElement.data.aspectRatio,
+                aspectRatio: nextAspectRatio,
               };
             }
 
@@ -133,7 +160,7 @@ export class DocumentMessageHandlers {
               previousSections,
             );
           }
-          return document;
+          return changed ? document : null;
         });
       }),
       //#endregion "General"
@@ -144,7 +171,7 @@ export class DocumentMessageHandlers {
           const previousSections = getElementSectionMap(document.content.elements);
           let changed = false;
           for (const element of document.content.elements) {
-            if (element.layout.yPos >= msg.startRow) {
+            if (msg.rowCount !== 0 && element.layout.yPos >= msg.startRow) {
               element.layout = {
                 ...element.layout,
                 yPos: element.layout.yPos + msg.rowCount,
@@ -158,7 +185,7 @@ export class DocumentMessageHandlers {
               previousSections,
             );
           }
-          return document;
+          return changed ? document : null;
         });
       }),
       this.document.messageService.on('textEditorCommand', (msg) => {
@@ -230,7 +257,7 @@ export class DocumentMessageHandlers {
               previousSections,
             );
           }
-          return document;
+          return changed ? document : null;
         });
       }),
 

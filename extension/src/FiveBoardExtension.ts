@@ -305,7 +305,11 @@ export class FiveBoardExtension extends ExtensionBase {
   @Command('5board-vsc.deleteEditorElement')
   deleteEditorElement(id: string): void {
     this.applyEditToActiveDocument((document) => {
-      document.content.elements = document.content.elements.filter((e) => e.id !== id);
+      const elements = document.content.elements.filter((e) => e.id !== id);
+      if (elements.length === document.content.elements.length) {
+        return null;
+      }
+      document.content.elements = elements;
       return document;
     });
   }
@@ -416,12 +420,20 @@ export class FiveBoardExtension extends ExtensionBase {
     );
   }
 
-  public applyEditToActiveDocument(edit: (document: BoardDocument) => BoardDocument): void {
-    if (!this.activeEditorDocument) {
+  public applyEditToActiveDocument(edit: (document: BoardDocument) => BoardDocument | null): void {
+    const activeDocument = this.activeEditorDocument;
+    if (!activeDocument) {
       return;
     }
-    this.activeEditorDocument.applyEdit(edit);
-    this.activeDocumentChange.fire(this.activeEditorDocument);
+    let changed = false;
+    activeDocument.applyEdit((document) => {
+      const next = edit(document);
+      changed = next !== null;
+      return next;
+    });
+    if (changed) {
+      this.activeDocumentChange.fire(activeDocument);
+    }
   }
 
   @Command('5board-vsc.goToElement')
@@ -468,9 +480,10 @@ export class FiveBoardExtension extends ExtensionBase {
 
     this.applyEditToActiveDocument((document) => {
       const target = document.content.elements.find((candidate) => candidate.id === elementId);
-      if (target && target.type !== EditorElementType.Heading) {
-        target.name = name || undefined;
+      if (!target || target.type === EditorElementType.Heading) {
+        return null;
       }
+      target.name = name || undefined;
       return document;
     });
   }
@@ -481,10 +494,10 @@ export class FiveBoardExtension extends ExtensionBase {
       for (const element of document.content.elements) {
         if (!element.display.visible && !element.display.speakerNote) {
           element.display.visible = true;
-          break;
+          return document;
         }
       }
-      return document;
+      return null;
     });
   }
 
@@ -495,10 +508,10 @@ export class FiveBoardExtension extends ExtensionBase {
         const element = document.content.elements[index];
         if (element.display.visible && !element.display.speakerNote) {
           element.display.visible = false;
-          break;
+          return document;
         }
       }
-      return document;
+      return null;
     });
   }
 
@@ -514,10 +527,15 @@ export class FiveBoardExtension extends ExtensionBase {
 
   private setAllElementsVisible(visible: boolean): void {
     this.applyEditToActiveDocument((document) => {
+      let changed = false;
       for (const element of document.content.elements) {
-        element.display.visible = visible && !element.display.speakerNote;
+        const nextVisible = visible && !element.display.speakerNote;
+        if (element.display.visible !== nextVisible) {
+          element.display.visible = nextVisible;
+          changed = true;
+        }
       }
-      return document;
+      return changed ? document : null;
     });
   }
 }

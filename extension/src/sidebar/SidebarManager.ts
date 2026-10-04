@@ -204,7 +204,7 @@ export class SidebarManager implements vscode.Disposable {
             previousSections,
           );
         }
-        return document;
+        return changed ? document : null;
       });
     });
 
@@ -239,13 +239,17 @@ export class SidebarManager implements vscode.Disposable {
           ? removeBackgroundColor(nextLevelSettings)
           : nextLevelSettings;
 
-        document.content.headingSettings = {
+        const nextHeadingSettings = {
           ...headingSettings,
           levels: {
             ...levels,
             [msg.level]: cleanedLevelSettings,
           },
         };
+        if (deepEquals(headingSettings, nextHeadingSettings)) {
+          return null;
+        }
+        document.content.headingSettings = nextHeadingSettings;
         return document;
       });
     });
@@ -259,7 +263,7 @@ export class SidebarManager implements vscode.Disposable {
         const headingSettings = document.content.headingSettings ?? {};
         const numberingFormats = headingSettings.numberingFormats ?? {};
 
-        document.content.headingSettings = {
+        const nextHeadingSettings = {
           ...headingSettings,
           numberingEnabled: msg.enabled ?? headingSettings.numberingEnabled,
           numberingFormats:
@@ -270,6 +274,10 @@ export class SidebarManager implements vscode.Disposable {
                 }
               : numberingFormats,
         };
+        if (deepEquals(headingSettings, nextHeadingSettings)) {
+          return null;
+        }
+        document.content.headingSettings = nextHeadingSettings;
         return document;
       });
     });

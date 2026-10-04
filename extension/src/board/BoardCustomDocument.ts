@@ -173,11 +173,14 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   }
 
   public applyEdit(
-    edit: (document: BoardDocument) => BoardDocument,
+    edit: (document: BoardDocument) => BoardDocument | null,
     options?: { isUndo?: boolean; isRedo?: boolean },
   ): void {
     const previous = this.boardPackage.document;
     const next = edit(structuredClone(this.boardPackage.document));
+    if (!next) {
+      return;
+    }
     this.boardPackage.document = next;
     this.documentChange.fire({
       previous,
