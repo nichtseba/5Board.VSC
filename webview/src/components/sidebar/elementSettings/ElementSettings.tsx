@@ -4,33 +4,45 @@ import { HeadingSettings } from './HeadingSettings';
 import { TextSettings } from './TextSettings';
 import { CodeSettings } from './CodeSettings';
 import { ImageSettings } from './ImageSettings';
-import { ShapeSettings } from './ShapeSettings';
-import { ArrowSettings } from './ArrowSettings';
+import { LineSettings } from './LineSettings';
+import { FreehandSettings } from './FreehandSettings';
 import { useLocalization } from '../../../providers/LocalizationProvider';
+import { TransformationSettings } from './TransformationSettings';
+import { RectangleSettings } from './RectangleSettings';
+import { CircleSettings } from './CircleSettings';
+import { TableOfContentsSettings } from './TableOfContentsSettings';
 
 type SettingsProps<T extends EditorElementType> = {
-  element: EditorElement<T>;
+  elements: EditorElement<T>[];
 };
 
+type SelectionType = EditorElementType | 'mixed';
+
+function getSelectionType(elements: EditorElement[]): SelectionType {
+  const type = elements[0].type;
+
+  return elements.every((element) => element.type === type) ? type : 'mixed';
+}
+
 export default function ElementSettings<ElementType extends EditorElementType>({
-  element,
+  elements,
 }: {
-  element: EditorElement<ElementType>;
+  elements: EditorElement<ElementType>[];
 }) {
-  const Component = SETTINGS_COMPONENTS[element.type] as React.ComponentType<
-    SettingsProps<ElementType>
-  >;
-  const { t } = useLocalization();
+  const type = getSelectionType(elements);
 
-  const content = Component ? (
-    <Component element={element} />
-  ) : (
-    <div>
-      <p>{t('webview.sidebar-element-settings.unsupportedElement')}</p>
-    </div>
+  if (type === 'mixed') {
+    return <TransformationSettings elements={elements} />;
+  }
+
+  const Component =
+    (SETTINGS_COMPONENTS[type] as React.ComponentType<SettingsProps<ElementType>>) ??
+    UnsupportedElementSettings;
+  return (
+    <>
+      <Component elements={elements} />
+    </>
   );
-
-  return content;
 }
 
 /**
@@ -43,6 +55,18 @@ const SETTINGS_COMPONENTS: {
   [EditorElementType.Text]: TextSettings,
   [EditorElementType.Code]: CodeSettings,
   [EditorElementType.Image]: ImageSettings,
-  [EditorElementType.Shape]: ShapeSettings,
-  [EditorElementType.Arrow]: ArrowSettings
+  [EditorElementType.Rectangle]: RectangleSettings,
+  [EditorElementType.Circle]: CircleSettings,
+  [EditorElementType.Line]: LineSettings,
+  [EditorElementType.Freehand]: FreehandSettings,
+  [EditorElementType.TableOfContents]: TableOfContentsSettings,
 };
+
+function UnsupportedElementSettings() {
+  const { t } = useLocalization();
+  return (
+    <div>
+      <p>{t('webview.sidebar-element-settings.unsupportedElement')}</p>
+    </div>
+  );
+}

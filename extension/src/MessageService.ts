@@ -20,15 +20,17 @@ export class MessageService {
   }
   public registerPanel(view: vscode.WebviewPanel) {
     this.registerPanelOrView(view);
+    const webview = view.webview;
     view.onDidChangeViewState((e) => {
-      this.handleMessage({ type: 'focus', focus: e.webviewPanel.active }, e.webviewPanel.webview);
+      this.handleMessage({ type: 'focus', focus: e.webviewPanel.active }, webview);
     });
   }
   private registerPanelOrView(panel: vscode.WebviewPanel | vscode.WebviewView): void {
-    this.webviews.add(panel.webview);
-    panel.webview.onDidReceiveMessage((msg) => this.handleMessage(msg, panel.webview));
+    const webview = panel.webview;
+    this.webviews.add(webview);
+    webview.onDidReceiveMessage((msg) => this.handleMessage(msg, webview));
     panel.onDidDispose(() => {
-      this.webviews.delete(panel.webview);
+      this.webviews.delete(webview);
     });
   }
 

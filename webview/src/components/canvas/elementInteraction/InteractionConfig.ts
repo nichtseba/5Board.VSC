@@ -6,6 +6,7 @@ export type ElementInteractionProfile = {
   resizable: boolean;
   rotatable: boolean;
   scalable?: boolean; // TODO for future use
+  keepRatio?: boolean;
   clipable?: boolean; // TODO for future use
 };
 
@@ -34,18 +35,37 @@ export const ELEMENT_INTERACTION_CONFIG = {
     resizable: true,
     rotatable: true,
     scalable: true,
+    keepRatio: true,
     clipable: true,
   },
-  [EditorElementType.Shape]: {
+  [EditorElementType.Rectangle]: {
     draggable: true,
     dragDirection: 'free',
     resizable: true,
     rotatable: true,
   },
-  [EditorElementType.Arrow]: {
+  [EditorElementType.Circle]: {
     draggable: true,
     dragDirection: 'free',
     resizable: true,
     rotatable: true,
+  },
+  [EditorElementType.Line]: {
+    draggable: true,
+    dragDirection: 'free',
+    resizable: true,
+    rotatable: true,
+  },
+  [EditorElementType.TableOfContents]: {
+    draggable: true,
+    dragDirection: 'free',
+    resizable: true,
+    rotatable: false,
+  },
+  [EditorElementType.Freehand]: {
+    draggable: true,
+    dragDirection: 'free',
+    resizable: true,
+    rotatable: false,
   },
 } satisfies Record<EditorElementType, ElementInteractionProfile>;

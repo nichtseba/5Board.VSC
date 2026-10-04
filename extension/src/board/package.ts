@@ -5,8 +5,11 @@ import {
   BoardContent,
   BoardDocument,
   BoardManifest,
+  GridSettings,
   Source,
   create5boardzManifest,
+  flattenBoardElements,
+  normalizeElementRevealOrder,
 } from '5board.vsc-common';
 
 export const MANIFEST_PATH = 'manifest.json';
@@ -36,15 +39,36 @@ export class BoardPackage {
       assets,
     };
 
+    BoardPackage.applyFixes(document);
+
     return new BoardPackage(document);
   }
 
-  public static createEmpty(title: string): BoardPackage {
+  private static applyFixes(document: BoardDocument): void {
+    // Implement any necessary fixes or adjustments to the document here
+    BoardPackage.fixDisplay(document);
+  }
+
+  private static fixDisplay(document: BoardDocument): void {
+    for (const element of flattenBoardElements(document.content.elements)) {
+      if (element.display === undefined) {
+        element.display = {
+          visible: true,
+          speakerNote: false,
+          excludeFromExport: false,
+        };
+      }
+    }
+  }
+
+  public static createEmpty(title: string, grid: GridSettings): BoardPackage {
     const document: BoardDocument = {
       manifest: create5boardzManifest(title),
       content: {
-        selectedElementId: null,
+        selectedElementIds: [],
+        primarySelectedElementId: null,
         elements: [],
+        grid: { ...grid },
         background: '',
         snapAngle: 0,
         revealOrder: -1,
@@ -56,7 +80,9 @@ export class BoardPackage {
     return new BoardPackage(document);
   }
 
-  constructor(public document: BoardDocument) {}
+  constructor(public document: BoardDocument) {
+    document.content.elements = normalizeElementRevealOrder(document.content.elements);
+  }
 
   public async write(uri: vscode.Uri): Promise<void> {
     const zip = new JSZip();

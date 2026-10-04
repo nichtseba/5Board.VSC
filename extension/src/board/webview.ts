@@ -17,3 +17,10 @@ export function setEditorWebviewHtml(
 ): void {
   setWebviewHtml(context, webview, 'Editor.html');
 }
+
+export function setExportPreviewWebviewHtml(
+  context: vscode.ExtensionContext,
+  webview: vscode.Webview,
+): void {
+  setWebviewHtml(context, webview, 'ExportPreview.html');
+}

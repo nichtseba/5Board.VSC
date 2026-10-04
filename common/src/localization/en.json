@@ -7,18 +7,49 @@
       "createFile": "Create 5Board file",
       "createFileFailed": "Failed to create 5Board file:"
     },
+    "htmlExport": {
+      "noActiveBoard": "Open a .5boardz file or save current file.",
+      "saveLabel": "Save HTML Export",
+      "saved": "HTML export saved:",
+      "openContainingFolder": "Open in file system"
+    },
     "projector": {
       "startPresentation": "Start Presentation",
       "title": "Projector",
       "noFileOpen": "Please open a .5boardz file in the editor before starting the projector view.",
-      "loading": "Loading..."
+      "loading": "Loading...",
+      "live": "Live",
+      "paused": "Paused"
+    },
+    "presets": {
+      "noElementSelected": "No element selected. Please select an element to save as a preset.",
+      "groupNotSupported": "Groups are not supported yet to build presets. Please select a single element to save as a preset.",
+      "savePreset": "Save as Preset",
+      "presetNotSaved": "No preset was saved with the selected options",
+      "presetName": "Preset Name",
+      "presetNamePlaceholder": "Enter a name for the preset",
+      "keepStyle": "Keep Style",
+      "keepContent": "Keep Content",
+      "keepPosition": "Keep X-Position",
+      "presetOptions": "Preset Options",
+      "selectOptions": "Select Options",
+      "imageAssetMissing": "The selected image asset could not be found, so the preset was not saved.",
+      "presetSaved": "Preset saved successfully."
     }
   },
   "webview": {
     "customEditor": { "Test": "Test the translation." },
     "canvas": {
       "spacerLabel": "Spacer",
-      "rows": "rows"
+      "rows": "rows",
+      "contextMenu": {
+        "bringToFront": "Bring to front",
+        "sendToBack": "Send to back"
+      }
+    },
+    "exportPreview": {
+      "saveHtml": "Save HTML",
+      "loading": "Loading preview..."
     },
     "find": {
       "searchPlaceholder": "Find",
@@ -41,27 +72,71 @@
         "pointer": "Pointer",
         "spacer": "Spacer Tool",
         "freehand": "Freehand Tool",
-        "addElement": "Add Element",
-        "text": "Text",
-        "heading": "Heading",
-        "link": "Link",
-        "code": "Code",
-        "image": "Image"
+        "addElement": "Add Element"
       },
       "elementType": {
         "heading": "Heading",
         "text": "Text",
         "code": "Code",
         "image": "Image",
-        "shape": "Shape",
-        "arrow": "Arrow"
+        "rectangle": "Rectangle",
+        "circle": "Circle",
+        "line": "Line",
+        "freehand": "Freehand",
+        "tableOfContents": "Table of Contents",
+        "group": "Group"
+      },
+      "freehand": {
+        "title": "Freehand Options",
+        "color": "Color",
+        "customColor": "Custom color",
+        "width": "Thickness",
+        "opacity": "Opacity",
+        "lineStyle": "Line Style",
+        "dashScale": "Dash size",
+        "colors": {
+          "red": "Red",
+          "orange": "Orange",
+          "yellow": "Yellow",
+          "green": "Green",
+          "blue": "Blue",
+          "purple": "Purple",
+          "black": "Black",
+          "white": "White"
+        },
+        "lineStyles": {
+          "solid": "Solid",
+          "dashed": "Dashed",
+          "dotted": "Dotted",
+          "custom": "Custom"
+        },
+        "addSettings": "Add Settings for "
       },
       "projectorSettings": {
         "title": "Projector Settings",
         "cursorTracking": "Cursor Tracking",
+        "pause": "Pause",
+        "resume": "Resume",
+        "statusLive": "Live",
+        "statusPaused": "Paused",
+        "statusClosed": "Ended",
+        "revealNext": "Reveal Next",
+        "unrevealNext": "Unreveal Next",
+        "showAll": "Reveal All",
+        "hideAll": "Hide All",
         "pointerColor": "Pointer Color",
-        "customColor": "Custom",
+        "customColor": "Custom color",
         "pointerShape": "Pointer Shape",
+        "colors": {
+          "red": "Red",
+          "orange": "Orange",
+          "yellow": "Yellow",
+          "green": "Green",
+          "blue": "Blue",
+          "purple": "Purple",
+          "black": "Black",
+          "white": "White"
+        },
         "shapes": {
           "dot": "Dot",
           "ring": "Ring",
@@ -69,16 +144,153 @@
           "duck": "Duck"
         }
       },
-      "goToElement": "Go to Element"
+      "goToElement": "Go to element",
+      "renameElement": "Rename element",
+      "addElement": "Add Element",
+      "presets": {
+        "presets": "Select Preset",
+        "filtered": "Presets are filtered by the selected tool",
+        "deletePreset": "Delete Preset",
+        "noPresets": "No Presets Saved",
+        "settings": {
+          "keepStyle": "style",
+          "keepXPosition": "x-position",
+          "content": "content"
+        },
+        "openPresetFile": "Open Preset File"
+      },
+      "tableOfContentsAlreadyExists": "A table of contents already exists."
     },
     "sidebar-element-settings": {
       "noElementSelected": "No element selected",
       "unsupportedElement": "Unsupported element type",
       "selectedElement": "Selected Element",
+      "elementStyle": "Element Style",
+      "transformation": {
+        "title": "Transformation",
+        "x": "X:",
+        "y": "Y:",
+        "width": "W:",
+        "height": "H:",
+        "rotation": "R:",
+        "zIndex": "Z:"
+      },
       "headingSettings": {
         "title": "Heading",
-        "levelLabel": "Hierarchy level"
-      }
+        "levelLabel": "Hierarchy level",
+        "numberingLabel": "Numbering",
+        "numberingEnabled": "Enable numbering",
+        "numberingNone": "No numbers",
+        "numberingDecimal": "Numbers",
+        "numberingLowerAlpha": "Alphabetic lowercase",
+        "numberingUpperAlpha": "Alphabetic uppercase",
+        "numberingLowerRoman": "Roman lowercase",
+        "numberingUpperRoman": "Roman uppercase",
+        "fontFamily": "Font family",
+        "fontFamilyPlaceholder": "Default font",
+        "fontSize": "Font size",
+        "fontSizeDecrease": "Decrease font size by 1",
+        "fontSizeIncrease": "Increase font size by 1",
+        "textStyle": "Text style",
+        "bold": "Bold",
+        "italic": "Italic",
+        "underline": "Underline",
+        "color": "Text color",
+        "colorTheme": "Theme",
+        "customColor": "Custom color",
+        "backgroundColor": "Background color"
+      },
+      "tableOfContentsSettings": {
+        "title": "Table of Contents"
+      },
+      "textSettings": {
+        "title": "Text",
+        "textColor": "Text Color",
+        "highlightColor": "Highlight Color",
+        "backgroundColor": "Background Color",
+        "fontSize": "Font size",
+        "fontSettings": "Font",
+        "decoration": "Decoration",
+        "list": "List",
+        "alignment": "Alignment",
+        "fontFamilyTooltip": "Font family",
+        "fontSizeTooltip": "Font size",
+        "lineHeightTooltip": "Line height",
+        "textColorTooltip": "Text color",
+        "highlightColorTooltip": "Highlight color",
+        "backgroundColorTooltip": "Background color",
+        "customColorTooltip": "Choose a custom color",
+        "noColorTooltip": "No color",
+        "boldTooltip": "Bold",
+        "italicTooltip": "Italic",
+        "strikeTooltip": "Strikethrough",
+        "underlineTooltip": "Underline",
+        "codeTooltip": "Code",
+        "bulletListTooltip": "Bulleted list",
+        "orderedListTooltip": "Numbered list",
+        "alignLeftTooltip": "Align left",
+        "alignCenterTooltip": "Align center",
+        "alignRightTooltip": "Align right",
+        "alignJustifyTooltip": "Justify",
+        "colorPresets": {
+          "foreground": "Foreground",
+          "muted": "Muted",
+          "background": "Background",
+          "primary": "Primary",
+          "secondary": "Secondary",
+          "accent1": "Accent 1",
+          "accent2": "Accent 2",
+          "red": "Red",
+          "orange": "Orange",
+          "yellow": "Yellow",
+          "green": "Green",
+          "blue": "Blue",
+          "purple": "Purple",
+          "black": "Black",
+          "white": "White"
+        }
+      },
+      "imageSettings": {
+        "title": "Image",
+        "hideInExport": "Replace with placeholder in export",
+        "exportPlaceholder": "Image not included in export",
+        "imageName": "Image Name"
+      },
+      "freehandSettings": {
+        "title": "Freehand"
+      },
+      "rectangleSettings": {
+        "title": "Rectangle"
+      },
+      "circleSettings": {
+        "title": "Circle"
+      },
+      "lineSettings": {
+        "title": "Line",
+        "symbols": "Symbols",
+        "borderColor": "Border Color",
+        "borderWidth": "Border Width",
+        "borderRadius": "Border Radius",
+        "borderStyle": "Border Style",
+        "startHead": "Start head",
+        "endHead": "End head",
+        "headSize": "Head size",
+        "headFill": "Fill heads",
+        "headNone": "None",
+        "headArrow": "Arrow",
+        "headCircle": "Circle",
+        "headSquare": "Square"
+      },
+      "group": "Group",
+      "ungroup": "Ungroup",
+      "delete": "Delete",
+      "name": "Name",
+      "visibility": "Visibility",
+      "visible": "Visible",
+      "hide": "Hide",
+      "speakerNote": "Speaker Note",
+      "hideInExport": "Hide in Export",
+      "deleteTooltip": "Delete (entf)"
     }
   }
 }

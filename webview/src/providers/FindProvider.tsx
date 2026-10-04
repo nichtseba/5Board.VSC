@@ -69,7 +69,7 @@ export function FindProvider({ children }: { children: React.ReactNode }) {
     window.document
       .getElementById(match.elementId)
       ?.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
-    messages.send({ type: 'selectElement', id: match.elementId });
+    messages.send({ type: 'selectElements', ids: [match.elementId] });
   };
 
   const goToMatch = (direction: 1 | -1) => {

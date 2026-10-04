@@ -1,4 +1,4 @@
-import { BoardDocument, EditorElementType } from '5board.vsc-common';
+import { BoardDocument, EditorElementType, isGroupElement } from '5board.vsc-common';
 
 export type FindFlags = { matchCase: boolean; wholeWord: boolean; regex: boolean };
 export type FindMatch = { elementId: string; start: number; end: number };
@@ -39,7 +39,9 @@ export function computeMatches(
   }
 
   const elements = boardDocument.content.elements
-    .filter((element) => SEARCHABLE_TYPES.has(element.type))
+    .flatMap((element) =>
+      isGroupElement(element) || !SEARCHABLE_TYPES.has(element.type) ? [] : [element],
+    )
     .sort((a, b) => a.layout.yPos - b.layout.yPos || a.layout.xPos - b.layout.xPos);
 
   const matches: FindMatch[] = [];
