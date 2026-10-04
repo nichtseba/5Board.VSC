@@ -3,6 +3,8 @@ import { useMessageService } from '../services/MessageService';
 //import { useLocalization } from '../providers/LocalizationProvider';
 import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
+import { SourcesProvider } from '../providers/SourcesProvider';
+import { ExecutionOutputProvider } from '../providers/ExecutionOutputProvider';
 import ProjectorViewPort from '../components/projector/ProjectorViewPort';
 import ProjectorCursorMirror from '../components/projector/ProjectorCursorMirror';
 import ProjectorScrollMirror from '../components/projector/ProjectorScrollMirror';
@@ -26,11 +28,15 @@ export default function Editor() {
       <ViewTypeProvider value="editor">
         <div className="relative">
           {boardDocument && (
-            <CanvasEventsProvider>
-              <EditorCanvas enableKeyboardShortcuts />
-              <ProjectorCursorMirror />
-              <ProjectorScrollMirror />
-            </CanvasEventsProvider>
+            <ExecutionOutputProvider>
+              <SourcesProvider value={boardDocument.sources}>
+                <CanvasEventsProvider>
+                  <EditorCanvas enableKeyboardShortcuts />
+                  <ProjectorCursorMirror />
+                  <ProjectorScrollMirror />
+                </CanvasEventsProvider>
+              </SourcesProvider>
+            </ExecutionOutputProvider>
           )}
           <ProjectorViewPort />
         </div>

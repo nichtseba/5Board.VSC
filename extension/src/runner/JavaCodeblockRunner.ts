@@ -1,83 +1,109 @@
 import { join } from 'path';
-import { mkdtemp, rm, writeFile } from 'fs/promises';
+import { mkdir, mkdtemp, rm } from 'fs/promises';
 import { tmpdir } from 'os';
-import type {
-  CodeblockExecutionRequest,
-  CodeblockExecutionResult,
-  CodeblockLanguage,
-  CodeblockRunner,
-  GeneratedSourceFile,
-  ToolCheckResult,
+import {
+  formatMessage,
+  type CodeblockExecutionRequest,
+  type CodeblockRunner,
+  type ExecutionStartResult,
+  type ToolCheckResult,
+  type ToolchainConfig,
 } from '5board.vsc-common';
-import { indent, runCommand } from './runnerUtils';
+import { ProcessSession, runCommand, startProcess, writeSources } from './runnerUtils';
+import { resolveJavaToolchain } from './javaToolchain';
+import { describeToolchainFailure, formatToolchainReport } from './javaToolchainMessages';
+import { t } from '../localization';
 
-/**
- * Builds the Java source code for a given code snippet and class name.
- * @param code The Java code to include in the source.
- * @param className The name of the Java class.
- * @returns The complete Java source code.
- */
-function buildJavaSource(code: string, className: string): string {
-  return `public class ${className} {
-    public static void main(String[] args) throws Exception {
-${indent(code, 8)}
-    }
-}
-`;
-}
+const COMPILE_TIMEOUT_MS = 30_000;
+
+// Piped stdio makes Java fall back to the platform encoding (Cp1252 on Windows), which mangles
+// every non-ASCII character even though `file.encoding` is already UTF-8.
+const ENCODING_ARGS = [
+  '-Dstdout.encoding=UTF-8',
+  '-Dstderr.encoding=UTF-8',
+  '-Dstdin.encoding=UTF-8',
+];
 
 export class JavaCodeblockRunner implements CodeblockRunner {
-  canHandle(language: CodeblockLanguage): boolean {
+  canHandle(language: string): boolean {
     return language === 'java';
   }
 
-  async checkTools(): Promise<ToolCheckResult> {
-    const java = await runCommand('java', ['-version'], process.cwd(), 5_000);
-    const javac = await runCommand('javac', ['-version'], process.cwd(), 5_000);
+  async checkTools(config?: ToolchainConfig): Promise<ToolCheckResult> {
+    const result = await resolveJavaToolchain(config?.home);
 
-    const javaOk = !java.error && java.status === 0;
-    const javacOk = !javac.error && javac.status === 0;
-    const missingTools = [...(!javaOk ? ['java'] : []), ...(!javacOk ? ['javac'] : [])];
+    if (!result.ok) {
+      const { failure } = result;
+      return {
+        available: false,
+        missingTools: failure.kind === 'incomplete-jdk' ? failure.missing : undefined,
+        error: describeToolchainFailure(failure),
+      };
+    }
 
+    const { toolchain } = result;
     return {
-      available: javaOk && javacOk,
-      version: java.stdout || java.stderr || undefined,
-      missingTools: missingTools.length > 0 ? missingTools : undefined,
-      error: java.error ?? javac.error,
+      available: true,
+      toolPaths: { java: toolchain.javaPath, javac: toolchain.javacPath },
     };
   }
 
-  async execute(request: CodeblockExecutionRequest): Promise<CodeblockExecutionResult> {
-    const className = request.className ?? 'CodeBlockRunner';
+  async toolchainReport(config?: ToolchainConfig): Promise<string> {
+    return formatToolchainReport(await resolveJavaToolchain(config?.home), config?.home);
+  }
+
+  async start(request: CodeblockExecutionRequest): Promise<ExecutionStartResult> {
     const tempDir = await mkdtemp(join(tmpdir(), '5board-'));
+    const outDir = join(tempDir, 'out');
+
     try {
-      const content = buildJavaSource(request.code, className);
-      const sourceFile = join(tempDir, `${className}.java`);
-      await writeFile(sourceFile, content, 'utf8');
-      const generatedFiles: GeneratedSourceFile[] = [{ path: `${className}.java`, content }];
-      const compile = await runCommand('javac', [`${className}.java`], tempDir, 30_000);
-      if (compile.status !== 0) {
+      // Written flat: tempDir doubles as the sourcepath root.
+      const javaSources = request.sources.filter((s) => s.language === 'java');
+      await writeSources(javaSources, tempDir);
+      await mkdir(outDir, { recursive: true });
+
+      // Only the target is compiled; javac pulls referenced classes from the sourcepath, so
+      // unrelated broken sources don't block the run.
+      const compile = await runCommand(
+        request.toolPaths?.javac ?? 'javac',
+        ['-d', outDir, '-sourcepath', tempDir, request.fileName],
+        tempDir,
+        COMPILE_TIMEOUT_MS,
+      );
+
+      if (compile.timedOut) {
+        await rm(tempDir, { recursive: true, force: true });
         return {
-          success: false,
-          stdout: compile.stdout,
-          stderr: compile.stderr,
-          exitCode: compile.status ?? null,
-          generatedFiles,
-          error: compile.error ?? 'Compilation failed.',
+          ok: false,
+          error: formatMessage(t('extension.codeblock.execution.compileTimeout'), {
+            seconds: COMPILE_TIMEOUT_MS / 1000,
+          }),
         };
       }
-
-      const run = await runCommand('java', [className], tempDir, 30_000);
-      return {
-        success: run.status === 0,
-        stdout: run.stdout,
-        stderr: run.stderr,
-        exitCode: run.status ?? null,
-        generatedFiles,
-        error: run.error,
-      };
-    } finally {
+      if (compile.status !== 0) {
+        await rm(tempDir, { recursive: true, force: true });
+        return {
+          ok: false,
+          error: compile.error ?? t('extension.codeblock.execution.compilationFailed'),
+          stderr: compile.stderr || compile.stdout,
+        };
+      }
+    } catch (error) {
       await rm(tempDir, { recursive: true, force: true });
+      return { ok: false, error: error instanceof Error ? error.message : String(error) };
     }
+
+    const process = startProcess(
+      request.toolPaths?.java ?? 'java',
+      [...ENCODING_ARGS, '-cp', outDir, request.fileName.replace(/\.java$/, '')],
+      tempDir,
+    );
+
+    // The program runs out of tempDir, so it can only be removed once the process is gone.
+    process.onExit(() => {
+      void rm(tempDir, { recursive: true, force: true });
+    });
+
+    return { ok: true, session: new ProcessSession(process) };
   }
 }

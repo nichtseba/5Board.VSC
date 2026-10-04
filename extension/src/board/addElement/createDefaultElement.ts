@@ -1,14 +1,17 @@
 import {
   AddElementDefaults,
   BoardDocument,
+  CodeElementData,
   DEFAULT_ELEMENT_PROFILES,
   EditorElement,
   EditorElementDataMap,
   EditorElementType,
   ElementLayout,
   ImageElementData,
+  sanitizeClassName,
 } from '5board.vsc-common';
 import { addImageAsset } from './addImageAsset';
+import { nextCodeBlockId } from '../CodeblockSourceService';
 
 export function createDefaultElement<T extends EditorElementType>(
   type: T,
@@ -16,6 +19,7 @@ export function createDefaultElement<T extends EditorElementType>(
   defaults: AddElementDefaults<T> | undefined,
   document: BoardDocument,
 ): EditorElement<T> {
+  const id = type === EditorElementType.Code ? nextCodeBlockId(document) : crypto.randomUUID();
   const profile = DEFAULT_ELEMENT_PROFILES[type];
 
   const initialHeight =
@@ -47,8 +51,12 @@ export function createDefaultElement<T extends EditorElementType>(
     });
   }
 
+  if (type === EditorElementType.Code) {
+    (data as CodeElementData).className = sanitizeClassName(id);
+  }
+
   return {
-    id: crypto.randomUUID(),
+    id,
     type,
     layout: {
       ...profile.layout,

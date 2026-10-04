@@ -11,7 +11,7 @@ import { TextElement } from './elements/TextElement';
 import { HeadingElement } from './elements/HeadingElement';
 import ElementInteractionController from './elementInteraction/ElementInteractionController';
 import ElementContextMenu from './elementInteraction/ElementContextMenu';
-import { CodeElement } from './elements/CodeElement';
+import { CodeElement } from './elements/code/CodeElement';
 import { ImageElement } from './elements/ImageElement';
 import { LineElement } from './elements/LineElement';
 import { FreehandElement } from './elements/FreehandElement';
@@ -24,6 +24,10 @@ import { useLocalization } from '../../providers/LocalizationProvider';
 import { RectangleElement } from './elements/RectangleElement';
 import { CircleElement } from './elements/CircleElement';
 import { maxZIndex, minZIndex } from './logic/zIndex';
+import {
+  ELEMENT_INTERACTION_CONFIG,
+  type ElementInteractionProfile,
+} from './elementInteraction/InteractionConfig';
 
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
@@ -39,6 +43,8 @@ export type EditorElementProps<T extends EditorElementType> = {
   targetRef?: React.RefObject<HTMLDivElement>;
   assetUrls?: Record<string, string>;
   preview?: boolean;
+  /** Smallest resizable height in px. Only code blocks report one. */
+  onMinHeightChange?: (minHeight: number) => void;
   exportMode?: boolean;
 };
 
@@ -66,6 +72,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
     x: number;
     y: number;
   } | null>(null);
+  const [minHeight, setMinHeight] = useState<number>();
   const ElementComponent =
     (ELEMENT_COMPONENTS[element.type] as React.ComponentType<EditorElementProps<ElementType>>) ??
     UnknownElement;
@@ -74,6 +81,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
   const activeToolId = useEditorState()?.tool.type;
   const boardElements = useBoardDocument()?.content.elements ?? [];
   const allElements = flattenBoardElements(boardElements);
+  const profile: ElementInteractionProfile = ELEMENT_INTERACTION_CONFIG[element.type];
   const viewType = useViewType();
   const canEdit = viewType === 'editor' && !preview && activeToolId === EditorToolId.POINTER;
 
@@ -143,7 +151,9 @@ export default function EditorElement<ElementType extends EditorElementType>({
     if (
       !canEdit ||
       editing ||
-      (element.type !== EditorElementType.Text && element.type !== EditorElementType.Heading)
+      (element.type !== EditorElementType.Text &&
+        element.type !== EditorElementType.Heading &&
+        element.type !== EditorElementType.Code)
     ) {
       return;
     }
@@ -180,6 +190,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
         onContextMenu={handleContextMenu}
         className={`
           box-border 
+          ${profile.clickThroughEmptyArea ? 'pointer-events-none' : ''}
           ${element.type === EditorElementType.Line ? '' : 'overflow-hidden'}
           ${activeToolId === EditorToolId.POINTER ? 'cursor-pointer' : ''}
           ${
@@ -212,6 +223,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
           preview={preview}
           exportMode={exportMode}
           onStopEditing={handleStopEditing}
+          onMinHeightChange={setMinHeight}
         />
       </div>
       {activeToolId === EditorToolId.POINTER && !grouped && (
@@ -219,6 +231,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
           element={element}
           selected={selected && !editing}
           targetRef={targetRef}
+          minHeight={minHeight}
         />
       )}
       {contextMenuPosition && (

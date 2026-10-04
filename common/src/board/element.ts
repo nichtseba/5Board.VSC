@@ -150,12 +150,37 @@ export type NodeAttributes = {
 };
 
 export type CodeElementData = {
-  codeBlockId: string;
-  fileName?: string;
-  language?: string;
+  className: string;
+  language: string;
+  /**
+   * Transcript of the most recent run. Stored on the element so it survives a webview reload
+   * and shows up in the projector, which renders from the same document.
+   */
+  lastOutput?: CodeExecutionOutput;
+  outputCollapsed?: boolean;
+};
 
-  content: string;
-  output?: string;
+/**
+ * One ordered piece of a run's transcript.
+ *
+ * `in` is what the user typed. Pipes do not echo, so nothing would record it otherwise and a
+ * stored transcript of an interactive program would show prompts with no answers.
+ */
+// `system`: message from 5Board itself (no JDK, output limit …), not from program or compiler.
+export type TranscriptSegmentKind = 'out' | 'err' | 'in' | 'system';
+
+export type TranscriptSegment = {
+  kind: TranscriptSegmentKind;
+  text: string;
+};
+
+export type CodeExecutionOutput = {
+  /** stdout, stderr and the user's input in the order they actually happened. */
+  transcript: TranscriptSegment[];
+  success: boolean;
+  exitCode: number | null;
+  /** Set when the output cap stopped the process before it could finish on its own. */
+  truncated?: boolean;
 };
 
 export type ImageElementData = {
@@ -282,7 +307,8 @@ export const DEFAULT_ELEMENT_PROFILES = {
     style: {
       visible: true,
     },
-    data: { codeBlockId: '', content: '', language: 'plaintext' },
+    // className is derived from the id when the element is created.
+    data: { className: '', language: 'java' },
   },
   [EditorElementType.Image]: {
     layout: { width: 20, height: 10 },

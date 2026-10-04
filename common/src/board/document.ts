@@ -34,6 +34,11 @@ export interface BoardManifest {
   version: string;
 }
 
+export interface CodeClass {
+  name: string;
+  language: string;
+}
+
 /**
  * Represents the content section of a .5boardz document
  * Should be equivalent to the content.json within the .5boardz zip file
@@ -45,6 +50,7 @@ export interface BoardContent {
    * The list of elements contained within the board document in reveal order.
    */
   elements: BoardElement[];
+  codeClasses: CodeClass[];
   grid?: GridSettings;
   background?: string;
   snapAngle?: number;
