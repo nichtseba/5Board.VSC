@@ -30,8 +30,8 @@ export function FontSizeInput({ value, min = 1, onChange, onConfirm, label }: Fo
         [color-scheme:light_dark]
         focus:border-focus-border
         focus:outline-none
-        [&::-webkit-inner-spin-button]:opacity-100
-        [&::-webkit-outer-spin-button]:opacity-100
+        [&::-webkit-inner-spin-button]:opacity-50
+        [&::-webkit-outer-spin-button]:opacity-50
       "
       />
     </>

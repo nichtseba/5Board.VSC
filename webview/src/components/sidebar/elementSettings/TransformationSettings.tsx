@@ -140,7 +140,7 @@ export function TransformationSettings({ elements }: Props) {
     ) === true;
 
   const inputClassName =
-    'h-[26px] flex-1 min-w-0 rounded-xs border border-dropdown-border bg-input-background px-[9px] text-[length:var(--vscode-font-size)] text-input-foreground [color-scheme:light_dark] outline-none focus:border-focus-border disabled:cursor-not-allowed disabled:opacity-40 [&::-webkit-inner-spin-button]:opacity-100 [&::-webkit-outer-spin-button]:opacity-100';
+    'h-[26px] flex-1 min-w-0 rounded-xs border border-dropdown-border bg-input-background px-[9px] text-[length:var(--vscode-font-size)] text-input-foreground [color-scheme:light_dark] outline-none focus:border-focus-border disabled:cursor-not-allowed disabled:opacity-40 [&::-webkit-inner-spin-button]:opacity-50 [&::-webkit-outer-spin-button]:opacity-50';
 
   return (
     <SettingsField label={t('webview.sidebar-element-settings.transformation.title')}>
