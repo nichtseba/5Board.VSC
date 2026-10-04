@@ -144,78 +144,85 @@ export function TransformationSettings({ elements }: Props) {
 
   return (
     <SettingsField label={t('webview.sidebar-element-settings.transformation.title')}>
-      <div className="grid grid-cols-2 gap-x-4">
-        <SettingsField label={t('webview.sidebar-element-settings.transformation.x')} inline>
-          <input
-            type="number"
-            min={0}
-            max={maxX}
-            disabled={!canChangeLayout('xPos')}
-            className={inputClassName}
-            value={selectionBounds.xPos}
-            onChange={(event) => handleBoundsChange('xPos', Number(event.target.value))}
-          />
-        </SettingsField>
+      <div className="@container -mb-4 w-full">
+        <div className="grid grid-cols-1 gap-x-4 @[13rem]:grid-cols-2">
+          <SettingsField label={t('webview.sidebar-element-settings.transformation.x')} inline>
+            <input
+              type="number"
+              min={0}
+              max={maxX}
+              disabled={!canChangeLayout('xPos')}
+              className={inputClassName}
+              value={selectionBounds.xPos}
+              onChange={(event) => handleBoundsChange('xPos', Number(event.target.value))}
+            />
+          </SettingsField>
 
-        <SettingsField label={t('webview.sidebar-element-settings.transformation.y')} inline>
-          <input
-            type="number"
-            disabled={!canChangeLayout('yPos')}
-            className={inputClassName}
-            value={selectionBounds.yPos}
-            onChange={(event) => handleBoundsChange('yPos', Number(event.target.value))}
-          />
-        </SettingsField>
+          <SettingsField label={t('webview.sidebar-element-settings.transformation.y')} inline>
+            <input
+              type="number"
+              disabled={!canChangeLayout('yPos')}
+              className={inputClassName}
+              value={selectionBounds.yPos}
+              onChange={(event) => handleBoundsChange('yPos', Number(event.target.value))}
+            />
+          </SettingsField>
 
-        <SettingsField label={t('webview.sidebar-element-settings.transformation.width')} inline>
-          <input
-            type="number"
-            min={1}
-            max={maxWidth}
-            disabled={!canChangeLayout('width')}
-            className={inputClassName}
-            value={boundsWidth}
-            onChange={(event) => handleBoundsChange('width', Number(event.target.value))}
-          />
-        </SettingsField>
+          <SettingsField label={t('webview.sidebar-element-settings.transformation.width')} inline>
+            <input
+              type="number"
+              min={1}
+              max={maxWidth}
+              disabled={!canChangeLayout('width')}
+              className={inputClassName}
+              value={boundsWidth}
+              onChange={(event) => handleBoundsChange('width', Number(event.target.value))}
+            />
+          </SettingsField>
 
-        <SettingsField label={t('webview.sidebar-element-settings.transformation.height')} inline>
-          <input
-            type="number"
-            disabled={!canChangeLayout('height')}
-            className={inputClassName}
-            value={boundsHeight}
-            onChange={(event) => handleBoundsChange('height', Number(event.target.value))}
-          />
-        </SettingsField>
+          <SettingsField label={t('webview.sidebar-element-settings.transformation.height')} inline>
+            <input
+              type="number"
+              disabled={!canChangeLayout('height')}
+              className={inputClassName}
+              value={boundsHeight}
+              onChange={(event) => handleBoundsChange('height', Number(event.target.value))}
+            />
+          </SettingsField>
 
-        <SettingsField label={t('webview.sidebar-element-settings.transformation.rotation')} inline>
-          <Dropdown
-            className="min-w-0 flex-1 disabled:cursor-not-allowed disabled:opacity-40"
-            disabled={!canChangeLayout('rotation')}
-            options={rotationOptions}
-            value={commonRotation === undefined ? '' : String(commonRotation)}
-            onChange={(value) => {
-              if (!value) {
-                return;
-              }
+          <SettingsField
+            label={t('webview.sidebar-element-settings.transformation.rotation')}
+            inline
+          >
+            <div className="min-w-0 flex-1">
+              <Dropdown
+                className="w-full min-w-0! disabled:cursor-not-allowed disabled:opacity-40"
+                disabled={!canChangeLayout('rotation')}
+                options={rotationOptions}
+                value={commonRotation === undefined ? '' : String(commonRotation)}
+                onChange={(value) => {
+                  if (!value) {
+                    return;
+                  }
 
-              const rotation = typeof value === 'string' ? value : value.value;
+                  const rotation = typeof value === 'string' ? value : value.value;
 
-              handleRotationChange(Number(rotation));
-            }}
-          />
-        </SettingsField>
+                  handleRotationChange(Number(rotation));
+                }}
+              />
+            </div>
+          </SettingsField>
 
-        <SettingsField label={t('webview.sidebar-element-settings.transformation.zIndex')} inline>
-          <input
-            type="number"
-            disabled={!canChangeLayout('zIndex')}
-            className={inputClassName}
-            value={getCommonValue(elements.map((element) => element.layout.zIndex ?? 0)) ?? ''}
-            onChange={(event) => handleLayoutChange('zIndex', Number(event.target.value))}
-          />
-        </SettingsField>
+          <SettingsField label={t('webview.sidebar-element-settings.transformation.zIndex')} inline>
+            <input
+              type="number"
+              disabled={!canChangeLayout('zIndex')}
+              className={inputClassName}
+              value={getCommonValue(elements.map((element) => element.layout.zIndex ?? 0)) ?? ''}
+              onChange={(event) => handleLayoutChange('zIndex', Number(event.target.value))}
+            />
+          </SettingsField>
+        </div>
       </div>
     </SettingsField>
   );
