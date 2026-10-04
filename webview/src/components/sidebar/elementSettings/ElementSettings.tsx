@@ -7,11 +7,10 @@ import { ImageSettings } from './ImageSettings';
 import { LineSettings } from './LineSettings';
 import { FreehandSettings } from './FreehandSettings';
 import { useLocalization } from '../../../providers/LocalizationProvider';
-import { CommonSettings } from './CommonSettings';
+import { TransformationSettings } from './TransformationSettings';
 import { RectangleSettings } from './RectangleSettings';
 import { CircleSettings } from './CircleSettings';
-import GenericElementSettings from './GenericElementSettings';
-import { TableOfContentsSettings } from './ContentTableSettings';
+import { TableOfContentsSettings } from './TableOfContentsSettings';
 
 type SettingsProps<T extends EditorElementType> = {
   elements: EditorElement<T>[];
@@ -33,7 +32,7 @@ export default function ElementSettings<ElementType extends EditorElementType>({
   const type = getSelectionType(elements);
 
   if (type === 'mixed') {
-    return <CommonSettings elements={elements} />;
+    return <TransformationSettings elements={elements} />;
   }
 
   const Component =
@@ -41,8 +40,6 @@ export default function ElementSettings<ElementType extends EditorElementType>({
     UnsupportedElementSettings;
   return (
     <>
-      <CommonSettings elements={elements} />
-      {elements.length === 1 && <GenericElementSettings element={elements[0]} />}
       <Component elements={elements} />
     </>
   );

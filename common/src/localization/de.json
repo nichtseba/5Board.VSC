@@ -99,6 +99,7 @@
     "goToElement": "Gehe zu Element",
     "presets": {
       "noElementSelected": "Kein Element ausgewählt. Bitte wähle ein Element aus, um es als Preset zu speichern.",
+      "groupNotSupported": "Gruppen werden bei der Erstellung von Presets noch nicht unterstützt. Bitte wähle ein einzelnes Element aus, um es als Preset zu speichern.",
       "savePreset": "Als Preset speichern",
       "presetNotSaved": "Preset wurde nicht gespeichert mit aufgrund der ausgewählten Optionen.",
       "presetName": "Preset Name",
@@ -142,6 +143,21 @@
     "exportPreview": {
       "saveHtml": "HTML speichern",
       "loading": "Vorschau wird geladen..."
+    },
+    "find": {
+      "searchPlaceholder": "Suchen",
+      "replacePlaceholder": "Ersetzen",
+      "noResults": "Keine Ergebnisse",
+      "of": "von",
+      "matchCase": "Groß-/Kleinschreibung beachten",
+      "wholeWord": "Nur ganzes Wort suchen",
+      "useRegex": "Regulären Ausdruck verwenden",
+      "previousMatch": "Vorherige Übereinstimmung",
+      "nextMatch": "Nächste Übereinstimmung",
+      "close": "Schließen",
+      "toggleReplace": "Ersetzen umschalten",
+      "replace": "Ersetzen",
+      "replaceAll": "Alle ersetzen"
     },
     "sidebar": {
       "title": "5Board Seitenleiste",
@@ -217,6 +233,51 @@
         },
         "addSettings": "Einstellungen hinzufügen für "
       },
+      "elementType": {
+        "heading": "Überschrift",
+        "text": "Text",
+        "code": "Code",
+        "image": "Bild",
+        "rectangle": "Rechteck",
+        "circle": "Kreis",
+        "line": "Linie",
+        "freehand": "Freihand",
+        "tableOfContents": "Inhaltsverzeichnis",
+        "group": "Gruppe"
+      },
+      "projectorSettings": {
+        "title": "Beameransicht-Einstellungen",
+        "cursorTracking": "Mauszeiger-Tracking",
+        "pause": "Pausieren",
+        "resume": "Fortsetzen",
+        "statusLive": "Live",
+        "statusPaused": "Pausiert",
+        "statusClosed": "Beendet",
+        "revealNext": "Nächstes einblenden",
+        "unrevealNext": "Letztes ausblenden",
+        "showAll": "Alle einblenden",
+        "hideAll": "Alle ausblenden",
+        "pointerColor": "Zeiger-Farbe",
+        "customColor": "Eigene Farbe",
+        "pointerShape": "Zeiger-Form",
+        "colors": {
+          "red": "Rot",
+          "orange": "Orange",
+          "yellow": "Gelb",
+          "green": "Grün",
+          "blue": "Blau",
+          "purple": "Lila",
+          "black": "Schwarz",
+          "white": "Weiß"
+        },
+        "shapes": {
+          "dot": "Punkt",
+          "ring": "Ring",
+          "rectangle": "Rechteck",
+          "duck": "Ente"
+        }
+      },
+      "goToElement": "Gehe zu Element",
       "renameElement": "Element umbenennen",
       "addElement": "Element hinzufügen",
       "presets": {
@@ -237,6 +298,16 @@
       "noElementSelected": "Kein Element ausgewählt",
       "unsupportedElement": "Elementtyp wird nicht unterstützt",
       "selectedElement": "Ausgewähltes Element",
+      "elementStyle": "Element Style",
+      "transformation": {
+        "title": "Transformation",
+        "x": "X:",
+        "y": "Y:",
+        "width": "B:",
+        "height": "H:",
+        "rotation": "R:",
+        "zIndex": "Z:"
+      },
       "headingSettings": {
         "title": "Überschrift",
         "levelLabel": "Hierarchiestufe",
@@ -285,10 +356,53 @@
         "textColor": "Textfarbe",
         "highlightColor": "Textmarker",
         "backgroundColor": "Hintergrundfarbe",
-        "fontSize": "Schriftgröße"
+        "fontSize": "Schriftgröße",
+        "fontSettings": "Schrift",
+        "decoration": "Auszeichnung",
+        "list": "Liste",
+        "alignment": "Ausrichtung",
+        "fontFamilyTooltip": "Schriftart",
+        "fontSizeTooltip": "Schriftgröße",
+        "lineHeightTooltip": "Zeilenhöhe",
+        "textColorTooltip": "Textfarbe",
+        "highlightColorTooltip": "Textmarkerfarbe",
+        "backgroundColorTooltip": "Hintergrundfarbe",
+        "customColorTooltip": "Benutzerdefinierte Farbe auswählen",
+        "noColorTooltip": "Keine Farbe",
+        "boldTooltip": "Fett",
+        "italicTooltip": "Kursiv",
+        "strikeTooltip": "Durchgestrichen",
+        "underlineTooltip": "Unterstrichen",
+        "codeTooltip": "Code",
+        "bulletListTooltip": "Aufzählungsliste",
+        "orderedListTooltip": "Nummerierte Liste",
+        "alignLeftTooltip": "Linksbündig",
+        "alignCenterTooltip": "Zentriert",
+        "alignRightTooltip": "Rechtsbündig",
+        "alignJustifyTooltip": "Blocksatz",
+        "colorPresets": {
+          "foreground": "Vordergrund",
+          "muted": "Gedämpft",
+          "background": "Hintergrund",
+          "primary": "Primär",
+          "secondary": "Sekundär",
+          "accent1": "Akzent 1",
+          "accent2": "Akzent 2",
+          "red": "Rot",
+          "orange": "Orange",
+          "yellow": "Gelb",
+          "green": "Grün",
+          "blue": "Blau",
+          "purple": "Lila",
+          "black": "Schwarz",
+          "white": "Weiß"
+        }
       },
       "imageSettings": {
-        "title": "Bild"
+        "title": "Bild",
+        "hideInExport": "Im Export durch Platzhalter ersetzen",
+        "exportPlaceholder": "Bild nicht im Export enthalten",
+        "imageName": "Bildname"
       },
       "freehandSettings": {
         "title": "Freihand"
@@ -315,10 +429,13 @@
         "headCircle": "Kreis",
         "headSquare": "Quadrat"
       },
+      "group": "Gruppieren",
+      "ungroup": "Gruppierung aufheben",
       "delete": "Löschen",
       "name": "Name",
       "visibility": "Sichtbarkeit",
       "visible": "Sichtbar",
+      "hide": "Ausblenden",
       "speakerNote": "Sprechernotiz",
       "hideInExport": "Im Export ausblenden",
       "deleteTooltip": "Löschen (entf)"

@@ -1,5 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { EditorElement, EditorElementType, EditorToolId } from '5board.vsc-common';
+import {
+  EditorElement,
+  EditorElementType,
+  EditorToolId,
+  findTopLevelBoardElement,
+  flattenBoardElements,
+} from '5board.vsc-common';
 import type React from 'react';
 import { TextElement } from './elements/TextElement';
 import { HeadingElement } from './elements/HeadingElement';
@@ -39,6 +45,7 @@ export type EditorElementProps<T extends EditorElementType> = {
   preview?: boolean;
   /** Smallest resizable height in px. Only code blocks report one. */
   onMinHeightChange?: (minHeight: number) => void;
+  exportMode?: boolean;
 };
 
 /**
@@ -53,6 +60,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
   grouped,
   assetUrls,
   preview,
+  exportMode,
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
@@ -71,7 +79,8 @@ export default function EditorElement<ElementType extends EditorElementType>({
   const messages = useMessageService();
   const { t } = useLocalization();
   const activeToolId = useEditorState()?.tool.type;
-  const allElements = useBoardDocument()?.content.elements ?? [];
+  const boardElements = useBoardDocument()?.content.elements ?? [];
+  const allElements = flattenBoardElements(boardElements);
   const profile: ElementInteractionProfile = ELEMENT_INTERACTION_CONFIG[element.type];
   const viewType = useViewType();
   const canEdit = viewType === 'editor' && !preview && activeToolId === EditorToolId.POINTER;
@@ -79,12 +88,15 @@ export default function EditorElement<ElementType extends EditorElementType>({
   const handleSelectElement = (id: string, event?: React.MouseEvent) => {
     if (activeToolId !== EditorToolId.POINTER) return;
 
+    const selectedElement = findTopLevelBoardElement(boardElements, id);
+    const selectedId = selectedElement?.id ?? id;
+
     if (event?.shiftKey) {
-      messages.send({ type: 'toggleElementSelection', ids: [id] });
+      messages.send({ type: 'toggleElementSelection', ids: [selectedId] });
       return;
     }
 
-    messages.send({ type: 'selectElements', ids: [id] });
+    messages.send({ type: 'selectElements', ids: [selectedId] });
   };
 
   const handleContextMenu = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -209,6 +221,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
           editingPosition={editingPosition}
           assetUrls={assetUrls}
           preview={preview}
+          exportMode={exportMode}
           onStopEditing={handleStopEditing}
           onMinHeightChange={setMinHeight}
         />

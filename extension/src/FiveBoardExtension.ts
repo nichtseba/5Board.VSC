@@ -20,6 +20,10 @@ import {
   SUPPORTED_LANGUAGES,
   createAddElementToolFromPreset,
   normalizeElementRevealOrder,
+  flattenBoardElements,
+  isGroupElement,
+  groupElementsInDocument,
+  ungroupElementsInDocument,
 } from '5board.vsc-common';
 import { Command, ExtensionBase } from './ExtensionBase';
 import { ExportPreviewProvider } from './providers/ExportPreviewProvider';
@@ -129,7 +133,7 @@ export class FiveBoardExtension extends ExtensionBase {
       }),
     );
     new FiveBoardFileSystemProvider(this.packageManager).register(context);
-    new ExportPreviewProvider(context, this.packageManager).register();
+    new ExportPreviewProvider(context).register();
   }
 
   @Command('5board-vsc.newBoard')
@@ -239,6 +243,11 @@ export class FiveBoardExtension extends ExtensionBase {
     );
     if (!selectedElement) {
       vscode.window.showWarningMessage(t('extension.presets.noElementSelected'));
+      return;
+    }
+
+    if (isGroupElement(selectedElement)) {
+      vscode.window.showInformationMessage(t('extension.presets.groupNotSupported'));
       return;
     }
 
@@ -381,6 +390,40 @@ export class FiveBoardExtension extends ExtensionBase {
     this.elementClipboard.duplicate(document);
   }
 
+  @Command('5board-vsc.group')
+  groupOrUngroupElements(): void {
+    const activeDocument = this.activeEditorDocument;
+    if (!activeDocument) {
+      return;
+    }
+
+    const document = activeDocument.boardPackage.document;
+    const selectedIds = document.content.selectedElementIds;
+
+    if (selectedIds.length === 1) {
+      const selectedElement = document.content.elements.find(
+        (element) => element.id === selectedIds[0],
+      );
+
+      if (!selectedElement || !isGroupElement(selectedElement)) {
+        return;
+      }
+
+      activeDocument.applyEdit((boardDocument) =>
+        ungroupElementsInDocument(boardDocument, selectedElement.id),
+      );
+      return;
+    }
+
+    if (selectedIds.length < 2) {
+      return;
+    }
+
+    activeDocument.applyEdit((boardDocument) =>
+      groupElementsInDocument(boardDocument, selectedIds),
+    );
+  }
+
   @Command('5board-vsc.addNewEditorElement')
   addNewEditorElement(
     type: EditorElementType,
@@ -409,7 +452,7 @@ export class FiveBoardExtension extends ExtensionBase {
     const uris = await vscode.window.showOpenDialog({
       canSelectMany: false,
       filters: {
-        Images: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'],
+        Images: ['png', 'jpg', 'jpeg', 'gif', 'webp'],
       },
     });
 
@@ -447,19 +490,37 @@ export class FiveBoardExtension extends ExtensionBase {
 
   @Command('5board-vsc.previewHtmlExport')
   async previewHtmlExportCommand(): Promise<void> {
-    const uri = this.activeEditorDocument?.uri;
+    const sourceDocument = this.activeEditorDocument;
 
-    if (!uri) {
+    if (!sourceDocument) {
       vscode.window.showErrorMessage(t('extension.htmlExport.noActiveBoard'));
       return;
     }
 
-    await vscode.commands.executeCommand(
-      'vscode.openWith',
-      uri,
-      ExportPreviewProvider.VIEW_TYPE,
-      vscode.ViewColumn.Beside,
+    const uri = sourceDocument.uri;
+
+    const existingPreviewTabs = vscode.window.tabGroups.all.flatMap((group) =>
+      group.tabs.filter((tab) => {
+        const input = tab.input;
+
+        return (
+          input instanceof vscode.TabInputCustom &&
+          input.viewType === ExportPreviewProvider.VIEW_TYPE &&
+          input.uri.toString() === uri.toString()
+        );
+      }),
     );
+
+    if (existingPreviewTabs.length > 0) {
+      await vscode.window.tabGroups.close(existingPreviewTabs, true);
+    }
+
+    this.activeEditorDocument = sourceDocument;
+
+    await vscode.commands.executeCommand('vscode.openWith', uri, ExportPreviewProvider.VIEW_TYPE, {
+      viewColumn: vscode.ViewColumn.Beside,
+      preserveFocus: true,
+    });
   }
 
   public applyEditToActiveDocument(edit: (document: BoardDocument) => void): void {
@@ -559,11 +620,52 @@ export class FiveBoardExtension extends ExtensionBase {
   @Command('5board-vsc.revealNext')
   public revealNextCommand(): void {
     this.applyEditToActiveDocument((document) => {
-      for (const element of document.content.elements) {
+      for (const element of flattenBoardElements(document.content.elements)) {
+        if (isGroupElement(element)) {
+          continue;
+        }
         if (!element.display.visible && !element.display.speakerNote) {
           element.display.visible = true;
           break;
         }
+      }
+    });
+  }
+
+  @Command('5board-vsc.unrevealNext')
+  public unrevealNextCommand(): void {
+    this.applyEditToActiveDocument((document) => {
+      const elements = flattenBoardElements(document.content.elements);
+      for (let index = elements.length - 1; index >= 0; index--) {
+        const element = elements[index];
+        if (isGroupElement(element)) {
+          continue;
+        }
+        if (element.display.visible && !element.display.speakerNote) {
+          element.display.visible = false;
+          break;
+        }
+      }
+    });
+  }
+
+  @Command('5board-vsc.revealAll')
+  public revealAllCommand(): void {
+    this.setAllElementsVisible(true);
+  }
+
+  @Command('5board-vsc.hideAll')
+  public hideAllCommand(): void {
+    this.setAllElementsVisible(false);
+  }
+
+  private setAllElementsVisible(visible: boolean): void {
+    this.applyEditToActiveDocument((document) => {
+      for (const element of flattenBoardElements(document.content.elements)) {
+        if (isGroupElement(element)) {
+          continue;
+        }
+        element.display.visible = visible && !element.display.speakerNote;
       }
     });
   }

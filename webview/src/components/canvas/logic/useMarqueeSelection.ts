@@ -1,6 +1,11 @@
 import { useRef, useState } from 'react';
 
-import { BoardElement, EditorToolId } from '5board.vsc-common';
+import {
+  BoardElement,
+  EditorElement,
+  EditorToolId,
+  findTopLevelBoardElement,
+} from '5board.vsc-common';
 
 import { useCanvasEvents, useCanvasPoint } from '../../../providers/CanvasEventsProvider';
 
@@ -24,10 +29,12 @@ const MARQUEE_START_THRESHOLD = 4;
 export function useMarqueeSelection({
   activeToolId,
   elements,
+  boardElements,
   messages,
 }: {
   activeToolId?: string;
-  elements: BoardElement[];
+  elements: EditorElement[];
+  boardElements: BoardElement[];
   messages: MessageService;
 }) {
   /**
@@ -89,7 +96,7 @@ export function useMarqueeSelection({
    * element.layout and rect are both expressed
    * in grid units.
    */
-  const intersectsRect = (element: BoardElement, rect: MarqueeRect) => {
+  const intersectsRect = (element: EditorElement, rect: MarqueeRect) => {
     const ex = element.layout.xPos;
     const ey = element.layout.yPos;
     const ew = element.layout.width;
@@ -222,9 +229,15 @@ export function useMarqueeSelection({
       //rectangle from grid coordinates for intersection
       const gridRect = createRect(gridStart, gridCurrent);
 
-      const ids = elements
-        .filter((element) => intersectsRect(element, gridRect))
-        .map((element) => element.id);
+      const ids = [
+        ...new Set(
+          elements
+            .filter((element) => intersectsRect(element, gridRect))
+            .map(
+              (element) => findTopLevelBoardElement(boardElements, element.id)?.id ?? element.id,
+            ),
+        ),
+      ];
 
       if (event?.shiftKey) {
         messages.send({ type: 'toggleElementSelection', ids: ids });

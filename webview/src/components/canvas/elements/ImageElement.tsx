@@ -3,15 +3,33 @@ import { EditorElementProps } from '../EditorElement';
 import { useRef } from 'react';
 import { useMessageService } from '../../../services/MessageService';
 import { useGrid } from '../../../providers/GridProvider';
+import { useLocalization } from '../../../providers/LocalizationProvider';
 
 export function ImageElement({
   element,
   assetUrls,
   preview,
+  exportMode,
 }: EditorElementProps<EditorElementType.Image>) {
   const imgRef = useRef<HTMLImageElement | null>(null);
   const messages = useMessageService();
   const { cellSize } = useGrid();
+  const { t } = useLocalization();
+
+  if (exportMode && element.data.hideInExport) {
+    return (
+      <div
+        className="
+          flex h-full w-full items-center justify-center
+          border border-dashed border-foreground/40
+          bg-foreground/5 p-2
+          text-center text-foreground/60
+        "
+      >
+        {t('webview.sidebar-element-settings.imageSettings.exportPlaceholder')}
+      </div>
+    );
+  }
 
   const imageSrc = assetUrls?.[element.data.src] ?? element.data.src;
 
@@ -70,7 +88,7 @@ export function ImageElement({
             ? 'overflow-hidden'
             : `w-full h-full ${objectFitClass}`
       }
-      onLoad={preview ? undefined : configureSize}
+      onLoad={preview || exportMode ? undefined : configureSize}
     />
   );
 }

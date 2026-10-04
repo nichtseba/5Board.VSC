@@ -192,7 +192,10 @@ export function TextElement({
     const chain = editor.chain();
 
     if (editing) {
-      chain.focus();
+      if (msg.command.type === 'setFontSize') {
+      } else {
+        chain.focus();
+      }
     } else {
       chain.selectAll();
     }
@@ -224,7 +227,7 @@ export function TextElement({
 
       case 'setFontFamily':
         if (msg.command.font === 'default') {
-          chain.unsetFontFamily().run();
+          chain.setMark('textStyle', { fontFamily: null }).run();
         } else {
           chain.setFontFamily(msg.command.font).run();
         }
@@ -244,7 +247,7 @@ export function TextElement({
 
       case 'setBackgroundColor':
         if (msg.command.color === undefined) {
-          chain.unsetBackgroundColor().run();
+          chain.setMark('textStyle', { backgroundColor: null }).run();
         } else {
           chain.setBackgroundColor(msg.command.color).run();
         }
@@ -264,14 +267,32 @@ export function TextElement({
     }
   });
 
+  const { backgroundColor, border } = element.style;
+  const cssBorderStyle =
+    border?.style === 'dashed' || border?.style === 'dotted' ? border.style : 'solid';
+
   return (
     <div
-      style={{ width: '100%', height: '100%', backgroundColor: element.style.backgroundColor }}
+      style={{
+        width: '100%',
+        height: '100%',
+        boxSizing: 'border-box',
+        backgroundColor,
+        opacity: element.style.opacity ?? 1,
+        border: border?.color
+          ? `${border.width ?? 1}px ${cssBorderStyle} ${border.color}`
+          : undefined,
+        borderRadius: border?.radius,
+      }}
       className="flex flex-col"
     >
       <EditorContent editor={editor} />
       {editing && (
-        <BubbleMenu editor={editor} appendTo={() => document.body} className="z-50">
+        <BubbleMenu
+          editor={editor}
+          appendTo={() => document.body}
+          className="z-50 flex gap-1 rounded-md border border-[var(--vscode-editorWidget-border)] bg-[var(--vscode-editorWidget-background)] p-1 shadow-[0_2px_8px_var(--vscode-widget-shadow)]"
+        >
           <BoldButton elements={[element]} />
           <ItalicButton elements={[element]} />
           <StrikeButton elements={[element]} />

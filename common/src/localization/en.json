@@ -99,6 +99,7 @@
     "goToElement": "Go to Element",
     "presets": {
       "noElementSelected": "No element selected. Please select an element to save as a preset.",
+      "groupNotSupported": "Groups are not supported yet to build presets. Please select a single element to save as a preset.",
       "savePreset": "Save as Preset",
       "presetNotSaved": "No preset was saved with the selected options",
       "presetName": "Preset Name",
@@ -143,6 +144,21 @@
       "saveHtml": "Save HTML",
       "loading": "Loading preview..."
     },
+    "find": {
+      "searchPlaceholder": "Find",
+      "replacePlaceholder": "Replace",
+      "noResults": "No results",
+      "of": "of",
+      "matchCase": "Match Case",
+      "wholeWord": "Match Whole Word",
+      "useRegex": "Use Regular Expression",
+      "previousMatch": "Previous Match",
+      "nextMatch": "Next Match",
+      "close": "Close",
+      "toggleReplace": "Toggle Replace",
+      "replace": "Replace",
+      "replaceAll": "Replace All"
+    },
     "sidebar": {
       "title": "5Board Sidebar",
       "tools": {
@@ -160,7 +176,8 @@
         "circle": "Circle",
         "line": "Line",
         "freehand": "Freehand",
-        "tableOfContents": "Table of Contents"
+        "tableOfContents": "Table of Contents",
+        "group": "Group"
       },
       "projectorSettings": {
         "title": "Projector Settings",
@@ -197,7 +214,7 @@
         "customColor": "Custom color",
         "width": "Thickness",
         "opacity": "Opacity",
-        "lineStyle": "Line style",
+        "lineStyle": "Line Style",
         "dashScale": "Dash size",
         "colors": {
           "red": "Red",
@@ -217,6 +234,51 @@
         },
         "addSettings": "Add Settings for "
       },
+      "elementType": {
+        "heading": "Heading",
+        "text": "Text",
+        "code": "Code",
+        "image": "Image",
+        "rectangle": "Rectangle",
+        "circle": "Circle",
+        "line": "Line",
+        "freehand": "Freehand",
+        "tableOfContents": "Table of Contents",
+        "group": "Group"
+      },
+      "projectorSettings": {
+        "title": "Projector Settings",
+        "cursorTracking": "Cursor Tracking",
+        "pause": "Pause",
+        "resume": "Resume",
+        "statusLive": "Live",
+        "statusPaused": "Paused",
+        "statusClosed": "Ended",
+        "revealNext": "Reveal Next",
+        "unrevealNext": "Unreveal Next",
+        "showAll": "Reveal All",
+        "hideAll": "Hide All",
+        "pointerColor": "Pointer Color",
+        "customColor": "Custom color",
+        "pointerShape": "Pointer Shape",
+        "colors": {
+          "red": "Red",
+          "orange": "Orange",
+          "yellow": "Yellow",
+          "green": "Green",
+          "blue": "Blue",
+          "purple": "Purple",
+          "black": "Black",
+          "white": "White"
+        },
+        "shapes": {
+          "dot": "Dot",
+          "ring": "Ring",
+          "rectangle": "Rectangle",
+          "duck": "Duck"
+        }
+      },
+      "goToElement": "Go to element",
       "renameElement": "Rename element",
       "addElement": "Add Element",
       "presets": {
@@ -237,6 +299,16 @@
       "noElementSelected": "No element selected",
       "unsupportedElement": "Unsupported element type",
       "selectedElement": "Selected Element",
+      "elementStyle": "Element Style",
+      "transformation": {
+        "title": "Transformation",
+        "x": "X:",
+        "y": "Y:",
+        "width": "W:",
+        "height": "H:",
+        "rotation": "R:",
+        "zIndex": "Z:"
+      },
       "headingSettings": {
         "title": "Heading",
         "levelLabel": "Hierarchy level",
@@ -283,12 +355,55 @@
       "textSettings": {
         "title": "Text",
         "textColor": "Text Color",
-        "highlightColor": "Highligt Color",
+        "highlightColor": "Highlight Color",
         "backgroundColor": "Background Color",
-        "fontSize": "Font size"
+        "fontSize": "Font size",
+        "fontSettings": "Font",
+        "decoration": "Decoration",
+        "list": "List",
+        "alignment": "Alignment",
+        "fontFamilyTooltip": "Font family",
+        "fontSizeTooltip": "Font size",
+        "lineHeightTooltip": "Line height",
+        "textColorTooltip": "Text color",
+        "highlightColorTooltip": "Highlight color",
+        "backgroundColorTooltip": "Background color",
+        "customColorTooltip": "Choose a custom color",
+        "noColorTooltip": "No color",
+        "boldTooltip": "Bold",
+        "italicTooltip": "Italic",
+        "strikeTooltip": "Strikethrough",
+        "underlineTooltip": "Underline",
+        "codeTooltip": "Code",
+        "bulletListTooltip": "Bulleted list",
+        "orderedListTooltip": "Numbered list",
+        "alignLeftTooltip": "Align left",
+        "alignCenterTooltip": "Align center",
+        "alignRightTooltip": "Align right",
+        "alignJustifyTooltip": "Justify",
+        "colorPresets": {
+          "foreground": "Foreground",
+          "muted": "Muted",
+          "background": "Background",
+          "primary": "Primary",
+          "secondary": "Secondary",
+          "accent1": "Accent 1",
+          "accent2": "Accent 2",
+          "red": "Red",
+          "orange": "Orange",
+          "yellow": "Yellow",
+          "green": "Green",
+          "blue": "Blue",
+          "purple": "Purple",
+          "black": "Black",
+          "white": "White"
+        }
       },
       "imageSettings": {
-        "title": "Image"
+        "title": "Image",
+        "hideInExport": "Replace with placeholder in export",
+        "exportPlaceholder": "Image not included in export",
+        "imageName": "Image Name"
       },
       "freehandSettings": {
         "title": "Freehand"
@@ -302,10 +417,10 @@
       "lineSettings": {
         "title": "Line",
         "symbols": "Symbols",
-        "borderColor": "Border color",
-        "borderWidth": "Border width",
-        "borderRadius": "Border radius",
-        "borderStyle": "Border style",
+        "borderColor": "Border Color",
+        "borderWidth": "Border Width",
+        "borderRadius": "Border Radius",
+        "borderStyle": "Border Style",
         "startHead": "Start head",
         "endHead": "End head",
         "headSize": "Head size",
@@ -315,10 +430,13 @@
         "headCircle": "Circle",
         "headSquare": "Square"
       },
+      "group": "Group",
+      "ungroup": "Ungroup",
       "delete": "Delete",
       "name": "Name",
       "visibility": "Visibility",
       "visible": "Visible",
+      "hide": "Hide",
       "speakerNote": "Speaker Note",
       "hideInExport": "Hide in Export",
       "deleteTooltip": "Delete (entf)"

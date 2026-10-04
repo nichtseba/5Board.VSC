@@ -8,3 +8,4 @@ export * from './outputFormat';
 export * from './text';
 export * from './projector';
 export * from './settings';
+export * from './group';
