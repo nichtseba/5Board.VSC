@@ -75,7 +75,7 @@
         "customColor": "Custom color",
         "width": "Thickness",
         "opacity": "Opacity",
-        "lineStyle": "Line style",
+        "lineStyle": "Line Style",
         "dashScale": "Dash size",
         "colors": {
           "red": "Red",
