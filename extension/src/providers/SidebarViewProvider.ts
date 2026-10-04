@@ -60,3 +60,9 @@ export class ElementSettingsSidebarViewProvider extends WebviewProvider {
     );
   }
 }
+export class ClassSettingsSidebarViewProvider extends WebviewProvider {
+  public static readonly VIEW_ID = '5board-vsc.sidebar-class-settings-view';
+  constructor(context: vscode.ExtensionContext, messages: MessageService) {
+    super(context, messages, 'ClassSettingsSidebar.html', ClassSettingsSidebarViewProvider.VIEW_ID);
+  }
+}

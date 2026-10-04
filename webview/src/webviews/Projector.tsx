@@ -7,6 +7,8 @@ import { init } from '../app/init';
 import EditorCanvas from '../components/canvas/EditorCanvas';
 import { FreehandPreview } from '../components/canvas/tools/FreehandPreviewOverlay';
 import { CanvasEventsProvider } from '../providers/CanvasEventsProvider';
+import { SourcesProvider } from '../providers/SourcesProvider';
+import { ExecutionOutputProvider } from '../providers/ExecutionOutputProvider';
 import { ViewTypeProvider } from '../providers/ViewTypeProvider';
 
 // The projector view shows the same canvas as the editor,
@@ -158,14 +160,22 @@ export default function Projector() {
       */}
         <div style={{ pointerEvents: 'none' }}>
           {boardDocument ? (
-            <CanvasEventsProvider>
-              <EditorCanvas
-                enableKeyboardShortcuts={false}
-                cursor={cursor}
-                pointerStyle={pointerStyle}
-                freehandPreview={freehandPreview}
-              />
-            </CanvasEventsProvider>
+            // Mirrors code block output live, but read-only: input belongs to the editor
+            // window, so two windows can never write into the same program.
+            <ExecutionOutputProvider readOnly>
+              {/* Same SourcesProvider as the editor, without it every CodeElement shows
+                  "Source not found". */}
+              <SourcesProvider value={boardDocument.sources}>
+                <CanvasEventsProvider>
+                  <EditorCanvas
+                    enableKeyboardShortcuts={false}
+                    cursor={cursor}
+                    pointerStyle={pointerStyle}
+                    freehandPreview={freehandPreview}
+                  />
+                </CanvasEventsProvider>
+              </SourcesProvider>
+            </ExecutionOutputProvider>
           ) : (
             // Shown while waiting for the first 'init' message from the extension.
             <div style={{ padding: '1rem', opacity: 0.5 }}>{t('extension.projector.loading')}</div>

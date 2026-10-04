@@ -2,6 +2,7 @@ import vscode from 'vscode';
 import { SidebarDocumentSync } from './SidebarDocumentSync';
 import { MessageService } from '../MessageService';
 import {
+  ClassSettingsSidebarViewProvider,
   ElementSettingsSidebarViewProvider,
   ProjectorSettingsSidebarViewProvider,
   SidebarViewProvider,
@@ -10,6 +11,7 @@ import { StructureTreeProvider } from '../providers/StructureTreeProvider';
 import { EXTENSION } from '../extension';
 import deepEquals from 'deep-equal';
 import { FileTreeProvider } from '../providers/FileTreeProvider';
+import { registerCodeblockSidebarHandlers } from './CodeblockSidebarHandlers';
 import {
   HeadingLevelSettings,
   findBoardElementById,
@@ -31,6 +33,7 @@ export class SidebarManager implements vscode.Disposable {
     new SidebarViewProvider(context, messages).register();
     new ProjectorSettingsSidebarViewProvider(context, messages).register();
     new ElementSettingsSidebarViewProvider(context, messages).register();
+    new ClassSettingsSidebarViewProvider(context, messages).register();
     new StructureTreeProvider(context).register();
     new FileTreeProvider(context).register();
 
@@ -210,6 +213,7 @@ export class SidebarManager implements vscode.Disposable {
       });
     });
 
+    registerCodeblockSidebarHandlers(this.messages);
     this.messages.on('addImageFromFile', async () => {
       await vscode.commands.executeCommand('5board-vsc.addImageFromFile');
     });

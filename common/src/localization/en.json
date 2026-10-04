@@ -1,6 +1,8 @@
 {
   "extension": {
-    "openCustomEditorCommand": { "title": "5Boardz – Custom Page" },
+    "openCustomEditorCommand": {
+      "title": "5Boardz – Custom Page"
+    },
     "new5boardCommand": {
       "defaultFileName": "Lecture",
       "packageFilter": "5Boardz Package",
@@ -21,6 +23,80 @@
       "live": "Live",
       "paused": "Paused"
     },
+    "codeblock": {
+      "noActiveDocument": "No active 5Board document.",
+      "noCodeblockSelected": "Select a code block to execute it.",
+      "deleteClassNotEmpty": "The class still contains code blocks. Remove them from the class before deleting it.",
+      "classNameTaken": "The class name \"{name}\" is already taken.",
+      "resetAllConfirm": "Reset the output of all code blocks in this document?",
+      "resetAllConfirmButton": "Reset",
+      "noOutputsToReset": "There is no output to reset.",
+      "toolchainPick": "Show the toolchain of which language?",
+      "toolchainChannel": "5Board — Toolchain",
+      "execution": {
+        "notACodeblock": "Element \"{elementId}\" is not a code block.",
+        "noRunner": "No runner available for language: {language}",
+        "sourceNotFound": "Source file \"{fileName}\" not found in document.",
+        "toolsMissing": "Required tools not found: {tools}. Please install them to run {language} code blocks.",
+        "toolsUnavailable": "Required tools for {language} are not available.",
+        "compileTimeout": "Compilation took longer than {seconds} seconds and was stopped.",
+        "compilationFailed": "Compilation failed.",
+        "outputLimit": "Output limit reached, execution stopped."
+      },
+      "toolchain": {
+        "configNotFound": "The configured Java path \"{path}\" does not exist.",
+        "missingOne": "{missing} is missing in \"{path}\".",
+        "missingMany": "{missing} are missing in \"{path}\".",
+        "and": "and",
+        "jreHint": "The path most likely points at a JRE (runtime only) instead of a JDK — running code blocks needs a JDK with a compiler.",
+        "notJdkHint": "The path does not look like a JDK — it should be the directory that contains bin/java and bin/javac.",
+        "tooOld": "The configured Java path is Java {found}, but Java {required} or newer is required. Runnable blocks use compact source files (JEP 512).",
+        "versionMismatch": "java is version {java} but javac is version {javac} — both must come from the same JDK.",
+        "notFound": "No JDK {required}+ found. Searched: {searched}.",
+        "notFoundFound": "Found: {found}.",
+        "notFoundHint": "Runnable blocks use compact source files (JEP 512) and need JDK {required}+.",
+        "stage": {
+          "config": "settings",
+          "javaHome": "JAVA_HOME",
+          "wellKnown": "standard install locations",
+          "path": "PATH"
+        },
+        "outcome": {
+          "notSet": "not set",
+          "notFound": "not found",
+          "incomplete": "incomplete JDK",
+          "tooOld": "too old",
+          "versionMismatch": "java/javac version mismatch",
+          "ok": "ok",
+          "notReached": "not reached"
+        },
+        "report": {
+          "title": "5Board — Java toolchain",
+          "configuredHome": "Configured home",
+          "minimumRequired": "Minimum required",
+          "minimumRequiredValue": "Java {required} (compact source files, JEP 512)",
+          "selected": "Selected",
+          "viaStage": "Via stage",
+          "version": "Version",
+          "problem": "Problem",
+          "checked": "Checked:",
+          "notSet": "(not set)",
+          "fromPath": "(from PATH)",
+          "none": "(none)",
+          "missing": "missing {tools}",
+          "selectedMark": "<-- selected"
+        }
+      },
+      "python": {
+        "configUnusable": "The configured Python path \"{path}\" holds no usable interpreter.",
+        "notFound": "No Python {required} or newer found. Tried: {tried}.",
+        "foundOlder": "Found: Python {found}.",
+        "storeStubHint": "One entry reported no version — on Windows that is usually the Microsoft Store placeholder. Install Python from python.org or turn off the store alias under \"App execution aliases\".",
+        "reportTitle": "5Board — Python toolchain",
+        "outcomeNoVersion": "reported no version"
+      }
+    },
+    "goToElement": "Go to Element",
     "presets": {
       "noElementSelected": "No element selected. Please select an element to save as a preset.",
       "groupNotSupported": "Groups are not supported yet to build presets. Please select a single element to save as a preset.",
@@ -38,7 +114,9 @@
     }
   },
   "webview": {
-    "customEditor": { "Test": "Test the translation." },
+    "customEditor": {
+      "Test": "Test the translation."
+    },
     "canvas": {
       "spacerLabel": "Spacer",
       "rows": "rows",
@@ -46,6 +124,21 @@
         "bringToFront": "Bring to front",
         "sendToBack": "Send to back"
       }
+    },
+    "codeblock": {
+      "output": "Output",
+      "copyOutput": "Copy output",
+      "openSource": "Open source file",
+      "run": "Run",
+      "stop": "Stop",
+      "inputPlaceholder": "Enter sends, Ctrl+D ends",
+      "exitCode": "[Exit code {code}]",
+      "exitCodeNone": "none",
+      "sourceNotFound": "Source not found: {fileName}",
+      "copy": "Copy",
+      "cut": "Cut",
+      "paste": "Paste",
+      "stopEditing": "Stop Editing"
     },
     "exportPreview": {
       "saveHtml": "Save HTML",
@@ -86,6 +179,35 @@
         "tableOfContents": "Table of Contents",
         "group": "Group"
       },
+      "projectorSettings": {
+        "title": "Projector Settings",
+        "cursorTracking": "Cursor Tracking",
+        "pointerColor": "Pointer Color",
+        "customColor": "Custom color",
+        "pointerShape": "Pointer Shape",
+        "shapes": {
+          "dot": "Dot",
+          "ring": "Ring",
+          "rectangle": "Rectangle",
+          "duck": "Duck"
+        },
+        "pause": "Pause",
+        "resume": "Resume",
+        "statusLive": "Live",
+        "statusPaused": "Paused",
+        "statusClosed": "Ended",
+        "colors": {
+          "red": "Red",
+          "orange": "Orange",
+          "yellow": "Yellow",
+          "green": "Green",
+          "blue": "Blue",
+          "purple": "Purple",
+          "black": "Black",
+          "white": "White"
+        }
+      },
+      "goToElement": "Go to element",
       "freehand": {
         "title": "Freehand Options",
         "color": "Color",
@@ -111,6 +233,18 @@
           "custom": "Custom"
         },
         "addSettings": "Add Settings for "
+      },
+      "elementType": {
+        "heading": "Heading",
+        "text": "Text",
+        "code": "Code",
+        "image": "Image",
+        "rectangle": "Rectangle",
+        "circle": "Circle",
+        "line": "Line",
+        "freehand": "Freehand",
+        "tableOfContents": "Table of Contents",
+        "group": "Group"
       },
       "projectorSettings": {
         "title": "Projector Settings",
@@ -200,6 +334,21 @@
         "customColor": "Custom color",
         "backgroundColor": "Background color"
       },
+      "codeSettings": {
+        "title": "Code",
+        "languageLabel": "Language",
+        "classNameLabel": "Class",
+        "classNone": "None (standalone, runnable)",
+        "languageFromClass": "The language follows the assigned class",
+        "mainWrapInfo": "Wrapped in main method",
+        "noMainWrapInfo": "Custom class, no main method",
+        "backgroundLabel": "Background color",
+        "borderLabel": "Border color",
+        "resetColors": "Reset to theme colors",
+        "resetOutput": "Reset output",
+        "resetAllOutputs": "Reset all outputs"
+      },
+      "layer": "Layer",
       "tableOfContentsSettings": {
         "title": "Table of Contents"
       },
@@ -291,6 +440,16 @@
       "speakerNote": "Speaker Note",
       "hideInExport": "Hide in Export",
       "deleteTooltip": "Delete (entf)"
+    },
+    "sidebar-class-settings": {
+      "title": "Code Classes",
+      "noClasses": "No classes yet. Create one to group code blocks.",
+      "newClassPlaceholder": "New class name",
+      "create": "Create",
+      "edit": "Edit",
+      "apply": "Apply",
+      "cancel": "Cancel",
+      "delete": "Delete"
     }
   }
 }

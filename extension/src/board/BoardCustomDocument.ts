@@ -5,6 +5,7 @@ import { MessageService } from '../MessageService';
 import { EXTENSION } from '../extension';
 import { t } from '../localization';
 import { DocumentMessageHandlers } from './DocumentMessageHandlers';
+import { CodeblockController } from './CodeblockController';
 
 export class BoardCustomDocument implements vscode.CustomDocument {
   public readonly documentChange = new vscode.EventEmitter<{
@@ -15,6 +16,8 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   }>();
   public readonly onDocumentChange = this.documentChange.event;
   public readonly messageService = new MessageService();
+  // Per-document codeblock coordinator; also reached by the executeCodeblock command.
+  public readonly codeblock = new CodeblockController(this);
   private readonly disposables: vscode.Disposable[] = [];
   private readonly unsubscribers: (() => void)[] = [];
   private projectorCount = 0;
@@ -61,11 +64,18 @@ export class BoardCustomDocument implements vscode.CustomDocument {
       }),
     );
 
+    this.disposables.push(
+      this.boardPackage.onDocumentChange(() => {
+        this.documentChange.fire(this.boardPackage.document);
+      }),
+    );
+
     this.registerMessageHandlers();
   }
 
   private registerMessageHandlers(): void {
     this.unsubscribers.push(...new DocumentMessageHandlers(this).register());
+    this.unsubscribers.push(...this.codeblock.register());
   }
 
   dispose(): void {

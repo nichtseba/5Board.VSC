@@ -5,6 +5,7 @@ export default defineConfig(
   globalIgnores([
     '**/webpack.config.js',
     '**/dist',
+    '**/out',
     '**/media/webview',
     'scripts/**',
     '**/.vscode-test',
