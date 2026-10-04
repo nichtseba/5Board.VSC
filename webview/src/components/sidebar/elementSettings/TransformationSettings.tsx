@@ -1,10 +1,11 @@
 import { Dropdown } from 'vscrui';
-import { EditorElement } from '5board.vsc-common';
+import { DEFAULT_GRID_SETTINGS, EditorElement } from '5board.vsc-common';
 
 import { getCommonValue } from './utils/getCommonValue';
 
 import { useLocalization } from '../../../providers/LocalizationProvider';
 import { useMessageService } from '../../../services/MessageService';
+import { useBoardDocument } from '../../../providers/BoardDocumentProvider';
 import SettingsField from '../layout/SettingsField';
 import { ELEMENT_INTERACTION_CONFIG } from '../../canvas/elementInteraction/InteractionConfig';
 
@@ -13,6 +14,7 @@ type Props = {
 };
 
 type LayoutKey = 'xPos' | 'yPos' | 'width' | 'height' | 'rotation' | 'zIndex';
+type BoundingBoxKey = 'xPos' | 'yPos' | 'width' | 'height';
 
 const ROTATION_VALUES = [0, 45, 90, 135, 180, 225, 270, 315];
 
@@ -24,6 +26,23 @@ const rotationOptions = ROTATION_VALUES.map((rotation) => ({
 export function TransformationSettings({ elements }: Props) {
   const { t } = useLocalization();
   const messages = useMessageService();
+  const document = useBoardDocument();
+
+  const selectionBounds = elements.reduce(
+    (bounds, element) => ({
+      xPos: Math.min(bounds.xPos, element.layout.xPos),
+      yPos: Math.min(bounds.yPos, element.layout.yPos),
+      right: Math.max(bounds.right, element.layout.xPos + element.layout.width),
+      bottom: Math.max(bounds.bottom, element.layout.yPos + element.layout.height),
+    }),
+    { xPos: Infinity, yPos: Infinity, right: -Infinity, bottom: -Infinity },
+  );
+  const boundsWidth = selectionBounds.right - selectionBounds.xPos;
+  const boundsHeight = selectionBounds.bottom - selectionBounds.yPos;
+  const columnCount = document?.content.grid?.columnCount ?? DEFAULT_GRID_SETTINGS.columnCount;
+  const maxX = Math.max(0, columnCount - boundsWidth);
+  const maxWidth = Math.max(1, columnCount - selectionBounds.xPos);
+  const commonRotation = getCommonValue(elements.map((element) => element.layout.rotation ?? 0));
 
   const handleLayoutChange = (key: LayoutKey, value: number) => {
     messages.send({
@@ -40,8 +59,61 @@ export function TransformationSettings({ elements }: Props) {
     });
   };
 
-  const getLayoutValue = <K extends keyof EditorElement['layout']>(key: K) =>
-    getCommonValue(elements.map((element) => element.layout[key]));
+  const handleBoundsChange = (key: BoundingBoxKey, value: number) => {
+    if (!Number.isFinite(value)) {
+      return;
+    }
+
+    const currentValue = {
+      xPos: selectionBounds.xPos,
+      yPos: selectionBounds.yPos,
+      width: boundsWidth,
+      height: boundsHeight,
+    }[key];
+    if ((key === 'xPos' && value < 0) || (key === 'width' && value < 1)) {
+      return;
+    }
+
+    const boundedValue =
+      key === 'xPos' ? Math.min(value, maxX) : key === 'width' ? Math.min(value, maxWidth) : value;
+    const delta = boundedValue - currentValue;
+    if (delta === 0) {
+      return;
+    }
+
+    messages.send({
+      type: 'updateElements',
+      changes: elements.map((element) => ({
+        id: element.id,
+        changes: {
+          layout: {
+            ...element.layout,
+            [key]:
+              key === 'width' || key === 'height'
+                ? Math.max(1, element.layout[key] + delta)
+                : element.layout[key] + delta,
+          },
+        },
+      })),
+    });
+  };
+
+  const handleRotationChange = (rotation: number) => {
+    const delta = commonRotation === undefined ? undefined : rotation - commonRotation;
+
+    messages.send({
+      type: 'updateElements',
+      changes: elements.map((element) => ({
+        id: element.id,
+        changes: {
+          layout: {
+            ...element.layout,
+            rotation: delta === undefined ? rotation : (element.layout.rotation ?? 0) + delta,
+          },
+        },
+      })),
+    });
+  };
 
   const canChangeLayout = (key: LayoutKey) =>
     getCommonValue(
@@ -76,10 +148,12 @@ export function TransformationSettings({ elements }: Props) {
         <SettingsField label={t('webview.sidebar-element-settings.transformation.x')} inline>
           <input
             type="number"
+            min={0}
+            max={maxX}
             disabled={!canChangeLayout('xPos')}
             className={inputClassName}
-            value={getLayoutValue('xPos') ?? ''}
-            onChange={(event) => handleLayoutChange('xPos', Number(event.target.value))}
+            value={selectionBounds.xPos}
+            onChange={(event) => handleBoundsChange('xPos', Number(event.target.value))}
           />
         </SettingsField>
 
@@ -88,18 +162,20 @@ export function TransformationSettings({ elements }: Props) {
             type="number"
             disabled={!canChangeLayout('yPos')}
             className={inputClassName}
-            value={getLayoutValue('yPos') ?? ''}
-            onChange={(event) => handleLayoutChange('yPos', Number(event.target.value))}
+            value={selectionBounds.yPos}
+            onChange={(event) => handleBoundsChange('yPos', Number(event.target.value))}
           />
         </SettingsField>
 
         <SettingsField label={t('webview.sidebar-element-settings.transformation.width')} inline>
           <input
             type="number"
+            min={1}
+            max={maxWidth}
             disabled={!canChangeLayout('width')}
             className={inputClassName}
-            value={getLayoutValue('width') ?? ''}
-            onChange={(event) => handleLayoutChange('width', Number(event.target.value))}
+            value={boundsWidth}
+            onChange={(event) => handleBoundsChange('width', Number(event.target.value))}
           />
         </SettingsField>
 
@@ -108,8 +184,8 @@ export function TransformationSettings({ elements }: Props) {
             type="number"
             disabled={!canChangeLayout('height')}
             className={inputClassName}
-            value={getLayoutValue('height') ?? ''}
-            onChange={(event) => handleLayoutChange('height', Number(event.target.value))}
+            value={boundsHeight}
+            onChange={(event) => handleBoundsChange('height', Number(event.target.value))}
           />
         </SettingsField>
 
@@ -118,7 +194,7 @@ export function TransformationSettings({ elements }: Props) {
             className="min-w-0 flex-1 disabled:cursor-not-allowed disabled:opacity-40"
             disabled={!canChangeLayout('rotation')}
             options={rotationOptions}
-            value={String(getLayoutValue('rotation') ?? 0)}
+            value={commonRotation === undefined ? '' : String(commonRotation)}
             onChange={(value) => {
               if (!value) {
                 return;
@@ -126,7 +202,7 @@ export function TransformationSettings({ elements }: Props) {
 
               const rotation = typeof value === 'string' ? value : value.value;
 
-              handleLayoutChange('rotation', Number(rotation));
+              handleRotationChange(Number(rotation));
             }}
           />
         </SettingsField>
