@@ -46,20 +46,17 @@ export class EditorEditorProvider implements vscode.CustomEditorProvider<BoardCu
     };
 
     document.messageService.registerPanel(webviewPanel);
-    console.log('registering document change listener');
     document.onDocumentChange(({ next, previous, isUndo, isRedo }) => {
       if (isUndo || isRedo) {
         return;
       }
-      console.log('firing document change');
       this.didChangeCustomDocument.fire({
+        label: 'Document Change',
         document,
         undo() {
-          console.log('undoing document change');
           document.applyEdit((_) => previous, { isUndo: true });
         },
         redo() {
-          console.log('redoing document change');
           document.applyEdit((_) => next, { isRedo: true });
         },
       });
