@@ -102,6 +102,8 @@ type AllWebviewToExtensionMessage =
         changes: Omit<Partial<EditorElement>, 'id'>;
       }[];
     } // Update element with it's settings, array can handle one or more elements
+  | { type: 'groupElements'; ids: string[] }
+  | { type: 'ungroupElements'; id: string }
   | { type: 'textEditorCommand'; ids: string[]; command: TextEditorCommand }
   | { type: 'addImageFromFile' }
   | { type: 'addImageFromBytes'; name: string; bytes: number[] }

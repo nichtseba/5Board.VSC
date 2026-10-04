@@ -8,6 +8,7 @@ import {
   GridSettings,
   Source,
   create5boardzManifest,
+  flattenBoardElements,
   normalizeElementRevealOrder,
 } from '5board.vsc-common';
 
@@ -49,7 +50,7 @@ export class BoardPackage {
   }
 
   private static fixDisplay(document: BoardDocument): void {
-    for (const element of document.content.elements) {
+    for (const element of flattenBoardElements(document.content.elements)) {
       if (element.display === undefined) {
         element.display = {
           visible: true,

@@ -53,7 +53,6 @@ export function TextSettings({ elements }: Props) {
   const highlightColor = getCommonValue(
     elements.map((element) => element.data.tiptap?.marks?.textStyle?.backgroundColor),
   );
-
   const updateStyle = (changes: Partial<(typeof elements)[number]['style']>) => {
     messages.send({
       type: 'updateElements',
@@ -64,6 +63,24 @@ export function TextSettings({ elements }: Props) {
         },
       })),
     });
+  };
+  const backgroundColor = getCommonValue(elements.map((element) => element.style.backgroundColor));
+  const colorPresetLabels = {
+    foreground: t('webview.sidebar-element-settings.textSettings.colorPresets.foreground'),
+    muted: t('webview.sidebar-element-settings.textSettings.colorPresets.muted'),
+    background: t('webview.sidebar-element-settings.textSettings.colorPresets.background'),
+    primary: t('webview.sidebar-element-settings.textSettings.colorPresets.primary'),
+    secondary: t('webview.sidebar-element-settings.textSettings.colorPresets.secondary'),
+    accent1: t('webview.sidebar-element-settings.textSettings.colorPresets.accent1'),
+    accent2: t('webview.sidebar-element-settings.textSettings.colorPresets.accent2'),
+    red: t('webview.sidebar-element-settings.textSettings.colorPresets.red'),
+    orange: t('webview.sidebar-element-settings.textSettings.colorPresets.orange'),
+    yellow: t('webview.sidebar-element-settings.textSettings.colorPresets.yellow'),
+    green: t('webview.sidebar-element-settings.textSettings.colorPresets.green'),
+    blue: t('webview.sidebar-element-settings.textSettings.colorPresets.blue'),
+    purple: t('webview.sidebar-element-settings.textSettings.colorPresets.purple'),
+    black: t('webview.sidebar-element-settings.textSettings.colorPresets.black'),
+    white: t('webview.sidebar-element-settings.textSettings.colorPresets.white'),
   };
   return (
     <>
@@ -93,6 +110,7 @@ export function TextSettings({ elements }: Props) {
           <div className="flex flex-wrap items-center gap-3">
             <FontFamilyDropdown
               value={fontFamily}
+              title={t('webview.sidebar-element-settings.textSettings.fontFamilyTooltip')}
               onChange={(font) => {
                 messages.send({
                   type: 'textEditorCommand',
@@ -107,6 +125,7 @@ export function TextSettings({ elements }: Props) {
 
             <FontSizeInput
               value={fontSizeValue}
+              title={t('webview.sidebar-element-settings.textSettings.fontSizeTooltip')}
               onChange={(size) => {
                 messages.send({
                   type: 'textEditorCommand',
@@ -129,7 +148,7 @@ export function TextSettings({ elements }: Props) {
             />
 
             <Dropdown
-              title="Line Height"
+              title={t('webview.sidebar-element-settings.textSettings.lineHeightTooltip')}
               options={['1.0', '1.15', '1.5', '2.0', '2.5', '3.0']}
               className="w-max!"
               value={lineHeight}
@@ -163,6 +182,8 @@ export function TextSettings({ elements }: Props) {
             presets={PROJECTOR_POINTER_PRESET_COLORS}
             label={t('webview.sidebar-element-settings.textSettings.textColor')}
             customColorLabel={t('webview.sidebar.projectorSettings.customColor')}
+            pickerTitle={t('webview.sidebar-element-settings.textSettings.customColorTooltip')}
+            presetLabels={colorPresetLabels}
           />
 
           <ColorSelector
@@ -181,6 +202,21 @@ export function TextSettings({ elements }: Props) {
             presets={PROJECTOR_POINTER_PRESET_COLORS}
             label={t('webview.sidebar-element-settings.textSettings.highlightColor')}
             customColorLabel={t('webview.sidebar.projectorSettings.customColor')}
+            pickerTitle={t('webview.sidebar-element-settings.textSettings.customColorTooltip')}
+            noColorLabel={t('webview.sidebar-element-settings.textSettings.noColorTooltip')}
+            presetLabels={colorPresetLabels}
+          />
+
+          <ColorSelector
+            color={backgroundColor}
+            allowNone
+            onChange={(color) => updateStyle({ backgroundColor: color })}
+            presets={PROJECTOR_POINTER_PRESET_COLORS}
+            label={t('webview.sidebar-element-settings.textSettings.backgroundColor')}
+            customColorLabel={t('webview.sidebar.projectorSettings.customColor')}
+            pickerTitle={t('webview.sidebar-element-settings.textSettings.customColorTooltip')}
+            noColorLabel={t('webview.sidebar-element-settings.textSettings.noColorTooltip')}
+            presetLabels={colorPresetLabels}
           />
         </SettingsField>
         <Divider />
