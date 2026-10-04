@@ -4,7 +4,6 @@ import { BoardCustomDocument } from './BoardCustomDocument';
 import { ExecutionSessionManager, type SessionEvent } from '../runner/ExecutionSessionManager';
 import { SRC_ROOT } from './package';
 import { findCodeElement, updateBlockCode } from './CodeblockSourceService';
-import { SaveScheduler } from './SaveScheduler';
 import {
   hasStoredOutputs,
   resetAllOutputs,
@@ -13,9 +12,6 @@ import {
   setOutputCollapsed,
 } from './CodeblockOutputService';
 
-/** Upper bound on how often typing in a block writes the document. */
-const CODE_SAVE_INTERVAL_MS = 1000;
-
 /**
  * Per-document I/O boundary for codeblocks: wires inbound webview messages and the codeblock
  * commands to the services and broadcasts results.
@@ -23,10 +19,6 @@ const CODE_SAVE_INTERVAL_MS = 1000;
 export class CodeblockController {
   private readonly sessions = new ExecutionSessionManager((elementId, event) =>
     this.handleSessionEvent(elementId, event),
-  );
-  private readonly saves = new SaveScheduler(
-    () => void this.document.saveDocument(),
-    CODE_SAVE_INTERVAL_MS,
   );
   // Kept for webviews that open mid-run.
   private readonly inputDrafts = new Map<string, string>();
@@ -38,7 +30,6 @@ export class CodeblockController {
     return [
       messages.on('updateBlockCode', (msg) => {
         this.document.applyEdit((document) => updateBlockCode(document, msg.elementId, msg.code));
-        this.saves.requestSave();
       }),
       messages.on('openSource', (msg) => this.openSource(msg.elementId)),
       messages.on('executeCodeblock', (msg) => void this.executeBlock(msg.elementId)),
@@ -51,7 +42,7 @@ export class CodeblockController {
       messages.on('codeblockEndInput', (msg) => this.sessions.endInput(msg.elementId)),
       messages.on('codeblockStop', (msg) => this.sessions.stop(msg.elementId)),
       messages.on('codeblockSetOutputCollapsed', (msg) => {
-        this.editAndSave((document) => setOutputCollapsed(document, msg.elementId, msg.collapsed));
+        this.editDocument((document) => setOutputCollapsed(document, msg.elementId, msg.collapsed));
       }),
       // A webview that opened or reloaded mid-run catches up on every still-running block.
       messages.on('ready', (_msg, sender) => {
@@ -69,8 +60,6 @@ export class CodeblockController {
         }
       }),
       () => this.sessions.stopAll(),
-      // The document is closing; an edit that is only in memory would be lost.
-      () => this.saves.flush(),
     ];
   }
 
@@ -80,7 +69,7 @@ export class CodeblockController {
 
   /** Returns whether there was anything to reset, so the caller can say so otherwise. */
   public resetOutput(elementId: string): boolean {
-    const stored = this.editAndSave((document) => resetOutput(document, elementId));
+    const stored = this.editDocument((document) => resetOutput(document, elementId));
     if (!stored && !this.sessions.isActive(elementId)) return false;
     this.clearShownOutputs([elementId]);
     return true;
@@ -88,7 +77,7 @@ export class CodeblockController {
 
   public resetAllOutputs(): void {
     let stored: string[] = [];
-    this.editAndSave((document) => {
+    this.editDocument((document) => {
       stored = resetAllOutputs(document);
       return stored.length > 0;
     });
@@ -138,15 +127,11 @@ export class CodeblockController {
     this.document.messageService.send({ type: 'codeblockTranscriptCleared', elementId });
   }
 
-  /** Saves only when `edit` reports a change. Typing goes through the scheduler instead. */
-  private editAndSave(edit: (document: BoardDocument) => boolean): boolean {
+  private editDocument(edit: (document: BoardDocument) => boolean): boolean {
     let changed = false;
     this.document.applyEdit((document) => {
       changed = edit(document);
     });
-    if (changed) {
-      this.saves.saveNow();
-    }
     return changed;
   }
 
@@ -156,7 +141,7 @@ export class CodeblockController {
       case 'started':
         this.inputDrafts.delete(elementId);
         messages.send({ type: 'codeblockStarted', elementId });
-        this.editAndSave((document) => setOutputCollapsed(document, elementId, false));
+        this.editDocument((document) => setOutputCollapsed(document, elementId, false));
         return;
       case 'segment':
         messages.send({ type: 'codeblockChunk', elementId, segment: event.segment });
@@ -170,8 +155,7 @@ export class CodeblockController {
           success: event.success,
           truncated: event.truncated,
         });
-        // Stored once at the end, not per chunk: every save rewrites the whole archive.
-        this.editAndSave((document) =>
+        this.editDocument((document) =>
           setLastOutput(document, elementId, {
             transcript: event.transcript,
             success: event.success,
