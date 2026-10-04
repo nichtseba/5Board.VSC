@@ -9,7 +9,7 @@ import {
   SRC_ROOT,
 } from './board/package';
 import { Asset } from '5board.vsc-common';
-import { PackageManager } from './PackageManager';
+import { DocumentManager } from './PackageManager';
 import { randomUUID } from 'crypto';
 
 /**
@@ -19,7 +19,7 @@ export class FiveBoardFileSystemProvider implements vscode.FileSystemProvider {
   private onDidChangeFileEmitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
   onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this.onDidChangeFileEmitter.event;
 
-  public constructor(private readonly packageManager: PackageManager) {}
+  public constructor(private readonly packageManager: DocumentManager) {}
 
   public register(ctx: vscode.ExtensionContext): void {
     ctx.subscriptions.push(

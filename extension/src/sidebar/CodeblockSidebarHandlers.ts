@@ -15,7 +15,10 @@ import {
 export function registerCodeblockSidebarHandlers(messages: MessageService): void {
   messages.on('moveBlock', (msg) => {
     editActiveDocument((document) => {
-      moveBlock(document, msg.elementId, { className: msg.className, language: msg.language });
+      return moveBlock(document, msg.elementId, {
+        className: msg.className,
+        language: msg.language,
+      });
     });
   });
 
@@ -48,6 +51,7 @@ export function registerCodeblockSidebarHandlers(messages: MessageService): void
           result = deleteClass(document, msg.name, msg.language);
           break;
       }
+      return result === 'ok';
     });
     // manageCodeClass is fire-and-forget, so rejections surface as native notifications.
     showRejection(result, msg.newName ?? msg.name);
@@ -65,9 +69,14 @@ function showRejection(result: ClassOpResult, name: string): void {
   }
 }
 
-function editActiveDocument(edit: (document: BoardDocument) => void): void {
+function editActiveDocument(edit: (document: BoardDocument) => boolean): void {
   const document = EXTENSION.activeEditorDocument;
   if (!document) return;
-  document.applyEdit(edit);
+  let changed = false;
+  document.applyEdit((boardDocument) => {
+    changed = edit(boardDocument);
+    return changed ? boardDocument : null;
+  });
+  if (!changed) return;
   void document.saveDocument();
 }

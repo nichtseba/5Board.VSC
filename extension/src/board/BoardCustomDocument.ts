@@ -37,9 +37,6 @@ export class BoardCustomDocument implements vscode.CustomDocument {
         sender,
       );
     });
-    // this.messageService.on('focus', () => {
-    //   EXTENSION.activeEditorDocument = this;
-    // });
     this.messageService.on('saveHtmlExport', async (msg) => {
       await this.saveHtmlExport(msg.html, msg.backgroundColor);
     });
@@ -64,13 +61,8 @@ export class BoardCustomDocument implements vscode.CustomDocument {
       }),
     );
 
-    this.disposables.push(
-      this.boardPackage.onDocumentChange(() => {
-        this.documentChange.fire(this.boardPackage.document);
-      }),
-    );
-
     this.registerMessageHandlers();
+    EXTENSION.packageManager.registerDocument(this.uri, this);
   }
 
   private registerMessageHandlers(): void {
@@ -86,6 +78,7 @@ export class BoardCustomDocument implements vscode.CustomDocument {
       disposable.dispose();
     }
     this.clearActiveEditorDocument();
+    EXTENSION.packageManager.unregisterDocument(this.uri);
   }
 
   /** Check if projector window is active/attached */

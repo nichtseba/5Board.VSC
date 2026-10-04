@@ -66,46 +66,55 @@ export function nextCodeBlockId(document: BoardDocument): string {
   return `Code${n}`;
 }
 
-export function moveBlock(document: BoardDocument, elementId: string, target: BlockTarget): void {
+export function moveBlock(
+  document: BoardDocument,
+  elementId: string,
+  target: BlockTarget,
+): boolean {
   const element = findCodeElement(document, elementId);
-  if (!element) return;
+  if (!element) return false;
   const { data } = element;
 
   const newLanguage = target.language ?? data.language;
   const support = getLanguageSupport(newLanguage);
-  if (!support) return;
+  if (!support) return false;
 
   // Omitted className keeps the current class; null/empty means standalone (id-derived default).
   const requestedName = target.className === undefined ? data.className : (target.className ?? '');
   const newClassName = support.sanitizeClassName(requestedName.trim() || elementId);
 
-  if (newClassName === data.className && newLanguage === data.language) return;
+  if (newClassName === data.className && newLanguage === data.language) return false;
   // A block can only join a named class in a language that has them.
-  if (!isDefaultClassName(newClassName, elementId) && !support.namedClasses) return;
+  if (!isDefaultClassName(newClassName, elementId) && !support.namedClasses) return false;
 
   const code = detachBlock(document, elementId, data.className, data.language);
   attachBlock(document, elementId, newClassName, support, code);
 
   data.className = newClassName;
   data.language = newLanguage;
+  return true;
 }
 
-export function updateBlockCode(document: BoardDocument, elementId: string, code: string): void {
+export function updateBlockCode(document: BoardDocument, elementId: string, code: string): boolean {
   const element = findCodeElement(document, elementId);
-  if (!element) return;
+  if (!element) return false;
   const { className, language } = element.data;
 
   const source = findSource(document, className, language);
   if (source) {
     const prefix = commentPrefixFor(language);
     const indent = getBlockIndent(source.code, elementId, prefix);
-    source.code = updateBlock(source.code, elementId, indentCode(code, indent), prefix);
+    const nextCode = updateBlock(source.code, elementId, indentCode(code, indent), prefix);
+    if (nextCode === source.code) return false;
+    source.code = nextCode;
     source.modifiedAt = Date.now();
-    return;
+    return true;
   }
 
   const support = getLanguageSupport(language);
-  if (support) attachBlock(document, elementId, className, support, code);
+  if (!support) return false;
+  attachBlock(document, elementId, className, support, code);
+  return true;
 }
 
 // Back-compat for documents predating the registry: a source is a named class unless it is some

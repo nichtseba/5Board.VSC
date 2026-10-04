@@ -29,7 +29,7 @@ import { Command, ExtensionBase } from './ExtensionBase';
 import { ExportPreviewProvider } from './providers/ExportPreviewProvider';
 import { ProjectorProvider } from './providers/ProjectorProvider';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
-import { PackageManager } from './PackageManager';
+import { DocumentManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
 import { getRunner } from './runner';
 import { getConfiguredHome, watchToolchainSettings } from './config';
@@ -43,7 +43,7 @@ export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
   private presetProvider!: PresetProvider;
   private presetsReady = Promise.resolve();
-  public readonly packageManager = new PackageManager();
+  public readonly packageManager = new DocumentManager();
   public readonly settingsService = new SettingsService();
   private openDocuments = new Map<string, BoardCustomDocument>();
   private toolchainOutput?: vscode.OutputChannel;

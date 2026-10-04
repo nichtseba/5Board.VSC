@@ -25,6 +25,10 @@ export class BoardPackage {
 
   public static async read(uri: vscode.Uri): Promise<BoardPackage> {
     const packageBytes = await vscode.workspace.fs.readFile(uri);
+    return BoardPackage.readBytes(packageBytes);
+  }
+
+  public static async readBytes(packageBytes: Uint8Array): Promise<BoardPackage> {
     const zip = await JSZip.loadAsync(packageBytes);
     const manifest = await readJson<BoardManifest>(zip, MANIFEST_PATH);
 
