@@ -2,11 +2,10 @@ import type React from 'react';
 import { init } from '../app/init';
 import { useEffect, useMemo } from 'react';
 import ElementSettings from '../components/sidebar/elementSettings/ElementSettings';
-import { LayerSettings } from '../components/sidebar/elementSettings/LayerSettings';
 import { useMessageService } from '../services/MessageService';
 import { useLocalization } from '../providers/LocalizationProvider';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
-import { Button, Icon } from 'vscrui';
+import { Button, Divider, Icon } from 'vscrui';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
 import {
   findBoardElementById,
@@ -64,7 +63,6 @@ export default function ElementSettingsSidebar() {
   return (
     <SidebarShell>
       {content}
-      {selectedElements.length > 0 && <LayerSettings elements={selectedElements} />}
       {(selectedGroup || selectedElements.length >= 2) && (
         <Button
           appearance="secondary"
@@ -90,16 +88,20 @@ export default function ElementSettingsSidebar() {
         </Button>
       )}
       {selectedElements.length > 0 && (
-        <Button
-          appearance="secondary"
-          className="justify-center gap-2"
-          title={t('webview.sidebar-element-settings.deleteTooltip')}
-          onClick={() => handleDelete()}
-        >
-          <Icon name="trash" className="color-foreground-error" />
-
-          {t('webview.sidebar-element-settings.delete')}
-        </Button>
+        <>
+          <div className="-mt-2">
+            <Divider />
+          </div>
+          <Button
+            appearance="secondary"
+            className="justify-center gap-2"
+            title={t('webview.sidebar-element-settings.deleteTooltip')}
+            onClick={() => handleDelete()}
+          >
+            <Icon name="trash" className="color-foreground-error" />
+            {t('webview.sidebar-element-settings.delete')}
+          </Button>
+        </>
       )}
     </SidebarShell>
   );

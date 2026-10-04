@@ -9,7 +9,7 @@ import {
 } from '5board.vsc-common';
 import { useLocalization } from '../../providers/LocalizationProvider';
 import { useMessageService, useOnMessage } from '../../services/MessageService';
-import ColorSelector from './components/ColorSelector';
+import ColorSelector from './components/CompactColorSelector';
 
 const SHAPES: { id: ProjectorPointerShape; labelKey: TranslationKey }[] = [
   { id: 'dot', labelKey: 'webview.sidebar.projectorSettings.shapes.dot' },
@@ -173,7 +173,7 @@ export default function ProjectorSettings() {
         <ColorSelector
           color={style.color}
           onChange={(color) => update({ color })}
-          themePresets={PROJECTOR_POINTER_PRESET_COLORS.map((c) => ({
+          presets={PROJECTOR_POINTER_PRESET_COLORS.map((c) => ({
             id: c.id,
             value: c.value,
             label: t(`webview.sidebar.projectorSettings.colors.${c.id}` as TranslationKey),

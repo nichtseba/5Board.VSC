@@ -135,6 +135,7 @@ type AllWebviewToExtensionMessage =
       type: 'updateHeadingLevelSettings';
       level: HeadingLevel;
       changes: HeadingLevelSettings;
+      clear?: (keyof HeadingLevelSettings)[];
     }
   | {
       type: 'updateHeadingNumbering';

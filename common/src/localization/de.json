@@ -150,7 +150,16 @@
       "noElementSelected": "Kein Element ausgewählt",
       "unsupportedElement": "Elementtyp wird nicht unterstützt",
       "selectedElement": "Ausgewähltes Element",
-      "layer": "Ebene",
+      "elementStyle": "Element Style",
+      "transformation": {
+        "title": "Transformation",
+        "x": "X:",
+        "y": "Y:",
+        "width": "B:",
+        "height": "H:",
+        "rotation": "R:",
+        "zIndex": "Z:"
+      },
       "headingSettings": {
         "title": "Überschrift",
         "levelLabel": "Hierarchiestufe",
@@ -185,6 +194,10 @@
         "highlightColor": "Textmarker",
         "backgroundColor": "Hintergrundfarbe",
         "fontSize": "Schriftgröße",
+        "fontSettings": "Schrift",
+        "decoration": "Auszeichnung",
+        "list": "Liste",
+        "alignment": "Ausrichtung",
         "fontFamilyTooltip": "Schriftart",
         "fontSizeTooltip": "Schriftgröße",
         "lineHeightTooltip": "Zeilenhöhe",
@@ -256,6 +269,7 @@
       "name": "Name",
       "visibility": "Sichtbarkeit",
       "visible": "Sichtbar",
+      "hide": "Ausblenden",
       "speakerNote": "Sprechernotiz",
       "hideInExport": "Im Export ausblenden",
       "deleteTooltip": "Löschen (entf)"

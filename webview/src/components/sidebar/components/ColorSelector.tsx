@@ -3,12 +3,11 @@ import { ColorPreset, ColorPresets } from './ColorPresets';
 import { useSettings } from '../../../providers/SettingsProvider';
 import { useState } from 'react';
 
-type ColorSelectorProps = {
+export type ColorSelectorProps = {
   color?: string;
   onChange: (color: string | undefined) => void;
   allowNone?: boolean;
   presets?: readonly (string | ColorPreset)[];
-  themePresets?: readonly ColorPreset[];
   label?: string;
   customColorLabel?: string;
   themeLabel?: string;
@@ -23,10 +22,9 @@ export default function ColorSelector({
   onChange,
   allowNone = false,
   presets,
-  themePresets,
   label,
   customColorLabel,
-  themeLabel = 'Theme',
+  themeLabel,
   pickerTitle,
   noColorLabel,
   presetLabels,
@@ -46,31 +44,16 @@ export default function ColorSelector({
           presets={presets}
           allowNone={allowNone}
           noneLabel={noColorLabel}
+          themeLabel={themeLabel}
           presetLabels={presetLabels}
         />
-      )}
-      {themePresets && themePresets.length > 0 && (
-        <div className="flex flex-col gap-1">
-          <span className="text-xs uppercase text-foreground-description">{themeLabel}</span>
-          <ColorPresets
-            color={color}
-            onChange={onChange}
-            presets={themePresets.map((preset) => ({ ...preset, theme: true }))}
-            allowNone={allowNone}
-          />
-        </div>
       )}
       <div className="flex flex-col gap-1">
         {customColorLabel && (
           <span className="text-xs uppercase text-foreground-description">{customColorLabel}</span>
         )}
         {customColors.length > 0 && (
-          <ColorPresets
-            color={color}
-            onChange={onChange}
-            presets={customColors}
-            allowNone={allowNone}
-          />
+          <ColorPresets color={color} onChange={onChange} presets={customColors} />
         )}
         <ColorPicker
           color={pickerColor}

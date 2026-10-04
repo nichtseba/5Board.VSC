@@ -11,6 +11,7 @@ type ColorPresetsProps = {
   presets: readonly (string | ColorPreset)[];
   allowNone?: boolean;
   noneLabel?: string;
+  themeLabel?: string;
   presetLabels?: Record<string, string>;
 };
 
@@ -21,6 +22,7 @@ export function ColorPresets({
   presets,
   allowNone = false,
   noneLabel = 'Keine Farbe',
+  themeLabel = 'Theme',
   presetLabels,
 }: ColorPresetsProps) {
   const colorSelected = (preset: string) => color?.toLowerCase() === preset.toLowerCase();
@@ -46,7 +48,8 @@ export function ColorPresets({
           typeof preset === 'string'
             ? preset
             : (presetLabels?.[preset.id] ?? preset.label ?? preset.id);
-        const title = typeof preset === 'string' || !preset.theme ? label : `Theme: ${label}`;
+        const title =
+          typeof preset === 'string' || !preset.theme ? label : `${themeLabel}: ${label}`;
 
         return (
           <button

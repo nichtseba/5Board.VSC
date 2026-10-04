@@ -22,9 +22,13 @@ import {
   UnderlineButton,
 } from './components/TextSettingsButton';
 import { useMessageService } from '../../../services/MessageService';
-import ColorSelector from '../components/ColorSelector';
+import ColorSelector from '../components/CompactColorSelector';
 import { FontSizeInput } from './components/FontSizeInput';
 import { getCommonValue } from './utils/getCommonValue';
+import GenericElementSettings from './GenericElementSettings';
+import { TransformationSettings } from './TransformationSettings';
+import ElementStyleSettings from '../components/ElementStyleSettings';
+import { getCommonElementStyle } from './utils/getCommonElementStyle';
 
 type Props = {
   elements: EditorElement<EditorElementType.Text>[];
@@ -49,6 +53,17 @@ export function TextSettings({ elements }: Props) {
   const highlightColor = getCommonValue(
     elements.map((element) => element.data.tiptap?.marks?.textStyle?.backgroundColor),
   );
+  const updateStyle = (changes: Partial<(typeof elements)[number]['style']>) => {
+    messages.send({
+      type: 'updateElements',
+      changes: elements.map((element) => ({
+        id: element.id,
+        changes: {
+          style: { ...element.style, ...changes },
+        },
+      })),
+    });
+  };
   const backgroundColor = getCommonValue(elements.map((element) => element.style.backgroundColor));
   const colorPresetLabels = {
     foreground: t('webview.sidebar-element-settings.textSettings.colorPresets.foreground'),
@@ -73,12 +88,26 @@ export function TextSettings({ elements }: Props) {
         title={t('webview.sidebar-element-settings.textSettings.title')}
         icon="symbol-string"
       >
-        {/* <SettingsField>
-          <CommonSettings elements={elements} />
-        </SettingsField>
-        <Divider /> */}
-        <SettingsField>
-          <div className="mt-4 flex flex-wrap items-center gap-3">
+        <GenericElementSettings element={elements[0]} />
+        <Divider />
+        <TransformationSettings elements={elements} />
+        <Divider />
+        <ElementStyleSettings
+          style={getCommonElementStyle(elements)}
+          onChange={updateStyle}
+          allowNone
+          editableProperties={[
+            'backgroundColor',
+            'opacity',
+            'borderColor',
+            'borderWidth',
+            'borderRadius',
+            'borderStyle',
+          ]}
+        />
+        <Divider />
+        <SettingsField label={t('webview.sidebar-element-settings.textSettings.fontSettings')}>
+          <div className="flex flex-wrap items-center gap-3">
             <FontFamilyDropdown
               value={fontFamily}
               title={t('webview.sidebar-element-settings.textSettings.fontFamilyTooltip')}
@@ -137,7 +166,6 @@ export function TextSettings({ elements }: Props) {
             />
           </div>
         </SettingsField>
-        <Divider />
         <SettingsField>
           <ColorSelector
             color={textColor}
@@ -182,15 +210,7 @@ export function TextSettings({ elements }: Props) {
           <ColorSelector
             color={backgroundColor}
             allowNone
-            onChange={(color) => {
-              messages.send({
-                type: 'updateElements',
-                changes: elements.map((element) => ({
-                  id: element.id,
-                  changes: { style: { ...element.style, backgroundColor: color } },
-                })),
-              });
-            }}
+            onChange={(color) => updateStyle({ backgroundColor: color })}
             presets={PROJECTOR_POINTER_PRESET_COLORS}
             label={t('webview.sidebar-element-settings.textSettings.backgroundColor')}
             customColorLabel={t('webview.sidebar.projectorSettings.customColor')}
@@ -200,8 +220,8 @@ export function TextSettings({ elements }: Props) {
           />
         </SettingsField>
         <Divider />
-        <SettingsField>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3 mt-4">
+        <SettingsField label={t('webview.sidebar-element-settings.textSettings.decoration')}>
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3">
             <BoldButton elements={elements} />
             <ItalicButton elements={elements} />
             <StrikeButton elements={elements} />
@@ -210,15 +230,15 @@ export function TextSettings({ elements }: Props) {
           </div>
         </SettingsField>
         <Divider />
-        <SettingsField>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3 mt-4">
+        <SettingsField label={t('webview.sidebar-element-settings.textSettings.list')}>
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3">
             <BulletListButton elements={elements} />
             <OrderedListButton elements={elements} />
           </div>
         </SettingsField>
         <Divider />
-        <SettingsField>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3 mt-4">
+        <SettingsField label={t('webview.sidebar-element-settings.textSettings.alignment')}>
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(4rem,1fr))] gap-3">
             <AlignLeftButton elements={elements} />
             <AlignCenterButton elements={elements} />
             <AlignRightButton elements={elements} />
