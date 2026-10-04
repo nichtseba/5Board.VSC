@@ -17,6 +17,16 @@ export function createDefaultElement<T extends EditorElementType>(
   document: BoardDocument,
 ): EditorElement<T> {
   const profile = DEFAULT_ELEMENT_PROFILES[type];
+
+  const initialHeight =
+    type === EditorElementType.TableOfContents
+      ? Math.max(
+          6,
+          document.content.elements.filter((element) => element.type === EditorElementType.Heading)
+            .length * 2,
+        )
+      : profile.layout.height;
+
   const data = {
     ...structuredClone(profile.data),
     ...defaults?.data,
@@ -48,7 +58,10 @@ export function createDefaultElement<T extends EditorElementType>(
         (type === EditorElementType.Heading
           ? (document.content.grid?.columnCount ?? profile.layout.width)
           : profile.layout.width),
-      height: defaults?.layout?.height ?? profile.layout.height,
+      height:
+        type === EditorElementType.TableOfContents
+          ? initialHeight
+          : (defaults?.layout?.height ?? profile.layout.height),
     },
 
     style: {

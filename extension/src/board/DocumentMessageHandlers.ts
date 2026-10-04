@@ -1,8 +1,11 @@
 import {
+  BoardElement,
   EditorElement,
   EditorElementType,
   EditorToolId,
+  findBoardElementById,
   getElementSectionMap,
+  isGroupElement,
   normalizeElementRevealOrder,
   reconcileElementRevealOrder,
 } from '5board.vsc-common';
@@ -115,9 +118,9 @@ export class DocumentMessageHandlers {
           let changed = false;
 
           for (const update of msg.changes) {
-            const element = document.content.elements.find((element) => element.id === update.id);
+            const element = findBoardElementById(document.content.elements, update.id);
 
-            if (!element) {
+            if (!element || isGroupElement(element)) {
               continue;
             }
 
@@ -163,6 +166,7 @@ export class DocumentMessageHandlers {
           return changed ? document : null;
         });
       }),
+
       //#endregion "General"
 
       //#region "EditorTools"
@@ -170,7 +174,7 @@ export class DocumentMessageHandlers {
         this.document.applyEdit((document) => {
           const previousSections = getElementSectionMap(document.content.elements);
           let changed = false;
-          for (const element of document.content.elements) {
+          forEachEditorElement(document.content.elements, (element) => {
             if (msg.rowCount !== 0 && element.layout.yPos >= msg.startRow) {
               element.layout = {
                 ...element.layout,
@@ -178,7 +182,7 @@ export class DocumentMessageHandlers {
               };
               changed = true;
             }
-          }
+          });
           if (changed) {
             document.content.elements = reconcileElementRevealOrder(
               document.content.elements,
@@ -200,10 +204,11 @@ export class DocumentMessageHandlers {
           let changed = false;
 
           for (const update of msg.changes) {
-            const element = document.content.elements.find((e) => e.id === update.id);
-            if (!element) {
+            const element = findBoardElementById(document.content.elements, update.id);
+            if (!element || isGroupElement(element)) {
               continue;
             }
+
             const nextData = {
               ...element.data,
               ...update.changes.data,
@@ -228,27 +233,9 @@ export class DocumentMessageHandlers {
               continue;
             }
 
-            document.content.elements = document.content.elements.map((el) => {
-              if (el.id !== update.id) {
-                return el;
-              }
-
-              return {
-                ...el,
-                layout: {
-                  ...el.layout,
-                  ...update.changes.layout,
-                },
-                data: {
-                  ...el.data,
-                  ...update.changes.data,
-                } as typeof el.data,
-                style: {
-                  ...el.style,
-                  ...update.changes.style,
-                },
-              };
-            });
+            element.layout = nextLayout;
+            element.data = nextData as typeof element.data;
+            element.style = nextStyle;
             changed = true;
           }
           if (changed) {
@@ -309,6 +296,36 @@ export class DocumentMessageHandlers {
       }),
       //#endregion "EditorTools"
 
+      //#region "Find"
+
+      this.document.messageService.on('replaceElementContent', (msg) => {
+        this.document.applyEdit((document) => {
+          const replaceable = new Set<EditorElementType>([
+            EditorElementType.Heading,
+            EditorElementType.Text,
+            EditorElementType.Code,
+          ]);
+          let changed = false;
+          for (const change of msg.changes) {
+            const element = document.content.elements.find((e) => e.id === change.id);
+
+            if (!element || isGroupElement(element) || !replaceable.has(element.type)) {
+              continue;
+            }
+
+            const nextData = { ...element.data, content: change.content };
+            if (deepEquals(nextData, element.data)) {
+              continue;
+            }
+
+            element.data = nextData as typeof element.data;
+            changed = true;
+          }
+          return changed ? document : null;
+        });
+      }),
+      //#endregion "Find"
+
       //#region "Projector"
 
       // The editor (ProjectorCursorMirror) only sends while mirroring is active, so just relay.
@@ -335,5 +352,18 @@ export class DocumentMessageHandlers {
       }),
       //#endregion "Projector"
     ];
+  }
+}
+
+function forEachEditorElement(
+  elements: readonly BoardElement[],
+  callback: (element: EditorElement) => void,
+): void {
+  for (const element of elements) {
+    if (isGroupElement(element)) {
+      forEachEditorElement(element.data.children, callback);
+    } else {
+      callback(element);
+    }
   }
 }

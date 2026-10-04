@@ -1,4 +1,10 @@
-import { BoardElement, EditorElement, EditorElementType } from './element';
+import {
+  BoardElement,
+  EditorElement,
+  EditorElementType,
+  getElementLayout,
+  GROUP_ELEMENT_TYPE,
+} from './element';
 
 export type ElementSectionMap = Map<string, string | null>;
 
@@ -9,8 +15,8 @@ export function getElementSectionMap(elements: readonly BoardElement[]): Element
     .map((element, index) => ({ element, index }))
     .sort(
       (a, b) =>
-        a.element.layout.yPos - b.element.layout.yPos ||
-        a.element.layout.xPos - b.element.layout.xPos ||
+        getElementLayout(a.element).yPos - getElementLayout(b.element).yPos ||
+        getElementLayout(a.element).xPos - getElementLayout(b.element).xPos ||
         a.index - b.index,
     );
 
@@ -78,8 +84,8 @@ export function reconcileElementRevealOrder(
     .filter((element) => previousSections.get(element.id) !== nextSections.get(element.id))
     .sort(
       (a, b) =>
-        a.layout.yPos - b.layout.yPos ||
-        a.layout.xPos - b.layout.xPos ||
+        getElementLayout(a).yPos - getElementLayout(b).yPos ||
+        getElementLayout(a).xPos - getElementLayout(b).xPos ||
         originalOrder.get(a.id)! - originalOrder.get(b.id)!,
     );
   const reordered = [...elements];
@@ -97,9 +103,9 @@ export function reconcileElementRevealOrder(
     );
     const nextSibling = targetSiblings.find(
       (candidate) =>
-        candidate.layout.yPos > element.layout.yPos ||
-        (candidate.layout.yPos === element.layout.yPos &&
-          candidate.layout.xPos > element.layout.xPos),
+        getElementLayout(candidate).yPos > getElementLayout(element).yPos ||
+        (getElementLayout(candidate).yPos === getElementLayout(element).yPos &&
+          getElementLayout(candidate).xPos > getElementLayout(element).xPos),
     );
 
     if (nextSibling) {
@@ -162,10 +168,7 @@ export function moveHeadingSectionBefore(
   sourceId: string,
   targetId: string,
 ): BoardElement[] | undefined {
-  const workingElements = elements.map((element) => ({
-    ...element,
-    layout: { ...element.layout },
-  }));
+  const workingElements = elements.map(cloneElement);
   const sectionById = getElementSectionMap(workingElements);
   const source = workingElements.find((element) => element.id === sourceId);
   const target = workingElements.find((element) => element.id === targetId);
@@ -207,7 +210,9 @@ export function moveHeadingSectionBefore(
     if (!nextHeading) {
       return 0;
     }
-    const lastPosition = Math.max(...block.members.map((element) => element.layout.yPos));
+    const lastPosition = Math.max(
+      ...block.members.map((element) => getElementLayout(element).yPos), //getElementLayout ok?
+    );
     return Math.max(0, nextHeading.layout.yPos - lastPosition - 1);
   });
   const reorderedBlocks = [...blocks];
@@ -223,9 +228,11 @@ export function moveHeadingSectionBefore(
     const block = reorderedBlocks[index];
     const offset = nextY - block.heading.layout.yPos;
     for (const member of block.members) {
-      member.layout = { ...member.layout, yPos: member.layout.yPos + offset };
+      moveElementY(member, offset);
     }
-    const lastPosition = Math.max(...block.members.map((element) => element.layout.yPos));
+    const lastPosition = Math.max(
+      ...block.members.map((element) => getElementLayout(element).yPos),
+    );
     nextY = lastPosition + 1 + gaps[index];
   }
 
@@ -269,11 +276,42 @@ function getHeadingSectionMembers(
 function comparePosition(elements: readonly BoardElement[]) {
   const originalIndex = new Map(elements.map((element, index) => [element.id, index]));
   return (a: BoardElement, b: BoardElement) =>
-    a.layout.yPos - b.layout.yPos ||
-    a.layout.xPos - b.layout.xPos ||
+    getElementLayout(a).yPos - getElementLayout(b).yPos ||
+    getElementLayout(a).xPos - getElementLayout(b).xPos ||
     originalIndex.get(a.id)! - originalIndex.get(b.id)!;
 }
 
 function isHeading(element: BoardElement): element is EditorElement<EditorElementType.Heading> {
   return element.type === EditorElementType.Heading;
+}
+
+function moveElementY(element: BoardElement, offset: number): void {
+  if (element.type === GROUP_ELEMENT_TYPE) {
+    for (const child of element.data.children) {
+      moveElementY(child, offset);
+    }
+
+    return;
+  }
+
+  element.layout = {
+    ...element.layout,
+    yPos: element.layout.yPos + offset,
+  };
+}
+
+function cloneElement(element: BoardElement): BoardElement {
+  if (element.type === GROUP_ELEMENT_TYPE) {
+    return {
+      ...element,
+      data: {
+        children: element.data.children.map(cloneElement),
+      },
+    };
+  }
+
+  return {
+    ...element,
+    layout: { ...element.layout },
+  };
 }

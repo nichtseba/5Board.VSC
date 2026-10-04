@@ -27,6 +27,9 @@ function copyComputedStyles(source: Element, target: Element): void {
     const computedStyle = window.getComputedStyle(source);
 
     for (const property of computedStyle) {
+      if (property.startsWith('--')) {
+        continue;
+      }
       target.style.setProperty(
         property,
         computedStyle.getPropertyValue(property),

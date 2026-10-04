@@ -34,9 +34,9 @@ export class BoardCustomDocument implements vscode.CustomDocument {
         sender,
       );
     });
-    this.messageService.on('focus', () => {
-      EXTENSION.activeEditorDocument = this;
-    });
+    // this.messageService.on('focus', () => {
+    //   EXTENSION.activeEditorDocument = this;
+    // });
     this.messageService.on('saveHtmlExport', async (msg) => {
       await this.saveHtmlExport(msg.html, msg.backgroundColor);
     });
@@ -178,7 +178,7 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   ): void {
     const previous = this.boardPackage.document;
     const next = edit(structuredClone(this.boardPackage.document));
-    if (!next) {
+    if (next === null) {
       return;
     }
     this.boardPackage.document = next;

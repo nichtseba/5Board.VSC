@@ -23,7 +23,7 @@ export default function SliderInput({
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between">
-        <span className="text-xs opacity-80">{label}</span>
+        <span className="text-xs text-foreground-description">{label}</span>
         <span className="text-xs tabular-nums opacity-70">
           {value}
           {unit}

@@ -1,4 +1,5 @@
-import { BoardElement, EditorElementType } from './element';
+import { flattenBoardElements } from '../main';
+import { BoardElement, EditorElement, EditorElementType } from './element';
 import {
   HeadingLevel,
   HeadingNumberingStyle,
@@ -35,8 +36,11 @@ export function computeHeadingNumbers(
     return new Map();
   }
 
-  const headings = elements
-    .filter((el) => el.type === EditorElementType.Heading && el.style.visible !== false)
+  const headings = flattenBoardElements(elements)
+    .filter(
+      (element): element is EditorElement<EditorElementType.Heading> =>
+        element.type === EditorElementType.Heading && element.style.visible !== false,
+    )
     .slice()
     .sort((a, b) => a.layout.yPos - b.layout.yPos || a.layout.xPos - b.layout.xPos);
 

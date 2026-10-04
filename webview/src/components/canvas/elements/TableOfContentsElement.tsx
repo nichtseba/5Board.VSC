@@ -1,4 +1,9 @@
-import { EditorElement, EditorElementType, getHeadingLevelSettings } from '5board.vsc-common';
+import {
+  EditorElement,
+  EditorElementType,
+  flattenBoardElements,
+  getHeadingLevelSettings,
+} from '5board.vsc-common';
 import { EditorElementProps } from '../EditorElement';
 import { useBoardDocument } from '../../../providers/BoardDocumentProvider';
 import { useMessageService } from '../../../services/MessageService';
@@ -52,7 +57,7 @@ export function TableOfContentsElement({
   }
 
   const headings =
-    boardDocument?.content.elements
+    (boardDocument ? flattenBoardElements(boardDocument.content.elements) : [])
       .filter(isHeadingElement)
       .slice()
       .sort((a, b) => a.layout.yPos - b.layout.yPos || a.layout.xPos - b.layout.xPos) ?? [];

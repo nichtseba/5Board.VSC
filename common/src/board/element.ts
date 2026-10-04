@@ -1,7 +1,7 @@
 import type { JSONContent } from '@tiptap/core';
 import { TranslationKey } from '../localization';
 
-export type BoardElement = EditorElement; // Todo: Replace with new Element type when we have it defined
+export type BoardElement = EditorElement | GroupElement; // Todo: Replace with new Element type when we have it defined
 // Todo: Add additional element types
 export enum EditorElementType {
   Heading = 'heading',
@@ -27,6 +27,15 @@ export type EditorElement<T extends EditorElementType = EditorElementType> = {
   style: ElementStyle;
   display: ElementDisplay;
   data: EditorElementDataMap[T];
+};
+
+export const GROUP_ELEMENT_TYPE = 'group' as const;
+
+export type GroupElement = {
+  id: string;
+  name?: string;
+  type: typeof GROUP_ELEMENT_TYPE;
+  data: { children: BoardElement[] };
 };
 
 export type ElementLayout = {
@@ -331,7 +340,7 @@ export const DEFAULT_ELEMENT_PROFILES = {
     data: { strokes: [] },
   },
   [EditorElementType.TableOfContents]: {
-    layout: { width: 40, height: 10 },
+    layout: { width: 30, height: 10 },
     style: {
       visible: true,
     },
@@ -409,4 +418,18 @@ export function getElementTypeDefinition<T extends EditorElementType>(type: T) {
 }
 export function getCustomElementTypes(): [] {
   return [];
+}
+
+export function getElementLayout(element: BoardElement): ElementLayout {
+  if (element.type !== GROUP_ELEMENT_TYPE) {
+    return element.layout;
+  }
+
+  const topmostChild = [...element.data.children].sort(
+    (a, b) =>
+      (getElementLayout(a)?.yPos ?? Infinity) - (getElementLayout(b)?.yPos ?? Infinity) ||
+      (getElementLayout(a)?.xPos ?? Infinity) - (getElementLayout(b)?.xPos ?? Infinity),
+  )[0];
+
+  return getElementLayout(topmostChild);
 }
