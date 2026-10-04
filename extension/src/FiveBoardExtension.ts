@@ -128,7 +128,7 @@ export class FiveBoardExtension extends ExtensionBase {
       }),
     );
     new FiveBoardFileSystemProvider(this.packageManager).register(context);
-    new ExportPreviewProvider(context, this.packageManager).register();
+    new ExportPreviewProvider(context).register();
   }
 
   @Command('5board-vsc.newBoard')
@@ -404,7 +404,7 @@ export class FiveBoardExtension extends ExtensionBase {
     const uris = await vscode.window.showOpenDialog({
       canSelectMany: false,
       filters: {
-        Images: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'],
+        Images: ['png', 'jpg', 'jpeg', 'gif', 'webp'],
       },
     });
 
@@ -442,19 +442,37 @@ export class FiveBoardExtension extends ExtensionBase {
 
   @Command('5board-vsc.previewHtmlExport')
   async previewHtmlExportCommand(): Promise<void> {
-    const uri = this.activeEditorDocument?.uri;
+    const sourceDocument = this.activeEditorDocument;
 
-    if (!uri) {
+    if (!sourceDocument) {
       vscode.window.showErrorMessage(t('extension.htmlExport.noActiveBoard'));
       return;
     }
 
-    await vscode.commands.executeCommand(
-      'vscode.openWith',
-      uri,
-      ExportPreviewProvider.VIEW_TYPE,
-      vscode.ViewColumn.Beside,
+    const uri = sourceDocument.uri;
+
+    const existingPreviewTabs = vscode.window.tabGroups.all.flatMap((group) =>
+      group.tabs.filter((tab) => {
+        const input = tab.input;
+
+        return (
+          input instanceof vscode.TabInputCustom &&
+          input.viewType === ExportPreviewProvider.VIEW_TYPE &&
+          input.uri.toString() === uri.toString()
+        );
+      }),
     );
+
+    if (existingPreviewTabs.length > 0) {
+      await vscode.window.tabGroups.close(existingPreviewTabs, true);
+    }
+
+    this.activeEditorDocument = sourceDocument;
+
+    await vscode.commands.executeCommand('vscode.openWith', uri, ExportPreviewProvider.VIEW_TYPE, {
+      viewColumn: vscode.ViewColumn.Beside,
+      preserveFocus: true,
+    });
   }
 
   public applyEditToActiveDocument(edit: (document: BoardDocument) => void): void {

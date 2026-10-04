@@ -34,11 +34,11 @@ export type EditorCanvasProps = {
   // Live freehand stroke to mirror (projector only). The editor draws its own
   // preview locally via the FreehandTool.
   freehandPreview?: FreehandPreview | null;
-  readOnly?: boolean;
+  exportMode?: boolean;
 };
 
 export default function EditorCanvas({
-  readOnly = false,
+  exportMode = false,
   enableKeyboardShortcuts = false,
   cursor,
   pointerStyle,
@@ -186,19 +186,19 @@ export default function EditorCanvas({
         {...pointerHandlers}
         {...imageImportHandlers}
       >
-        {!readOnly && <CanvasTools />}
+        {!exportMode && <CanvasTools />}
 
         {flatElements.map((element) => (
           <EditorElement
             key={element.id}
             element={element}
-            selected={!readOnly && selectedLeafIds.includes(element.id)}
+            selected={!exportMode && selectedLeafIds.includes(element.id)}
             grouped={selectedLeafIds.length > 1}
             assetUrls={assetUrls}
+            exportMode={exportMode}
           />
         ))}
-
-        {activeToolId === EditorToolId.POINTER && selectedLeafIds.length > 1 && (
+        {!exportMode && activeToolId === EditorToolId.POINTER && selectedLeafIds.length > 1 && (
           <GroupInteractionController
             elements={flatElements}
             selectedElementIds={selectedLeafIds}

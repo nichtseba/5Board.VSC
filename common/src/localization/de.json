@@ -236,7 +236,10 @@
         }
       },
       "imageSettings": {
-        "title": "Bild"
+        "title": "Bild",
+        "hideInExport": "Im Export durch Platzhalter ersetzen",
+        "exportPlaceholder": "Bild nicht im Export enthalten",
+        "imageName": "Bildname"
       },
       "freehandSettings": {
         "title": "Freihand"

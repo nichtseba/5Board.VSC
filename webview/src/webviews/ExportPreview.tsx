@@ -33,7 +33,7 @@ export default function ExportPreview() {
           <div className="export-preview-pages">
             <div className="export-preview-page-guides" />
             <CanvasEventsProvider>
-              <EditorCanvas readOnly />
+              <EditorCanvas exportMode />
             </CanvasEventsProvider>
           </div>
         ) : (

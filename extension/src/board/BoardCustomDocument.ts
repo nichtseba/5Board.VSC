@@ -29,9 +29,9 @@ export class BoardCustomDocument implements vscode.CustomDocument {
         sender,
       );
     });
-    this.messageService.on('focus', () => {
-      EXTENSION.activeEditorDocument = this;
-    });
+    // this.messageService.on('focus', () => {
+    //   EXTENSION.activeEditorDocument = this;
+    // });
     this.messageService.on('saveHtmlExport', async (msg) => {
       await this.saveHtmlExport(msg.html, msg.backgroundColor);
     });

@@ -39,6 +39,7 @@ export type EditorElementProps<T extends EditorElementType> = {
   targetRef?: React.RefObject<HTMLDivElement>;
   assetUrls?: Record<string, string>;
   preview?: boolean;
+  exportMode?: boolean;
 };
 
 /**
@@ -53,6 +54,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
   grouped,
   assetUrls,
   preview,
+  exportMode,
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
@@ -208,6 +210,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
           editingPosition={editingPosition}
           assetUrls={assetUrls}
           preview={preview}
+          exportMode={exportMode}
           onStopEditing={handleStopEditing}
         />
       </div>
