@@ -10,7 +10,14 @@ import { StructureTreeProvider } from '../providers/StructureTreeProvider';
 import { EXTENSION } from '../extension';
 import deepEquals from 'deep-equal';
 import { FileTreeProvider } from '../providers/FileTreeProvider';
-import { getElementSectionMap, reconcileElementRevealOrder } from '5board.vsc-common';
+import {
+  findBoardElementById,
+  getElementSectionMap,
+  groupElementsInDocument,
+  isGroupElement,
+  reconcileElementRevealOrder,
+  ungroupElementsInDocument,
+} from '5board.vsc-common';
 
 export class SidebarManager implements vscode.Disposable {
   private readonly sync: SidebarDocumentSync;
@@ -142,11 +149,11 @@ export class SidebarManager implements vscode.Disposable {
         let changed = false;
 
         for (const update of msg.changes) {
-          const elementIndex = document.content.elements.findIndex((e) => e.id === update.id);
-          const element = document.content.elements[elementIndex];
-          if (!element) {
-            continue; // Todo: Warn here, something has gone wrong
+          const element = findBoardElementById(document.content.elements, update.id);
+          if (!element || isGroupElement(element)) {
+            continue;
           }
+
           const nextData = {
             ...element.data,
             ...update.changes.data,
@@ -178,20 +185,14 @@ export class SidebarManager implements vscode.Disposable {
           }
 
           document.content.elements = document.content.elements.map((el) => {
-            if (el.id !== update.id) {
+            if (el.id !== update.id || isGroupElement(el)) {
               return el;
             }
 
             return {
               ...el,
-              layout: {
-                ...el.layout,
-                ...update.changes.layout,
-              },
-              data: {
-                ...el.data,
-                ...update.changes.data,
-              } as typeof el.data,
+              layout: nextLayout,
+              data: nextData as typeof el.data,
               style: nextStyle,
               display: nextDisplay,
             };
@@ -270,6 +271,20 @@ export class SidebarManager implements vscode.Disposable {
               : numberingFormats,
         };
       });
+    });
+    this.messages.on('groupElements', ({ ids }) => {
+      const activeDocument = EXTENSION.activeEditorDocument;
+      if (!activeDocument) {
+        return;
+      }
+      activeDocument.applyEdit((document) => groupElementsInDocument(document, ids));
+    });
+    this.messages.on('ungroupElements', ({ id }) => {
+      const activeDocument = EXTENSION.activeEditorDocument;
+      if (!activeDocument) {
+        return;
+      }
+      activeDocument.applyEdit((document) => ungroupElementsInDocument(document, id));
     });
   }
 

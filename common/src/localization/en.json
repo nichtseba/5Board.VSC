@@ -23,6 +23,7 @@
     },
     "presets": {
       "noElementSelected": "No element selected. Please select an element to save as a preset.",
+      "groupNotSupported": "Groups are not supported yet to build presets. Please select a single element to save as a preset.",
       "savePreset": "Save as Preset",
       "presetNotSaved": "No preset was saved with the selected options",
       "presetName": "Preset Name",
@@ -67,7 +68,8 @@
         "circle": "Circle",
         "line": "Line",
         "freehand": "Freehand",
-        "tableOfContents": "Table of Contents"
+        "tableOfContents": "Table of Contents",
+        "group": "Group"
       },
       "freehand": {
         "title": "Freehand Options",
@@ -212,6 +214,8 @@
         "headCircle": "Circle",
         "headSquare": "Square"
       },
+      "group": "Group",
+      "ungroup": "Ungroup",
       "delete": "Delete",
       "name": "Name",
       "visibility": "Visibility",

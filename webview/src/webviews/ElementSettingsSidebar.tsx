@@ -1,6 +1,6 @@
 import type React from 'react';
 import { init } from '../app/init';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import ElementSettings from '../components/sidebar/elementSettings/ElementSettings';
 import { LayerSettings } from '../components/sidebar/elementSettings/LayerSettings';
 import { useMessageService } from '../services/MessageService';
@@ -8,6 +8,13 @@ import { useLocalization } from '../providers/LocalizationProvider';
 import { SidebarShell } from '../components/sidebar/layout/SidebarShell';
 import { Button, Icon } from 'vscrui';
 import { useBoardDocument } from '../providers/BoardDocumentProvider';
+import {
+  findBoardElementById,
+  flattenBoardElements,
+  getLeafElementIds,
+  isGroupElement,
+} from '5board.vsc-common';
+import { RectangleGroupIcon } from '@heroicons/react/24/outline';
 
 export default function ElementSettingsSidebar() {
   const messages = useMessageService();
@@ -17,15 +24,16 @@ export default function ElementSettingsSidebar() {
   useEffect(() => {
     messages.send({ type: 'ready' });
   }, []);
-
+  const elements = document?.content.elements ?? [];
+  const flatElements = useMemo(() => flattenBoardElements(elements), [elements]);
   const selectedElementIds = document?.content.selectedElementIds ?? [];
+  const selectedLeafIds = selectedElementIds.flatMap((id) => {
+    const selected = findBoardElementById(elements, id);
+    return selected ? getLeafElementIds([selected]) : [];
+  });
 
   const selectedElements =
-    document?.content.elements.filter((element) => selectedElementIds.includes(element.id)) ?? [];
-
-  const primarySelectedElement =
-    document?.content.elements.find((e) => document.content.primarySelectedElementId === e.id) ??
-    null;
+    flatElements.filter((element) => selectedLeafIds.includes(element.id)) ?? [];
 
   let content: React.ReactNode;
   if (selectedElements.length === 0) {
@@ -45,11 +53,43 @@ export default function ElementSettingsSidebar() {
     });
   };
 
+  const selectedElement =
+    selectedElementIds.length === 1
+      ? findBoardElementById(elements, selectedElementIds[0])
+      : undefined;
+
+  const selectedGroup =
+    selectedElement && isGroupElement(selectedElement) ? selectedElement : undefined;
+
   return (
     <SidebarShell>
       {content}
-      {primarySelectedElement && <LayerSettings element={primarySelectedElement} />}
-      {primarySelectedElement && (
+      {selectedElements.length > 0 && <LayerSettings elements={selectedElements} />}
+      {(selectedGroup || selectedElements.length >= 2) && (
+        <Button
+          appearance="secondary"
+          className="justify-center gap-2"
+          onClick={() => {
+            if (selectedGroup) {
+              messages.send({
+                type: 'ungroupElements',
+                id: selectedGroup.id,
+              });
+            } else {
+              messages.send({
+                type: 'groupElements',
+                ids: selectedElementIds,
+              });
+            }
+          }}
+        >
+          <RectangleGroupIcon className="size-4" />
+          {selectedGroup
+            ? t('webview.sidebar-element-settings.ungroup')
+            : t('webview.sidebar-element-settings.group')}
+        </Button>
+      )}
+      {selectedElements.length > 0 && (
         <Button
           appearance="secondary"
           className="justify-center gap-2"

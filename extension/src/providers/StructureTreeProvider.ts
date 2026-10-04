@@ -1,6 +1,8 @@
 import {
+  BoardElement,
   EditorElement,
   EditorElementType,
+  getElementLayout,
   getElementSectionMap,
   moveElementBeforeInSection,
   moveHeadingSectionBefore,
@@ -72,7 +74,7 @@ export class StructureTreeProvider
       }
 
       const previousPositions = new Map(
-        elements.map((candidate) => [candidate.id, candidate.layout.yPos]),
+        elements.map((candidate) => [candidate.id, getElementLayout(candidate).yPos]),
       );
       const reordered = isHeadingElement(source)
         ? moveHeadingSectionBefore(elements, sourceId, target.elementId)
@@ -84,7 +86,7 @@ export class StructureTreeProvider
       const changed =
         reordered.some((candidate, index) => candidate.id !== elements[index]?.id) ||
         reordered.some(
-          (candidate) => previousPositions.get(candidate.id) !== candidate.layout.yPos,
+          (candidate) => previousPositions.get(candidate.id) !== getElementLayout(candidate).yPos,
         );
       if (!changed) {
         return false;
@@ -116,7 +118,7 @@ export class StructureTreeProvider
 class StructureNode extends vscode.TreeItem {
   public readonly elementId: string;
 
-  constructor(element: EditorElement) {
+  constructor(element: BoardElement) {
     let label;
     let state;
     if (isHeadingElement(element)) {
@@ -140,7 +142,7 @@ class StructureNode extends vscode.TreeItem {
   }
 }
 
-function isHeadingElement(el: EditorElement): el is EditorElement<EditorElementType.Heading> {
+function isHeadingElement(el: BoardElement): el is EditorElement<EditorElementType.Heading> {
   return el.type === EditorElementType.Heading;
 }
 
