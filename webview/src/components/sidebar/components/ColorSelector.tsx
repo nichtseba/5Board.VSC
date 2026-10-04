@@ -12,6 +12,9 @@ type ColorSelectorProps = {
   label?: string;
   customColorLabel?: string;
   themeLabel?: string;
+  pickerTitle?: string;
+  noColorLabel?: string;
+  presetLabels?: Record<string, string>;
 };
 
 // Generic colour picker with optional preset swatches
@@ -24,6 +27,9 @@ export default function ColorSelector({
   label,
   customColorLabel,
   themeLabel = 'Theme',
+  pickerTitle,
+  noColorLabel,
+  presetLabels,
 }: ColorSelectorProps) {
   const settings = useSettings();
 
@@ -34,7 +40,14 @@ export default function ColorSelector({
     <div className="flex flex-col gap-2">
       {label && <span className="text-foreground-description">{label}</span>}
       {presets && presets.length > 0 && (
-        <ColorPresets color={color} onChange={onChange} presets={presets} allowNone={allowNone} />
+        <ColorPresets
+          color={color}
+          onChange={onChange}
+          presets={presets}
+          allowNone={allowNone}
+          noneLabel={noColorLabel}
+          presetLabels={presetLabels}
+        />
       )}
       {themePresets && themePresets.length > 0 && (
         <div className="flex flex-col gap-1">
@@ -61,6 +74,7 @@ export default function ColorSelector({
         )}
         <ColorPicker
           color={pickerColor}
+          title={pickerTitle}
           onChange={(newColor) => {
             setPickerColor(newColor);
             onChange(newColor);

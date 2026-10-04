@@ -10,10 +10,19 @@ type ColorPresetsProps = {
   onChange: (color: string | undefined) => void;
   presets: readonly (string | ColorPreset)[];
   allowNone?: boolean;
+  noneLabel?: string;
+  presetLabels?: Record<string, string>;
 };
 
 // Just the row of preset swatches; the label is shown on hover.
-export function ColorPresets({ color, onChange, presets, allowNone = false }: ColorPresetsProps) {
+export function ColorPresets({
+  color,
+  onChange,
+  presets,
+  allowNone = false,
+  noneLabel = 'Keine Farbe',
+  presetLabels,
+}: ColorPresetsProps) {
   const colorSelected = (preset: string) => color?.toLowerCase() === preset.toLowerCase();
 
   return (
@@ -21,8 +30,8 @@ export function ColorPresets({ color, onChange, presets, allowNone = false }: Co
       {allowNone && (
         <button
           type="button"
-          title="Keine Farbe"
-          aria-label="Keine Farbe"
+          title={noneLabel}
+          aria-label={noneLabel}
           aria-pressed={color === undefined}
           onClick={() => onChange(undefined)}
           className={`relative h-6 w-6 overflow-hidden rounded-full border border-foreground-description ${color === undefined ? 'ring-2 ring-focus-border border-transparent' : ''}`}
@@ -33,7 +42,10 @@ export function ColorPresets({ color, onChange, presets, allowNone = false }: Co
 
       {presets.map((preset) => {
         const value = typeof preset === 'string' ? preset : preset.value;
-        const label = typeof preset === 'string' ? preset : (preset.label ?? preset.id);
+        const label =
+          typeof preset === 'string'
+            ? preset
+            : (presetLabels?.[preset.id] ?? preset.label ?? preset.id);
         const title = typeof preset === 'string' || !preset.theme ? label : `Theme: ${label}`;
 
         return (

@@ -4,14 +4,23 @@ interface FontSizeInputProps {
   onChange: (value: string) => void;
   onConfirm?: () => void;
   label?: string;
+  title?: string;
 }
 
-export function FontSizeInput({ value, min = 1, onChange, onConfirm, label }: FontSizeInputProps) {
+export function FontSizeInput({
+  value,
+  min = 1,
+  onChange,
+  onConfirm,
+  label,
+  title,
+}: FontSizeInputProps) {
   return (
     <>
       {label && <span className="text-foreground-description">{label}</span>}
       <input
         type="number"
+        title={title}
         min={min}
         value={value}
         onChange={(e) => onChange(e.target.value)}
