@@ -40,6 +40,13 @@ export type EditorElementProps<T extends EditorElementType> = {
   assetUrls?: Record<string, string>;
   preview?: boolean;
   exportMode?: boolean;
+  /**
+   * Presentation state shown in the editor while a projector is open:
+   * 'hidden' = not shown on the projector, 'next' = shown by the next reveal step.
+   */
+  revealMarker?: 'hidden' | 'next';
+  /** Whether a projector is open, which enables presentation actions in the context menu. */
+  presenting?: boolean;
 };
 
 /**
@@ -55,6 +62,8 @@ export default function EditorElement<ElementType extends EditorElementType>({
   assetUrls,
   preview,
   exportMode,
+  revealMarker,
+  presenting,
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
@@ -165,6 +174,12 @@ export default function EditorElement<ElementType extends EditorElementType>({
       setEditingPosition(null);
     }
   }, [selected, canEdit]);
+  const gridPlacement = {
+    gridRowStart: element.layout.yPos + 1,
+    gridRowEnd: `span ${element.layout.height}`,
+    gridColumnStart: element.layout.xPos + 1,
+    gridColumnEnd: `span ${element.layout.width}`,
+  };
   const hidden =
     preview ||
     (viewType === 'projector' && (element.display.speakerNote || !element.display.visible)) ||
@@ -189,16 +204,15 @@ export default function EditorElement<ElementType extends EditorElementType>({
           }
           ${selected ? 'outline outline-2 outline-focus-border bg-focus-border/12' : ''}
           ${hidden ? 'invisible' : ''}
+          transition-opacity
         `}
         ref={targetRef}
         style={{
-          gridRowStart: element.layout.yPos + 1,
-          gridRowEnd: `span ${element.layout.height}`,
-          gridColumnStart: element.layout.xPos + 1,
-          gridColumnEnd: `span ${element.layout.width}`,
+          ...gridPlacement,
           transform: `rotate(${element.layout.rotation ?? 0}deg)`,
           transformOrigin: 'center center',
           zIndex: element.layout.zIndex,
+          opacity: revealMarker ? HIDDEN_REVEAL_OPACITY : undefined,
         }}
       >
         <ElementComponent
@@ -214,6 +228,29 @@ export default function EditorElement<ElementType extends EditorElementType>({
           onStopEditing={handleStopEditing}
         />
       </div>
+      {revealMarker === 'next' && (
+        // Separate grid item so the marker is neither clipped nor dimmed with the element.
+        <div
+          aria-hidden
+          className="pointer-events-none relative rounded-sm"
+          style={{
+            ...gridPlacement,
+            zIndex: NEXT_REVEAL_MARKER_Z_INDEX,
+            outline: `2px dashed ${NEXT_REVEAL_COLOR}`,
+            outlineOffset: 2,
+          }}
+        >
+          <span
+            className="absolute left-0 -top-5 whitespace-nowrap rounded-sm px-1 text-xs leading-4"
+            style={{
+              backgroundColor: NEXT_REVEAL_COLOR,
+              color: 'var(--vscode-editor-background)',
+            }}
+          >
+            ▶ {t('webview.canvas.nextReveal')}
+          </span>
+        </div>
+      )}
       {activeToolId === EditorToolId.POINTER && !grouped && (
         <ElementInteractionController
           element={element}
@@ -236,12 +273,28 @@ export default function EditorElement<ElementType extends EditorElementType>({
               icon: 'arrow-down',
               onClick: () => setZIndex(minZIndex(allElements) - 1),
             },
+            ...(presenting && !element.display.speakerNote
+              ? [
+                  {
+                    label: t('webview.canvas.contextMenu.revealUpTo'),
+                    icon: 'eye',
+                    onClick: () => {
+                      messages.send({ type: 'revealUpTo', elementId: element.id });
+                      setContextMenuPosition(null);
+                    },
+                  },
+                ]
+              : []),
           ]}
         />
       )}
     </>
   );
 }
+
+const HIDDEN_REVEAL_OPACITY = 0.35;
+const NEXT_REVEAL_COLOR = 'var(--vscode-charts-orange, #d18616)';
+const NEXT_REVEAL_MARKER_Z_INDEX = 1000;
 
 /*
  * Mapping of editor element types to their corresponding React components.

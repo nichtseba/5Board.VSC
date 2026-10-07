@@ -4,6 +4,7 @@ import {
   EditorElement,
   GROUP_ELEMENT_TYPE,
   GroupElement,
+  normalizeElementRevealOrder,
 } from './main';
 
 export function isGroupElement(element: BoardElement): element is GroupElement {
@@ -69,10 +70,13 @@ export function groupElementsInDocument(document: BoardDocument, ids: readonly s
     },
   };
 
-  document.content.elements = [
-    ...document.content.elements.filter((element) => !ids.includes(element.id)),
-    group,
-  ];
+  // Keep the group where its first child was in the reveal order instead of appending it.
+  const firstChildIndex = document.content.elements.findIndex((element) =>
+    selectedIds.has(element.id),
+  );
+  const remaining = document.content.elements.filter((element) => !selectedIds.has(element.id));
+  remaining.splice(firstChildIndex, 0, group);
+  document.content.elements = normalizeElementRevealOrder(remaining);
 
   document.content.selectedElementIds = [group.id];
   document.content.primarySelectedElementId = group.id;

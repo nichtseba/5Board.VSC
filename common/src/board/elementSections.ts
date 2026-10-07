@@ -89,8 +89,12 @@ export function reconcileElementRevealOrder(
         originalOrder.get(a.id)! - originalOrder.get(b.id)!,
     );
   const reordered = [...elements];
+  // Moved elements that have not been placed yet still sit at their old index (new elements at
+  // the end), so they must not serve as anchors for the others.
+  const pendingIds = new Set(movedElements.map((element) => element.id));
 
   for (const element of movedElements) {
+    pendingIds.delete(element.id);
     const currentIndex = reordered.findIndex((candidate) => candidate.id === element.id);
     if (currentIndex < 0) {
       continue;
@@ -99,7 +103,8 @@ export function reconcileElementRevealOrder(
 
     const targetSectionId = nextSections.get(element.id) ?? null;
     const targetSiblings = reordered.filter(
-      (candidate) => nextSections.get(candidate.id) === targetSectionId,
+      (candidate) =>
+        !pendingIds.has(candidate.id) && nextSections.get(candidate.id) === targetSectionId,
     );
     const nextSibling = targetSiblings.find(
       (candidate) =>
@@ -132,19 +137,89 @@ export function reconcileElementRevealOrder(
   return normalizeElementRevealOrder(reordered);
 }
 
-export function moveElementBeforeInSection(
+/**
+ * Adds new elements (created, pasted, duplicated, drawn) and places each one in the reveal order
+ * of the section it lands in, according to its position on the canvas, instead of appending it
+ * to the end of the whole board.
+ */
+export function insertElementsInRevealOrder(
+  elements: readonly BoardElement[],
+  insertedElements: readonly BoardElement[],
+): BoardElement[] {
+  return reconcileElementRevealOrder(
+    [...elements, ...insertedElements],
+    getElementSectionMap(elements),
+  );
+}
+
+export type RevealPlacement = 'before' | 'after';
+
+/**
+ * Elements whose reveal order can be swapped with the given element: headings of the same level
+ * in the same section (sorted by position), or the non-heading elements of the same section
+ * (in reveal order).
+ */
+export function getRevealSiblings(elements: readonly BoardElement[], id: string): BoardElement[] {
+  const sectionById = getElementSectionMap(elements);
+  const element = elements.find((candidate) => candidate.id === id);
+  if (!element || !sectionById.has(id)) {
+    return [];
+  }
+  const sectionId = sectionById.get(id);
+
+  if (isHeading(element)) {
+    return elements
+      .filter(isHeading)
+      .filter(
+        (candidate) =>
+          candidate.data.level === element.data.level &&
+          sectionById.get(candidate.id) === sectionId,
+      )
+      .sort(comparePosition(elements));
+  }
+
+  return elements.filter(
+    (candidate) => !isHeading(candidate) && sectionById.get(candidate.id) === sectionId,
+  );
+}
+
+/** Moves an element one step earlier (-1) or later (1) in the reveal order of its section. */
+export function moveElementInRevealOrder(
+  elements: readonly BoardElement[],
+  id: string,
+  direction: -1 | 1,
+): BoardElement[] | undefined {
+  const siblings = getRevealSiblings(elements, id);
+  const index = siblings.findIndex((candidate) => candidate.id === id);
+  const target = siblings[index + direction];
+  if (index < 0 || !target) {
+    return undefined;
+  }
+
+  return moveElementInSection(elements, id, target.id, direction < 0 ? 'before' : 'after');
+}
+
+/**
+ * Moves an element before or after another element of the same section. Headings move together
+ * with their whole section (see {@link moveHeadingSection}).
+ */
+export function moveElementInSection(
   elements: readonly BoardElement[],
   sourceId: string,
   targetId: string,
+  placement: RevealPlacement,
 ): BoardElement[] | undefined {
-  const sectionById = getElementSectionMap(elements);
   const source = elements.find((element) => element.id === sourceId);
+  if (source && isHeading(source)) {
+    return moveHeadingSection(elements, sourceId, targetId, placement);
+  }
+
+  const sectionById = getElementSectionMap(elements);
   const target = elements.find((element) => element.id === targetId);
   if (
     !source ||
     !target ||
     sourceId === targetId ||
-    isHeading(source) ||
     sectionById.get(sourceId) !== sectionById.get(targetId)
   ) {
     return undefined;
@@ -156,17 +231,23 @@ export function moveElementBeforeInSection(
     1,
   );
   reordered.splice(
-    reordered.findIndex((element) => element.id === targetId),
+    reordered.findIndex((element) => element.id === targetId) + (placement === 'after' ? 1 : 0),
     0,
     source,
   );
   return normalizeElementRevealOrder(reordered);
 }
 
-export function moveHeadingSectionBefore(
+/**
+ * Moves a heading together with its whole section before or after a heading of the same level
+ * in the same section. The sections are also rearranged on the canvas, because section
+ * membership is derived from the canvas position.
+ */
+export function moveHeadingSection(
   elements: readonly BoardElement[],
   sourceId: string,
   targetId: string,
+  placement: RevealPlacement,
 ): BoardElement[] | undefined {
   const workingElements = elements.map(cloneElement);
   const sectionById = getElementSectionMap(workingElements);
@@ -197,7 +278,10 @@ export function moveHeadingSectionBefore(
   if (sourceIndex < 0 || targetIndex < 0) {
     return undefined;
   }
-  if (sourceIndex + 1 === targetIndex) {
+  if (
+    (placement === 'before' && sourceIndex + 1 === targetIndex) ||
+    (placement === 'after' && targetIndex + 1 === sourceIndex)
+  ) {
     return undefined;
   }
 
@@ -218,7 +302,8 @@ export function moveHeadingSectionBefore(
   const reorderedBlocks = [...blocks];
   const [sourceBlock] = reorderedBlocks.splice(sourceIndex, 1);
   reorderedBlocks.splice(
-    reorderedBlocks.findIndex((block) => block.heading.id === targetId),
+    reorderedBlocks.findIndex((block) => block.heading.id === targetId) +
+      (placement === 'after' ? 1 : 0),
     0,
     sourceBlock,
   );

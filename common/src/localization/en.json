@@ -44,8 +44,10 @@
       "rows": "rows",
       "contextMenu": {
         "bringToFront": "Bring to front",
-        "sendToBack": "Send to back"
-      }
+        "sendToBack": "Send to back",
+        "revealUpTo": "Reveal up to here"
+      },
+      "nextReveal": "Next"
     },
     "exportPreview": {
       "saveHtml": "Save HTML",
@@ -127,10 +129,20 @@
           "ring": "Ring",
           "rectangle": "Rectangle",
           "duck": "Duck"
-        }
+        },
+        "progress": "Revealed",
+        "nextUp": "Next:",
+        "nothingLeft": "Everything is revealed"
       },
       "goToElement": "Go to element",
       "renameElement": "Rename element",
+      "structure": {
+        "speakerNote": "Speaker note",
+        "nextReveal": "next",
+        "revealed": "Shown on projector",
+        "hidden": "Not shown yet",
+        "dropHint": "Drag onto an element to take its place, onto the section heading to move to the top, or onto empty space to move to the end."
+      },
       "addElement": "Add Element",
       "presets": {
         "presets": "Select Preset",

@@ -112,6 +112,7 @@ type AllWebviewToExtensionMessage =
   | { type: 'setAllElementsVisible'; visible: boolean }
   | { type: 'revealNext' }
   | { type: 'unrevealNext' }
+  | { type: 'revealUpTo'; elementId: string }
   | { type: 'updateProjectorPointer'; style: ProjectorPointerStyle }
   // Sent by the editor after drawing a new element (e.g. a freehand stroke).
   | { type: 'addFreehandElement'; element: EditorElement }

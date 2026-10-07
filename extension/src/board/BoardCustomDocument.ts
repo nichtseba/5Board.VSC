@@ -1,6 +1,13 @@
 import vscode from 'vscode';
 import { BoardPackage } from './package';
-import { BoardDocument, EditorElement } from '5board.vsc-common';
+import {
+  BoardDocument,
+  EditorElement,
+  getLastRevealedElement,
+  getNextRevealElement,
+  revealUpTo,
+  setAllElementsVisible,
+} from '5board.vsc-common';
 import { MessageService } from '../MessageService';
 import { EXTENSION } from '../extension';
 import { t } from '../localization';
@@ -80,6 +87,10 @@ export class BoardCustomDocument implements vscode.CustomDocument {
 
   /** Attach projector panel (init) */
   public addProjector(): void {
+    // A new presentation starts with everything hidden.
+    if (!this.hasProjector) {
+      this.setAllElementsVisible(false);
+    }
     this.projectorCount++;
     EXTENSION.projectorDocument = this;
     this.broadcastProjectorState();
@@ -171,6 +182,39 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     const changed = edit(this.boardPackage.document);
     if (changed === false) return;
     this.documentChange.fire(this.boardPackage.document);
+  }
+
+  /** Shows the next hidden element in reveal order. */
+  public revealNext(): void {
+    this.applyEdit((document) => {
+      const element = getNextRevealElement(document.content.elements);
+      if (!element) {
+        return false;
+      }
+      element.display.visible = true;
+      return true;
+    });
+  }
+
+  /** Hides the last shown element in reveal order. */
+  public unrevealNext(): void {
+    this.applyEdit((document) => {
+      const element = getLastRevealedElement(document.content.elements);
+      if (!element) {
+        return false;
+      }
+      element.display.visible = false;
+      return true;
+    });
+  }
+
+  /** Shows all elements up to and including the given one and hides everything after it. */
+  public revealUpTo(elementId: string): void {
+    this.applyEdit((document) => revealUpTo(document.content.elements, elementId));
+  }
+
+  public setAllElementsVisible(visible: boolean): void {
+    this.applyEdit((document) => setAllElementsVisible(document.content.elements, visible));
   }
 
   /** Merges changes into the data of the element with the given id and persists the edit. */

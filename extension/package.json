@@ -141,12 +141,27 @@
         "title": "%commands.renameStructureItem%"
       },
       {
+        "command": "5board-vsc.moveStructureItemUp",
+        "title": "%commands.moveStructureItemUp%",
+        "icon": "$(arrow-up)"
+      },
+      {
+        "command": "5board-vsc.moveStructureItemDown",
+        "title": "%commands.moveStructureItemDown%",
+        "icon": "$(arrow-down)"
+      },
+      {
         "command": "5board-vsc.revealNext",
         "title": "%commands.revealNext%"
       },
       {
         "command": "5board-vsc.unrevealNext",
         "title": "%commands.unrevealNext%"
+      },
+      {
+        "command": "5board-vsc.revealUpTo",
+        "title": "%commands.revealUpTo%",
+        "icon": "$(eye)"
       },
       {
         "command": "5board-vsc.revealAll",
@@ -213,6 +228,36 @@
         {
           "command": "5board-vsc.renameStructureItem",
           "when": "view == 5board-vsc.sidebar-structure-view && viewItem == structureElement"
+        },
+        {
+          "command": "5board-vsc.moveStructureItemUp",
+          "when": "view == 5board-vsc.sidebar-structure-view && viewItem =~ /^structure/",
+          "group": "inline@1"
+        },
+        {
+          "command": "5board-vsc.moveStructureItemDown",
+          "when": "view == 5board-vsc.sidebar-structure-view && viewItem =~ /^structure/",
+          "group": "inline@2"
+        },
+        {
+          "command": "5board-vsc.revealUpTo",
+          "when": "view == 5board-vsc.sidebar-structure-view && viewItem =~ /^structure/ && 5board-vsc.projectorOpen",
+          "group": "inline@0"
+        },
+        {
+          "command": "5board-vsc.revealUpTo",
+          "when": "view == 5board-vsc.sidebar-structure-view && viewItem =~ /^structure/",
+          "group": "reveal@0"
+        },
+        {
+          "command": "5board-vsc.moveStructureItemUp",
+          "when": "view == 5board-vsc.sidebar-structure-view && viewItem =~ /^structure/",
+          "group": "reveal@1"
+        },
+        {
+          "command": "5board-vsc.moveStructureItemDown",
+          "when": "view == 5board-vsc.sidebar-structure-view && viewItem =~ /^structure/",
+          "group": "reveal@2"
         }
       ],
       "view/title": [
