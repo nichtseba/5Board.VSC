@@ -1,5 +1,22 @@
 {
   "extension": {
+    "legacyImport": {
+      "converting": "Converting old 5Board file…",
+      "targetExists": "\"{fileName}\" already exists. Overwrite it with the converted board?",
+      "overwrite": "Overwrite",
+      "saveAs": "Save as…",
+      "saveLabel": "Save converted board",
+      "converted": "Converted \"{source}\" to \"{target}\".",
+      "convertedWithWarnings": "Converted \"{source}\" to \"{target}\" with notes:",
+      "failed": "The old 5Board file could not be converted:",
+      "warnings": {
+        "unknownType": "Unknown object type \"{type}\" was skipped.",
+        "missingCodeBlock": "Code block {block} of class \"{className}\" was not found and became a standalone code block.",
+        "imageWithoutData": "An image without embedded data was skipped.",
+        "imageCrop": "Image cropping is not converted, the full image is used.",
+        "tableOfContentsLines": "Lines of the table of contents without a matching heading were dropped: {lines}"
+      }
+    },
     "openCustomEditorCommand": {
       "title": "5Boardz – Custom Page"
     },

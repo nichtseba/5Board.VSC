@@ -1,5 +1,22 @@
 {
   "extension": {
+    "legacyImport": {
+      "converting": "Alte 5Board-Datei wird umgewandelt…",
+      "targetExists": "\"{fileName}\" existiert bereits. Mit dem umgewandelten Board überschreiben?",
+      "overwrite": "Überschreiben",
+      "saveAs": "Speichern unter…",
+      "saveLabel": "Umgewandeltes Board speichern",
+      "converted": "\"{source}\" wurde in \"{target}\" umgewandelt.",
+      "convertedWithWarnings": "\"{source}\" wurde in \"{target}\" umgewandelt, mit Hinweisen:",
+      "failed": "Die alte 5Board-Datei konnte nicht umgewandelt werden:",
+      "warnings": {
+        "unknownType": "Unbekannter Objekttyp \"{type}\" wurde übersprungen.",
+        "missingCodeBlock": "Codeblock {block} der Klasse \"{className}\" wurde nicht gefunden und ist jetzt ein eigenständiger Codeblock.",
+        "imageWithoutData": "Ein Bild ohne eingebettete Daten wurde übersprungen.",
+        "imageCrop": "Bildzuschnitte werden nicht übernommen, das ganze Bild wird verwendet.",
+        "tableOfContentsLines": "Zeilen im Inhaltsverzeichnis ohne passende Überschrift wurden weggelassen: {lines}"
+      }
+    },
     "openCustomEditorCommand": {
       "title": "5Boardz – Custom Seite"
     },

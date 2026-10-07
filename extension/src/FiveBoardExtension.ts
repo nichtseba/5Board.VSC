@@ -28,6 +28,8 @@ import {
 import { Command, ExtensionBase } from './ExtensionBase';
 import { ExportPreviewProvider } from './providers/ExportPreviewProvider';
 import { ProjectorProvider } from './providers/ProjectorProvider';
+import { LegacyConverterProvider } from './providers/LegacyConverterProvider';
+import { convertLegacyBoardFile } from './board/legacyImport';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { DocumentManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
@@ -119,6 +121,7 @@ export class FiveBoardExtension extends ExtensionBase {
     context.subscriptions.push(this.settingsService, watchToolchainSettings());
     new EditorEditorProvider(context, this.packageManager).register();
     new ProjectorProvider(context).register();
+    new LegacyConverterProvider(context).register();
     context.subscriptions.push(new SidebarManager(context, this.messages));
     context.subscriptions.push(
       this.settingsService.onDidChange((settings) => {
@@ -134,6 +137,32 @@ export class FiveBoardExtension extends ExtensionBase {
     );
     new FiveBoardFileSystemProvider(this.packageManager).register(context);
     new ExportPreviewProvider(context).register();
+  }
+
+  /** Opens a .5boardz file, converting old .5board files first. */
+  @Command('5board-vsc.openBoardFile')
+  async openBoardFileCommand(uri?: vscode.Uri): Promise<void> {
+    const fileUri =
+      uri ??
+      (
+        await vscode.window.showOpenDialog({
+          canSelectMany: false,
+          filters: { [t('extension.new5boardCommand.packageFilter')]: ['5boardz', '5board'] },
+        })
+      )?.[0];
+    if (!fileUri) {
+      return;
+    }
+
+    if (path.extname(fileUri.path).toLowerCase() === '.5board') {
+      await convertLegacyBoardFile(fileUri);
+      return;
+    }
+    await vscode.commands.executeCommand(
+      'vscode.openWith',
+      fileUri,
+      EditorEditorProvider.VIEW_TYPE,
+    );
   }
 
   @Command('5board-vsc.newBoard')
