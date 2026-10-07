@@ -7,6 +7,10 @@ import {
   flattenBoardElements,
 } from '5board.vsc-common';
 import type React from 'react';
+import {
+  ArrowTopRightOnSquareIcon,
+  ChatBubbleBottomCenterTextIcon,
+} from '@heroicons/react/24/outline';
 import { TextElement } from './elements/TextElement';
 import { HeadingElement } from './elements/HeadingElement';
 import ElementInteractionController from './elementInteraction/ElementInteractionController';
@@ -190,6 +194,34 @@ export default function EditorElement<ElementType extends EditorElementType>({
     gridColumnStart: element.layout.xPos + 1,
     gridColumnEnd: `span ${element.layout.width}`,
   };
+  // Badges that mark elements which are never projected or left out of the export.
+  const displayBadges =
+    viewType === 'editor' && !preview && !exportMode
+      ? [
+          ...(element.display.speakerNote
+            ? [
+                {
+                  key: 'speakerNote',
+                  Icon: ChatBubbleBottomCenterTextIcon,
+                  label: t('webview.canvas.speakerNote'),
+                  hint: t('webview.canvas.speakerNoteHint'),
+                  color: SPEAKER_NOTE_COLOR,
+                },
+              ]
+            : []),
+          ...(element.display.excludeFromExport
+            ? [
+                {
+                  key: 'excludeFromExport',
+                  Icon: ArrowTopRightOnSquareIcon,
+                  label: t('webview.canvas.excludedFromExport'),
+                  hint: t('webview.canvas.excludedFromExportHint'),
+                  color: EXCLUDED_FROM_EXPORT_COLOR,
+                },
+              ]
+            : []),
+        ]
+      : [];
   const hidden =
     preview ||
     (viewType === 'projector' && (element.display.speakerNote || !element.display.visible)) ||
@@ -240,27 +272,49 @@ export default function EditorElement<ElementType extends EditorElementType>({
           onMinHeightChange={setMinHeight}
         />
       </div>
-      {revealMarker === 'next' && (
-        // Separate grid item so the marker is neither clipped nor dimmed with the element.
+      {(revealMarker === 'next' || displayBadges.length > 0) && (
+        // Separate grid item so the markers are neither clipped nor dimmed with the element.
         <div
           aria-hidden
           className="pointer-events-none relative rounded-sm"
           style={{
             ...gridPlacement,
-            zIndex: NEXT_REVEAL_MARKER_Z_INDEX,
-            outline: `2px dashed ${NEXT_REVEAL_COLOR}`,
+            zIndex: ELEMENT_MARKER_Z_INDEX,
+            outline:
+              revealMarker === 'next'
+                ? `2px dashed ${NEXT_REVEAL_COLOR}`
+                : element.display.speakerNote
+                  ? `1px dashed ${SPEAKER_NOTE_COLOR}`
+                  : undefined,
             outlineOffset: 2,
           }}
         >
-          <span
-            className="absolute left-0 -top-5 whitespace-nowrap rounded-sm px-1 text-xs leading-4"
-            style={{
-              backgroundColor: NEXT_REVEAL_COLOR,
-              color: 'var(--vscode-editor-background)',
-            }}
-          >
-            ▶ {t('webview.canvas.nextReveal')}
-          </span>
+          {revealMarker === 'next' && (
+            <span
+              className="absolute left-0 -top-5 whitespace-nowrap rounded-sm px-1 text-xs leading-4"
+              style={{
+                backgroundColor: NEXT_REVEAL_COLOR,
+                color: 'var(--vscode-editor-background)',
+              }}
+            >
+              ▶ {t('webview.canvas.nextReveal')}
+            </span>
+          )}
+          {displayBadges.length > 0 && (
+            <div className="absolute right-0 -top-5 flex gap-1">
+              {displayBadges.map(({ key, Icon, label, hint, color }) => (
+                <span
+                  key={key}
+                  title={`${label}: ${hint}`}
+                  className="pointer-events-auto flex h-4 items-center gap-0.5 whitespace-nowrap rounded-sm px-1 text-xs leading-4"
+                  style={{ backgroundColor: color, color: 'var(--vscode-editor-background)' }}
+                >
+                  <Icon className="size-3" />
+                  {label}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       )}
       {activeToolId === EditorToolId.POINTER && !grouped && (
@@ -307,7 +361,9 @@ export default function EditorElement<ElementType extends EditorElementType>({
 
 const HIDDEN_REVEAL_OPACITY = 0.35;
 const NEXT_REVEAL_COLOR = 'var(--vscode-charts-orange, #d18616)';
-const NEXT_REVEAL_MARKER_Z_INDEX = 1000;
+const SPEAKER_NOTE_COLOR = 'var(--vscode-charts-blue, #3794ff)';
+const EXCLUDED_FROM_EXPORT_COLOR = 'var(--vscode-charts-purple, #b180d7)';
+const ELEMENT_MARKER_Z_INDEX = 1000;
 
 /*
  * Mapping of editor element types to their corresponding React components.

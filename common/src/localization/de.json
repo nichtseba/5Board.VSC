@@ -125,7 +125,11 @@
         "sendToBack": "Nach hinten schicken",
         "revealUpTo": "Bis hier einblenden"
       },
-      "nextReveal": "Als Nächstes"
+      "nextReveal": "Als Nächstes",
+      "speakerNote": "Sprechernotiz",
+      "speakerNoteHint": "Nur im Editor sichtbar, nie im Beamer oder Export",
+      "excludedFromExport": "Nicht im Export",
+      "excludedFromExportHint": "Wird im HTML-Export weggelassen"
     },
     "codeblock": {
       "output": "Ausgabe",
@@ -286,6 +290,7 @@
       "renameElement": "Element umbenennen",
       "structure": {
         "speakerNote": "Sprechernotiz",
+        "excludedFromExport": "nicht im Export",
         "nextReveal": "als Nächstes",
         "revealed": "Im Beamer sichtbar",
         "hidden": "Noch nicht eingeblendet",

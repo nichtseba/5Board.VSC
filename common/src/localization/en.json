@@ -125,7 +125,11 @@
         "sendToBack": "Send to back",
         "revealUpTo": "Reveal up to here"
       },
-      "nextReveal": "Next"
+      "nextReveal": "Next",
+      "speakerNote": "Speaker note",
+      "speakerNoteHint": "Only visible in the editor, never on the projector or in the export",
+      "excludedFromExport": "Not in export",
+      "excludedFromExportHint": "Left out of the HTML export"
     },
     "codeblock": {
       "output": "Output",
@@ -287,6 +291,7 @@
       "renameElement": "Rename element",
       "structure": {
         "speakerNote": "Speaker note",
+        "excludedFromExport": "not in export",
         "nextReveal": "next",
         "revealed": "Shown on projector",
         "hidden": "Not shown yet",

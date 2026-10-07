@@ -219,12 +219,16 @@ class StructureNode extends vscode.TreeItem {
       .map((leaf) => reveal.stepNumbers.get(leaf.id))
       .filter((step) => step !== undefined);
     const revealState = getRevealState(leaves, reveal.nextRevealId);
-    const description =
+    const stepDescription =
       steps.length === 0
         ? t('webview.sidebar.structure.speakerNote')
         : steps.length === 1
           ? `#${steps[0]}`
           : `#${steps[0]}–${steps[steps.length - 1]}`;
+    const excludedFromExport = leaves.every((leaf) => leaf.display.excludeFromExport);
+    const description = excludedFromExport
+      ? `${stepDescription} · ${t('webview.sidebar.structure.excludedFromExport')}`
+      : stepDescription;
 
     if (reveal.presenting) {
       this.description =
@@ -235,16 +239,28 @@ class StructureNode extends vscode.TreeItem {
       this.tooltip = `${label}\n${t(REVEAL_STATE_LABELS[revealState])}`;
     } else {
       this.description = description;
-      this.iconPath = isGroupElement(element)
-        ? new vscode.ThemeIcon('group-by-ref-type')
-        : new vscode.ThemeIcon(getElementTypeDefinition(element.type).icon);
+      this.iconPath =
+        revealState === 'speakerNote'
+          ? SPEAKER_NOTE_ICON
+          : excludedFromExport
+            ? EXCLUDED_FROM_EXPORT_ICON
+            : isGroupElement(element)
+              ? new vscode.ThemeIcon('group-by-ref-type')
+              : new vscode.ThemeIcon(getElementTypeDefinition(element.type).icon);
       this.tooltip = `${label}\n${t('webview.sidebar.structure.dropHint')}`;
     }
   }
 }
 
+// Same colors as the badges on the editor canvas.
+const SPEAKER_NOTE_ICON = new vscode.ThemeIcon('comment', new vscode.ThemeColor('charts.blue'));
+const EXCLUDED_FROM_EXPORT_ICON = new vscode.ThemeIcon(
+  'link-external',
+  new vscode.ThemeColor('charts.purple'),
+);
+
 const REVEAL_STATE_ICONS: Record<RevealState, vscode.ThemeIcon> = {
-  speakerNote: new vscode.ThemeIcon('note', new vscode.ThemeColor('disabledForeground')),
+  speakerNote: SPEAKER_NOTE_ICON,
   next: new vscode.ThemeIcon('debug-stackframe', new vscode.ThemeColor('charts.orange')),
   revealed: new vscode.ThemeIcon('eye', new vscode.ThemeColor('charts.green')),
   hidden: new vscode.ThemeIcon('eye-closed', new vscode.ThemeColor('disabledForeground')),
