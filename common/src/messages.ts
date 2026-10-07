@@ -1,6 +1,6 @@
 import { BoardDocument } from './board/document';
 import { HeadingLevel, HeadingLevelSettings, HeadingNumberingStyle } from './board/headingSettings';
-import { Language } from './localization';
+import { Language } from './localization/index';
 import {
   EditorElement,
   EditorElementType,
@@ -10,9 +10,10 @@ import {
   AddElementDefaults,
   LineStyle,
   TextEditorCommand,
+  WebviewSettings,
 } from './main';
 import { ProjectorPointerStyle } from './projector';
-import { WebviewSettings } from './main';
+import { TranscriptSegment } from './board/element';
 
 /**
  * Messages from the extension to webviews
@@ -55,7 +56,30 @@ type AllExtensionToWebviewMessage =
       type: 'viewportUpdate';
       viewport: { top: number; left: number; height: number; width: number };
     }
+  | { type: 'codeblockStarted'; elementId: string }
+  | { type: 'codeblockChunk'; elementId: string; segment: TranscriptSegment }
+  | {
+      type: 'codeblockExited';
+      elementId: string;
+      exitCode: number | null;
+      success: boolean;
+      truncated: boolean;
+    }
+  // Answers `ready` so a webview that opened (or reloaded) mid-run catches up on what it missed.
+  | {
+      type: 'codeblockSync';
+      elementId: string;
+      transcript: TranscriptSegment[];
+      running: boolean;
+      draft?: string;
+    }
+  | { type: 'codeblockOutputCleared'; elementId: string }
+  // Reset of a running block: only the transcript goes, the run and its input line stay.
+  | { type: 'codeblockTranscriptCleared'; elementId: string }
+  // What is typed into the input line but not sent yet, mirrored to the projector.
+  | { type: 'codeblockInputDraft'; elementId: string; text: string }
   | { type: 'goToElement'; elementId: string }
+  | { type: 'clipboardContent'; text: string }
   | { type: 'settingsChanged'; settings: WebviewSettings };
 /**
  * Messages from the webviews to the extension
@@ -107,6 +131,7 @@ type AllWebviewToExtensionMessage =
   | { type: 'textEditorCommand'; ids: string[]; command: TextEditorCommand }
   | { type: 'addImageFromFile' }
   | { type: 'addImageFromBytes'; name: string; bytes: number[] }
+  | { type: 'replaceElementContent'; changes: { id: string; content: string }[] }
   | { type: 'toggleCursorTracking' }
   | { type: 'toggleProjectorPaused' }
   | { type: 'setAllElementsVisible'; visible: boolean }
@@ -131,6 +156,27 @@ type AllWebviewToExtensionMessage =
   | {
       type: 'updateViewport';
       viewport: { top: number; left: number; height: number; width: number };
+    }
+  | { type: 'executeCodeblock'; elementId: string }
+  | { type: 'codeblockInput'; elementId: string; text: string }
+  | { type: 'codeblockInputDraft'; elementId: string; text: string }
+  | { type: 'codeblockEndInput'; elementId: string }
+  | { type: 'codeblockStop'; elementId: string }
+  | { type: 'codeblockResetOutput'; elementId: string }
+  | { type: 'codeblockResetAllOutputs' }
+  | { type: 'codeblockSetOutputCollapsed'; elementId: string; collapsed: boolean }
+  | { type: 'updateBlockCode'; elementId: string; code: string }
+  | { type: 'openSource'; elementId: string }
+  | { type: 'copyToClipboard'; text: string }
+  | { type: 'requestClipboard' }
+  | { type: 'moveBlock'; elementId: string; className?: string | null; language?: string }
+  | {
+      type: 'manageCodeClass';
+      op: 'create' | 'update' | 'delete';
+      name: string;
+      language: string;
+      newName?: string;
+      newLanguage?: string;
     }
   | {
       type: 'updateHeadingLevelSettings';

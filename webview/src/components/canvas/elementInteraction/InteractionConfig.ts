@@ -8,6 +8,8 @@ export type ElementInteractionProfile = {
   scalable?: boolean; // TODO for future use
   keepRatio?: boolean;
   clipable?: boolean; // TODO for future use
+  /** Only the element's content takes clicks; empty space inside it passes them through. */
+  clickThroughEmptyArea?: boolean;
 };
 
 export const ELEMENT_INTERACTION_CONFIG = {
@@ -26,8 +28,9 @@ export const ELEMENT_INTERACTION_CONFIG = {
   [EditorElementType.Code]: {
     draggable: true,
     dragDirection: 'vertical',
-    resizable: false,
+    resizable: true,
     rotatable: false,
+    clickThroughEmptyArea: true,
   },
   [EditorElementType.Image]: {
     draggable: true,

@@ -166,7 +166,7 @@ function applyReorder(
     );
     const reordered = reorder(elements);
     if (!reordered) {
-      return false;
+      return null;
     }
 
     const changed =
@@ -175,11 +175,11 @@ function applyReorder(
         (candidate) => previousPositions.get(candidate.id) !== getElementLayout(candidate).yPos,
       );
     if (!changed) {
-      return false;
+      return null;
     }
 
     boardDocument.content.elements = reordered;
-    return true;
+    return boardDocument;
   });
 }
 

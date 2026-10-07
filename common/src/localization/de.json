@@ -1,6 +1,8 @@
 {
   "extension": {
-    "openCustomEditorCommand": { "title": "5Boardz – Custom Seite" },
+    "openCustomEditorCommand": {
+      "title": "5Boardz – Custom Seite"
+    },
     "new5boardCommand": {
       "defaultFileName": "Vorlesung",
       "packageFilter": "5Boardz Paket",
@@ -21,6 +23,80 @@
       "live": "Live",
       "paused": "Pausiert"
     },
+    "codeblock": {
+      "noActiveDocument": "Kein aktives 5Board-Dokument.",
+      "noCodeblockSelected": "Wähle einen Codeblock aus, um ihn auszuführen.",
+      "deleteClassNotEmpty": "Die Klasse enthält noch Codeblöcke. Entferne sie zuerst aus der Klasse, bevor du sie löschst.",
+      "classNameTaken": "Der Klassenname \"{name}\" ist bereits vergeben.",
+      "resetAllConfirm": "Ausgabe aller Codeblöcke in diesem Dokument zurücksetzen?",
+      "resetAllConfirmButton": "Zurücksetzen",
+      "noOutputsToReset": "Es gibt keine Ausgabe zum Zurücksetzen.",
+      "toolchainPick": "Toolchain welcher Sprache anzeigen?",
+      "toolchainChannel": "5Board — Toolchain",
+      "execution": {
+        "notACodeblock": "Element \"{elementId}\" ist kein Codeblock.",
+        "noRunner": "Keine Ausführung verfügbar für die Sprache: {language}",
+        "sourceNotFound": "Quelldatei \"{fileName}\" nicht im Dokument gefunden.",
+        "toolsMissing": "Benötigte Werkzeuge nicht gefunden: {tools}. Bitte installiere sie, um {language}-Codeblöcke auszuführen.",
+        "toolsUnavailable": "Die benötigten Werkzeuge für {language} sind nicht verfügbar.",
+        "compileTimeout": "Die Kompilierung hat länger als {seconds} Sekunden gedauert und wurde abgebrochen.",
+        "compilationFailed": "Kompilierung fehlgeschlagen.",
+        "outputLimit": "Ausgabelimit erreicht, Ausführung gestoppt."
+      },
+      "toolchain": {
+        "configNotFound": "Der konfigurierte Java-Pfad \"{path}\" existiert nicht.",
+        "missingOne": "{missing} fehlt in \"{path}\".",
+        "missingMany": "{missing} fehlen in \"{path}\".",
+        "and": "und",
+        "jreHint": "Der Pfad zeigt vermutlich auf eine JRE (nur Laufzeitumgebung) statt auf ein JDK — zum Ausführen von Codeblöcken wird ein JDK mit Compiler benötigt.",
+        "notJdkHint": "Der Pfad sieht nicht nach einem JDK aus — er sollte auf das Verzeichnis zeigen, das bin/java und bin/javac enthält.",
+        "tooOld": "Der konfigurierte Java-Pfad ist Java {found}, benötigt wird aber Java {required} oder neuer. Ausführbare Blöcke nutzen Compact Source Files (JEP 512).",
+        "versionMismatch": "java hat Version {java}, javac aber Version {javac} — beide müssen aus demselben JDK stammen.",
+        "notFound": "Kein JDK {required}+ gefunden. Durchsucht: {searched}.",
+        "notFoundFound": "Gefunden: {found}.",
+        "notFoundHint": "Ausführbare Blöcke nutzen Compact Source Files (JEP 512) und benötigen JDK {required}+.",
+        "stage": {
+          "config": "Einstellungen",
+          "javaHome": "JAVA_HOME",
+          "wellKnown": "Standard-Installationsorte",
+          "path": "PATH"
+        },
+        "outcome": {
+          "notSet": "nicht gesetzt",
+          "notFound": "nicht gefunden",
+          "incomplete": "unvollständiges JDK",
+          "tooOld": "zu alt",
+          "versionMismatch": "java/javac-Versionen passen nicht zusammen",
+          "ok": "ok",
+          "notReached": "nicht erreicht"
+        },
+        "report": {
+          "title": "5Board — Java-Toolchain",
+          "configuredHome": "Konfigurierter Pfad",
+          "minimumRequired": "Mindestens benötigt",
+          "minimumRequiredValue": "Java {required} (Compact Source Files, JEP 512)",
+          "selected": "Ausgewählt",
+          "viaStage": "Über Stufe",
+          "version": "Version",
+          "problem": "Problem",
+          "checked": "Geprüft:",
+          "notSet": "(nicht gesetzt)",
+          "fromPath": "(aus PATH)",
+          "none": "(keins)",
+          "missing": "fehlt: {tools}",
+          "selectedMark": "<-- ausgewählt"
+        }
+      },
+      "python": {
+        "configUnusable": "Der konfigurierte Python-Pfad \"{path}\" enthält keinen nutzbaren Interpreter.",
+        "notFound": "Kein Python {required} oder neuer gefunden. Versucht: {tried}.",
+        "foundOlder": "Gefunden: Python {found}.",
+        "storeStubHint": "Ein Eintrag hat keine Version gemeldet — unter Windows ist das meist der Platzhalter aus dem Microsoft Store. Installiere Python von python.org oder deaktiviere den Store-Alias unter \"App-Ausführungsaliase\".",
+        "reportTitle": "5Board — Python-Toolchain",
+        "outcomeNoVersion": "meldet keine Version"
+      }
+    },
+    "goToElement": "Gehe zu Element",
     "presets": {
       "noElementSelected": "Kein Element ausgewählt. Bitte wähle ein Element aus, um es als Preset zu speichern.",
       "groupNotSupported": "Gruppen werden bei der Erstellung von Presets noch nicht unterstützt. Bitte wähle ein einzelnes Element aus, um es als Preset zu speichern.",
@@ -38,7 +114,9 @@
     }
   },
   "webview": {
-    "customEditor": { "Test": "Testen der Übersetzung" },
+    "customEditor": {
+      "Test": "Testen der Übersetzung"
+    },
     "canvas": {
       "spacerLabel": "Abstand",
       "rows": "Zeilen",
@@ -49,9 +127,39 @@
       },
       "nextReveal": "Als Nächstes"
     },
+    "codeblock": {
+      "output": "Ausgabe",
+      "copyOutput": "Ausgabe kopieren",
+      "openSource": "Quelldatei öffnen",
+      "run": "Ausführen",
+      "stop": "Stoppen",
+      "inputPlaceholder": "Enter sendet, Ctrl+D beendet",
+      "exitCode": "[Exit-Code {code}]",
+      "exitCodeNone": "keiner",
+      "sourceNotFound": "Quelldatei nicht gefunden: {fileName}",
+      "copy": "Kopieren",
+      "cut": "Ausschneiden",
+      "paste": "Einfügen",
+      "stopEditing": "Bearbeiten beenden"
+    },
     "exportPreview": {
       "saveHtml": "HTML speichern",
       "loading": "Vorschau wird geladen..."
+    },
+    "find": {
+      "searchPlaceholder": "Suchen",
+      "replacePlaceholder": "Ersetzen",
+      "noResults": "Keine Ergebnisse",
+      "of": "von",
+      "matchCase": "Groß-/Kleinschreibung beachten",
+      "wholeWord": "Nur ganzes Wort suchen",
+      "useRegex": "Regulären Ausdruck verwenden",
+      "previousMatch": "Vorherige Übereinstimmung",
+      "nextMatch": "Nächste Übereinstimmung",
+      "close": "Schließen",
+      "toggleReplace": "Ersetzen umschalten",
+      "replace": "Ersetzen",
+      "replaceAll": "Alle ersetzen"
     },
     "sidebar": {
       "title": "5Board Seitenleiste",
@@ -61,6 +169,46 @@
         "freehand": "Freihand-Tool",
         "addElement": "Element hinzufügen"
       },
+      "elementType": {
+        "heading": "Überschrift",
+        "text": "Text",
+        "code": "Code",
+        "image": "Bild",
+        "rectangle": "Rechteck",
+        "circle": "Kreis",
+        "line": "Linie",
+        "freehand": "Freihand",
+        "tableOfContents": "Inhaltsverzeichnis"
+      },
+      "projectorSettings": {
+        "title": "Beameransicht-Einstellungen",
+        "cursorTracking": "Mauszeiger-Tracking",
+        "pointerColor": "Zeiger-Farbe",
+        "customColor": "Eigene Farbe",
+        "pointerShape": "Zeiger-Form",
+        "shapes": {
+          "dot": "Punkt",
+          "ring": "Ring",
+          "rectangle": "Rechteck",
+          "duck": "Ente"
+        },
+        "pause": "Pausieren",
+        "resume": "Fortsetzen",
+        "statusLive": "Live",
+        "statusPaused": "Pausiert",
+        "statusClosed": "Beendet",
+        "colors": {
+          "red": "Rot",
+          "orange": "Orange",
+          "yellow": "Gelb",
+          "green": "Grün",
+          "blue": "Blau",
+          "purple": "Lila",
+          "black": "Schwarz",
+          "white": "Weiß"
+        }
+      },
+      "goToElement": "Gehe zu Element",
       "freehand": {
         "title": "Freihand-Optionen",
         "color": "Farbe",
@@ -197,6 +345,21 @@
         "customColor": "Eigene Farbe",
         "backgroundColor": "Hintergrundfarbe"
       },
+      "codeSettings": {
+        "title": "Code",
+        "languageLabel": "Sprache",
+        "classNameLabel": "Klasse",
+        "classNone": "Keine (eigenständig, ausführbar)",
+        "languageFromClass": "Die Sprache folgt der zugewiesenen Klasse",
+        "mainWrapInfo": "In main-Methode eingebettet",
+        "noMainWrapInfo": "Eigene Klasse, keine main-Methode",
+        "backgroundLabel": "Hintergrundfarbe",
+        "borderLabel": "Rahmenfarbe",
+        "resetColors": "Auf Theme-Farben zurücksetzen",
+        "resetOutput": "Ausgabe zurücksetzen",
+        "resetAllOutputs": "Alle Ausgaben zurücksetzen"
+      },
+      "layer": "Ebene",
       "tableOfContentsSettings": {
         "title": "Inhaltsverzeichnis"
       },
@@ -288,6 +451,16 @@
       "speakerNote": "Sprechernotiz",
       "hideInExport": "Im Export ausblenden",
       "deleteTooltip": "Löschen (entf)"
+    },
+    "sidebar-class-settings": {
+      "title": "Code-Klassen",
+      "noClasses": "Noch keine Klassen. Erstelle eine, um Codeblöcke zu gruppieren.",
+      "newClassPlaceholder": "Neuer Klassenname",
+      "create": "Erstellen",
+      "edit": "Bearbeiten",
+      "apply": "Übernehmen",
+      "cancel": "Abbrechen",
+      "delete": "Löschen"
     }
   }
 }

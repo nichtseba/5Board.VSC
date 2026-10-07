@@ -1,20 +1,20 @@
 import * as vscode from 'vscode';
-
+import { BoardPackage } from '../board/package';
 import { setEditorWebviewHtml } from '../board/webview';
 import { BoardCustomDocument } from '../board/BoardCustomDocument';
-import { PackageManager } from '../PackageManager';
+import { DocumentManager } from '../PackageManager';
 
 export class EditorEditorProvider implements vscode.CustomEditorProvider<BoardCustomDocument> {
   public static readonly VIEW_TYPE = '5board-vsc.editor';
 
   private didChangeCustomDocument = new vscode.EventEmitter<
-    vscode.CustomDocumentContentChangeEvent<BoardCustomDocument>
+    vscode.CustomDocumentEditEvent<BoardCustomDocument>
   >();
   onDidChangeCustomDocument = this.didChangeCustomDocument.event;
 
   constructor(
     private context: vscode.ExtensionContext,
-    private packageManager: PackageManager,
+    private packageManager: DocumentManager,
   ) {}
 
   saveCustomDocumentAs(
@@ -30,7 +30,15 @@ export class EditorEditorProvider implements vscode.CustomEditorProvider<BoardCu
     openContext: vscode.CustomDocumentOpenContext,
     _token: vscode.CancellationToken,
   ): Promise<BoardCustomDocument> {
-    const pkg = await this.packageManager.getOrLoadPackage(uri, openContext);
+    let pkg: BoardPackage;
+    if (openContext.untitledDocumentData) {
+      pkg = await BoardPackage.readBytes(openContext.untitledDocumentData);
+    } else {
+      if (openContext.backupId) {
+        uri = vscode.Uri.parse(openContext.backupId);
+      }
+      pkg = await BoardPackage.read(uri);
+    }
 
     return new BoardCustomDocument(pkg, uri);
   }
@@ -46,6 +54,21 @@ export class EditorEditorProvider implements vscode.CustomEditorProvider<BoardCu
     };
 
     document.messageService.registerPanel(webviewPanel);
+    document.onDocumentChange(({ next, previous, isUndo, isRedo }) => {
+      if (isUndo || isRedo) {
+        return;
+      }
+      this.didChangeCustomDocument.fire({
+        label: 'Document Change',
+        document,
+        undo() {
+          document.applyEdit((_) => previous, { isUndo: true });
+        },
+        redo() {
+          document.applyEdit((_) => next, { isRedo: true });
+        },
+      });
+    });
 
     // Todo: Replace with actual document title
     webviewPanel.title = `5Board: ${vscode.workspace.asRelativePath(document.uri, false)}`;

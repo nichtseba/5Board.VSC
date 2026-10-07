@@ -94,6 +94,11 @@
           "name": "%views.sidebar.element-settings-title%"
         },
         {
+          "type": "webview",
+          "id": "5board-vsc.sidebar-class-settings-view",
+          "name": "%views.sidebar.class-settings-title%"
+        },
+        {
           "id": "5board-vsc.sidebar-structure-view",
           "name": "%views.sidebar.structure-title%"
         },
@@ -123,18 +128,33 @@
         "icon": "$(play)"
       },
       {
+        "command": "5board-vsc.executeCodeblock",
+        "title": "%commands.executeCodeblock%",
+        "icon": "$(run)"
+      },
+      {
+        "command": "5board-vsc.resetAllOutputs",
+        "title": "%commands.resetAllOutputs%",
+        "category": "5Board"
+      },
+      {
         "command": "5board-vsc.previewHtmlExport",
         "title": "%commands.previewHtmlExport%",
         "icon": "$(file-code)"
       },
       {
+        "command": "5board-vsc.goToElement",
+        "title": "%commands.goToElement%"
+      },
+      {
+        "command": "5board-vsc.showToolchain",
+        "title": "%commands.showToolchain%",
+        "category": "5Board"
+      },
+      {
         "command": "5board-vsc.addImageFromFile",
         "title": "%commands.addImageFromFile%",
         "icon": "$(file-media)"
-      },
-      {
-        "command": "5board-vsc.goToElement",
-        "title": "%commands.goToElement%"
       },
       {
         "command": "5board-vsc.renameStructureItem",
@@ -209,6 +229,12 @@
       }
     ],
     "keybindings": [
+      {
+        "command": "5board-vsc.executeCodeblock",
+        "key": "ctrl+shift+e",
+        "mac": "cmd+shift+e",
+        "when": "activeCustomEditorId == '5board-vsc.editor'"
+      },
       {
         "command": "5board-vsc.group",
         "key": "ctrl+g",
@@ -299,6 +325,13 @@
           "order": 10,
           "description": "%configuration.java.home.description%"
         },
+        "5board-vsc.python.path": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "order": 11,
+          "description": "%configuration.python.path.description%"
+        },
         "5board-vsc.grid.cellSize": {
           "type": "integer",
           "default": 16,
@@ -338,8 +371,8 @@
     "watch:copy-webview": "nodemon --watch ../webview/dist -e css,css.map,html,js,js.map --delay 1000ms --exec \"pnpm run copy-webview\"",
     "prebuild": "pnpm run copy-webview",
     "build": "webpack",
-    "compile-tests": "tsc -p . --outDir out",
-    "watch-tests": "tsc -p . -w --outDir out",
+    "compile-tests": "tsc -p tsconfig.test.json",
+    "watch-tests": "tsc -p tsconfig.test.json -w",
     "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
     "lint": "eslint src",
     "test": "vscode-test",
@@ -347,7 +380,6 @@
     "clean": "rimraf dist media/webview out"
   },
   "devDependencies": {
-    "@types/deep-equal": "^1.0.4",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
     "@types/vscode": "^1.107.0",
@@ -360,11 +392,12 @@
     "ts-loader": "^9.5.4",
     "typescript": "^5.9.3",
     "webpack": "^5.105.3",
-    "webpack-cli": "^6.0.1"
+    "webpack-cli": "^6.0.1",
+    "@types/deep-equal": "^1.0.4"
   },
   "dependencies": {
     "5board.vsc-common": "link:../common",
-    "deep-equal": "^2.2.3",
-    "jszip": "^3.10.1"
+    "jszip": "^3.10.1",
+    "deep-equal": "^2.2.3"
   }
 }

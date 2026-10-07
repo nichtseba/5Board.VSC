@@ -17,6 +17,7 @@ import {
   ImageElementData,
   Preset,
   ProjectorPointerStyle,
+  SUPPORTED_LANGUAGES,
   createAddElementToolFromPreset,
   insertElementsInRevealOrder,
   isGroupElement,
@@ -27,10 +28,13 @@ import { Command, ExtensionBase } from './ExtensionBase';
 import { ExportPreviewProvider } from './providers/ExportPreviewProvider';
 import { ProjectorProvider } from './providers/ProjectorProvider';
 import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
-import { PackageManager } from './PackageManager';
+import { DocumentManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
+import { getRunner } from './runner';
+import { getConfiguredHome, watchToolchainSettings } from './config';
 import { SettingsService } from './SettingsService';
 import { createDefaultElement } from './board/addElement/createDefaultElement';
+import { findCodeElement, updateBlockCode } from './board/CodeblockSourceService';
 import { PresetProvider } from './presets/PresetProvider';
 import { ElementClipboardService } from './ElementClipboardService';
 
@@ -38,9 +42,10 @@ export class FiveBoardExtension extends ExtensionBase {
   private messages = new MessageService();
   private presetProvider!: PresetProvider;
   private presetsReady = Promise.resolve();
-  public readonly packageManager = new PackageManager();
+  public readonly packageManager = new DocumentManager();
   public readonly settingsService = new SettingsService();
   private openDocuments = new Map<string, BoardCustomDocument>();
+  private toolchainOutput?: vscode.OutputChannel;
   private readonly elementClipboard = new ElementClipboardService((uri) =>
     this.getDocumentForUri(uri),
   );
@@ -111,7 +116,7 @@ export class FiveBoardExtension extends ExtensionBase {
     this.presetsReady = this.presetProvider.loadPresets().then((presets) => {
       this.editorState = { presets };
     });
-    context.subscriptions.push(this.settingsService);
+    context.subscriptions.push(this.settingsService, watchToolchainSettings());
     new EditorEditorProvider(context, this.packageManager).register();
     new ProjectorProvider(context).register();
     context.subscriptions.push(new SidebarManager(context, this.messages));
@@ -180,6 +185,46 @@ export class FiveBoardExtension extends ExtensionBase {
       await vscode.commands.executeCommand('workbench.action.moveEditorGroupToNewWindow');
     } else {
       vscode.window.showWarningMessage(t('extension.projector.noFileOpen'));
+    }
+  }
+
+  @Command('5board-vsc.executeCodeblock')
+  async executeCodeblockCommand(elementId?: string): Promise<void> {
+    const document = this.activeEditorDocument;
+    if (!document) {
+      vscode.window.showWarningMessage(t('extension.codeblock.noActiveDocument'));
+      return;
+    }
+    // Without an explicit elementId (programmatic invocation), run the selected element.
+    const content = document.boardPackage.document.content;
+    const id = elementId ?? content.primarySelectedElementId;
+    const element = content.elements.find((e) => e.id === id);
+    if (!element || element.type !== EditorElementType.Code) {
+      vscode.window.showWarningMessage(t('extension.codeblock.noCodeblockSelected'));
+      return;
+    }
+    await document.codeblock.executeBlock(element.id);
+  }
+
+  @Command('5board-vsc.resetAllOutputs')
+  async resetAllOutputsCommand(): Promise<void> {
+    const document = this.activeEditorDocument;
+    if (!document) {
+      vscode.window.showWarningMessage(t('extension.codeblock.noActiveDocument'));
+      return;
+    }
+    if (!document.codeblock.hasOutputs()) {
+      vscode.window.showInformationMessage(t('extension.codeblock.noOutputsToReset'));
+      return;
+    }
+    const confirm = t('extension.codeblock.resetAllConfirmButton');
+    const choice = await vscode.window.showWarningMessage(
+      t('extension.codeblock.resetAllConfirm'),
+      { modal: true },
+      confirm,
+    );
+    if (choice === confirm) {
+      document.codeblock.resetAllOutputs();
     }
   }
 
@@ -314,7 +359,12 @@ export class FiveBoardExtension extends ExtensionBase {
   @Command('5board-vsc.deleteEditorElement')
   deleteEditorElement(id: string): void {
     this.applyEditToActiveDocument((document) => {
-      document.content.elements = document.content.elements.filter((e) => e.id !== id);
+      const elements = document.content.elements.filter((e) => e.id !== id);
+      if (elements.length === document.content.elements.length) {
+        return null;
+      }
+      document.content.elements = elements;
+      return document;
     });
   }
 
@@ -365,7 +415,7 @@ export class FiveBoardExtension extends ExtensionBase {
       }
 
       activeDocument.applyEdit((boardDocument) =>
-        ungroupElementsInDocument(boardDocument, selectedElement.id),
+        ungroupElementsInDocument(boardDocument, selectedElement.id) ? boardDocument : null,
       );
       return;
     }
@@ -375,7 +425,7 @@ export class FiveBoardExtension extends ExtensionBase {
     }
 
     activeDocument.applyEdit((boardDocument) =>
-      groupElementsInDocument(boardDocument, selectedIds),
+      groupElementsInDocument(boardDocument, selectedIds) ? boardDocument : null,
     );
   }
 
@@ -388,6 +438,10 @@ export class FiveBoardExtension extends ExtensionBase {
     this.applyEditToActiveDocument((document) => {
       const element = createDefaultElement(type, position, defaults, document);
       document.content.elements = insertElementsInRevealOrder(document.content.elements, [element]);
+      if (element.type === EditorElementType.Code) {
+        updateBlockCode(document, element.id, '');
+      }
+      return document;
     });
   }
 
@@ -474,12 +528,56 @@ export class FiveBoardExtension extends ExtensionBase {
     });
   }
 
-  public applyEditToActiveDocument(edit: (document: BoardDocument) => void): void {
-    if (!this.activeEditorDocument) {
+  public applyEditToActiveDocument(edit: (document: BoardDocument) => BoardDocument | null): void {
+    const activeDocument = this.activeEditorDocument;
+    if (!activeDocument) {
       return;
     }
-    this.activeEditorDocument.applyEdit(edit);
-    this.activeDocumentChange.fire(this.activeEditorDocument);
+    let changed = false;
+    activeDocument.applyEdit((document) => {
+      const next = edit(document);
+      changed = next !== null;
+      return next;
+    });
+    if (changed) {
+      this.activeDocumentChange.fire(activeDocument);
+    }
+  }
+
+  /**
+   * Reports which toolchain a language's lookup settled on and what it checked. Written to an
+   * output channel rather than a notification so the text can be copied when asking for help.
+   */
+  @Command('5board-vsc.showToolchain')
+  public async showToolchain(): Promise<void> {
+    const language = await this.pickToolchainLanguage();
+    const runner = language ? getRunner(language) : undefined;
+    if (!language || !runner) return;
+
+    const report = await runner.toolchainReport({ home: getConfiguredHome(language) });
+    this.toolchainOutput ??= vscode.window.createOutputChannel(
+      t('extension.codeblock.toolchainChannel'),
+    );
+    this.toolchainOutput.clear();
+    this.toolchainOutput.appendLine(report);
+    this.toolchainOutput.show(true);
+  }
+
+  // The selected code block's language, otherwise the user picks one.
+  private async pickToolchainLanguage(): Promise<string | undefined> {
+    const document = this.activeEditorDocument?.boardPackage.document;
+    const selectedId = document?.content.primarySelectedElementId;
+    const selected = document && selectedId ? findCodeElement(document, selectedId) : undefined;
+    if (selected) return selected.data.language;
+
+    const choice = await vscode.window.showQuickPick(
+      SUPPORTED_LANGUAGES.filter((language) => getRunner(language.id)).map((language) => ({
+        label: language.displayName,
+        id: language.id,
+      })),
+      { placeHolder: t('extension.codeblock.toolchainPick') },
+    );
+    return choice?.id;
   }
 
   @Command('5board-vsc.goToElement')
@@ -526,9 +624,11 @@ export class FiveBoardExtension extends ExtensionBase {
 
     this.applyEditToActiveDocument((document) => {
       const target = document.content.elements.find((candidate) => candidate.id === elementId);
-      if (target && target.type !== EditorElementType.Heading) {
-        target.name = name || undefined;
+      if (!target || target.type === EditorElementType.Heading) {
+        return null;
       }
+      target.name = name || undefined;
+      return document;
     });
   }
 

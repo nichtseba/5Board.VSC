@@ -11,6 +11,7 @@ import {
   flattenBoardElements,
   normalizeElementRevealOrder,
 } from '5board.vsc-common';
+import { deriveCodeClasses } from './CodeblockSourceService';
 
 export const MANIFEST_PATH = 'manifest.json';
 export const CONTENT_PATH = 'content.json';
@@ -24,6 +25,10 @@ export class BoardPackage {
 
   public static async read(uri: vscode.Uri): Promise<BoardPackage> {
     const packageBytes = await vscode.workspace.fs.readFile(uri);
+    return BoardPackage.readBytes(packageBytes);
+  }
+
+  public static async readBytes(packageBytes: Uint8Array): Promise<BoardPackage> {
     const zip = await JSZip.loadAsync(packageBytes);
     const manifest = await readJson<BoardManifest>(zip, MANIFEST_PATH);
 
@@ -31,6 +36,9 @@ export class BoardPackage {
     const content = await readJson<BoardContent>(zip, CONTENT_PATH);
     const sources = await readSources(zip);
     const assets = await readAssets(zip);
+
+    // Documents saved before the class registry existed derive it from their named sources.
+    content.codeClasses ??= deriveCodeClasses(content, sources);
 
     const document: BoardDocument = {
       manifest,
@@ -68,6 +76,7 @@ export class BoardPackage {
         selectedElementIds: [],
         primarySelectedElementId: null,
         elements: [],
+        codeClasses: [],
         grid: { ...grid },
         background: '',
         snapAngle: 0,

@@ -50,9 +50,21 @@ export function revealUpTo(elements: readonly BoardElement[], id: string): boole
   return changed;
 }
 
-/** Shows or hides all elements at once. Speaker notes always stay hidden. */
-export function setAllElementsVisible(elements: readonly BoardElement[], visible: boolean): void {
+/**
+ * Shows or hides all elements at once. Speaker notes always stay hidden.
+ * Returns whether anything changed.
+ */
+export function setAllElementsVisible(
+  elements: readonly BoardElement[],
+  visible: boolean,
+): boolean {
+  let changed = false;
   for (const element of flattenBoardElements(elements)) {
-    element.display.visible = visible && !element.display.speakerNote;
+    const nextVisible = visible && !element.display.speakerNote;
+    if (element.display.visible !== nextVisible) {
+      element.display.visible = nextVisible;
+      changed = true;
+    }
   }
+  return changed;
 }

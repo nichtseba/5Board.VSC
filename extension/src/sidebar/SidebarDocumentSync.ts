@@ -39,10 +39,10 @@ export class SidebarDocumentSync implements vscode.Disposable {
       });
 
       this.activeDocumentListener?.dispose();
-      this.activeDocumentListener = doc.onDocumentChange((document) => {
+      this.activeDocumentListener = doc.onDocumentChange(({ next }) => {
         this.messages.send({
           type: 'updateDocument',
-          document,
+          document: next,
         });
       });
     });

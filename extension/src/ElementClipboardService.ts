@@ -161,6 +161,7 @@ export class ElementClipboardService {
       );
       boardDocument.content.selectedElementIds = cloneIds;
       boardDocument.content.primarySelectedElementId = cloneIds[0] ?? null;
+      return boardDocument;
     });
     return cloneIds;
   }

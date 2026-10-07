@@ -1,12 +1,14 @@
 import { EditorElementType, TextDecorationStyle, getHeadingLevelSettings } from '5board.vsc-common';
 import type React from 'react';
-import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { EditorElementProps } from '../EditorElement';
 import { useHeadingNumber } from '../../../providers/HeadingNumberingContext';
 import { useBoardDocument } from '../../../providers/BoardDocumentProvider';
 import { useGrid } from '../../../providers/GridProvider';
 import { useIsEditorView } from '../../../providers/ViewTypeProvider';
 import { useMessageService } from '../../../services/MessageService';
+import { useFind } from '../../../providers/FindProvider';
+import { segmentContent } from '../../../services/findMatches';
 
 const HEADING_TAGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const;
 
@@ -21,6 +23,15 @@ export function HeadingElement({
   onStopEditing,
   preview,
 }: EditorElementProps<EditorElementType.Heading>) {
+  const find = useFind();
+  const content = element.data.content;
+  const segments = useMemo(() => {
+    if (!find?.open) return null;
+    const ownMatches = find.matches.filter((match) => match.elementId === element.id);
+    if (ownMatches.length === 0) return null;
+    const currentMatch = find.currentIndex >= 0 ? find.matches[find.currentIndex] : null;
+    return segmentContent(content, ownMatches, currentMatch);
+  }, [find, content, element.id]);
   const number = useHeadingNumber(element.id);
   const boardDocument = useBoardDocument();
   const messages = useMessageService();
@@ -234,7 +245,26 @@ export function HeadingElement({
             cancel();
           }
         }}
-      />
+      >
+        {segments && !editing
+          ? segments.map((segment, index) =>
+              segment.kind === 'plain' ? (
+                segment.text
+              ) : (
+                <mark
+                  key={index}
+                  className={`text-inherit ${
+                    segment.kind === 'current'
+                      ? 'bg-editor-find-match-background'
+                      : 'bg-editor-find-match-highlight-background'
+                  }`}
+                >
+                  {segment.text}
+                </mark>
+              ),
+            )
+          : content}
+      </span>
     </HeadingTag>
   );
 }

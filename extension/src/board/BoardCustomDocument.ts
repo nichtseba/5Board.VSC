@@ -2,7 +2,6 @@ import vscode from 'vscode';
 import { BoardPackage } from './package';
 import {
   BoardDocument,
-  EditorElement,
   getLastRevealedElement,
   getNextRevealElement,
   revealUpTo,
@@ -12,11 +11,19 @@ import { MessageService } from '../MessageService';
 import { EXTENSION } from '../extension';
 import { t } from '../localization';
 import { DocumentMessageHandlers } from './DocumentMessageHandlers';
+import { CodeblockController } from './CodeblockController';
 
 export class BoardCustomDocument implements vscode.CustomDocument {
-  public readonly documentChange = new vscode.EventEmitter<BoardDocument>();
+  public readonly documentChange = new vscode.EventEmitter<{
+    previous: BoardDocument;
+    next: BoardDocument;
+    isUndo: boolean;
+    isRedo: boolean;
+  }>();
   public readonly onDocumentChange = this.documentChange.event;
   public readonly messageService = new MessageService();
+  // Per-document codeblock coordinator; also reached by the executeCodeblock command.
+  public readonly codeblock = new CodeblockController(this);
   private readonly disposables: vscode.Disposable[] = [];
   private readonly unsubscribers: (() => void)[] = [];
   private projectorCount = 0;
@@ -36,22 +43,19 @@ export class BoardCustomDocument implements vscode.CustomDocument {
         sender,
       );
     });
-    // this.messageService.on('focus', () => {
-    //   EXTENSION.activeEditorDocument = this;
-    // });
     this.messageService.on('saveHtmlExport', async (msg) => {
       await this.saveHtmlExport(msg.html, msg.backgroundColor);
     });
-    this.onDocumentChange((document) => {
-      this.messageService.send({ type: 'updateDocument', document });
+    this.onDocumentChange(({ next }) => {
+      this.messageService.send({ type: 'updateDocument', document: next });
     });
     // Register in the global document registry so ProjectorProvider can
     // find this document and attach the projector panel to the same MessageService.
     EXTENSION.registerDocument(this);
 
     this.disposables.push(
-      this.onDocumentChange((document) => {
-        this.messageService.send({ type: 'updateDocument', document });
+      this.onDocumentChange(({ next }) => {
+        this.messageService.send({ type: 'updateDocument', document: next });
       }),
     );
     this.disposables.push(
@@ -64,10 +68,12 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     );
 
     this.registerMessageHandlers();
+    EXTENSION.packageManager.registerDocument(this.uri, this);
   }
 
   private registerMessageHandlers(): void {
     this.unsubscribers.push(...new DocumentMessageHandlers(this).register());
+    this.unsubscribers.push(...this.codeblock.register());
   }
 
   dispose(): void {
@@ -78,6 +84,7 @@ export class BoardCustomDocument implements vscode.CustomDocument {
       disposable.dispose();
     }
     this.clearActiveEditorDocument();
+    EXTENSION.packageManager.unregisterDocument(this.uri);
   }
 
   /** Check if projector window is active/attached */
@@ -178,10 +185,22 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     }
   }
 
-  public applyEdit(edit: (document: BoardDocument) => unknown): void {
-    const changed = edit(this.boardPackage.document);
-    if (changed === false) return;
-    this.documentChange.fire(this.boardPackage.document);
+  public applyEdit(
+    edit: (document: BoardDocument) => BoardDocument | null,
+    options?: { isUndo?: boolean; isRedo?: boolean },
+  ): void {
+    const previous = this.boardPackage.document;
+    const next = edit(structuredClone(this.boardPackage.document));
+    if (next === null) {
+      return;
+    }
+    this.boardPackage.document = next;
+    this.documentChange.fire({
+      previous,
+      next: this.boardPackage.document,
+      isUndo: options?.isUndo ?? false,
+      isRedo: options?.isRedo ?? false,
+    });
   }
 
   /** Shows the next hidden element in reveal order. */
@@ -189,10 +208,10 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     this.applyEdit((document) => {
       const element = getNextRevealElement(document.content.elements);
       if (!element) {
-        return false;
+        return null;
       }
       element.display.visible = true;
-      return true;
+      return document;
     });
   }
 
@@ -201,31 +220,24 @@ export class BoardCustomDocument implements vscode.CustomDocument {
     this.applyEdit((document) => {
       const element = getLastRevealedElement(document.content.elements);
       if (!element) {
-        return false;
+        return null;
       }
       element.display.visible = false;
-      return true;
+      return document;
     });
   }
 
   /** Shows all elements up to and including the given one and hides everything after it. */
   public revealUpTo(elementId: string): void {
-    this.applyEdit((document) => revealUpTo(document.content.elements, elementId));
+    this.applyEdit((document) =>
+      revealUpTo(document.content.elements, elementId) ? document : null,
+    );
   }
 
   public setAllElementsVisible(visible: boolean): void {
-    this.applyEdit((document) => setAllElementsVisible(document.content.elements, visible));
-  }
-
-  /** Merges changes into the data of the element with the given id and persists the edit. */
-  public updateElement(id: string, changes: Partial<EditorElement>): void {
-    this.applyEdit((document) => {
-      const element = document.content.elements.find((e) => e.id === id);
-      if (!element) return;
-      if (changes.data) {
-        element.data = { ...element.data, ...changes.data };
-      }
-    });
+    this.applyEdit((document) =>
+      setAllElementsVisible(document.content.elements, visible) ? document : null,
+    );
   }
 }
 

@@ -17,12 +17,14 @@ type Props<T extends EditorElementType> = {
   element: EditorElement<T>;
   selected: boolean | undefined;
   targetRef: React.RefObject<HTMLDivElement>;
+  minHeight?: number;
 };
 
 export default function ElementInteractionController<ElementType extends EditorElementType>({
   element,
   selected,
   targetRef,
+  minHeight,
 }: Props<ElementType>) {
   const moveableRef = useRef<Moveable | null>(null);
   const { cellSize, metrics } = useGrid();
@@ -150,6 +152,7 @@ export default function ElementInteractionController<ElementType extends EditorE
     );
     const constrainedHeight = Math.max(
       cellSize.height,
+      minHeight ?? 0,
       isImageCornerResize(direction) ? constrainedWidth / getImageResizeRatio() : nextHeight,
     );
     const x = direction[0] < 0 ? element.layout.width * cellSize.width - constrainedWidth : 0;
@@ -206,7 +209,8 @@ export default function ElementInteractionController<ElementType extends EditorE
         : columnCount - element.layout.xPos,
     );
     const newWidth = Math.max(1, Math.min(maxWidth, Math.round(width / cellSize.width)));
-    const newHeight = Math.max(1, Math.round(height / cellSize.height));
+    const minRows = minHeight === undefined ? 1 : Math.ceil(minHeight / cellSize.height);
+    const newHeight = Math.max(minRows, Math.round(height / cellSize.height));
     const xDelta = lastEvent.direction[0] < 0 ? element.layout.width - newWidth : 0;
     const yDelta = lastEvent.direction[1] < 0 ? element.layout.height - newHeight : 0;
 

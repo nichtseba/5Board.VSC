@@ -1,5 +1,5 @@
-import en from './en.json';
-import de from './de.json';
+import en from './en.json' with { type: 'json' };
+import de from './de.json' with { type: 'json' };
 
 // Garantees that all translations have the same keys, otherwise TypeScript will throw an error
 type Translations = Readonly<typeof en>;
@@ -48,4 +48,10 @@ export function t(language: Language, key: TranslationKey): string {
   const locale = normalizeLanguage(language);
   const value = getNestedValue(TRANSLATIONS[locale], key);
   return typeof value === 'string' ? value : key;
+}
+
+export function formatMessage(template: string, params: Record<string, string | number>): string {
+  return template.replace(/\{(\w+)\}/g, (match, name: string) =>
+    name in params ? String(params[name]) : match,
+  );
 }
