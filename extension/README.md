@@ -16,7 +16,7 @@ Diese extension ist im Rahmen eines Studierenden-Projekts an der Hochschule Düs
 Benno Steinkamp, Denis Weigel, Emma Damm, Felix Kircher, Katharina Mückenheim, Leon Erwig, Sebastian Dronov, Violaine Schlüter
 
 ## Feedback
-Wenn du Anregungen und Wünsche hast, schreib gerne an: Mailadresse
+Wenn du Anregungen und Wünsche hast, schreib gerne an: Mailadresse folgt
 
 -----------------------------
 
@@ -37,4 +37,4 @@ This extension was created as part of a student project in the Media Informatics
 Benno Steinkamp, Denis Weigel, Emma Damm, Felix Kircher, Katharina Mückenheim, Leon Erwig, Sebastian Dronov, Violaine Schlüter
 
 ## Feedback
-Have any suggestions or feature requests? Feel free to email us at: Email address
+Have any suggestions or feature requests? Feel free to email us at: Email address follows
