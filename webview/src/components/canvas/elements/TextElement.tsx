@@ -8,6 +8,7 @@ import { TextStyleKit } from '@tiptap/extension-text-style';
 import TextAlign from '@tiptap/extension-text-align';
 import { useMessageService, useOnMessage } from '../../../services/MessageService';
 import { useGrid } from '../../../providers/GridProvider';
+import { useViewType } from '../../../providers/ViewTypeProvider';
 import {
   BoldButton,
   CodeButton,
@@ -24,6 +25,7 @@ export function TextElement({
   editing = false,
   editingPosition,
   onStopEditing,
+  preview,
 }: EditorElementProps<EditorElementType.Text>) {
   const messages = useMessageService();
   const grid = useGrid();
@@ -266,6 +268,34 @@ export function TextElement({
         chain.focus().run();
     }
   });
+
+  // Grow the element whenever its text does not fit, not only while editing (e.g. after loading
+  // a document or when fonts load late). Only the editor writes; other views just render.
+  const viewType = useViewType();
+  const layoutRef = useRef(element.layout);
+  layoutRef.current = element.layout;
+  useEffect(() => {
+    const dom = editor?.view.dom;
+    // Until the grid is measured, cellSize is a 1px placeholder that would turn pixels into rows.
+    const gridMeasured = grid.metrics.width > 0;
+    if (!dom || viewType !== 'editor' || preview || !gridMeasured) {
+      return;
+    }
+
+    const growToContent = () => {
+      const requiredRows = Math.ceil(dom.offsetHeight / grid.cellSize.height);
+      if (requiredRows > layoutRef.current.height) {
+        messages.send({
+          type: 'updateElementsLayout',
+          changes: [{ id: element.id, changes: { height: requiredRows } }],
+        });
+      }
+    };
+
+    const observer = new ResizeObserver(growToContent);
+    observer.observe(dom);
+    return () => observer.disconnect();
+  }, [editor, viewType, preview, grid.cellSize.height, grid.metrics.width, element.id, messages]);
 
   const { backgroundColor, border } = element.style;
   const cssBorderStyle =
