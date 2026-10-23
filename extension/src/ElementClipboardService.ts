@@ -6,7 +6,7 @@ import {
   BoardElement,
   EditorElement,
   EditorElementType,
-  normalizeElementRevealOrder,
+  insertElementsInRevealOrder,
 } from '5board.vsc-common';
 
 const ELEMENT_CLIPBOARD_MARKER = '5board-vsc.elements';
@@ -155,8 +155,10 @@ export class ElementClipboardService {
           src: addImageAsset(boardDocument, imageClone.data.src, new Uint8Array(bytes)),
         };
       }
-      boardDocument.content.elements.push(...clones);
-      boardDocument.content.elements = normalizeElementRevealOrder(boardDocument.content.elements);
+      boardDocument.content.elements = insertElementsInRevealOrder(
+        boardDocument.content.elements,
+        clones,
+      );
       boardDocument.content.selectedElementIds = cloneIds;
       boardDocument.content.primarySelectedElementId = cloneIds[0] ?? null;
       return boardDocument;

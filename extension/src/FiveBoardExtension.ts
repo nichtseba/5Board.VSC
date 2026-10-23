@@ -19,8 +19,7 @@ import {
   ProjectorPointerStyle,
   SUPPORTED_LANGUAGES,
   createAddElementToolFromPreset,
-  normalizeElementRevealOrder,
-  flattenBoardElements,
+  insertElementsInRevealOrder,
   isGroupElement,
   groupElementsInDocument,
   ungroupElementsInDocument,
@@ -75,6 +74,7 @@ export class FiveBoardExtension extends ExtensionBase {
   }
   public set projectorDocument(document: BoardCustomDocument | null) {
     this.projectorDocument_ = document;
+    void vscode.commands.executeCommand('setContext', '5board-vsc.projectorOpen', !!document);
     this.projectorDocumentChange.fire(document);
   }
   // Sidebars run on their own MessageService, so push attach/detach to them here.
@@ -437,11 +437,10 @@ export class FiveBoardExtension extends ExtensionBase {
   ): void {
     this.applyEditToActiveDocument((document) => {
       const element = createDefaultElement(type, position, defaults, document);
-      document.content.elements.push(element);
+      document.content.elements = insertElementsInRevealOrder(document.content.elements, [element]);
       if (element.type === EditorElementType.Code) {
         updateBlockCode(document, element.id, '');
       }
-      document.content.elements = normalizeElementRevealOrder(document.content.elements);
       return document;
     });
   }
@@ -633,61 +632,36 @@ export class FiveBoardExtension extends ExtensionBase {
     });
   }
 
+  /** The document being presented, falling back to the focused editor. */
+  private get presentationDocument(): BoardCustomDocument | null {
+    return this.projectorDocument ?? this.activeEditorDocument;
+  }
+
   @Command('5board-vsc.revealNext')
   public revealNextCommand(): void {
-    this.applyEditToActiveDocument((document) => {
-      for (const element of flattenBoardElements(document.content.elements)) {
-        if (isGroupElement(element)) {
-          continue;
-        }
-        if (!element.display.visible && !element.display.speakerNote) {
-          element.display.visible = true;
-          return document;
-        }
-      }
-      return null;
-    });
+    this.presentationDocument?.revealNext();
   }
 
   @Command('5board-vsc.unrevealNext')
   public unrevealNextCommand(): void {
-    this.applyEditToActiveDocument((document) => {
-      const elements = flattenBoardElements(document.content.elements);
-      for (let index = elements.length - 1; index >= 0; index--) {
-        const element = elements[index];
-        if (isGroupElement(element)) {
-          continue;
-        }
-        if (element.display.visible && !element.display.speakerNote) {
-          element.display.visible = false;
-          return document;
-        }
-      }
-      return null;
-    });
+    this.presentationDocument?.unrevealNext();
+  }
+
+  @Command('5board-vsc.revealUpTo')
+  public revealUpToCommand(item?: vscode.TreeItem | string): void {
+    const elementId = typeof item === 'string' ? item : item?.id;
+    if (elementId) {
+      this.presentationDocument?.revealUpTo(elementId);
+    }
   }
 
   @Command('5board-vsc.revealAll')
   public revealAllCommand(): void {
-    this.setAllElementsVisible(true);
+    this.presentationDocument?.setAllElementsVisible(true);
   }
 
   @Command('5board-vsc.hideAll')
   public hideAllCommand(): void {
-    this.setAllElementsVisible(false);
-  }
-
-  private setAllElementsVisible(visible: boolean): void {
-    this.applyEditToActiveDocument((document) => {
-      let changed = false;
-      for (const element of flattenBoardElements(document.content.elements)) {
-        const nextVisible = visible && !element.display.speakerNote;
-        if (element.display.visible !== nextVisible) {
-          element.display.visible = nextVisible;
-          changed = true;
-        }
-      }
-      return changed ? document : null;
-    });
+    this.presentationDocument?.setAllElementsVisible(false);
   }
 }

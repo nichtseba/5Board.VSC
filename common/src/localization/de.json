@@ -122,8 +122,14 @@
       "rows": "Zeilen",
       "contextMenu": {
         "bringToFront": "Nach vorne bringen",
-        "sendToBack": "Nach hinten schicken"
-      }
+        "sendToBack": "Nach hinten schicken",
+        "revealUpTo": "Bis hier einblenden"
+      },
+      "nextReveal": "Als Nächstes",
+      "speakerNote": "Sprechernotiz",
+      "speakerNoteHint": "Nur im Editor sichtbar, nie im Beamer oder Export",
+      "excludedFromExport": "Nicht im Export",
+      "excludedFromExportHint": "Wird im HTML-Export weggelassen"
     },
     "codeblock": {
       "output": "Ausgabe",
@@ -275,10 +281,21 @@
           "ring": "Ring",
           "rectangle": "Rechteck",
           "duck": "Ente"
-        }
+        },
+        "progress": "Eingeblendet",
+        "nextUp": "Als Nächstes:",
+        "nothingLeft": "Alles ist eingeblendet"
       },
       "goToElement": "Gehe zu Element",
       "renameElement": "Element umbenennen",
+      "structure": {
+        "speakerNote": "Sprechernotiz",
+        "excludedFromExport": "nicht im Export",
+        "nextReveal": "als Nächstes",
+        "revealed": "Im Beamer sichtbar",
+        "hidden": "Noch nicht eingeblendet",
+        "dropHint": "Auf ein Element ziehen, um seinen Platz einzunehmen, auf die Abschnittsüberschrift für ganz oben oder in den leeren Bereich für ganz unten."
+      },
       "addElement": "Element hinzufügen",
       "presets": {
         "addCustomElement": "Preset auswählen",

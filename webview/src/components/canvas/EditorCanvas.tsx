@@ -6,6 +6,7 @@ import {
   findBoardElementById,
   flattenBoardElements,
   getLeafElementIds,
+  getNextRevealElement,
 } from '5board.vsc-common';
 import { useEffect, useMemo, useRef, type CSSProperties, useState } from 'react';
 import EditorElement from './EditorElement';
@@ -24,6 +25,8 @@ import GroupInteractionController from './elementInteraction/GroupInteractionCon
 import { useCanvasPointer } from './logic/useCanvasPointer';
 import { useMarqueeSelection } from './logic/useMarqueeSelection';
 import { MarqueeOverlay } from './logic/MarqueeOverlay';
+import { useViewType } from '../../providers/ViewTypeProvider';
+import { usePresentationKeys } from '../projector/usePresentationKeys';
 
 export type EditorCanvasProps = {
   enableKeyboardShortcuts?: boolean;
@@ -158,6 +161,18 @@ export default function EditorCanvas({
     [elements, document?.content.headingSettings],
   );
 
+  // While presenting, the editor shows which elements the projector currently displays.
+  const viewType = useViewType();
+  const [projectorOpen, setProjectorOpen] = useState(false);
+  useOnMessage((msg) => {
+    if (msg.type === 'projectorStateChanged') {
+      setProjectorOpen(msg.open);
+    }
+  });
+  const showRevealState = viewType === 'editor' && !exportMode && projectorOpen;
+  usePresentationKeys(showRevealState || viewType === 'projector');
+  const nextRevealId = useMemo(() => getNextRevealElement(elements)?.id, [elements]);
+
   const { marqueeRect } = useMarqueeSelection({
     activeToolId,
     elements: flatElements,
@@ -196,6 +211,16 @@ export default function EditorCanvas({
             grouped={selectedLeafIds.length > 1}
             assetUrls={assetUrls}
             exportMode={exportMode}
+            presenting={showRevealState}
+            revealMarker={
+              !showRevealState
+                ? undefined
+                : element.id === nextRevealId
+                  ? 'next'
+                  : element.display.speakerNote || !element.display.visible
+                    ? 'hidden'
+                    : undefined
+            }
           />
         ))}
         {!exportMode && activeToolId === EditorToolId.POINTER && selectedLeafIds.length > 1 && (

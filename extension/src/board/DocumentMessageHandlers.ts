@@ -7,7 +7,7 @@ import {
   findBoardElementById,
   getElementSectionMap,
   isGroupElement,
-  normalizeElementRevealOrder,
+  insertElementsInRevealOrder,
   reconcileElementRevealOrder,
 } from '5board.vsc-common';
 import { EXTENSION } from '../extension';
@@ -280,8 +280,9 @@ export class DocumentMessageHandlers {
       // Append it to the document; the change broadcasts 'updateDocument' to all panels.
       this.document.messageService.on('addFreehandElement', (msg) => {
         this.document.applyEdit((document) => {
-          document.content.elements.push(msg.element);
-          document.content.elements = normalizeElementRevealOrder(document.content.elements);
+          document.content.elements = insertElementsInRevealOrder(document.content.elements, [
+            msg.element,
+          ]);
           return document;
         });
       }),
@@ -336,6 +337,11 @@ export class DocumentMessageHandlers {
       //#endregion "Find"
 
       //#region "Projector"
+      this.document.messageService.on('revealNext', () => this.document.revealNext()),
+      this.document.messageService.on('unrevealNext', () => this.document.unrevealNext()),
+      this.document.messageService.on('revealUpTo', (msg) =>
+        this.document.revealUpTo(msg.elementId),
+      ),
 
       // The editor (ProjectorCursorMirror) only sends while mirroring is active, so just relay.
       this.document.messageService.on('cursorMove', (msg) => {

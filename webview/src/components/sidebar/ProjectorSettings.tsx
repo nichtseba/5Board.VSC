@@ -1,7 +1,12 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Checkbox } from 'vscrui';
 import {
   DEFAULT_PROJECTOR_POINTER_STYLE,
+  EditorElement,
+  EditorElementType,
+  getElementTypeDefinition,
+  getNextRevealElement,
+  getRevealSteps,
   PROJECTOR_POINTER_PRESET_COLORS,
   ProjectorPointerShape,
   ProjectorPointerStyle,
@@ -10,6 +15,7 @@ import {
 import { useLocalization } from '../../providers/LocalizationProvider';
 import { useMessageService, useOnMessage } from '../../services/MessageService';
 import ColorSelector from './components/CompactColorSelector';
+import { useBoardDocument } from '../../providers/BoardDocumentProvider';
 
 const SHAPES: { id: ProjectorPointerShape; labelKey: TranslationKey }[] = [
   { id: 'dot', labelKey: 'webview.sidebar.projectorSettings.shapes.dot' },
@@ -30,6 +36,26 @@ export default function ProjectorSettings() {
   // Whether a projector window is attached.
   const [open, setOpen] = useState(false);
   const [style, setStyle] = useState<ProjectorPointerStyle>(DEFAULT_PROJECTOR_POINTER_STYLE);
+
+  const elements = useBoardDocument()?.content.elements;
+  const revealProgress = useMemo(() => {
+    if (!elements) {
+      return null;
+    }
+    const steps = getRevealSteps(elements);
+    return {
+      revealed: steps.filter((element) => element.display.visible).length,
+      total: steps.length,
+      next: getNextRevealElement(elements),
+    };
+  }, [elements]);
+
+  const getElementLabel = (element: EditorElement) => {
+    if (element.type === EditorElementType.Heading) {
+      return (element as EditorElement<EditorElementType.Heading>).data.content;
+    }
+    return element.name ?? t(getElementTypeDefinition(element.type).label as TranslationKey);
+  };
 
   useOnMessage((msg) => {
     if (msg.type === 'cursorTrackingChanged') setCursorTracking(msg.enabled);
@@ -104,6 +130,26 @@ export default function ProjectorSettings() {
               : t('webview.sidebar.projectorSettings.statusLive')}
         </span>
       </div>
+
+      {revealProgress && revealProgress.total > 0 && (
+        <div className="flex flex-col gap-1 text-sm">
+          <span className="text-foreground-description">
+            {t('webview.sidebar.projectorSettings.progress')}: {revealProgress.revealed} /{' '}
+            {revealProgress.total}
+          </span>
+          <span className="truncate">
+            {revealProgress.next ? (
+              <>
+                <span style={{ color: 'var(--vscode-charts-orange, #d18616)' }}>▶ </span>
+                {t('webview.sidebar.projectorSettings.nextUp')}{' '}
+                {getElementLabel(revealProgress.next)}
+              </>
+            ) : (
+              t('webview.sidebar.projectorSettings.nothingLeft')
+            )}
+          </span>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-2">
         <button

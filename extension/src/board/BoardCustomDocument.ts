@@ -1,6 +1,12 @@
 import vscode from 'vscode';
 import { BoardPackage } from './package';
-import { BoardDocument } from '5board.vsc-common';
+import {
+  BoardDocument,
+  getLastRevealedElement,
+  getNextRevealElement,
+  revealUpTo,
+  setAllElementsVisible,
+} from '5board.vsc-common';
 import { MessageService } from '../MessageService';
 import { EXTENSION } from '../extension';
 import { t } from '../localization';
@@ -88,6 +94,10 @@ export class BoardCustomDocument implements vscode.CustomDocument {
 
   /** Attach projector panel (init) */
   public addProjector(): void {
+    // A new presentation starts with everything hidden.
+    if (!this.hasProjector) {
+      this.setAllElementsVisible(false);
+    }
     this.projectorCount++;
     EXTENSION.projectorDocument = this;
     this.broadcastProjectorState();
@@ -191,6 +201,43 @@ export class BoardCustomDocument implements vscode.CustomDocument {
       isUndo: options?.isUndo ?? false,
       isRedo: options?.isRedo ?? false,
     });
+  }
+
+  /** Shows the next hidden element in reveal order. */
+  public revealNext(): void {
+    this.applyEdit((document) => {
+      const element = getNextRevealElement(document.content.elements);
+      if (!element) {
+        return null;
+      }
+      element.display.visible = true;
+      return document;
+    });
+  }
+
+  /** Hides the last shown element in reveal order. */
+  public unrevealNext(): void {
+    this.applyEdit((document) => {
+      const element = getLastRevealedElement(document.content.elements);
+      if (!element) {
+        return null;
+      }
+      element.display.visible = false;
+      return document;
+    });
+  }
+
+  /** Shows all elements up to and including the given one and hides everything after it. */
+  public revealUpTo(elementId: string): void {
+    this.applyEdit((document) =>
+      revealUpTo(document.content.elements, elementId) ? document : null,
+    );
+  }
+
+  public setAllElementsVisible(visible: boolean): void {
+    this.applyEdit((document) =>
+      setAllElementsVisible(document.content.elements, visible) ? document : null,
+    );
   }
 }
 

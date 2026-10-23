@@ -2,10 +2,17 @@ import {
   BoardElement,
   EditorElement,
   EditorElementType,
+  flattenBoardElements,
   getElementLayout,
   getElementSectionMap,
-  moveElementBeforeInSection,
-  moveHeadingSectionBefore,
+  getElementTypeDefinition,
+  getNextRevealElement,
+  getRevealSiblings,
+  getRevealStepNumbers,
+  isGroupElement,
+  moveElementInRevealOrder,
+  moveElementInSection,
+  TranslationKey,
 } from '5board.vsc-common';
 import * as vscode from 'vscode';
 import { EXTENSION } from '../extension';
@@ -27,6 +34,8 @@ export class StructureTreeProvider
     context.subscriptions.push(
       this.didChangeTreeData,
       EXTENSION.onActiveDocumentChange((document) => this.watchDocument(document)),
+      // Reveal states are only shown while a projector is open.
+      EXTENSION.onProjectorDocumentChange(() => this.didChangeTreeData.fire(undefined)),
       new vscode.Disposable(() => this.activeDocumentListener?.dispose()),
     );
     this.watchDocument(EXTENSION.activeEditorDocument);
@@ -48,9 +57,14 @@ export class StructureTreeProvider
     const elements = document.boardPackage.document.content.elements;
     const sectionById = getElementSectionMap(elements);
     const parentId = element?.elementId ?? null;
+    const revealContext: RevealContext = {
+      stepNumbers: getRevealStepNumbers(elements),
+      nextRevealId: getNextRevealElement(elements)?.id,
+      presenting: document.hasProjector,
+    };
     return elements
       .filter((candidate) => sectionById.get(candidate.id) === parentId)
-      .map((candidate) => new StructureNode(candidate));
+      .map((candidate) => new StructureNode(candidate, revealContext));
   }
 
   handleDrag(source: readonly StructureNode[], dataTransfer: vscode.DataTransfer): void {
@@ -62,39 +76,23 @@ export class StructureTreeProvider
   handleDrop(target: StructureNode | undefined, dataTransfer: vscode.DataTransfer): void {
     const sourceId = dataTransfer.get(this.dropMimeTypes[0])?.value;
     const document = EXTENSION.activeEditorDocument;
-    if (typeof sourceId !== 'string' || !target || !document) {
+    if (typeof sourceId !== 'string' || !document) {
       return;
     }
 
-    document.applyEdit((boardDocument) => {
-      const elements = boardDocument.content.elements;
-      const source = elements.find((candidate) => candidate.id === sourceId);
-      if (!source) {
-        return null;
-      }
+    applyReorder(document, (elements) => getDropResult(elements, sourceId, target?.elementId));
+  }
 
-      const previousPositions = new Map(
-        elements.map((candidate) => [candidate.id, getElementLayout(candidate).yPos]),
-      );
-      const reordered = isHeadingElement(source)
-        ? moveHeadingSectionBefore(elements, sourceId, target.elementId)
-        : moveElementBeforeInSection(elements, sourceId, target.elementId);
-      if (!reordered) {
-        return null;
-      }
+  /** Moves a structure item one step earlier (-1) or later (1) in the reveal order. */
+  public moveItem(item: StructureNode | undefined, direction: -1 | 1): void {
+    const document = EXTENSION.activeEditorDocument;
+    if (!item || !document) {
+      return;
+    }
 
-      const changed =
-        reordered.some((candidate, index) => candidate.id !== elements[index]?.id) ||
-        reordered.some(
-          (candidate) => previousPositions.get(candidate.id) !== getElementLayout(candidate).yPos,
-        );
-      if (!changed) {
-        return null;
-      }
-
-      boardDocument.content.elements = reordered;
-      return boardDocument;
-    });
+    applyReorder(document, (elements) =>
+      moveElementInRevealOrder(elements, item.elementId, direction),
+    );
   }
 
   public register(): void {
@@ -103,6 +101,12 @@ export class StructureTreeProvider
         treeDataProvider: this,
         dragAndDropController: this,
       }),
+      vscode.commands.registerCommand('5board-vsc.moveStructureItemUp', (item?: StructureNode) =>
+        this.moveItem(item, -1),
+      ),
+      vscode.commands.registerCommand('5board-vsc.moveStructureItemDown', (item?: StructureNode) =>
+        this.moveItem(item, 1),
+      ),
     );
   }
 
@@ -115,31 +119,176 @@ export class StructureTreeProvider
   }
 }
 
+/**
+ * Resolves a drop in the structure view:
+ * - onto a sibling: the source takes the target's place in the reveal order
+ * - onto the heading of its own section: the source becomes the first of its section
+ * - onto empty space: the source becomes the last of its section
+ */
+function getDropResult(
+  elements: BoardElement[],
+  sourceId: string,
+  targetId: string | undefined,
+): BoardElement[] | undefined {
+  const siblings = getRevealSiblings(elements, sourceId);
+  const sourceIndex = siblings.findIndex((candidate) => candidate.id === sourceId);
+  if (sourceIndex < 0 || sourceId === targetId) {
+    return undefined;
+  }
+
+  if (targetId === undefined) {
+    return moveElementInSection(elements, sourceId, siblings[siblings.length - 1].id, 'after');
+  }
+  if (getElementSectionMap(elements).get(sourceId) === targetId) {
+    return moveElementInSection(elements, sourceId, siblings[0].id, 'before');
+  }
+
+  const targetIndex = siblings.findIndex((candidate) => candidate.id === targetId);
+  if (targetIndex < 0) {
+    return undefined;
+  }
+  return moveElementInSection(
+    elements,
+    sourceId,
+    targetId,
+    sourceIndex < targetIndex ? 'after' : 'before',
+  );
+}
+
+function applyReorder(
+  document: BoardCustomDocument,
+  reorder: (elements: BoardElement[]) => BoardElement[] | undefined,
+): void {
+  document.applyEdit((boardDocument) => {
+    const elements = boardDocument.content.elements;
+    const previousPositions = new Map(
+      elements.map((candidate) => [candidate.id, getElementLayout(candidate).yPos]),
+    );
+    const reordered = reorder(elements);
+    if (!reordered) {
+      return null;
+    }
+
+    const changed =
+      reordered.some((candidate, index) => candidate.id !== elements[index]?.id) ||
+      reordered.some(
+        (candidate) => previousPositions.get(candidate.id) !== getElementLayout(candidate).yPos,
+      );
+    if (!changed) {
+      return null;
+    }
+
+    boardDocument.content.elements = reordered;
+    return boardDocument;
+  });
+}
+
+type RevealContext = {
+  stepNumbers: ReadonlyMap<string, number>;
+  nextRevealId: string | undefined;
+  presenting: boolean;
+};
+
+type RevealState = 'speakerNote' | 'next' | 'revealed' | 'hidden';
+
 class StructureNode extends vscode.TreeItem {
   public readonly elementId: string;
 
-  constructor(element: BoardElement) {
+  constructor(element: BoardElement, reveal: RevealContext) {
     let label;
     let state;
     if (isHeadingElement(element)) {
       label = element.data.content;
       state = vscode.TreeItemCollapsibleState.Collapsed;
     } else {
-      label = element.name ?? element.id;
+      label = element.name ?? getDefaultLabel(element);
       state = vscode.TreeItemCollapsibleState.None;
     }
     super(label, state);
     this.elementId = element.id;
     this.id = element.id;
-    if (!isHeadingElement(element)) {
-      this.contextValue = 'structureElement';
-    }
+    this.contextValue = isHeadingElement(element) ? 'structureHeading' : 'structureElement';
     this.command = {
       title: t('webview.sidebar.goToElement'),
       command: '5board-vsc.goToElement',
       arguments: [element.id],
     };
+
+    const leaves = flattenBoardElements([element]);
+    const steps = leaves
+      .map((leaf) => reveal.stepNumbers.get(leaf.id))
+      .filter((step) => step !== undefined);
+    const revealState = getRevealState(leaves, reveal.nextRevealId);
+    const stepDescription =
+      steps.length === 0
+        ? t('webview.sidebar.structure.speakerNote')
+        : steps.length === 1
+          ? `#${steps[0]}`
+          : `#${steps[0]}–${steps[steps.length - 1]}`;
+    const excludedFromExport = leaves.every((leaf) => leaf.display.excludeFromExport);
+    const description = excludedFromExport
+      ? `${stepDescription} · ${t('webview.sidebar.structure.excludedFromExport')}`
+      : stepDescription;
+
+    if (reveal.presenting) {
+      this.description =
+        revealState === 'next'
+          ? `${description} · ${t('webview.sidebar.structure.nextReveal')}`
+          : description;
+      this.iconPath = REVEAL_STATE_ICONS[revealState];
+      this.tooltip = `${label}\n${t(REVEAL_STATE_LABELS[revealState])}`;
+    } else {
+      this.description = description;
+      this.iconPath =
+        revealState === 'speakerNote'
+          ? SPEAKER_NOTE_ICON
+          : excludedFromExport
+            ? EXCLUDED_FROM_EXPORT_ICON
+            : isGroupElement(element)
+              ? new vscode.ThemeIcon('group-by-ref-type')
+              : new vscode.ThemeIcon(getElementTypeDefinition(element.type).icon);
+      this.tooltip = `${label}\n${t('webview.sidebar.structure.dropHint')}`;
+    }
   }
+}
+
+// Same colors as the badges on the editor canvas.
+const SPEAKER_NOTE_ICON = new vscode.ThemeIcon('comment', new vscode.ThemeColor('charts.blue'));
+const EXCLUDED_FROM_EXPORT_ICON = new vscode.ThemeIcon(
+  'link-external',
+  new vscode.ThemeColor('charts.purple'),
+);
+
+const REVEAL_STATE_ICONS: Record<RevealState, vscode.ThemeIcon> = {
+  speakerNote: SPEAKER_NOTE_ICON,
+  next: new vscode.ThemeIcon('debug-stackframe', new vscode.ThemeColor('charts.orange')),
+  revealed: new vscode.ThemeIcon('eye', new vscode.ThemeColor('charts.green')),
+  hidden: new vscode.ThemeIcon('eye-closed', new vscode.ThemeColor('disabledForeground')),
+};
+
+const REVEAL_STATE_LABELS: Record<RevealState, TranslationKey> = {
+  speakerNote: 'webview.sidebar.structure.speakerNote',
+  next: 'webview.sidebar.structure.nextReveal',
+  revealed: 'webview.sidebar.structure.revealed',
+  hidden: 'webview.sidebar.structure.hidden',
+};
+
+function getRevealState(leaves: EditorElement[], nextRevealId: string | undefined): RevealState {
+  const steps = leaves.filter((leaf) => !leaf.display.speakerNote);
+  if (steps.length === 0) {
+    return 'speakerNote';
+  }
+  if (steps.some((leaf) => leaf.id === nextRevealId)) {
+    return 'next';
+  }
+  return steps.every((leaf) => leaf.display.visible) ? 'revealed' : 'hidden';
+}
+
+function getDefaultLabel(element: BoardElement): string {
+  if (isGroupElement(element)) {
+    return t('webview.sidebar.elementType.group');
+  }
+  return t(getElementTypeDefinition(element.type).label as TranslationKey);
 }
 
 function isHeadingElement(el: BoardElement): el is EditorElement<EditorElementType.Heading> {
