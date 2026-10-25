@@ -112,6 +112,34 @@ export class FiveBoardExtension extends ExtensionBase {
 
   public activate(context: vscode.ExtensionContext): void {
     super.activate(context);
+
+    context.subscriptions.push(
+      vscode.commands.registerCommand('5board-vsc.mermaidTest', () => {
+        const panel = vscode.window.createWebviewPanel(
+          '5board-vsc.mermaidTest',
+          'Mermaid-Skilltree – Prototyp',
+          vscode.ViewColumn.Beside,
+          { enableScripts: true },
+        );
+
+        const htmlPath = vscode.Uri.joinPath(
+          context.extensionUri,
+          'media',
+          'webview',
+          'MermaidTest.html',
+        );
+
+        const webview = panel.webview;
+        const mediaRoot = vscode.Uri.joinPath(context.extensionUri, 'media', 'webview');
+        const mediaRootWeb = webview.asWebviewUri(mediaRoot).toString();
+
+        void vscode.workspace.fs.readFile(htmlPath).then((content) => {
+          const html = Buffer.from(content).toString('utf8');
+          webview.html = html.replace(/(src|href)="(.+?)"/g, `$1="${mediaRootWeb}/$2"`);
+        });
+      }),
+    );
+
     this.presetProvider = new PresetProvider(context.globalStorageUri);
     this.presetsReady = this.presetProvider.loadPresets().then((presets) => {
       this.editorState = { presets };

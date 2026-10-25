@@ -143,6 +143,11 @@
         "icon": "$(file-code)"
       },
       {
+        "command": "5board-vsc.mermaidTest",
+        "title": "Mermaid-Skilltree testen",
+        "category": "5Board"
+      },
+      {
         "command": "5board-vsc.goToElement",
         "title": "%commands.goToElement%"
       },

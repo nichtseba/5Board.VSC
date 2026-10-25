@@ -32,20 +32,21 @@
   },
   "dependencies": {
     "5board.vsc-common": "link:..\\common",
-    "@monaco-editor/react": "^4.7.0",
-    "@vscode/codicons": "^0.0.45",
-    "monaco-editor": "^0.55.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-moveable": "^0.56.0",
-    "tailwindcss": "^4.3.0",
-    "vscrui": "^0.3.0",
     "@heroicons/react": "^2.2.0",
+    "@monaco-editor/react": "^4.7.0",
     "@tiptap/extension-text-align": "^3.27.1",
     "@tiptap/extension-text-style": "^3.27.1",
     "@tiptap/pm": "^3.26.1",
     "@tiptap/react": "^3.26.1",
     "@tiptap/starter-kit": "^3.26.1",
-    "react-error-boundary": "^6.1.6"
+    "@vscode/codicons": "^0.0.45",
+    "mermaid": "^12.2.0",
+    "monaco-editor": "^0.55.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-error-boundary": "^6.1.6",
+    "react-moveable": "^0.56.0",
+    "tailwindcss": "^4.3.0",
+    "vscrui": "^0.3.0"
   }
 }

@@ -15,6 +15,7 @@ const VIEWS = [
   'ClassSettingsSidebar',
   'Projector',
   'ExportPreview',
+  'MermaidTest',
 ];
 
 //@ts-check
