@@ -5,14 +5,17 @@ import {
   isDefaultClassName,
 } from '5board.vsc-common';
 import type { ElementStyle } from '5board.vsc-common';
-import { Button, Dropdown, DropdownOption } from 'vscrui';
+import { ArrowUturnLeftIcon } from '@heroicons/react/24/outline';
+import { Button, Divider, Dropdown, DropdownOption } from 'vscrui';
 import { languageOptions as supportedLanguageOptions, optionValue } from '../codeblockOptions';
-import ColorSelector from '../components/ColorSelector';
+import ColorSelector from '../components/CompactColorSelector';
 import SettingsField from '../layout/SettingsField';
 import SettingsPanel from '../layout/SettingsPanel';
 import { useBoardDocument } from '../../../providers/BoardDocumentProvider';
 import { useLocalization } from '../../../providers/LocalizationProvider';
 import { useMessageService } from '../../../services/MessageService';
+import GenericElementSettings from './GenericElementSettings';
+import { TransformationSettings } from './TransformationSettings';
 
 type Props = {
   elements: EditorElement<EditorElementType.Code>[];
@@ -23,7 +26,19 @@ const NONE = '';
 export function CodeSettings({ elements }: Props) {
   // Class, language and output are per block, so settings only apply to a single selection.
   if (elements.length !== 1) return null;
-  return <SingleCodeSettings element={elements[0]} />;
+
+  const { t } = useLocalization();
+  return (
+    <>
+      <SettingsPanel title={t('webview.sidebar-element-settings.codeSettings.title')} icon="code">
+        <GenericElementSettings element={elements[0]} />
+        <Divider />
+        <TransformationSettings elements={elements} />
+        <Divider />
+        <SingleCodeSettings element={elements[0]} />
+      </SettingsPanel>
+    </>
+  );
 }
 
 function SingleCodeSettings({ element }: { element: EditorElement<EditorElementType.Code> }) {
@@ -77,7 +92,7 @@ function SingleCodeSettings({ element }: { element: EditorElement<EditorElementT
     element.style.backgroundColor !== undefined || element.style.border?.color !== undefined;
 
   return (
-    <SettingsPanel title={t('webview.sidebar-element-settings.codeSettings.title')} icon="code">
+    <>
       <SettingsField label={t('webview.sidebar-element-settings.codeSettings.languageLabel')}>
         <Dropdown
           options={languageOptions}
@@ -92,29 +107,34 @@ function SingleCodeSettings({ element }: { element: EditorElement<EditorElementT
         )}
       </SettingsField>
       {hasClasses && (
-        <SettingsField label={t('webview.sidebar-element-settings.codeSettings.classNameLabel')}>
-          <Dropdown
-            options={classOptions}
-            value={standalone ? NONE : className}
-            onChange={selectClass}
-          />
-          <InfoLine icon={standalone ? 'symbol-method' : 'symbol-class'}>
-            {standalone
-              ? t('webview.sidebar-element-settings.codeSettings.mainWrapInfo')
-              : t('webview.sidebar-element-settings.codeSettings.noMainWrapInfo')}
-          </InfoLine>
-        </SettingsField>
+        <>
+          <Divider />
+          <SettingsField label={t('webview.sidebar-element-settings.codeSettings.classNameLabel')}>
+            <Dropdown
+              options={classOptions}
+              value={standalone ? NONE : className}
+              onChange={selectClass}
+            />
+            <InfoLine icon={standalone ? 'symbol-method' : 'symbol-class'}>
+              {standalone
+                ? t('webview.sidebar-element-settings.codeSettings.mainWrapInfo')
+                : t('webview.sidebar-element-settings.codeSettings.noMainWrapInfo')}
+            </InfoLine>
+          </SettingsField>
+        </>
       )}
-      <SettingsField label={t('webview.sidebar-element-settings.codeSettings.backgroundLabel')}>
+      <Divider />
+      <SettingsField label={t('webview.sidebar-element-settings.codeSettings.style')}>
         <ColorSelector
-          color={element.style.backgroundColor ?? ''}
+          color={element.style.backgroundColor}
           onChange={(color) => updateStyle({ backgroundColor: color })}
+          label={t('webview.sidebar-element-settings.codeSettings.backgroundLabel')}
         />
-      </SettingsField>
-      <SettingsField label={t('webview.sidebar-element-settings.codeSettings.borderLabel')}>
+
         <ColorSelector
-          color={element.style.border?.color ?? ''}
+          color={element.style.border?.color}
           onChange={(color) => updateStyle({ border: { ...element.style.border, color } })}
+          label={t('webview.sidebar-element-settings.codeSettings.borderLabel')}
         />
       </SettingsField>
       {hasColorOverride && (
@@ -131,21 +151,27 @@ function SingleCodeSettings({ element }: { element: EditorElement<EditorElementT
         </Button>
       )}
       {/* Always available: only the extension knows whether a block is running with live output. */}
+      <Divider />
       <div className="mt-2 flex flex-col gap-2">
         <Button
           appearance="secondary"
+          className="justify-center gap-2"
           onClick={() => messages.send({ type: 'codeblockResetOutput', elementId: element.id })}
         >
+          <ArrowUturnLeftIcon className="size-4" />
           {t('webview.sidebar-element-settings.codeSettings.resetOutput')}
         </Button>
         <Button
           appearance="secondary"
+          className="justify-center gap-2"
           onClick={() => messages.send({ type: 'codeblockResetAllOutputs' })}
         >
+          <ArrowUturnLeftIcon className="size-4" />
+          <ArrowUturnLeftIcon className="size-4" />
           {t('webview.sidebar-element-settings.codeSettings.resetAllOutputs')}
         </Button>
       </div>
-    </SettingsPanel>
+    </>
   );
 }
 

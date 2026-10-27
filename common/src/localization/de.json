@@ -345,7 +345,8 @@
         "borderLabel": "Rahmenfarbe",
         "resetColors": "Auf Theme-Farben zurücksetzen",
         "resetOutput": "Ausgabe zurücksetzen",
-        "resetAllOutputs": "Alle Ausgaben zurücksetzen"
+        "resetAllOutputs": "Alle Ausgaben zurücksetzen",
+        "style": "Style"
       },
       "layer": "Ebene",
       "tableOfContentsSettings": {

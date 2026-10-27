@@ -346,7 +346,8 @@
         "borderLabel": "Border color",
         "resetColors": "Reset to theme colors",
         "resetOutput": "Reset output",
-        "resetAllOutputs": "Reset all outputs"
+        "resetAllOutputs": "Reset all outputs",
+        "style": "Style"
       },
       "layer": "Layer",
       "tableOfContentsSettings": {
