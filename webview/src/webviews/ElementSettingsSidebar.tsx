@@ -63,6 +63,11 @@ export default function ElementSettingsSidebar() {
   return (
     <SidebarShell>
       {content}
+      {selectedElements.length > 0 && (
+        <div className="-mt-2">
+          <Divider />
+        </div>
+      )}
       {(selectedGroup || selectedElements.length >= 2) && (
         <Button
           appearance="secondary"
@@ -88,20 +93,15 @@ export default function ElementSettingsSidebar() {
         </Button>
       )}
       {selectedElements.length > 0 && (
-        <>
-          <div className="-mt-2">
-            <Divider />
-          </div>
-          <Button
-            appearance="secondary"
-            className="justify-center gap-2"
-            title={t('webview.sidebar-element-settings.deleteTooltip')}
-            onClick={() => handleDelete()}
-          >
-            <Icon name="trash" className="color-foreground-error" />
-            {t('webview.sidebar-element-settings.delete')}
-          </Button>
-        </>
+        <Button
+          appearance="secondary"
+          className="justify-center gap-2"
+          title={t('webview.sidebar-element-settings.deleteTooltip')}
+          onClick={() => handleDelete()}
+        >
+          <Icon name="trash" className="color-foreground-error" />
+          {t('webview.sidebar-element-settings.delete')}
+        </Button>
       )}
     </SidebarShell>
   );
