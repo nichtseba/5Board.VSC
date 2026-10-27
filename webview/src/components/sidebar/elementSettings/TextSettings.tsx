@@ -64,7 +64,6 @@ export function TextSettings({ elements }: Props) {
       })),
     });
   };
-  const backgroundColor = getCommonValue(elements.map((element) => element.style.backgroundColor));
   const colorPresetLabels = {
     foreground: t('webview.sidebar-element-settings.textSettings.colorPresets.foreground'),
     muted: t('webview.sidebar-element-settings.textSettings.colorPresets.muted'),
@@ -201,18 +200,6 @@ export function TextSettings({ elements }: Props) {
             }}
             presets={PROJECTOR_POINTER_PRESET_COLORS}
             label={t('webview.sidebar-element-settings.textSettings.highlightColor')}
-            customColorLabel={t('webview.sidebar.projectorSettings.customColor')}
-            pickerTitle={t('webview.sidebar-element-settings.textSettings.customColorTooltip')}
-            noColorLabel={t('webview.sidebar-element-settings.textSettings.noColorTooltip')}
-            presetLabels={colorPresetLabels}
-          />
-
-          <ColorSelector
-            color={backgroundColor}
-            allowNone
-            onChange={(color) => updateStyle({ backgroundColor: color })}
-            presets={PROJECTOR_POINTER_PRESET_COLORS}
-            label={t('webview.sidebar-element-settings.textSettings.backgroundColor')}
             customColorLabel={t('webview.sidebar.projectorSettings.customColor')}
             pickerTitle={t('webview.sidebar-element-settings.textSettings.customColorTooltip')}
             noColorLabel={t('webview.sidebar-element-settings.textSettings.noColorTooltip')}
