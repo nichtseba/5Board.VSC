@@ -95,7 +95,6 @@ export default function ProjectorSettings() {
 
   const isGeometric =
     style.shape === 'dot' || style.shape === 'ring' || style.shape === 'rectangle';
-  appearance = 'secondary';
 
   return (
     <div className="flex flex-col gap-4">
