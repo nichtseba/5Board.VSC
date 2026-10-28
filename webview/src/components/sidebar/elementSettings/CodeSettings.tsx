@@ -25,17 +25,20 @@ const NONE = '';
 
 export function CodeSettings({ elements }: Props) {
   // Class, language and output are per block, so settings only apply to a single selection.
-  if (elements.length !== 1) return null;
-
   const { t } = useLocalization();
+  const isSingleSelection = elements.length === 1;
   return (
     <>
       <SettingsPanel title={t('webview.sidebar-element-settings.codeSettings.title')} icon="code">
-        <GenericElementSettings element={elements[0]} />
-        <Divider />
+        {isSingleSelection && <GenericElementSettings element={elements[0]} />}
+        {isSingleSelection && <Divider />}
         <TransformationSettings elements={elements} />
-        <Divider />
-        <SingleCodeSettings element={elements[0]} />
+        {isSingleSelection && (
+          <>
+            <Divider />
+            <SingleCodeSettings element={elements[0]} />
+          </>
+        )}
       </SettingsPanel>
     </>
   );
