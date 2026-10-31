@@ -32,7 +32,8 @@ import { FiveBoardFileSystemProvider } from './FiveBoardFileSystemProvider';
 import { DocumentManager } from './PackageManager';
 import { SidebarManager } from './sidebar/SidebarManager';
 import { getRunner } from './runner';
-import { getConfiguredHome, watchToolchainSettings } from './config';
+import { getConfiguredHome, getServerUrl, watchToolchainSettings } from './config';
+import { SessionController } from './session/SessionController';
 import { SettingsService } from './SettingsService';
 import { createDefaultElement } from './board/addElement/createDefaultElement';
 import { findCodeElement, updateBlockCode } from './board/CodeblockSourceService';
@@ -47,6 +48,7 @@ export class FiveBoardExtension extends ExtensionBase {
   public readonly settingsService = new SettingsService();
   private openDocuments = new Map<string, BoardCustomDocument>();
   private toolchainOutput?: vscode.OutputChannel;
+  private session?: SessionController;
   private readonly elementClipboard = new ElementClipboardService((uri) =>
     this.getDocumentForUri(uri),
   );
@@ -134,6 +136,19 @@ export class FiveBoardExtension extends ExtensionBase {
     );
     new FiveBoardFileSystemProvider(this.packageManager).register(context);
     new ExportPreviewProvider(context).register();
+    this.session = new SessionController(getServerUrl);
+    context.subscriptions.push(this.session);
+  }
+
+  /** Starts a live session for the students; while one is running, lets the teacher copy the code or end it. */
+  @Command('5board-vsc.startSession')
+  async startSessionCommand(): Promise<void> {
+    await this.session?.startOrManage();
+  }
+
+  @Command('5board-vsc.stopSession')
+  stopSessionCommand(): void {
+    this.session?.stop();
   }
 
   @Command('5board-vsc.newBoard')

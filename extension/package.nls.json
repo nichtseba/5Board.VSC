@@ -13,6 +13,8 @@
   "commands.openBoardFile": "Open 5Board File",
   "commands.newBoardFile": "New 5Board File",
   "commands.startPresentation": "Start Presentation",
+  "commands.startSession": "Start Live Session",
+  "commands.stopSession": "End Live Session",
   "commands.executeCodeblock": "Execute Code Block",
   "commands.showToolchain": "Show Toolchain…",
   "commands.resetAllOutputs": "Reset All Code Block Outputs",
@@ -38,5 +40,6 @@
   "configuration.python.path.description": "Path to a Python 3.7 or newer interpreter, a virtual environment or an install directory. Leave empty to use python3/python from PATH.",
   "configuration.grid.cellSize.description": "Changes to the grid size affect the export layout! \n\n Default grid cell size in pixels for new documents.",
   "configuration.grid.columnCount.description": "Changes to the grid size affect the export layout! \n\n Default number of grid columns for new documents.",
-  "configuration.colorPalette.customColors.description": "Add custom colors to the color picker using RGB values, e.g. rgb(255, 0, 0)"
+  "configuration.colorPalette.customColors.description": "Add custom colors to the color picker using RGB values, e.g. rgb(255, 0, 0)",
+  "configuration.server.url.description": "Address of the 5Board live server that students connect through, e.g. http://localhost:3000."
 }

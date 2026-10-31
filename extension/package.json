@@ -128,6 +128,17 @@
         "icon": "$(play)"
       },
       {
+        "command": "5board-vsc.startSession",
+        "title": "%commands.startSession%",
+        "icon": "$(broadcast)",
+        "category": "5Board"
+      },
+      {
+        "command": "5board-vsc.stopSession",
+        "title": "%commands.stopSession%",
+        "category": "5Board"
+      },
+      {
         "command": "5board-vsc.executeCodeblock",
         "title": "%commands.executeCodeblock%",
         "icon": "$(run)"
@@ -263,6 +274,11 @@
           "group": "navigation@4"
         },
         {
+          "command": "5board-vsc.startSession",
+          "when": "view == 5board-vsc.sidebar-tool-view",
+          "group": "navigation@5"
+        },
+        {
           "command": "5board-vsc.savePreset",
           "when": "view == 5board-vsc.sidebar-element-settings-view",
           "group": "navigation"
@@ -286,6 +302,13 @@
           "scope": "machine",
           "order": 11,
           "description": "%configuration.python.path.description%"
+        },
+        "5board-vsc.server.url": {
+          "type": "string",
+          "default": "http://localhost:3000",
+          "scope": "window",
+          "order": 20,
+          "description": "%configuration.server.url.description%"
         },
         "5board-vsc.grid.cellSize": {
           "type": "integer",
@@ -335,9 +358,11 @@
     "clean": "rimraf dist media/webview out"
   },
   "devDependencies": {
+    "@types/deep-equal": "^1.0.4",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
     "@types/vscode": "^1.107.0",
+    "@types/ws": "^8.5.12",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
     "@vscode/vsce": "^3.9.1",
@@ -347,12 +372,12 @@
     "ts-loader": "^9.5.4",
     "typescript": "^5.9.3",
     "webpack": "^5.105.3",
-    "webpack-cli": "^6.0.1",
-    "@types/deep-equal": "^1.0.4"
+    "webpack-cli": "^6.0.1"
   },
   "dependencies": {
     "5board.vsc-common": "link:../common",
+    "deep-equal": "^2.2.3",
     "jszip": "^3.10.1",
-    "deep-equal": "^2.2.3"
+    "ws": "^8.18.0"
   }
 }

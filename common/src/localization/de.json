@@ -111,6 +111,29 @@
       "selectOptions": "Optionen auswählen",
       "imageAssetMissing": "Das ausgewählte Bild-Asset wurde nicht gefunden. Das Preset wurde nicht gespeichert.",
       "presetSaved": "Preset erfolgreich gespeichert."
+    },
+    "session": {
+      "statusName": "5Board Live-Sitzung",
+      "connecting": "Live-Sitzung wird gestartet…",
+      "started": "Live-Sitzung gestartet. Code für die Studierenden: {code}",
+      "copyCode": "Code kopieren",
+      "codeCopied": "Code kopiert",
+      "stop": "Sitzung beenden",
+      "stopped": "Live-Sitzung beendet.",
+      "manageTitle": "Live-Sitzung {code}",
+      "participants": "Teilnehmende: {count}",
+      "reconnecting": "Verbindung zum Server verloren. Verbindung wird wiederhergestellt…",
+      "sessionEnded": "Die Live-Sitzung wurde beendet, weil die Verbindung zum Server nicht wiederhergestellt werden konnte.",
+      "connectionFailed": "Die Live-Sitzung konnte nicht gestartet werden. Läuft der Server unter {url}?",
+      "invalidUrl": "Ungültige Server-Adresse: {url}. Verwende eine Adresse wie http://localhost:3000",
+      "openSettings": "Einstellungen öffnen",
+      "reaction": {
+        "tooFast": "Zu schnell",
+        "tooSlow": "Zu langsam",
+        "unclear": "Unklar",
+        "good": "Gut",
+        "panic": "Panik"
+      }
     }
   },
   "webview": {

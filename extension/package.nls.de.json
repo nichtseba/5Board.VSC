@@ -13,6 +13,8 @@
   "commands.openBoardFile": "5Board Datei öffnen",
   "commands.newBoardFile": "Neue 5Board Datei",
   "commands.startPresentation": "Präsentation starten",
+  "commands.startSession": "Live-Sitzung starten",
+  "commands.stopSession": "Live-Sitzung beenden",
   "commands.executeCodeblock": "Codeblock ausführen",
   "commands.showToolchain": "Toolchain anzeigen…",
   "commands.resetAllOutputs": "Alle Codeblock-Ausgaben zurücksetzen",
@@ -37,5 +39,6 @@
   "configuration.python.path.description": "Pfad zu einem Python-Interpreter ab 3.7, einer virtuellen Umgebung oder einem Installationsverzeichnis. Leer lassen, um python3/python aus dem PATH zu verwenden.",
   "configuration.grid.cellSize.description": "Änderungen an der Grid-Größe haben Auswirkung auf die Export Darstellung! \n\n Standardgröße einer Rasterzelle in Pixeln für neue Dokumente.",
   "configuration.grid.columnCount.description": "Änderungen an der Grid-Größe haben Auswirkung auf die Export Darstellung! \n\n Standardanzahl der Rasterspalten für neue Dokumente.",
-  "configuration.colorPalette.customColors.description": "Füge eigene Farben zur Farbauswahl im RGB-Format hinzu, z.B. rgb(255, 0, 0)"
+  "configuration.colorPalette.customColors.description": "Füge eigene Farben zur Farbauswahl im RGB-Format hinzu, z.B. rgb(255, 0, 0)",
+  "configuration.server.url.description": "Adresse des 5Board-Live-Servers, über den sich die Studierenden verbinden, z. B. http://localhost:3000."
 }

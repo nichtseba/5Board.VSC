@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { DEFAULT_SERVER_URL } from '5board.vsc-common';
 import { clearToolchainCache } from './runner/javaToolchain';
 import { clearPythonToolchainCache } from './runner/pythonToolchain';
 
@@ -15,6 +16,12 @@ export function getConfiguredHome(language: string): string | undefined {
   if (!setting) return undefined;
   const home = vscode.workspace.getConfiguration(SECTION).get<string>(setting.key, '').trim();
   return home || undefined;
+}
+
+/** Address of the live server students connect through; an empty setting means the default. */
+export function getServerUrl(): string {
+  const url = vscode.workspace.getConfiguration(SECTION).get<string>('server.url', '').trim();
+  return url || DEFAULT_SERVER_URL;
 }
 
 /** A resolved toolchain is cached, so changing its setting has to drop the cache. */

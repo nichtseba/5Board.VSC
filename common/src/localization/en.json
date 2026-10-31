@@ -111,6 +111,29 @@
       "selectOptions": "Select Options",
       "imageAssetMissing": "The selected image asset could not be found, so the preset was not saved.",
       "presetSaved": "Preset saved successfully."
+    },
+    "session": {
+      "statusName": "5Board Live Session",
+      "connecting": "Starting live session…",
+      "started": "Live session started. Code for students: {code}",
+      "copyCode": "Copy code",
+      "codeCopied": "Code copied",
+      "stop": "End session",
+      "stopped": "Live session ended.",
+      "manageTitle": "Live session {code}",
+      "participants": "Participants: {count}",
+      "reconnecting": "Connection to the server lost. Reconnecting…",
+      "sessionEnded": "The live session ended because the connection to the server could not be restored.",
+      "connectionFailed": "Could not start the live session. Is the server running at {url}?",
+      "invalidUrl": "Invalid server address: {url}. Use an address like http://localhost:3000",
+      "openSettings": "Open settings",
+      "reaction": {
+        "tooFast": "Too fast",
+        "tooSlow": "Too slow",
+        "unclear": "Unclear",
+        "good": "Good",
+        "panic": "Panic"
+      }
     }
   },
   "webview": {

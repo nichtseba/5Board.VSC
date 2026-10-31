@@ -22,6 +22,10 @@ const extensionConfig = {
   },
   externals: {
     vscode: 'commonjs vscode', // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
+    // Optional native speed-ups of `ws`. It requires them inside try/catch and falls back to plain
+    // JavaScript when they are missing, so they are neither installed nor shipped.
+    bufferutil: 'commonjs bufferutil',
+    'utf-8-validate': 'commonjs utf-8-validate',
     // modules added here also need to be added in the .vscodeignore file
   },
   resolve: {
