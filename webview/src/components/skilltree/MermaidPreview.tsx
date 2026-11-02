@@ -83,6 +83,61 @@ export default function MermaidPreview() {
     }
   }, [zoom, position]);
 
+  //Apply zoom relative to a given point
+  function applyZoom(newZoom: number, centerX: number, centerY: number) {
+    const oldZoom = zoom;
+    const clampedZoom = Math.min(3, Math.max(0.25, newZoom));
+
+    const scale = clampedZoom / oldZoom;
+
+    setPosition({
+      x: centerX - (centerX - position.x) * scale,
+      y: centerY - (centerY - position.y) * scale,
+    });
+
+    setZoom(clampedZoom);
+  }
+
+  //Available zoom levels
+  const zoomLevels = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3];
+
+  //Get next zoom level
+  function getNextZoom(currentZoom: number, direction: number) {
+    if (direction > 0) {
+      return zoomLevels.find((level) => level > currentZoom + 0.001) ?? 3;
+    }
+
+    return [...zoomLevels].reverse().find((level) => level < currentZoom - 0.001) ?? 0.25;
+  }
+
+  //Handle mouse wheel zoom
+  useEffect(() => {
+    const container = containerRef.current;
+
+    if (!container) return;
+
+    function handleWheel(event: WheelEvent) {
+      event.preventDefault();
+
+      const bounds = container!.getBoundingClientRect();
+
+      //Get mouse position relative to the diagram container
+      const centerX = event.clientX - bounds.left - 16;
+      const centerY = event.clientY - bounds.top - 16;
+
+      const direction = event.deltaY < 0 ? 1 : -1;
+      const newZoom = getNextZoom(zoom, direction);
+
+      applyZoom(newZoom, centerX, centerY);
+    }
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+
+    return () => {
+      container.removeEventListener('wheel', handleWheel);
+    };
+  }, [zoom, position]);
+
   //Start dragging
   function handlePointerDown(event: React.PointerEvent<HTMLDivElement>) {
     if (event.button !== 0) return;
@@ -177,7 +232,15 @@ export default function MermaidPreview() {
         }}
       >
         <button
-          onClick={() => setZoom((current) => Math.max(0.25, current - 0.25))}
+          onClick={() => {
+            const container = containerRef.current;
+            if (!container) return;
+
+            const centerX = container.clientWidth / 2 - 16;
+            const centerY = container.clientHeight / 2 - 16;
+
+            applyZoom(zoom - 0.25, centerX, centerY);
+          }}
           disabled={zoom <= 0.25}
         >
           −
@@ -186,13 +249,30 @@ export default function MermaidPreview() {
         <span>{Math.round(zoom * 100)} %</span>
 
         <button
-          onClick={() => setZoom((current) => Math.min(3, current + 0.25))}
+          onClick={() => {
+            const container = containerRef.current;
+            if (!container) return;
+
+            const centerX = container.clientWidth / 2 - 16;
+            const centerY = container.clientHeight / 2 - 16;
+
+            applyZoom(zoom + 0.25, centerX, centerY);
+          }}
           disabled={zoom >= 3}
         >
           +
         </button>
 
-        <button onClick={() => setZoom(1)}>Zoom zurücksetzen</button>
+        <button
+          onClick={() => {
+            setZoom(1);
+            setPosition({ x: 0, y: 0 });
+          }}
+        >
+          Zoom zurücksetzen
+        </button>
+
+        <button onClick={() => setPosition({ x: 0, y: 0 })}>Position zurücksetzen</button>
       </div>
 
       <div
@@ -210,6 +290,7 @@ export default function MermaidPreview() {
           cursor: isDragging ? 'grabbing' : 'grab',
           touchAction: 'none',
           userSelect: 'none',
+          overscrollBehavior: 'contain',
         }}
       />
     </main>
