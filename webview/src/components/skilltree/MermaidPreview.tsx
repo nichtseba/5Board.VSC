@@ -17,6 +17,10 @@ mermaid.initialize({
 export default function MermaidPreview() {
   const [source, setSource] = useState(initialDiagram);
   const [error, setError] = useState('');
+
+  //Zoom
+  const [zoom, setZoom] = useState(1);
+
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,6 +36,16 @@ export default function MermaidPreview() {
         }
 
         containerRef.current.innerHTML = svg;
+        const svgElement = containerRef.current.querySelector('svg');
+
+        if (svgElement) {
+          svgElement.style.maxWidth = 'none';
+          svgElement.style.width = 'auto';
+          svgElement.style.height = 'auto';
+          svgElement.style.display = 'block';
+          svgElement.style.transformOrigin = 'top left';
+        }
+
         setError('');
       } catch (err) {
         if (!cancelled) {
@@ -46,6 +60,16 @@ export default function MermaidPreview() {
       cancelled = true;
     };
   }, [source]);
+
+  //Transfer zoom to SVG
+  useEffect(() => {
+    const svgElement = containerRef.current?.querySelector('svg');
+
+    if (svgElement) {
+      svgElement.style.transform = `scale(${zoom})`;
+      svgElement.style.transformOrigin = 'top left';
+    }
+  }, [zoom]);
 
   return (
     <main style={{ padding: '24px', fontFamily: 'sans-serif' }}>
@@ -73,6 +97,34 @@ export default function MermaidPreview() {
           {error}
         </pre>
       )}
+
+      {/* Zoom movement */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          marginBottom: '8px',
+        }}
+      >
+        <button
+          onClick={() => setZoom((current) => Math.max(0.25, current - 0.25))}
+          disabled={zoom <= 0.25}
+        >
+          −
+        </button>
+
+        <span>{Math.round(zoom * 100)} %</span>
+
+        <button
+          onClick={() => setZoom((current) => Math.min(3, current + 0.25))}
+          disabled={zoom >= 3}
+        >
+          +
+        </button>
+
+        <button onClick={() => setZoom(1)}>Zoom zurücksetzen</button>
+      </div>
 
       <div
         ref={containerRef}
