@@ -12,30 +12,43 @@ mermaid.initialize({
   startOnLoad: false,
   theme: 'default',
   securityLevel: 'strict',
+  suppressErrorRendering: true, //suppress Mermaid errors
 });
 
 export default function MermaidPreview() {
   const [source, setSource] = useState(initialDiagram);
+  const [confirmedSource, setConfirmedSource] = useState(initialDiagram);
+
+  //Set error
   const [error, setError] = useState('');
+
+  //Position and drag state
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+
+  const dragStart = useRef({ x: 0, y: 0 });
+  const positionStart = useRef({ x: 0, y: 0 });
 
   //Zoom
   const [zoom, setZoom] = useState(1);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
+  //Render Mermaid diagram
   useEffect(() => {
     let cancelled = false;
 
     async function renderDiagram() {
       try {
         const id = `mermaid-${crypto.randomUUID()}`;
-        const { svg } = await mermaid.render(id, source);
+        const { svg } = await mermaid.render(id, confirmedSource);
 
         if (cancelled || !containerRef.current) {
           return;
         }
 
         containerRef.current.innerHTML = svg;
+
         const svgElement = containerRef.current.querySelector('svg');
 
         if (svgElement) {
@@ -43,7 +56,6 @@ export default function MermaidPreview() {
           svgElement.style.width = 'auto';
           svgElement.style.height = 'auto';
           svgElement.style.display = 'block';
-          svgElement.style.transformOrigin = 'top left';
         }
 
         setError('');
@@ -59,17 +71,56 @@ export default function MermaidPreview() {
     return () => {
       cancelled = true;
     };
-  }, [source]);
+  }, [confirmedSource]);
 
-  //Transfer zoom to SVG
+  //Transfer zoom and position to SVG
   useEffect(() => {
     const svgElement = containerRef.current?.querySelector('svg');
 
     if (svgElement) {
-      svgElement.style.transform = `scale(${zoom})`;
+      svgElement.style.transform = `translate(${position.x}px, ${position.y}px) scale(${zoom})`;
       svgElement.style.transformOrigin = 'top left';
     }
-  }, [zoom]);
+  }, [zoom, position]);
+
+  //Start dragging
+  function handlePointerDown(event: React.PointerEvent<HTMLDivElement>) {
+    if (event.button !== 0) return;
+
+    event.preventDefault();
+    event.currentTarget.setPointerCapture(event.pointerId);
+
+    setIsDragging(true);
+
+    dragStart.current = {
+      x: event.clientX,
+      y: event.clientY,
+    };
+
+    positionStart.current = position;
+  }
+
+  //Move diagram
+  function handlePointerMove(event: React.PointerEvent<HTMLDivElement>) {
+    if (!isDragging) return;
+
+    const deltaX = event.clientX - dragStart.current.x;
+    const deltaY = event.clientY - dragStart.current.y;
+
+    setPosition({
+      x: positionStart.current.x + deltaX,
+      y: positionStart.current.y + deltaY,
+    });
+  }
+
+  //Stop dragging
+  function handlePointerUp(event: React.PointerEvent<HTMLDivElement>) {
+    setIsDragging(false);
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+  }
 
   return (
     <main style={{ padding: '24px', fontFamily: 'sans-serif' }}>
@@ -77,6 +128,7 @@ export default function MermaidPreview() {
       <p>Ändere den Quelltext, um das Diagramm neu zu rendern.</p>
 
       <label htmlFor="mermaid-source">Diagramm-Quelltext</label>
+
       <textarea
         id="mermaid-source"
         value={source}
@@ -97,6 +149,23 @@ export default function MermaidPreview() {
           {error}
         </pre>
       )}
+
+      {/* Button for saving changes on diagram */}
+      <button
+        onClick={() => setConfirmedSource(source)}
+        disabled={source === confirmedSource}
+        style={{
+          padding: '8px 16px',
+          marginBottom: '16px',
+          border: '1px solid #888',
+          borderRadius: '6px',
+          cursor: 'pointer',
+          backgroundColor: '#eee',
+          color: '#222',
+        }}
+      >
+        Diagramm übernehmen
+      </button>
 
       {/* Zoom movement */}
       <div
@@ -128,11 +197,19 @@ export default function MermaidPreview() {
 
       <div
         ref={containerRef}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
         style={{
-          overflow: 'auto',
+          overflow: 'hidden',
           border: '1px solid #888',
           borderRadius: '8px',
           padding: '16px',
+          minHeight: '500px',
+          cursor: isDragging ? 'grabbing' : 'grab',
+          touchAction: 'none',
+          userSelect: 'none',
         }}
       />
     </main>
