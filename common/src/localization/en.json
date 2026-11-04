@@ -177,7 +177,8 @@
         "line": "Line",
         "freehand": "Freehand",
         "tableOfContents": "Table of Contents",
-        "group": "Group"
+        "group": "Group",
+        "mermaid": "Mermaid"
       },
       "projectorSettings": {
         "title": "Projector Settings",
@@ -244,6 +245,7 @@
         "line": "Line",
         "freehand": "Freehand",
         "tableOfContents": "Table of Contents",
+        "mermaid": "Mermaid",
         "group": "Group"
       },
       "projectorSettings": {
@@ -429,6 +431,11 @@
         "headArrow": "Arrow",
         "headCircle": "Circle",
         "headSquare": "Square"
+      },
+      "mermaidSettings": {
+        "title": "Mermaid Diagram",
+        "source": "Diagram source",
+        "apply": "Apply changes"
       },
       "group": "Group",
       "ungroup": "Ungroup",

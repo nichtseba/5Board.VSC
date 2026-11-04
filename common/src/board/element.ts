@@ -13,6 +13,7 @@ export enum EditorElementType {
   Line = 'line',
   Freehand = 'freehand',
   TableOfContents = 'tableOfContents',
+  Mermaid = 'mermaid',
 }
 
 /**
@@ -84,6 +85,7 @@ export type EditorElementDataMap = {
   [EditorElementType.Line]: LineElementData;
   [EditorElementType.Freehand]: FreehandElementData;
   [EditorElementType.TableOfContents]: TableOfContentsElementData;
+  [EditorElementType.Mermaid]: MermaidElementData; //new type: Mermaid
 };
 
 export type HeadingElementData = {
@@ -271,6 +273,11 @@ export type ElementTypeDefinition<T extends EditorElementType = EditorElementTyp
   };
 };
 
+// export new type: Mermaid
+export type MermaidElementData = {
+  source: string;
+};
+
 export const DEFAULT_ELEMENT_PROFILES = {
   [EditorElementType.Heading]: {
     layout: { width: 40, height: 3 },
@@ -372,6 +379,20 @@ export const DEFAULT_ELEMENT_PROFILES = {
     },
     data: {},
   },
+
+  //New type: Mermaid
+  [EditorElementType.Mermaid]: {
+    layout: {
+      width: 40,
+      height: 20,
+    },
+    style: {
+      visible: true,
+    },
+    data: {
+      source: 'flowchart TD\n  A[Start] --> B[Ende]',
+    },
+  },
 } satisfies {
   [K in EditorElementType]: {
     layout: Omit<ElementLayout, 'xPos' | 'yPos'>;
@@ -435,6 +456,14 @@ export const ELEMENT_TYPE_DEFINITIONS = {
     icon: 'list-unordered',
     placement: 'free',
     profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.TableOfContents],
+  },
+
+  //new type: Mermaid
+  [EditorElementType.Mermaid]: {
+    label: 'webview.sidebar.elementType.mermaid',
+    icon: 'workflow',
+    placement: 'free',
+    profile: DEFAULT_ELEMENT_PROFILES[EditorElementType.Mermaid],
   },
 } as const satisfies {
   [K in EditorElementType]: ElementTypeDefinition<K>;

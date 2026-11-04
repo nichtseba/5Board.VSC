@@ -49,7 +49,11 @@ export function NewElements({ handleToolClick }: newElementProps) {
     return () => window.clearTimeout(timer);
   }, [showTocNotice]);
 
+  console.log('NEW ELEMENTS COMPONENT LOADED');
+
   const addableElements = Object.entries(ELEMENT_TYPE_DEFINITIONS);
+
+  console.log('MERMAID DEFINITION:', ELEMENT_TYPE_DEFINITIONS[EditorElementType.Mermaid]);
 
   const handleElementClick = (
     elementType: EditorElementType,

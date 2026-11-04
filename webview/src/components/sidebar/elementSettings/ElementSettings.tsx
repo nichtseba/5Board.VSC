@@ -11,6 +11,7 @@ import { TransformationSettings } from './TransformationSettings';
 import { RectangleSettings } from './RectangleSettings';
 import { CircleSettings } from './CircleSettings';
 import { TableOfContentsSettings } from './TableOfContentsSettings';
+import { MermaidSettings } from './MermaidSettings';
 
 type SettingsProps<T extends EditorElementType> = {
   elements: EditorElement<T>[];
@@ -60,6 +61,7 @@ const SETTINGS_COMPONENTS: {
   [EditorElementType.Line]: LineSettings,
   [EditorElementType.Freehand]: FreehandSettings,
   [EditorElementType.TableOfContents]: TableOfContentsSettings,
+  [EditorElementType.Mermaid]: MermaidSettings,
 };
 
 function UnsupportedElementSettings() {

@@ -28,6 +28,7 @@ import {
   ELEMENT_INTERACTION_CONFIG,
   type ElementInteractionProfile,
 } from './elementInteraction/InteractionConfig';
+import { MermaidElement } from './elements/MermaidElement';
 
 export type EditorElementProps<T extends EditorElementType> = {
   element: EditorElement<T>;
@@ -269,6 +270,7 @@ const ELEMENT_COMPONENTS = {
   [EditorElementType.Line]: LineElement,
   [EditorElementType.Freehand]: FreehandElement,
   [EditorElementType.TableOfContents]: TableOfContentsElement,
+  [EditorElementType.Mermaid]: MermaidElement,
 } as const satisfies {
   [ElementType in EditorElementType]: React.ComponentType<EditorElementProps<ElementType>>;
 };

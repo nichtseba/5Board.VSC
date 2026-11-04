@@ -176,7 +176,8 @@
         "circle": "Kreis",
         "line": "Linie",
         "freehand": "Freihand",
-        "tableOfContents": "Inhaltsverzeichnis"
+        "tableOfContents": "Inhaltsverzeichnis",
+        "mermaid": "Mermaid"
       },
       "projectorSettings": {
         "title": "Beameransicht-Einstellungen",
@@ -243,6 +244,7 @@
         "line": "Linie",
         "freehand": "Freihand",
         "tableOfContents": "Inhaltsverzeichnis",
+        "mermaid": "Mermaid",
         "group": "Gruppe"
       },
       "projectorSettings": {
@@ -428,6 +430,11 @@
         "headArrow": "Pfeil",
         "headCircle": "Kreis",
         "headSquare": "Quadrat"
+      },
+      "mermaidSettings": {
+        "title": "Mermaid-Diagramm",
+        "source": "Diagramm-Quellcode",
+        "apply": "Änderungen übernehmen"
       },
       "group": "Gruppieren",
       "ungroup": "Gruppierung aufheben",
