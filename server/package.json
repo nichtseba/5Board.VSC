@@ -1,0 +1,25 @@
+{
+  "name": "5board-vsc-server",
+  "version": "0.0.1",
+  "private": true,
+  "license": "ISC",
+  "type": "module",
+  "description": "Live relay server for 5Board.VSC: forwards the board to students and collects anonymous reactions.",
+  "scripts": {
+    "start": "tsx src/main.ts",
+    "dev": "tsx watch src/main.ts",
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test src/smoke.test.ts"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/ws": "^8.5.12",
+    "esbuild": "^0.25.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

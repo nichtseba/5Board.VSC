@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>5Board server demo</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 0;
+        padding: 16px;
+        max-width: 640px;
+        margin-inline: auto;
+      }
+      h1 {
+        font-size: 1.2rem;
+      }
+      button {
+        font-size: 1rem;
+        padding: 8px 12px;
+        margin: 4px 4px 4px 0;
+        cursor: pointer;
+      }
+      .box {
+        border: 1px solid #8884;
+        border-radius: 8px;
+        padding: 12px;
+        margin: 12px 0;
+      }
+      .board {
+        position: relative;
+        height: 220px;
+        background: #8882;
+        border-radius: 8px;
+        overflow: hidden;
+        touch-action: manipulation;
+      }
+      .board .mark {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        font-size: 1.6rem;
+        pointer-events: none;
+      }
+      .counts span {
+        display: inline-block;
+        margin-right: 12px;
+      }
+      code {
+        background: #8882;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      #log {
+        font-size: 0.85rem;
+        opacity: 0.8;
+        white-space: pre-wrap;
+        max-height: 120px;
+        overflow: auto;
+      }
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>5Board server demo</h1>
+    <p>
+      Open this page in <b>two browser tabs</b>: one as <b>Teacher</b>, one as <b>Student</b>. This
+      is only a test page; the real student page will show the board.
+    </p>
+
+    <div id="choose" class="box">
+      <button id="btnTeacher">I am the teacher</button>
+      <button id="btnStudent">I am a student</button>
+    </div>
+
+    <!-- Teacher -->
+    <div id="teacher" class="box hidden">
+      <h2>Teacher</h2>
+      <button id="start">Start session</button>
+      <div id="teacherInfo" class="hidden">
+        <p>Code for students: <code id="code" style="font-size: 1.4rem"></code></p>
+        <p>Students connected: <b id="participants">0</b></p>
+        <p class="counts" id="counts"></p>
+        <button id="sendBoard">Send test "board" message</button>
+        <div class="board" id="teacherBoard"></div>
+      </div>
+    </div>
+
+    <!-- Student -->
+    <div id="student" class="box hidden">
+      <h2>Student</h2>
+      <div id="join">
+        <input
+          id="codeInput"
+          placeholder="Code, e.g. K7F2"
+          maxlength="4"
+          style="font-size: 1.2rem; padding: 6px; width: 8em; text-transform: uppercase"
+        />
+        <button id="joinBtn">Join</button>
+      </div>
+      <div id="studentInfo" class="hidden">
+        <p>Status: <b id="status">connected</b></p>
+        <p>Last board message: <code id="boardMsg">-</code></p>
+        <div id="reactionButtons"></div>
+        <p>Tap the grey area to mark "I did not understand this spot":</p>
+        <div class="board" id="studentBoard"></div>
+      </div>
+    </div>
+
+    <div id="log"></div>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const REACTIONS = {
+        tooFast: '🐇 too fast',
+        tooSlow: '🐢 too slow',
+        unclear: '❓ unclear',
+        good: '👍 good',
+        panic: '🆘 panic',
+      };
+      const wsBase = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host;
+      const log = (text) =>
+        ($('log').textContent =
+          new Date().toLocaleTimeString() + '  ' + text + '\n' + $('log').textContent);
+
+      $('btnTeacher').onclick = () => {
+        $('choose').classList.add('hidden');
+        $('teacher').classList.remove('hidden');
+      };
+      $('btnStudent').onclick = () => {
+        $('choose').classList.add('hidden');
+        $('student').classList.remove('hidden');
+      };
+
+      // ---------- teacher ----------
+      let teacherSocket;
+      let boardCounter = 0;
+      $('start').onclick = async () => {
+        const res = await fetch('/api/sessions', { method: 'POST' });
+        if (!res.ok) return log('could not create session: ' + res.status);
+        const { code, teacherToken } = await res.json();
+        $('code').textContent = code;
+        $('teacherInfo').classList.remove('hidden');
+        $('start').classList.add('hidden');
+        teacherSocket = new WebSocket(`${wsBase}/ws?code=${code}&token=${teacherToken}`);
+        teacherSocket.onmessage = (event) => {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'participants') $('participants').textContent = msg.count;
+          if (msg.type === 'reactionCounts') {
+            $('counts').innerHTML = Object.entries(REACTIONS)
+              .map(([kind, label]) => `<span>${label}: <b>${msg.counts[kind]}</b></span>`)
+              .join('');
+          }
+          if (msg.type === 'mark') {
+            const el = document.createElement('div');
+            el.className = 'mark';
+            el.textContent = msg.emoji;
+            el.style.left = msg.x * 100 + '%';
+            el.style.top = msg.y * 100 + '%';
+            $('teacherBoard').appendChild(el);
+          }
+        };
+        teacherSocket.onclose = () => log('teacher connection closed');
+      };
+      $('sendBoard').onclick = () => {
+        boardCounter += 1;
+        teacherSocket.send(
+          JSON.stringify({
+            type: 'broadcast',
+            remember: true,
+            message: { type: 'demoBoard', text: 'board version ' + boardCounter },
+          }),
+        );
+      };
+
+      // ---------- student ----------
+      let studentSocket;
+      for (const [kind, label] of Object.entries(REACTIONS)) {
+        const button = document.createElement('button');
+        button.textContent = label;
+        button.onclick = () => studentSocket?.send(JSON.stringify({ type: 'reaction', kind }));
+        $('reactionButtons').appendChild(button);
+      }
+      $('studentBoard').onclick = (event) => {
+        const rect = event.currentTarget.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / rect.width;
+        const y = (event.clientY - rect.top) / rect.height;
+        studentSocket?.send(JSON.stringify({ type: 'mark', x, y, emoji: '❓' }));
+        const el = document.createElement('div');
+        el.className = 'mark';
+        el.textContent = '❓';
+        el.style.left = x * 100 + '%';
+        el.style.top = y * 100 + '%';
+        event.currentTarget.appendChild(el);
+      };
+      $('joinBtn').onclick = () => {
+        const code = $('codeInput').value.trim().toUpperCase();
+        studentSocket = new WebSocket(`${wsBase}/ws?code=${code}`);
+        studentSocket.onopen = () => {
+          $('join').classList.add('hidden');
+          $('studentInfo').classList.remove('hidden');
+        };
+        studentSocket.onmessage = (event) => {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'board') $('boardMsg').textContent = JSON.stringify(msg.message);
+          if (msg.type === 'teacherOffline') $('status').textContent = 'teacher is offline';
+          if (msg.type === 'teacherBack') $('status').textContent = 'connected';
+          if (msg.type === 'sessionEnded') $('status').textContent = 'session ended';
+        };
+        studentSocket.onclose = (event) =>
+          log('closed: ' + (event.code === 4004 ? 'unknown code' : event.code));
+      };
+    </script>
+  </body>
+</html>

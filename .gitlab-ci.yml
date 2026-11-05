@@ -2,6 +2,7 @@ stages:
   - build
   - lint
   - package
+  - deploy
 
 .pnpm:
   image: node:24.14.1
@@ -64,3 +65,31 @@ lint:
   script:
     - pnpm install
     - pnpm run lint --max-warnings=0
+
+# Uploads the live server (folder `server/`) to the university web hosting (httpdocs/app.js).
+# The login data HOST, USER and PASSWORD are CI/CD variables of the project.
+# On main it runs by itself when something in `server/` changed. On every other branch there is
+# a manual play button, so the upload can be tested before merging.
+deploy_server:
+  stage: deploy
+  image: node:24.14.1-alpine
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      changes:
+        - server/**/*
+    - if: '$CI_COMMIT_BRANCH'
+      when: manual
+      allow_failure: true
+  before_script:
+    - apk add --no-cache lftp
+  script:
+    - |
+      if [ -z "$HOST" ] || [ -z "$USER" ] || [ -z "$PASSWORD" ]; then
+        echo "HOST, USER or PASSWORD is empty. If the variables exist, they are probably marked as protected and only work on main."
+        exit 1
+      fi
+    - cd server
+    - npm install
+    - npm run build
+    # mirror -R: upload, -e: delete files on the server that are not in ./build, -n: only newer files
+    - lftp -c "set ftp:ssl-force true; open -u $USER,$PASSWORD $HOST; mirror -Renv ./build ./httpdocs"
