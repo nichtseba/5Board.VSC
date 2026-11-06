@@ -67,7 +67,7 @@ export function MermaidElement({ element }: EditorElementProps<EditorElementType
         {`
           .mermaid-container svg {
             width: 100%;
-            height: auto;
+            height: 100%;
             max-width: 100%;
           }
         `}
