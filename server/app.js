@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
+/* eslint-disable @typescript-eslint/no-require-imports, no-console */
 const http = require('http');
 
 const PORT = process.env.PORT || 3000;
