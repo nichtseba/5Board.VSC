@@ -6,6 +6,7 @@ import {
   findBoardElementById,
   flattenBoardElements,
   getLeafElementIds,
+  EditorElementType,
 } from '5board.vsc-common';
 import { useEffect, useMemo, useRef, type CSSProperties, useState } from 'react';
 import EditorElement from './EditorElement';
@@ -24,6 +25,7 @@ import GroupInteractionController from './elementInteraction/GroupInteractionCon
 import { useCanvasPointer } from './logic/useCanvasPointer';
 import { useMarqueeSelection } from './logic/useMarqueeSelection';
 import { MarqueeOverlay } from './logic/MarqueeOverlay';
+import { MermaidToolbar } from './elements/MermaidToolbar';
 
 export type EditorCanvasProps = {
   enableKeyboardShortcuts?: boolean;
@@ -59,6 +61,42 @@ export default function EditorCanvas({
     return selected ? getLeafElementIds([selected]) : [];
   });
   const activeToolId = editorState?.tool.type;
+
+  const selectedMermaidElement = flatElements.find(
+    (element) =>
+      !exportMode &&
+      activeToolId === EditorToolId.POINTER &&
+      selectedLeafIds.length === 1 &&
+      element.id === selectedLeafIds[0] &&
+      element.type === EditorElementType.Mermaid,
+  ) as import('5board.vsc-common').EditorElement<EditorElementType.Mermaid> | undefined;
+
+  const mermaidSource = selectedMermaidElement?.data.source;
+
+  const handleMermaidDirectionChange = (direction: 'TD' | 'BT' | 'LR' | 'RL') => {
+    if (!selectedMermaidElement || mermaidSource === undefined) return;
+
+    const updatedSource = mermaidSource.replace(
+      /^(\s*(?:flowchart|graph)\s+)(TD|BT|LR|RL)\b/im,
+      `$1${direction}`,
+    );
+
+    if (updatedSource === mermaidSource) return;
+
+    messages.send({
+      type: 'updateElements',
+      changes: [
+        {
+          id: selectedMermaidElement.id,
+          changes: {
+            data: {
+              source: updatedSource,
+            },
+          },
+        },
+      ],
+    });
+  };
 
   const messages = useMessageService();
   const canvasRef = useRef<HTMLDivElement | null>(null);
@@ -198,6 +236,21 @@ export default function EditorCanvas({
             exportMode={exportMode}
           />
         ))}
+        {selectedMermaidElement && mermaidSource !== undefined && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 10,
+              right: 10,
+              zIndex: 9999,
+            }}
+          >
+            <MermaidToolbar
+              source={mermaidSource}
+              onDirectionChange={handleMermaidDirectionChange}
+            />
+          </div>
+        )}
         {!exportMode && activeToolId === EditorToolId.POINTER && selectedLeafIds.length > 1 && (
           <GroupInteractionController
             elements={flatElements}
