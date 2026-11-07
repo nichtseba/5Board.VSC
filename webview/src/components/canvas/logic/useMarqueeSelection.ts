@@ -129,11 +129,20 @@ export function useMarqueeSelection({
 
   useCanvasEvents({
     pointerDown: (event) => {
+      console.log('[Marquee Debug] pointerDown', {
+        target: event.target,
+        editorElement: (event.target as HTMLElement).closest('[data-editor-element]'),
+        moveableControl: (event.target as HTMLElement).closest('.moveable-control-box'),
+        startedOnElement: startedOnElementRef.current,
+      });
       if (activeToolId !== EditorToolId.POINTER) return;
       if (event.button !== 0) return;
 
       const target = event.target;
       if (!(target instanceof HTMLElement)) return;
+
+      // Don't treat intern Canvas UI elements as empty spaces
+      if (target.closest('[data-canvas-ui]')) return;
 
       const element = target.closest('[data-editor-element]');
       if (element) {
@@ -193,6 +202,12 @@ export function useMarqueeSelection({
     },
 
     pointerUp: (event) => {
+      console.log('[Marquee Debug] pointerUp', {
+        target: event.target,
+        startedOnElement: startedOnElementRef.current,
+        hasStart: !!startRef.current,
+        isMarqueeActive: isMarqueeActiveRef.current,
+      });
       if (
         !startRef.current ||
         activeToolId !== EditorToolId.POINTER ||
@@ -240,6 +255,11 @@ export function useMarqueeSelection({
       ];
 
       if (event?.shiftKey) {
+        console.log('[Selection Debug] Clearing selection via pointerUp', {
+          target: event.target,
+          startedOnElement: startedOnElementRef.current,
+          isMarqueeActive: isMarqueeActiveRef.current,
+        });
         messages.send({ type: 'toggleElementSelection', ids: ids });
       } else {
         messages.send({

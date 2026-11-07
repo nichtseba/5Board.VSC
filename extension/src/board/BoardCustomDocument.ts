@@ -181,6 +181,11 @@ export class BoardCustomDocument implements vscode.CustomDocument {
   ): void {
     const previous = this.boardPackage.document;
     const next = edit(structuredClone(this.boardPackage.document));
+    console.log('[Selection Debug] applyEdit:', {
+      previousSelection: previous.content.selectedElementIds,
+      nextSelection: next?.content.selectedElementIds,
+      nextIsNull: next === null,
+    });
     if (next === null) {
       return;
     }

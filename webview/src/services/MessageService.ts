@@ -15,6 +15,11 @@ export class MessageService {
 
   /** Send a message to the extension host. */
   send(msg: WebviewToExtensionMessage): void {
+    if (msg.type === 'selectElements' && msg.ids.length === 0) {
+      console.log('[Message Debug] Empty selection sent');
+      console.log(new Error().stack);
+    }
+
     this.vscode.postMessage(msg);
   }
 

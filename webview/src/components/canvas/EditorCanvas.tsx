@@ -26,6 +26,11 @@ import { useCanvasPointer } from './logic/useCanvasPointer';
 import { useMarqueeSelection } from './logic/useMarqueeSelection';
 import { MarqueeOverlay } from './logic/MarqueeOverlay';
 import { MermaidToolbar } from './elements/MermaidToolbar';
+import {
+  getMermaidDirection,
+  isSupportedMermaidDiagram,
+  updateMermaidDirection,
+} from './elements/MermaidDirection';
 
 export type EditorCanvasProps = {
   enableKeyboardShortcuts?: boolean;
@@ -60,6 +65,11 @@ export default function EditorCanvas({
     const selected = findBoardElementById(elements, id);
     return selected ? getLeafElementIds([selected]) : [];
   });
+
+  useEffect(() => {
+    console.log('[Mermaid Debug] Selected IDs:', selectedElementIds);
+  }, [selectedElementIds]);
+
   const activeToolId = editorState?.tool.type;
 
   const selectedMermaidElement = flatElements.find(
@@ -73,13 +83,18 @@ export default function EditorCanvas({
 
   const mermaidSource = selectedMermaidElement?.data.source;
 
-  const handleMermaidDirectionChange = (direction: 'TD' | 'BT' | 'LR' | 'RL') => {
+  const isMermaidDirectionSupported =
+    mermaidSource !== undefined && isSupportedMermaidDiagram(mermaidSource);
+
+  const currentMermaidDirection =
+    mermaidSource !== undefined ? getMermaidDirection(mermaidSource) : undefined;
+
+  const handleMermaidDirectionChange = (
+    direction: import('./elements/MermaidDirection').MermaidDirection,
+  ) => {
     if (!selectedMermaidElement || mermaidSource === undefined) return;
 
-    const updatedSource = mermaidSource.replace(
-      /^(\s*(?:flowchart|graph)\s+)(TD|BT|LR|RL)\b/im,
-      `$1${direction}`,
-    );
+    const updatedSource = updateMermaidDirection(mermaidSource, direction);
 
     if (updatedSource === mermaidSource) return;
 
@@ -176,6 +191,10 @@ export default function EditorCanvas({
       activeToolId !== EditorToolId.POINTER &&
       (document?.content?.selectedElementIds?.length ?? 0) > 0
     ) {
+      console.log('[Selection Debug] Selection cleared because tool is not Pointer:', {
+        activeToolId,
+        selectedElementIds: document?.content.selectedElementIds,
+      });
       messages.send({
         type: 'selectElements',
         ids: [],
@@ -236,8 +255,9 @@ export default function EditorCanvas({
             exportMode={exportMode}
           />
         ))}
-        {selectedMermaidElement && mermaidSource !== undefined && (
+        {selectedMermaidElement && isMermaidDirectionSupported && (
           <div
+            data-canvas-ui="true"
             style={{
               position: 'absolute',
               top: 10,
@@ -246,7 +266,7 @@ export default function EditorCanvas({
             }}
           >
             <MermaidToolbar
-              source={mermaidSource}
+              currentDirection={currentMermaidDirection}
               onDirectionChange={handleMermaidDirectionChange}
             />
           </div>

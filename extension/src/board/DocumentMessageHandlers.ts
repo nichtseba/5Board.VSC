@@ -74,6 +74,7 @@ export class DocumentMessageHandlers {
 
           document.content.selectedElementIds = next;
           document.content.primarySelectedElementId = primarySelectedElementId;
+          console.log('[Extension Debug] Selection toggled:', document.content.selectedElementIds);
           return document;
         });
       }),
@@ -109,6 +110,7 @@ export class DocumentMessageHandlers {
 
           document.content.selectedElementIds = msg.ids;
           document.content.primarySelectedElementId = primarySelectedElementId;
+          console.log('[Extension Debug] Selection set:', document.content.selectedElementIds);
           return document;
         });
       }),
@@ -253,6 +255,10 @@ export class DocumentMessageHandlers {
               previousSections,
             );
           }
+          console.log(
+            '[Extension Debug] Selected IDs after update:',
+            document.content.selectedElementIds,
+          );
           return changed ? document : null;
         });
       }),

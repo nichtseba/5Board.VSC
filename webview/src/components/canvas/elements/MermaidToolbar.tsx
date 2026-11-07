@@ -1,10 +1,11 @@
-type MermaidDirection = 'TD' | 'BT' | 'LR' | 'RL';
+import { type MermaidDirection } from './MermaidDirection';
 
 type Props = {
-  source: string;
+  currentDirection?: MermaidDirection;
   onDirectionChange: (direction: MermaidDirection) => void;
 };
 
+//Setup directions for flowchart diagrams
 const DIRECTIONS: { id: MermaidDirection; label: string }[] = [
   { id: 'TD', label: 'Oben nach unten' },
   { id: 'BT', label: 'Unten nach oben' },
@@ -12,10 +13,7 @@ const DIRECTIONS: { id: MermaidDirection; label: string }[] = [
   { id: 'RL', label: 'Rechts nach links' },
 ];
 
-export function MermaidToolbar({ source, onDirectionChange }: Props) {
-  const match = source.match(/^\s*(?:flowchart|graph)\s+(TD|BT|LR|RL)\b/im);
-  const currentDirection = match?.[1] as MermaidDirection | undefined;
-
+export function MermaidToolbar({ currentDirection, onDirectionChange }: Props) {
   return (
     <div role="toolbar" aria-label="Mermaid-Ausrichtung" className="flex items-center gap-1">
       {DIRECTIONS.map(({ id, label }) => {
