@@ -47,6 +47,23 @@ export type EditorElementProps<T extends EditorElementType> = {
   /** Smallest resizable height in px. Only code blocks report one. */
   onMinHeightChange?: (minHeight: number) => void;
   exportMode?: boolean;
+
+  //Check if pan mode is active
+  isMermaidPanMode?: boolean;
+  onMermaidPanModeChange?: (enabled: boolean) => void;
+
+  //Additions for Mermaid zoom
+  registerZoomControls?: (
+    controls: {
+      zoomIn: () => void;
+      zoomOut: () => void;
+      resetZoom: () => void;
+      resetPosition: () => void;
+      zoomPercent: number;
+      canZoomIn: boolean;
+      canZoomOut: boolean;
+    } | null,
+  ) => void;
 };
 
 /**
@@ -62,6 +79,9 @@ export default function EditorElement<ElementType extends EditorElementType>({
   assetUrls,
   preview,
   exportMode,
+  registerZoomControls,
+  isMermaidPanMode = false,
+  onMermaidPanModeChange,
 }: EditorElementProps<ElementType>) {
   const targetRef = useRef<HTMLDivElement>(null);
   const [editing, setEditing] = useState(false);
@@ -225,6 +245,9 @@ export default function EditorElement<ElementType extends EditorElementType>({
           exportMode={exportMode}
           onStopEditing={handleStopEditing}
           onMinHeightChange={setMinHeight}
+          registerZoomControls={registerZoomControls}
+          isMermaidPanMode={isMermaidPanMode}
+          onMermaidPanModeChange={onMermaidPanModeChange}
         />
       </div>
       {activeToolId === EditorToolId.POINTER && !grouped && (
@@ -233,6 +256,7 @@ export default function EditorElement<ElementType extends EditorElementType>({
           selected={selected && !editing}
           targetRef={targetRef}
           minHeight={minHeight}
+          isMermaidPanMode={isMermaidPanMode}
         />
       )}
       {contextMenuPosition && (

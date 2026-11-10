@@ -18,6 +18,7 @@ type Props<T extends EditorElementType> = {
   selected: boolean | undefined;
   targetRef: React.RefObject<HTMLDivElement>;
   minHeight?: number;
+  isMermaidPanMode?: boolean;
 };
 
 export default function ElementInteractionController<ElementType extends EditorElementType>({
@@ -25,6 +26,7 @@ export default function ElementInteractionController<ElementType extends EditorE
   selected,
   targetRef,
   minHeight,
+  isMermaidPanMode = false,
 }: Props<ElementType>) {
   const moveableRef = useRef<Moveable | null>(null);
   const { cellSize, metrics } = useGrid();
@@ -247,7 +249,7 @@ export default function ElementInteractionController<ElementType extends EditorE
     <Moveable
       ref={moveableRef}
       target={targetRef}
-      draggable={profile.draggable}
+      draggable={profile.draggable && !isMermaidPanMode}
       resizable={profile.resizable}
       rotatable={profile.rotatable}
       keepRatio={profile.keepRatio}

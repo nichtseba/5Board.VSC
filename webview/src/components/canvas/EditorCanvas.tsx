@@ -113,9 +113,68 @@ export default function EditorCanvas({
     });
   };
 
+  const [mermaidToolbarPosition, setMermaidToolbarPosition] = useState({
+    top: 10,
+    left: 10,
+  });
+
+  useEffect(() => {
+    if (!selectedMermaidElement || !isMermaidDirectionSupported) {
+      return;
+    }
+
+    const updateToolbarPosition = () => {
+      const target = globalThis.document?.getElementById(selectedMermaidElement.id);
+      const canvas = canvasRef.current;
+
+      if (!target || !canvas) return;
+
+      const targetRect = target.getBoundingClientRect();
+      const canvasRect = canvas.getBoundingClientRect();
+
+      setMermaidToolbarPosition({
+        top: targetRect.top - canvasRect.top + canvas.scrollTop,
+        left: targetRect.right - canvasRect.left + canvas.scrollLeft + 10,
+      });
+    };
+
+    updateToolbarPosition();
+
+    const canvas = canvasRef.current;
+
+    canvas?.addEventListener('scroll', updateToolbarPosition);
+    window.addEventListener('resize', updateToolbarPosition);
+
+    return () => {
+      canvas?.removeEventListener('scroll', updateToolbarPosition);
+      window.removeEventListener('resize', updateToolbarPosition);
+    };
+  }, [selectedMermaidElement, isMermaidDirectionSupported]);
+
   const messages = useMessageService();
   const canvasRef = useRef<HTMLDivElement | null>(null);
   const [elementToScrollId, setElementToScrollId] = useState<string | null>(null);
+
+  //Refer to Mermaid zoom
+  type MermaidZoomControls = {
+    zoomIn: () => void;
+    zoomOut: () => void;
+    resetZoom: () => void;
+    resetPosition: () => void;
+    zoomPercent: number;
+    canZoomIn: boolean;
+    canZoomOut: boolean;
+  };
+
+  const [mermaidZoomControls, setMermaidZoomControls] = useState<MermaidZoomControls | null>(null);
+
+  // Check if Mermaid pan mode is active
+  const [isMermaidPanMode, setIsMermaidPanMode] = useState(false);
+
+  useEffect(() => {
+    setIsMermaidPanMode(false);
+  }, [selectedMermaidElement?.id]);
+
   const imageImportHandlers = useImageImport();
   const { setGridElement } = useGrid();
 
@@ -253,21 +312,36 @@ export default function EditorCanvas({
             grouped={selectedLeafIds.length > 1}
             assetUrls={assetUrls}
             exportMode={exportMode}
+            registerZoomControls={
+              element.id === selectedMermaidElement?.id ? setMermaidZoomControls : undefined
+            }
+            isMermaidPanMode={element.id === selectedMermaidElement?.id && isMermaidPanMode}
+            onMermaidPanModeChange={setIsMermaidPanMode}
           />
         ))}
+
         {selectedMermaidElement && isMermaidDirectionSupported && (
           <div
             data-canvas-ui="true"
             style={{
               position: 'absolute',
-              top: 10,
-              right: 10,
+              top: mermaidToolbarPosition.top,
+              left: mermaidToolbarPosition.left,
               zIndex: 9999,
             }}
           >
             <MermaidToolbar
               currentDirection={currentMermaidDirection}
               onDirectionChange={handleMermaidDirectionChange}
+              onZoomIn={() => mermaidZoomControls?.zoomIn()}
+              onZoomOut={() => mermaidZoomControls?.zoomOut()}
+              onZoomReset={() => mermaidZoomControls?.resetZoom()}
+              onPositionReset={() => mermaidZoomControls?.resetPosition()}
+              zoomPercent={mermaidZoomControls?.zoomPercent ?? 100}
+              canZoomIn={mermaidZoomControls?.canZoomIn ?? true}
+              canZoomOut={mermaidZoomControls?.canZoomOut ?? true}
+              isPanMode={isMermaidPanMode}
+              onPanModeChange={setIsMermaidPanMode}
             />
           </div>
         )}
