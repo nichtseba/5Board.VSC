@@ -2,3 +2,4 @@ node_modules
 .DS_Store
 *.md
 package-lock.json
+build/  

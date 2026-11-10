@@ -5,7 +5,7 @@
   "packageManager": "pnpm@10.6.2",
   "scripts": {
     "package": "pnpm --filter 5board-vsc run package",
-    "build": "pnpm run build:common && pnpm run build:webview && pnpm run build:extension",
+    "build": "pnpm run build:common && pnpm run build:webview && pnpm run build:extension && node -e \"const fs=require('fs'); fs.mkdirSync('build', {recursive: true}); fs.copyFileSync('server/app.js', 'build/app.js');\"",
     "build:common": "pnpm --filter 5board-vsc-common run build",
     "build:webview": "pnpm --filter 5board-vsc-webview run build",
     "build:extension": "pnpm --filter 5board-vsc run build",

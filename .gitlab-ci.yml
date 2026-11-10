@@ -2,6 +2,7 @@ stages:
   - build
   - lint
   - package
+  - deploy
 
 .pnpm:
   image: node:24.14.1
@@ -31,6 +32,7 @@ build:
     paths:
       - 'extension/dist'
       - 'webview/dist'
+      - 'build/' # save build-folder for app.js, which is needed for the package step
 
 package:
   rules:
@@ -64,3 +66,16 @@ lint:
   script:
     - pnpm install
     - pnpm run lint --max-warnings=0
+
+# New stage-deploy to the university server
+stage_deploy:
+  image: node:24.14.1
+  stage: deploy
+  dependencies:
+    - build
+  before_script:
+    - apt-get update && apt-get install -y lftp
+  script:
+    - lftp -c "set ftp:ssl-force true; open -u $USER,$PASSWORD $HOST; mirror -Renv ./build ./httpdocs"
+  only:
+    - main
